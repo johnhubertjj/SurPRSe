@@ -29,20 +29,19 @@ change.odds <- function (odds.ratios) {
 
 # Preparing to run in Job array
 AI <- Sys.getenv("PBS_ARRAY_INDEX")
-tmp_dir <- Sys.getenv("TMPDIR")
 chromosome.number <- as.numeric(AI)
 
 # load libraries
 library(data.table)
 
 # Set Working directory
-setwd(tmp_dir)
+setwd(".")
 
 ### Adding in PGC data ###
-PGC.test.data.frame <- fread(paste0("gzip -dc ",tmp_dir,"PGC_table",chromosome.number,".txt.gz"))
+PGC.test.data.frame <- fread(paste0("gzip -dc PGC_table",chromosome.number,".txt.gz"))
 
 ### Read in the CLOZUK data ###
-untar(paste0("/scratch/c1020109/PR54/PGC_CLOZUK_PRS/CLOZUK_GWAS_BGE_chr",chromosome.number,".tar.gz"),files = paste0("CLOZUK_GWAS_BGE_chr",chromosome.number,".bim"))
+untar(paste0("CLOZUK_GWAS_BGE_chr",chromosome.number,".tar.gz"),files = paste0("CLOZUK_GWAS_BGE_chr",chromosome.number,".bim"))
 CLOZUK.data <- fread(paste0("CLOZUK_GWAS_BGE_chr",chromosome.number,".bim"))
 
 ### Replace the column names ###
