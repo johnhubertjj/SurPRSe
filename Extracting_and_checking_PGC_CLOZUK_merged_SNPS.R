@@ -46,7 +46,7 @@ if (system_information[1] == "Windows") fpath <-  "/Users/JJ/" else fpath <-"/Us
 library(data.table)
 
 # Set Working directory
-setwd(paste0(fpath,"Dropbox/PGC_CLOZUK_GWAS_INPUT/"))
+setwd(paste0(fpath,"Documents/PGC_CLOZUK_GWAS_INPUT/"))
 
 ### Adding in PGC data ###
 PGC.test.data.frame <- fread(paste0("gzip -dc PGC_table",chromosome.number,".txt.gz"))
@@ -103,15 +103,21 @@ if (length(checking.duplications.CZK) != 0 & length(checking.duplications.PGC) !
 }
 
 ### Extracting SNPs for analysis ###
-
+setwd(paste0(fpath,"Documents/PGC_CLOZUK_GWAS_INPUT/"))
+untar(paste0("CLOZUK_GWAS_BGE_chr",chromosome.number,".tar.gz"))
 
 ### Taring multiple files together ###
+
+### Incorporating MAGMA gene locations ###
+wd <-getwd()
+MAGMA.gene.regions <- fread(paste0(fpath,"Documents/PGC_CLOZUK_GWAS_INPUT/NCBI37.3/NCBI37.3.gene.loc"),colClasses = c("numeric","character",rep("numeric",2),rep("character",2)))
 
 ### TODO ###
 
 # Incorporate the new ID's into CLOZUK data including the genotype information etc... tar all together and keep in bim format#
 # Extract a list of common SNP's for each chromosome as a vector and print out to file.txt
 # print out new PGC table that has altered OR and BETA to be used for analysis that is usable
+# correspond SNP's to genomic regions by reading in the NCBI data source
 
 
 
