@@ -105,10 +105,40 @@ if (length(checking.duplications.CZK) != 0 & length(checking.duplications.PGC) !
 ### Extracting SNPs for analysis ###
 setwd(paste0(fpath,"Documents/PGC_CLOZUK_GWAS_INPUT/"))
 untar(paste0("CLOZUK_GWAS_BGE_chr",chromosome.number,".tar.gz"))
+CLOZUK.altered <- CLOZUK.altered[,-"place",with = F]
+CLOZUK.altered <- cbind(CLOZUK.altered,CLOZUK.data$GENEDIST)
+CLOZUK.altered <- CLOZUK.altered[,c("CHR","SNP","V2","BP","A1","A2"), with = F]
+names(CLOZUK.altered) <- c("CHR","SNP","GENEDIST","BP","A1","A2")
+
+## Altering data tables to fit previous input files ##
+PGC.altered <- PGC.altered[,-"OR",with = F]
+namesPGC <- names(PGC.altered)
+namesPGC <- namesPGC[c(1:8,17,9:16)]
+PGC.altered <- PGC.altered[, namesPGC, with = F]
+
+## checking for combined SNPs ##
+SNPs <- match(Combined.PGC.CLOZUK$SNP.x,Combined.PGC.CLOZUK$SNP.y)
+if (length(which(is.na(SNPs))) > 0 ) {
+  stop("there is an uneven number of SNPs common between both data.tables")
+}
+
+## writing both the combined SNPs and the alternative datasets in the right format ###
+write(Combined.PGC.CLOZUK$SNP.x,file = paste0("chr",chromosome.number,"PGC_CLOZUK_common_SNPs.txt"))
+write.table(CLOZUK.altered, file = paste0("CLOZUK_GWAS_BGE_chr",chromosome.number,".bim"),quote = F,row.names = F)
+
+za <- gzfile(paste0("CHR.POS CLOZUK PGC/PGC_table",chromosome.number,".txt.gz"))
+write.table(PGC.altered,file = za ,quote = F,row.names = F)
 
 ### Taring multiple files together ###
+system(paste0("tar -zcf ",fpath,"Documents/PGC_CLOZUK_GWAS_INPUT/CHR.POS\\ CLOZUK\\ PGC/ALT_CLOZUK_GWAS_BGE_chr",chromosome.number,".tar.gz ",
+              "CLOZUK_GWAS_BGE_chr",chromosome.number,".bed ",
+              "CLOZUK_GWAS_BGE_chr",chromosome.number,".bim ",
+              "CLOZUK_GWAS_BGE_chr",chromosome.number,".fam"))
 
 ### Incorporating MAGMA gene locations ###
+### don't need it, can use --clump-range glist- filename ###
+### but can use it to add regions to each gene +10kb and -35kb etc...###
+
 wd <-getwd()
 MAGMA.gene.regions <- fread(paste0(fpath,"Documents/PGC_CLOZUK_GWAS_INPUT/NCBI37.3/NCBI37.3.gene.loc"),colClasses = c("numeric","character",rep("numeric",2),rep("character",2)))
 
@@ -119,6 +149,10 @@ MAGMA.gene.regions <- fread(paste0(fpath,"Documents/PGC_CLOZUK_GWAS_INPUT/NCBI37
 # print out new PGC table that has altered OR and BETA to be used for analysis that is usable
 # correspond SNP's to genomic regions by reading in the NCBI data source
 
+
+## clumping per gene ##
+# plink --bfile CLOZUK_GWAS_BGE_chr22 --clump CLOZUK2_COGS_GWAS_noPGC2.assoc.dosage --clump-r2 0.1 --clump-kb 3000 --out test3 --clump-p1 0.0001 --clump-verbose --clump-range input MAGMA limits
+# 
 
 
   
