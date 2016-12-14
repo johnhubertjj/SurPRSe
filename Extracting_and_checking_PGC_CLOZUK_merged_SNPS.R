@@ -45,6 +45,7 @@ if (system_information[1] == "Windows") fpath <-  "/Users/JJ/" else fpath <-"/Us
 # load libraries
 library(data.table)
 
+
 # Set Working directory
 setwd(paste0(fpath,"Documents/PGC_CLOZUK_GWAS_INPUT/"))
 
