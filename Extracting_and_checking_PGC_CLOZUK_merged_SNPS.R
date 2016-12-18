@@ -1,6 +1,6 @@
 ### Finding list of useful SNPs from both CLOZUK and PGC ### 
 
-### Chromosome 22 ###
+### Chromosome 14 ###
 
 # Add new environment for variables created within a function
 e <- new.env()
@@ -38,7 +38,7 @@ Checking_allele_swapping <- function(alteredtable1,table2,which.is.combined = c(
 
 
 # Preparing to run in local
-chromosome.number <- 22
+chromosome.number <- 14
 system_information<-Sys.info()
 if (system_information[1] == "Windows") fpath <-  "/Users/JJ/" else fpath <-"/Users/johnhubert/"
 
