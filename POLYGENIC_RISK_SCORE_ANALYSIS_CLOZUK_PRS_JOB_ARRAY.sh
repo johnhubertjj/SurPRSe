@@ -15,7 +15,7 @@ cd $PBS_O_WORKDIR
 module load R/3.3.0
 module load plink/1.9a
 
-tar -zxvf CLOZUK_GWAS_BGE_chr${PBS_ARRAY_INDEX}.tar.gz
+tar -zxvf ALT_CLOZUK_GWAS_BGE_chr${PBS_ARRAY_INDEX}.tar.gz
 gzip -dc PGC_table${PBS_ARRAY_INDEX}.txt.gz
 
 R CMD BATCH Clumping_CLOZUK_PGC.R ./extrainfo/Rout_files/CLOZUK_PGC_clumpinginfo_chr${PBS_ARRAY_INDEX}.Rout 
@@ -37,12 +37,12 @@ rm CLOZUK_PGC_CLUMPED_chr${PBS_ARRAY_INDEX}.txt
 
 R CMD BATCH PRS_scoring_R_script.R ./extrainfo/Rout_files/PRS_SCORING_INFO_CLOZUK_PGC_chr${PBS_ARRAY_INDEX}.Rout
 
-significant=(1e-4 1e-3 1e-2 0.05 0.1 0.2 0.3 0.4 0.5)
+significant=(0.0001 0.001 0.01 0.05 0.1 0.2 0.3 0.4 0.5)
 
 for i in `seq 1 ${#significant[@]}` ;
 do
-	plink --silent --bfile CLOZUK_GWAS_BGE_chr${PBS_ARRAY_INDEX} --exclude extracted_Duplicate_snps_chr${PBS_ARRAY_INDEX}.txt --score scoring_PGC_CLOZUK_chromosome_${PBS_ARRAY_INDEX}_${significant[i]}.score --out profiles/chr_${PBS_ARRAY_INDEX}_clump_r0.2_1000kb_${significant[i]}
-
+	plink --silent --bfile CLOZUK_GWAS_BGE_chr${PBS_ARRAY_INDEX} --exclude extracted_Duplicate_snps_chr${PBS_ARRAY_INDEX}.txt --score score/scoring_PGC_CLOZUK_chromosome_${PBS_ARRAY_INDEX}_${significant[i]}.score --out profiles/chr_${PBS_ARRAY_INDEX}_clump_r0.2_1000kb_${significant[i]}
+	
 done
 
 
