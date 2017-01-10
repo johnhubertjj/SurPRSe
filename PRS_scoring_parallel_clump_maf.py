@@ -1,4 +1,4 @@
-#!/Users/johnhubert/anaconda/bin/python2.7
+#!/Users/Emily/Software/anaconda/bin/python
 
 # -------------- DECLARE VARIABLES -------------- #
 
