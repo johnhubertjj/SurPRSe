@@ -131,6 +131,7 @@ za <- gzfile(paste0("CHR.POS CLOZUK PGC/PGC_table",chromosome.number,".txt.gz"))
 write.table(PGC.altered,file = za ,quote = F,row.names = F)
 
 ### Taring multiple files together ###
+# MAY NEED TO ADD NEW PLINK COMMAND -MAKE-BED here) #
 system(paste0("tar -zcf ",fpath,"Documents/PGC_CLOZUK_GWAS_INPUT/CHR.POS\\ CLOZUK\\ PGC/ALT_CLOZUK_GWAS_BGE_chr",chromosome.number,".tar.gz ",
               "CLOZUK_GWAS_BGE_chr",chromosome.number,".bed ",
               "CLOZUK_GWAS_BGE_chr",chromosome.number,".bim ",
