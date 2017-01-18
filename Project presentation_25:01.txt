@@ -1,0 +1,15 @@
+Presentation for the 18th Jan
+
+- Start with a description of the project
+- method slide : PRS, (log regression with cov)
+
+- N numbers of SNPs and genes for both datasets on all chromosomes
+- N SNPs and N genes at each p-threshold
+- Correlations between magma and pre -log10 gene based p-vals
+
+-results (use ggplot to have them visible and nice to look at) but KEEP SIMPLE)
+
+-have a presentation ready by tuesday morning!
+
+
+- Check

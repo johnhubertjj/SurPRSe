@@ -1,0 +1,15 @@
+#! /bin/bash
+
+sig=(1e-4 1e-3 1e-2 0.05 0.1 0.2 0.3 0.4 0.5)
+length_PGC=(521 1435 4787 13603 23369 40794 57657 74106 89961)
+
+for i in `seq 1 9` ;
+do
+        magma --annotate --snp-loc CLOZUK_GWAS_BGE_chr22_magma_input2.bim --gene-loc NCBI37.3.gene.loc --out ${sig[i]}_CLOZUK_clumped
+        magma --bfile CLOZUK_GWAS_BGE_magma_input_chr22 --pval ${sig[i]}CLOZUK_PGC_P_Vals_reference_file.txt N=${length_PGC[i]} --gene-annot ${sig[i]}_CLOZUK_clumped.genes.annot --covar file=CLOZUK2.r7.select2PC.eigenvec include=PC1-PC5,PC6,PC9,PC11,PC12,PC13,PC19 --out ${sig[i]}gene_annotation_for_CLOZUK
+
+done
+
+
+magma --annotate --snp-loc CLOZUK_GWAS_BGE_chr22_magma_input2.bim --gene-loc NCBI37.3.gene.loc
+magma --bfile CLOZUK_GWAS_BGE_magma_input_chr22 --gene-annot 0.5_CLOZUK_clumped.genes.annot --covar file=CLOZUK2.r7.select2PC.eigenvec include=PC1-PC5,PC6,PC9,PC11,PC12,PC13,PC19 —out magma_test_0.5_CLOZUK
