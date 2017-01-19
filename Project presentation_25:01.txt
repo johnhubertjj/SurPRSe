@@ -13,3 +13,7 @@ Presentation for the 18th Jan
 
 
 - Check
+
+-The p -130 was indeed an outlier, everyone in the candidate study had a score of 0 for 2 SNPs on 1 gene, one person had a very high genotype association to the SNP and therefore the profile was very significant because of the lack of data points to form a model.
+
+- will need to refine: in future the Gene was 113730 : remove from analysis
