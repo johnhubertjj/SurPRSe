@@ -85,7 +85,7 @@ if __name__=='__main__':
 
     # Read in Pruned Bim file #
     bim_names=["CHR", "SNP", "GD", "BP", "A1", "A2"]
-    bim_clump=pd.read_table('CLOZUK_GWAS_BGE_chr22.bim', names=bim_names)
+    bim_clump=pd.read_table('CLOZUK_GWAS_BGE_CLUMPED_chr22.bim', names=bim_names)
 
     
     # Read in Annot Data #
@@ -94,8 +94,8 @@ if __name__=='__main__':
     
     # Read in IGAP_noGERAD Assoc Data Pruned Data # #Is this the PGC alternative?#
     
-    igap_names=["ROW_ID", "CHR", "SNP", "BP", "A1", "A2", "BETA", "P", "MAF"]
-    igap_clump=pd.read_table('IGAP_noGERAD/IGAP_noGERAD_GERAD_genoSNPs_final_clump_maf', sep=' ', names=igap_names)
+    igap_names=["ROW.NUM","ROW.ID", "CHR", "SNP", "BP", "A1", "A2", "BETA", "P", "MAF"]
+    igap_clump=pd.read_table('CLOZUK_GWAS_BGE_CLUMPED_PGC_MAF_FINAL.txt', sep=' ', names=igap_names)
     # File that Emily made herself: took the MAF from GERAD and then applied it above.
     # For me I would take the Minor allele frequency from CLOZUK and then apply the BETA and p for PGC for the common SNPs
 
