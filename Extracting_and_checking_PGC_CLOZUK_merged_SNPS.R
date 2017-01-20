@@ -154,7 +154,11 @@ MAGMA.gene.regions <- fread(paste0(fpath,"Documents/PGC_CLOZUK_GWAS_INPUT/NCBI37
 
 ## clumping per gene ##
 # plink --bfile CLOZUK_GWAS_BGE_chr22 --clump CLOZUK2_COGS_GWAS_noPGC2.assoc.dosage --clump-r2 0.1 --clump-kb 3000 --out test3 --clump-p1 0.0001 --clump-verbose --clump-range input MAGMA limits
-# 
 
 
-  
+# rewrite all of this, use the altered.names files to get the right list of SNPs for the CLOZUK dataset, PGC is fine, you cacn move it around alright
+
+CLOZUK_before <- fread("CLOZUK_GWAS_BGE_chr22.bim")  
+CLOZUK_AFTER <- fread("CLOZUK_altered_names_chr22.txt")
+CLOZUK_together <- CLOZUK_before[,.(V2)][,SNP := CLOZUK_AFTER$SNP]
+write.table(CLOZUK_together, file = "CLOZUK_chr22_chr.pos.txt", quote = F, row.names = F, col.names = F)
