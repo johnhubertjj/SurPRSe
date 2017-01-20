@@ -74,7 +74,20 @@ plink
  --make-bed 
  --out CLOZUK_GWAS_BGE_CLUMPED_chr${PBS_ARRAY_INDEX}
 
- #### alter below ####
+# recode genotypes for input into Python
+plink --bfile CLOZUK_GWAS_BGE_CLUMPED_chr${PBS_ARRAY_INDEX} --recodeA --out CLOZUK_GWAS_BGE_CLUMPED_chr${PBS_ARRAY_INDEX}
+plink --bfile CLOZUK_GWAS_BGE_CLUMPED_chr${PBS_ARRAY_INDEX} --freq --out CLOZUK_GWAS_BGE_CLUMPED_chr${PBS_ARRAY_INDEX}
+
+# Get the MAF from CLOZUK and import into the PGC_summary_stats for PRS analysis
+awk '{ $6=$7=$8=$10=$12=$13=$14=$15=$16=$17=""; print$0}' PGC_table${PBS_ARRAY_INDEX}.txt > PGC_table_for_python${PBS_ARRAY_INDEX}.txt
+
+# match the SNP rows to the MAF rows using R script
+R CMD BATCH Prepare_both_CLOZUK_AND_PGC_for_PRS_MAF_Genotype.R
+
+awk 'NR>1' CLOZUK_GWAS_BGE_CLUMPED_chr${PBS_ARRAY_INDEX}.raw > CLOZUK_GWAS_BGE_CLUMPED_chr${PBS_ARRAY_INDEX}_no_head.raw 
+
+
+#### alter below ####
 # Calculate the PRS and profiles
 R CMD BATCH PRS_scoring_R_script.R ./extrainfo/Rout_files/PRS_SCORING_INFO_CLOZUK_PGC_chr${PBS_ARRAY_INDEX}.Rout
 
