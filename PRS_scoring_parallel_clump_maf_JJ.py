@@ -11,9 +11,12 @@ import numpy as np
 from decimal import Decimal
 from multiprocessing import Pool
 import time
+import os
 
 timer_start=time.time()
 
+os.getcwd()
+os.chdir(C:\Users\JJ\Documents\PhD)
 
 # -------------- CREATE PRS FUNCTION -------------- #
 
@@ -80,7 +83,7 @@ if __name__=='__main__':
     # -------------- READ IN DATA -------------- #
 
     # Read in Unique Gene file #
-    unigene_names=["GENE"]
+    unigene_names = ["GENE"]
     unigene=pd.read_table('PGC_CLOZUK_unique_genes.txt', names=unigene_names)
 
     # Read in Pruned Bim file #
