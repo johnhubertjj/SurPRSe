@@ -2,8 +2,26 @@
 ##################### PROPER SCRIPT START #######################
 #################################################################
 
+### Where am I? ###
+
+System_information <- Sys.info()
+whereami <- System_information['user']
+
+if (whereami == 'JJ' | whereami == "johnhubert"){
+  chromosome.number = 22
+  
+} else if (whereami == "c1020109") {
+  # Preparing to run in Job array
+  AI <- Sys.getenv("PBS_ARRAY_INDEX")
+  chromosome.number <- as.numeric(AI)
+  
+} else {
+  stop("current environment NOT at work/home or on servers, please add to script above to specify where you are and what type of analysis you want to do")
+}
+
+
 ###############################
-# ODDS RATIO TO BETA FuNCTION #
+# ODDS RATIO TO BETA FUNCTION #
 ###############################
 # add new environment#
 e <- new.env()
@@ -27,9 +45,7 @@ change.odds <- function (odds.ratios) {
 # COMBINING CLOZUK AND PGC SNPS #
 #################################
 
-# Preparing to run in Job array
-AI <- Sys.getenv("PBS_ARRAY_INDEX")
-chromosome.number <- as.numeric(AI)
+
 
 # load libraries
 library(data.table)
@@ -38,10 +54,9 @@ library(data.table)
 setwd(".")
 
 ### Adding in PGC data ###
-PGC.test.data.frame <- fread(paste0("gzip -dc PGC_table",chromosome.number,".txt.gz"))
+PGC.test.data.frame <- fread(paste0("PGC_table",chromosome.number,"_OR.txt"))
 
 ### Read in the CLOZUK data ###
-untar(paste0("CLOZUK_GWAS_BGE_chr",chromosome.number,".tar.gz"),files = paste0("CLOZUK_GWAS_BGE_chr",chromosome.number,".bim"))
 CLOZUK.data <- fread(paste0("CLOZUK_GWAS_BGE_chr",chromosome.number,".bim"))
 
 ### Replace the column names ###
@@ -67,7 +82,7 @@ CLOZUK.data2 <- CLOZUK.data
 CLOZUK.integers.to.change <- CLOZUK.data2[,.I[grep(paste0("^",chromosome.number,":\\d+:\\w+:\\w+"),SNP, perl = T,invert = T)]]
 CLOZUK.divisive.names <- CLOZUK.data[CLOZUK.integers.to.change]
 CLOZUK.alternative <- CLOZUK.data[,SNP := paste0(CHR,":",BP)]
-CLOZUK.alternative <- CLOZUK.alternative[,c("CHR","SNP","BP","A1","A2"),with = F]
+CLOZUK.alternative <- CLOZUK.alternative[,c("CHR","SNP","BP","A1","A2"), with = F]
 rm(CLOZUK.data2)
 
 CLOZUK.alternative$place <- c(1:length(CLOZUK.alternative$CHR))
@@ -166,7 +181,7 @@ PGC.OR.changes <- combined.CLOZUK.PGC$OR
 PGC.BETA.changes <- combined.CLOZUK.PGC$BETA
 CLOZUK.final.index <- combined.CLOZUK.PGC$place.y
 
-#Alter original files to have the right allele switching and the right BETA coefficient#
+# Alter original files to have the right allele switching and the right BETA coefficient#
 abc <- copy(PGC.test.data.frame)
 PGC.test.data.frame <- PGC.test.data.frame[PGC.final.index,A1:= PGC.A1.allele.changes]
 PGC.test.data.frame <- PGC.test.data.frame[PGC.final.index,A2:= PGC.A2.allele.changes]
@@ -182,7 +197,7 @@ write.table(combined.CLOZUK.PGC,file = za, row.names = F, quote = F)
 write.table(CLOZUK.alternative,file = zb, row.names = F, quote = F)
 write.table(PGC.test.data.frame,file = zc,row.names = F, quote = F)
 
-# write the index as well just in case for clumping
+# write the index as well just in case for clumping #REDO THIS
 write(x = CLOZUK.final.index,file = paste0("./extrainfo/CLOZUK.merged.index.chr",chromosome.number,".txt"))
 write(x = PGC.final.index,file = paste0("./extrainfo/PGC.merged.index.chr",chromosome.number,".txt"))
 system("rm CLOZUK_GWAS_BGE_chr${PBS_ARRAY_INDEX}.bim", intern = T)

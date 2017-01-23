@@ -12,12 +12,18 @@ from decimal import Decimal
 from multiprocessing import Pool
 import time
 import os
+import platform
 
-timer_start=time.time()
+platform_system = platform.system()
+if platform_system == 'Darwin' :
+    os.chdir('/Users/johnhubert/Documents/PhD scripts/Schizophrenia_PRS_pipeline_scripts/')
+elif platform_system == 'Windows' :
+    os.chdir(C:\Users\JJ\Documents\PhD)
 
 os.getcwd()
-os.chdir(C:\Users\JJ\Documents\PhD)
 
+
+timer_start=time.time()
 # -------------- CREATE PRS FUNCTION -------------- #
 
 # Define function #
@@ -42,7 +48,7 @@ def f(gene):
     if (len(effect.index)!=0):
         # The raw file uses recode-A NOT AD and the ROW ID is a recorder of the row for the right SNP (+6 for python because of zero indexing but +5 otherwise)
         # then take the headers off - command line will work on shell script
-        gen_clump = open('Clumping/GERAD_geno_GeneSNPs_igapnogerad_clump_nohead.raw', 'r')
+        gen_clump = open('test_clumped_CLOZUK_PGC_PRS_recode_no_head.raw', 'r')
 
         indiv=0
         
@@ -60,10 +66,10 @@ def f(gene):
             
             # Loop through effect dataset #
             for i in range(0, len(effect.index)):
-                
-                if indiv_snp[(effect.iloc[i]['ROW_ID']+6)]!= 'NA':
+                # Careful here, in R the indexing starts at 1 so the rows will be out out order by one
+                if indiv_snp[(effect.iloc[i]['ROW.NUM']+6)]!= 'NA':
                     # Calculate the PRS, find individual genotype corresponding to correct SNP using rowID #
-                    prs = prs+(float(indiv_snp[(effect.iloc[i]['ROW_ID']+6)])*effect.iloc[i]['BETA'])
+                    prs = prs+(float(indiv_snp[(effect.iloc[i]['ROW.NUM']+6)])* effect.iloc[i]['BETA'])
                 else:
                     prs = prs+(2*effect.iloc[i]['BETA']*effect.iloc[i]['MAF'])
         
@@ -99,6 +105,10 @@ if __name__=='__main__':
     
     igap_names=["ROW.NUM","ROW.ID", "CHR", "SNP", "BP", "A1", "A2", "BETA", "P", "MAF"]
     igap_clump=pd.read_table('CLOZUK_GWAS_BGE_CLUMPED_PGC_MAF_FINAL.txt', sep=' ', names=igap_names)
+
+    # If the data is from R, the indexing standard needs to be changed
+    igap_clump[['ROW.NUM']] = igap_clump[["ROW.NUM"]] - 1
+
     # File that Emily made herself: took the MAF from GERAD and then applied it above.
     # For me I would take the Minor allele frequency from CLOZUK and then apply the BETA and p for PGC for the common SNPs
 
@@ -117,4 +127,7 @@ timer_end= time.time()-timer_start
 
 print timer_end
 
-
+# At the moment the script loops through quite a few things and requires the input of a large dataset (albeit line by line) into the python environment
+    # Improvements: make it work for the plink format: read in and parse through the binary file so that it becomes more applicable and easier to run
+    # will save on memory, also try not to loop so many times, it's effectively adding the PRS each time and then overwriting that vector, would be better to pre-create the PRS vector first and then add up at the end in one function instead of overwriting
+    # It does however, do this in parallel, (which is good) but it will need to be tracked so that it can work
