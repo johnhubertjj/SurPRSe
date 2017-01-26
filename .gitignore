@@ -1,0 +1,15 @@
+# plink files
+*.bed
+*.bim
+*.bim
+*.map
+*.frq
+*.nosex
+*.log
+
+# reformatted plink files
+*.raw
+
+# annoying pycharm files
+*.idea
+
