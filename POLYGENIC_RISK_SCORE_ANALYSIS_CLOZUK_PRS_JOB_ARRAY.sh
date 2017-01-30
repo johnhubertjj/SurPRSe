@@ -16,9 +16,8 @@ cd $PBS_O_WORKDIR
 module load R/3.3.0
 module load plink/1.9a
 
-# unpack the CLOZUK and PGC datasets
+# unpack the CLOZUK datasets
 tar -zxvf CLOZUK_GWAS_BGE_chr${PBS_ARRAY_INDEX}.tar.gz
-gzip -dc PGC_table${PBS_ARRAY_INDEX}.txt.gz
 
 # Run R script that will combine PGC and CLOZUK to an individual table
 R CMD BATCH CLOZUK_PGC_COMBINE_final.R ./extrainfo/Rout_files/CLOZUK_PGC_COMBINE_chr${PBS_ARRAY_INDEX}.Rout
