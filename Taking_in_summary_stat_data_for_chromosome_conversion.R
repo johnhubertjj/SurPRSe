@@ -21,10 +21,15 @@ if (whereami == "johnhubert") {
 library(data.table)
 
 ## setting working directory
-wd <- getwd()
+setwd(".")
+
 
 ## Reading in PGC data
 ## Select for CHR 22
 PGC_data <- fread(Filename)
-test_PGC_data_chr_22_integer <- which(PGC_data[,CHR] == '22')
-PGC_test_data_frame <- PGC_data[test_PGC_data_chr_22_integer,]
+setkey(PGC_data,CHR)
+
+for (chromosome.number in 1:22) { 
+write.table(eval(parse(text = paste0("PGC_data[J(",chromosome.number,")]"))), file = paste0("PGC_table",chromosome.number,".txt"), quote = F, row.names = F)
+}
+
