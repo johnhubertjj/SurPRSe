@@ -2,19 +2,25 @@
 ##################### PROPER SCRIPT START #######################
 #################################################################
 
-### Where am I? ###
+###############################
+# Checking location for serial or batch analysis #
+###############################
 
 System_information <- Sys.info()
 whereami <- System_information['user']
 
-if (whereami == 'JJ' | whereami == "johnhubert"){
-  chromosome.number = 22
+if (whereami == "johnhubert") {
+  chromosome.number <- 22
+  
+} else if (whereami == 'JJ') {
+  chromosome.number <- 22
   
 } else if (whereami == "c1020109") {
-  # Preparing to run in Job array
-  AI <- Sys.getenv("PBS_ARRAY_INDEX")
-  chromosome.number <- as.numeric(AI)
-  
+
+# Preparing to run in Job array
+AI <- Sys.getenv("PBS_ARRAY_INDEX")
+chromosome.number <- as.numeric(AI)
+
 } else {
   stop("current environment NOT at work/home or on servers, please add to script above to specify where you are and what type of analysis you want to do")
 }
@@ -38,14 +44,12 @@ log.to.odds <- function(imported.data.table) {
 
 change.odds <- function (odds.ratios) {
   PGC.NEW.OR <- 1 / odds.ratios
-  assign("PGC.NEW.OR", PGC.NEW.OR,envir = e)
+  assign("PGC.NEW.OR", PGC.NEW.OR, envir = e)
 }
 
 #################################
 # COMBINING CLOZUK AND PGC SNPS #
 #################################
-
-
 
 # load libraries
 library(data.table)
@@ -54,27 +58,27 @@ library(data.table)
 setwd(".")
 
 ### Adding in PGC data ###
-PGC.test.data.frame <- fread(paste0("PGC_table",chromosome.number,"_OR.txt"))
+PGC.data.frame <- fread(paste0("PGC_table",chromosome.number,".txt"))
+cat("Chr:",chromosome.number, nrow(PGC.data.frame))
 
 ### Read in the CLOZUK data ###
 CLOZUK.data <- fread(paste0("CLOZUK_GWAS_BGE_chr",chromosome.number,".bim"))
+cat("Chr:",chromosome.number, nrow(CLOZUK.data))
 
 ### Replace the column names ###
 setnames(CLOZUK.data, c("CHR","SNP","GENEDIST","BP","A1","A2"))
 
-###Replacing PGC values###
-PGC.test.data.frame2 <- PGC.test.data.frame
-PGC.integers.to.change <- PGC.test.data.frame2[,.I[grep(paste0("^",chromosome.number,":\\d+:\\w+:\\w+"),SNP, perl = T,invert = T)]]
-PGC.divisive.names <- PGC.test.data.frame2[PGC.integers.to.change]
-PGC.alternative <- PGC.test.data.frame[,SNP := paste0(CHR,":",BP)]
-PGC.test.data.frame <- PGC.test.data.frame[,SNP := paste0(CHR,":",BP)]
+### Replacing PGC values###
+PGC.integers.to.change <- PGC.data.frame[,.I[grep(paste0("^",chromosome.number,":\\d+:\\w+:\\w+"),SNP, perl = T,invert = T)]]
+PGC.divisive.names <- PGC.data.frame[PGC.integers.to.change]
+PGC.alternative <- PGC.data.frame[,SNP := paste0(CHR,":",BP)]
+PGC.data.frame <- PGC.data.frame[,SNP := paste0(CHR,":",BP)]
 PGC.alternative <- PGC.alternative[,c("CHR","SNP","BP","A1","A2","OR"),with = F]
 
+### Adding BETA column to data
 log.to.odds(PGC.alternative)
-# PGC.alternative2 <- copy(PGC.alternative)
 PGC.alternative[,BETA := e$PGC.BETA]
-PGC.test.data.frame[,BETA := e$PGC.BETA]
-rm(PGC.test.data.frame2)
+PGC.data.frame[,BETA := e$PGC.BETA]
 
 
 ### Changes the CLOZUK identifiers in 3 lines of a Data.table in no time whatsoever ###
@@ -82,7 +86,7 @@ CLOZUK.data2 <- CLOZUK.data
 CLOZUK.integers.to.change <- CLOZUK.data2[,.I[grep(paste0("^",chromosome.number,":\\d+:\\w+:\\w+"),SNP, perl = T,invert = T)]]
 CLOZUK.divisive.names <- CLOZUK.data[CLOZUK.integers.to.change]
 CLOZUK.alternative <- CLOZUK.data[,SNP := paste0(CHR,":",BP)]
-CLOZUK.alternative <- CLOZUK.alternative[,c("CHR","SNP","BP","A1","A2"), with = F]
+CLOZUK.alternative <- CLOZUK.alternative[,c("CHR","SNP","BP","A1","A2"),with = F]
 rm(CLOZUK.data2)
 
 CLOZUK.alternative$place <- c(1:length(CLOZUK.alternative$CHR))
@@ -181,12 +185,12 @@ PGC.OR.changes <- combined.CLOZUK.PGC$OR
 PGC.BETA.changes <- combined.CLOZUK.PGC$BETA
 CLOZUK.final.index <- combined.CLOZUK.PGC$place.y
 
-# Alter original files to have the right allele switching and the right BETA coefficient#
-abc <- copy(PGC.test.data.frame)
-PGC.test.data.frame <- PGC.test.data.frame[PGC.final.index,A1:= PGC.A1.allele.changes]
-PGC.test.data.frame <- PGC.test.data.frame[PGC.final.index,A2:= PGC.A2.allele.changes]
-PGC.test.data.frame <- PGC.test.data.frame[PGC.final.index,OR:= PGC.OR.changes]
-PGC.test.data.frame <- PGC.test.data.frame[PGC.final.index,BETA:= PGC.BETA.changes]
+#Alter original files to have the right allele switching and the right BETA coefficient#
+abc <- copy(PGC.data.frame)
+PGC.data.frame <- PGC.data.frame[PGC.final.index,A1:= PGC.A1.allele.changes]
+PGC.data.frame <- PGC.data.frame[PGC.final.index,A2:= PGC.A2.allele.changes]
+PGC.data.frame <- PGC.data.frame[PGC.final.index,OR:= PGC.OR.changes]
+PGC.data.frame <- PGC.data.frame[PGC.final.index,BETA:= PGC.BETA.changes]
 
 # write the combined tables and the tables with altered SNP identifiers to the wd
 za <- gzfile(paste0("./output/PGC_CLOZUK_SNP_table",chromosome.number,".txt.gz"))
@@ -195,9 +199,9 @@ zc <- gzfile(paste0("./extrainfo/PGC_altered_names_chr",chromosome.number,".txt.
 
 write.table(combined.CLOZUK.PGC,file = za, row.names = F, quote = F)
 write.table(CLOZUK.alternative,file = zb, row.names = F, quote = F)
-write.table(PGC.test.data.frame,file = zc,row.names = F, quote = F)
+write.table(PGC.data.frame,file = zc,row.names = F, quote = F)
 
-# write the index as well just in case for clumping #REDO THIS
+# write the index as well just in case for clumping
 write(x = CLOZUK.final.index,file = paste0("./extrainfo/CLOZUK.merged.index.chr",chromosome.number,".txt"))
 write(x = PGC.final.index,file = paste0("./extrainfo/PGC.merged.index.chr",chromosome.number,".txt"))
 system("rm CLOZUK_GWAS_BGE_chr${PBS_ARRAY_INDEX}.bim", intern = T)
