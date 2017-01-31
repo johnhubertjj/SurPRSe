@@ -19,12 +19,19 @@ module load plink/1.9a
 # unpack the CLOZUK datasets
 tar -zxvf CLOZUK_GWAS_BGE_chr${PBS_ARRAY_INDEX}.tar.gz
 
+# make directories for output and extra info
+if [ ! -d "output" ]; then
+   mkdir output
+fi
+
+if [ ! -d "extrainfo" ]; then
+   mkdir extrainfo
+fi
+
 # Run R script that will combine PGC and CLOZUK to an individual table
+# Output is in PGC_CLOZUK_SNP_table.txt
 R CMD BATCH CLOZUK_PGC_COMBINE_final.R ./extrainfo/Rout_files/CLOZUK_PGC_COMBINE_chr${PBS_ARRAY_INDEX}.Rout
-
-# unpack that table#CHANGE... WHY ARE YOU PACKING AND UNPACKING THINGS!
-gzip -dc output/PGC_CLOZUK_SNP_table${PBS_ARRAY_INDEX}.txt
-
+ 
 # recreating the bim file...need to change so that you are also altering the BED file as well... use plink...
 R CMD BATCH Extracting_and_checking_PGC_CLOZUK_merged_SNPS.R ./PGC_CLOZUK_GWAS_INPUT/PGC_CLOZUK_PRS/extrainfo/Rout_files/CLOZUK_PGC_EXTRACT_chr${PBS_ARRAY_INDEX}.Rout
 
