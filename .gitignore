@@ -13,3 +13,5 @@
 # annoying pycharm files
 *.idea
 
+# PGC table
+PGC_table22.txt

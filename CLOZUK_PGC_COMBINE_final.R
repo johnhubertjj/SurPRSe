@@ -2,6 +2,10 @@
 ##################### PROPER SCRIPT START #######################
 #################################################################
 
+### Start Timer
+ptm <- proc.time()
+
+
 ###############################
 # Checking location for serial or batch analysis #
 ###############################
@@ -47,6 +51,38 @@ change.odds <- function (odds.ratios) {
   assign("PGC.NEW.OR", PGC.NEW.OR, envir = e)
 }
 
+##################################################################
+#### CHECK TO SEE IF TWO COLUMNS HAVE ALLELES SWAPPED FUNCTION ###
+##################################################################
+
+Checking_allele_swapping <- function(alteredtable1,table2,which.is.combined = c("NONE","PGC","CLOZUK")){
+  if (which.is.combined == "PGC") {
+    Allele.x <- alteredtable1[,c("A1.x","A2.x"),with = F]
+    Allele.y <- table2[,c("A1","A2"),with = F]
+  }
+  if(which.is.combined == "CLOZUK") {
+    Allele.x <- alteredtable1[,c("A1.y","A2.y"),with = F]
+    Allele.y <- table2[,c("A1","A2"),with = F]
+  }
+  if(which.is.combined == "NONE"){
+    Allele.x <- alteredtable1[,c("A1","A2"),with = F]
+    Allele.y <- table2[,c("A1","A2"),with = F]
+  }
+  
+  Allele.x <- as.data.frame(Allele.x)
+  Allele.y <- as.data.frame(Allele.y)
+  iterations.to.remain <- NULL
+  
+  for (i in 1:length(Allele.x[,1])){
+    if (Allele.x[i,1] != Allele.y[i,1]) {
+      iterations.to.remain <- c(iterations.to.remain,i)
+    }
+  }
+  argument.name <-deparse(substitute(alteredtable1))
+  assign(paste0(argument.name,"flipped.alleles"), iterations.to.remain, envir = e)
+}
+
+
 #################################
 # COMBINING CLOZUK AND PGC SNPS #
 #################################
@@ -59,11 +95,14 @@ setwd(".")
 
 ### Adding in PGC data ###
 PGC.data.frame <- fread(paste0("PGC_table",chromosome.number,".txt"))
-cat("Chr:",chromosome.number, nrow(PGC.data.frame))
+
+cat("Number of SNPS in PGC Chr:",chromosome.number, nrow(PGC.data.frame))
 
 ### Read in the CLOZUK data ###
 CLOZUK.data <- fread(paste0("CLOZUK_GWAS_BGE_chr",chromosome.number,".bim"))
-cat("Chr:",chromosome.number, nrow(CLOZUK.data))
+
+# Number of SNPs in CLOZUK data
+cat("Number of SNPs in CLOZUK Chr:",chromosome.number, nrow(CLOZUK.data))
 
 ### Replace the column names ###
 setnames(CLOZUK.data, c("CHR","SNP","GENEDIST","BP","A1","A2"))
@@ -81,26 +120,27 @@ PGC.alternative[,BETA := e$PGC.BETA]
 PGC.data.frame[,BETA := e$PGC.BETA]
 
 
-### Changes the CLOZUK identifiers in 3 lines of a Data.table in no time whatsoever ###
-CLOZUK.data2 <- CLOZUK.data
-CLOZUK.integers.to.change <- CLOZUK.data2[,.I[grep(paste0("^",chromosome.number,":\\d+:\\w+:\\w+"),SNP, perl = T,invert = T)]]
+### Changes the CLOZUK identifiers ###
+CLOZUK.integers.to.change <- CLOZUK.data[,.I[grep(paste0("^",chromosome.number,":\\d+:\\w+:\\w+"),SNP, perl = T,invert = T)]]
 CLOZUK.divisive.names <- CLOZUK.data[CLOZUK.integers.to.change]
 CLOZUK.alternative <- CLOZUK.data[,SNP := paste0(CHR,":",BP)]
 CLOZUK.alternative <- CLOZUK.alternative[,c("CHR","SNP","BP","A1","A2"),with = F]
-rm(CLOZUK.data2)
 
+# Simple tracking of each row for future checks
 CLOZUK.alternative$place <- c(1:length(CLOZUK.alternative$CHR))
 PGC.alternative$place <- c(1:length(PGC.alternative$CHR))
 
 ### Merging based on BP position ###
 combined.CLOZUK.PGC <- merge(x = PGC.alternative,y = CLOZUK.alternative,by = c('BP','CHR'), all = F, sort = F)
 
-combined.CLOZUK.PGC$A1.x <- toupper(combined.CLOZUK.PGC$A1.x)
-combined.CLOZUK.PGC$A2.x <- toupper(combined.CLOZUK.PGC$A2.x)
-combined.CLOZUK.PGC$A1.y <- toupper(combined.CLOZUK.PGC$A1.y)
-combined.CLOZUK.PGC$A2.y <- toupper(combined.CLOZUK.PGC$A2.y)
+# Change all alleles to uppercase: saving time method
+# below it states:
+## assign columns you want to change to object cols
+## take all rows of data.table; apply the toupper function to Subset of Data columns named in cols object
+cols <- c('A1.x','A2.x','A1.y','A2.y')
+combined.CLOZUK.PGC[, (cols) := lapply(.SD, toupper), .SDcols = cols ]
 
-cat("Chr:",chromosome.number ,nrow(combined.CLOZUK.PGC))
+cat("Number of SNPs BEFORE flipping between CLOZUK and PGC Chr:",chromosome.number ,nrow(combined.CLOZUK.PGC))
 
 a <- which(combined.CLOZUK.PGC$A1.x == "C" & combined.CLOZUK.PGC$A2.x == "G"); if (length(a)>0) {combined.CLOZUK.PGC<-combined.CLOZUK.PGC[-a]}
 a <- which(combined.CLOZUK.PGC$A1.x == "G" & combined.CLOZUK.PGC$A2.x == "C"); if (length(a)>0) {combined.CLOZUK.PGC<-combined.CLOZUK.PGC[-a]}
@@ -115,7 +155,7 @@ a <- which(combined.CLOZUK.PGC$A1.y=="A" & combined.CLOZUK.PGC$A2.y=="T"); if (l
 a <- which(combined.CLOZUK.PGC$A1.y=="T" & combined.CLOZUK.PGC$A2.y=="A"); if (length(a)>0) {combined.CLOZUK.PGC<-combined.CLOZUK.PGC[-a]}
 
 
-cat("Chr:",chromosome.number, "remove A-T, C-G: N=", nrow(combined.CLOZUK.PGC))
+cat("CLOZUK_PGC Chr:",chromosome.number, "remove A-T, C-G: N=", nrow(combined.CLOZUK.PGC))
 
 ## FLIPPING ##
 # A1.x/A2.x are PGC alleles
@@ -177,34 +217,36 @@ a <- which(combined.CLOZUK.PGC$A1.y != combined.CLOZUK.PGC$A1.x | combined.CLOZU
 if (length(a)>0) combined.CLOZUK.PGC <- combined.CLOZUK.PGC[-a,]
 cat("Chr:", chromosome.number,", remove A-T, C-G and other mismatches: N=", nrow(combined.CLOZUK.PGC))
 
-# Find  out where in the original table the SNP identifiers are
+### Find  out where in the original table the SNP identifiers are
 PGC.final.index <- combined.CLOZUK.PGC$place.x
 PGC.A1.allele.changes <- combined.CLOZUK.PGC$A1.x
 PGC.A2.allele.changes <- combined.CLOZUK.PGC$A2.x
 PGC.OR.changes <- combined.CLOZUK.PGC$OR
 PGC.BETA.changes <- combined.CLOZUK.PGC$BETA
-CLOZUK.final.index <- combined.CLOZUK.PGC$place.y
+CLOZUK.final.index <- combined.CLOZUK.PGC$place.x
 
-#Alter original files to have the right allele switching and the right BETA coefficient#
-abc <- copy(PGC.data.frame)
-PGC.data.frame <- PGC.data.frame[PGC.final.index,A1:= PGC.A1.allele.changes]
-PGC.data.frame <- PGC.data.frame[PGC.final.index,A2:= PGC.A2.allele.changes]
-PGC.data.frame <- PGC.data.frame[PGC.final.index,OR:= PGC.OR.changes]
-PGC.data.frame <- PGC.data.frame[PGC.final.index,BETA:= PGC.BETA.changes]
 
-# write the combined tables and the tables with altered SNP identifiers to the wd
-za <- gzfile(paste0("./output/PGC_CLOZUK_SNP_table",chromosome.number,".txt.gz"))
-zb <- gzfile(paste0("./extrainfo/CLOZUK_altered_names_chr",chromosome.number,".txt.gz"))
-zc <- gzfile(paste0("./extrainfo/PGC_altered_names_chr",chromosome.number,".txt.gz"))
+### Alter original files to have the right allele switching and the right BETA coefficient #
+PGC.data.frame2 <- copy(PGC.data.frame)
+PGC.data.frame2 <- PGC.data.frame2[PGC.final.index,A1:= PGC.A1.allele.changes]
+PGC.data.frame2 <- PGC.data.frame2[PGC.final.index,A2:= PGC.A2.allele.changes]
+PGC.data.frame2 <- PGC.data.frame2[PGC.final.index,OR:= PGC.OR.changes]
+PGC.data.frame2 <- PGC.data.frame2[PGC.final.index,BETA:= PGC.BETA.changes]
 
-write.table(combined.CLOZUK.PGC,file = za, row.names = F, quote = F)
-write.table(CLOZUK.alternative,file = zb, row.names = F, quote = F)
-write.table(PGC.data.frame,file = zc,row.names = F, quote = F)
+### write the combined tables and the tables with altered SNP identifiers to the wd
+za <- gzfile(paste0("./extrainfo/CLOZUK_altered_names_chr",chromosome.number,".txt.gz"))
+new.PGC.table <- paste0("PGC_table",chromosome.number,".txt")
 
-# write the index as well just in case for clumping
-write(x = CLOZUK.final.index,file = paste0("./extrainfo/CLOZUK.merged.index.chr",chromosome.number,".txt"))
-write(x = PGC.final.index,file = paste0("./extrainfo/PGC.merged.index.chr",chromosome.number,".txt"))
-system("rm CLOZUK_GWAS_BGE_chr${PBS_ARRAY_INDEX}.bim", intern = T)
+write.table(combined.CLOZUK.PGC, file = combined.table.path, row.names = F, quote = F)
+write.table(CLOZUK.alternative,file = za, row.names = F, quote = F)
+write.table(PGC.data.frame, file = new.PGC.table, row.names = F, quote = F)
+
+### write the index as well just in case for clumping
+write(x = PGC.final.index, file = paste0("./extrainfo/PGC.merged.index.chr",chromosome.number,".txt"))
+write(x = CLOZUK.final.index,file = paste0("CLOZUK.merged.index.chr",chromosome.number,".txt"))
+
+### End timer
+proc.time() - ptm
 
 ##### TODO #####
 ## Run in a job array using the job number as the chromosome number
@@ -215,4 +257,97 @@ system("rm CLOZUK_GWAS_BGE_chr${PBS_ARRAY_INDEX}.bim", intern = T)
 ## Change BETA, also change the table so that PGC are the alleles being changed rather than CLOZUK, because then you can change the effect sizes
 ## calculate BETA for PGC as well and incorporate that into this script
 ## Make the script more adept for other datasets as well
+
+############################################
+### CHECKING ABOVE ANALYSIS FOR ACCURACY ###
+############################################
+
+### checking everything is above board ###
+Checking_allele_swapping(PGC.data.frame2,PGC.data.frame,which.is.combined = "NONE")
+Checking_allele_swapping(CLOZUK.alternative,CLOZUK.data,which.is.combined = "NONE")
+
+if (length(e$CLOZUK.alternativeflipped.alleles) != 0) {
+  stop("alleles have been flipped on CLOZUK")
+}
+
+checking.which.OR.do.not.equal.each.other <- which(PGC.data.frame2$OR != PGC.data.frame$OR)
+problematic.SNPs <- match(e$PGC.data.frame2flipped.alleles, checking.which.OR.do.not.equal.each.other)  
+problematic.SNPs <- which(is.na(problematic.SNPs))
+check1_index <- e$PGC.data.frame2flipped.alleles[problematic.SNPs]
+check1 <- PGC.data.frame2[check1_index]
+check2 <- PGC.data.frame[check1_index]
+
+if (all(check1$OR == 1) & all(check2$OR == 1)){
+  cat("You have",length(check1$CHR),"flipped SNPs with OR = 1")
+}else{
+  stop("There is an uneven amount of flipped SNPs")
+}
+
+### Checking conversions of SNPs ###
+checking.duplications.PGC <- which (duplicated(combined.CLOZUK.PGC$SNP.x))
+checking.duplications.CZK <- which (duplicated(combined.CLOZUK.PGC$SNP.y))
+
+if (length(checking.duplications.CZK) != 0 & length(checking.duplications.PGC) != 0) {
+  stop("There are duplicated SNPs common between CLOZUK and PGC")
+}
+
+### Extracting SNPs for analysis ###
+setwd(paste0(fpath,"Documents/PGC_CLOZUK_GWAS_INPUT/"))
+untar(paste0("CLOZUK_GWAS_BGE_chr",chromosome.number,".tar.gz"))
+CLOZUK.alternative <- CLOZUK.alternative[,-"place",with = F]
+CLOZUK.alternative <- cbind(CLOZUK.alternative,CLOZUK.data$GENEDIST)
+CLOZUK.alternative <- CLOZUK.alternative[,c("CHR","SNP","V2","BP","A1","A2"), with = F]
+names(CLOZUK.alternative) <- c("CHR","SNP","GENEDIST","BP","A1","A2")
+
+## Altering data tables to fit previous input files ##
+PGC.data.frame2 <- PGC.data.frame2[,-"OR",with = F]
+namesPGC <- names(PGC.data.frame2)
+namesPGC <- namesPGC[c(1:8,17,9:16)]
+PGC.data.frame2 <- PGC.data.frame2[, namesPGC, with = F]
+
+## checking for combined SNPs ##
+SNPs <- match(combined.CLOZUK.PGC$SNP.x,combined.CLOZUK.PGC$SNP.y)
+if (length(which(is.na(SNPs))) > 0 ) {
+  stop("there is an uneven number of SNPs common between both data.tables")
+}
+
+## writing both the combined SNPs and the alternative datasets in the right format ###
+write(combined.CLOZUK.PGC$SNP.x,file = paste0("chr",chromosome.number,"PGC_CLOZUK_common_SNPs.txt"))
+write.table(CLOZUK.alternative, file = paste0("CLOZUK_GWAS_BGE_chr",chromosome.number,".bim"),quote = F,row.names = F)
+
+za <- gzfile(paste0("CHR.POS CLOZUK PGC/PGC_table",chromosome.number,".txt.gz"))
+write.table(PGC.data.frame2,file = za ,quote = F,row.names = F)
+
+### Taring multiple files together ###
+# MAY NEED TO ADD NEW PLINK COMMAND -MAKE-BED here) #
+system(paste0("tar -zcf ",fpath,"Documents/PGC_CLOZUK_GWAS_INPUT/CHR.POS\\ CLOZUK\\ PGC/ALT_CLOZUK_GWAS_BGE_chr",chromosome.number,".tar.gz ",
+              "CLOZUK_GWAS_BGE_chr",chromosome.number,".bed ",
+              "CLOZUK_GWAS_BGE_chr",chromosome.number,".bim ",
+              "CLOZUK_GWAS_BGE_chr",chromosome.number,".fam"))
+
+### Incorporating MAGMA gene locations ###
+### don't need it, can use --clump-range glist- filename ###
+### but can use it to add regions to each gene +10kb and -35kb etc...###
+
+wd <-getwd()
+MAGMA.gene.regions <- fread(paste0(fpath,"Documents/PGC_CLOZUK_GWAS_INPUT/NCBI37.3/NCBI37.3.gene.loc"),colClasses = c("numeric","character",rep("numeric",2),rep("character",2)))
+
+### TODO ###
+
+# Incorporate the new ID's into CLOZUK data including the genotype information etc... tar all together and keep in bim format#
+# Extract a list of common SNP's for each chromosome as a vector and print out to file.txt
+# print out new PGC table that has altered OR and BETA to be used for analysis that is usable
+# correspond SNP's to genomic regions by reading in the NCBI data source
+
+
+## clumping per gene ##
+# plink --bfile CLOZUK_GWAS_BGE_chr22 --clump CLOZUK2_COGS_GWAS_noPGC2.assoc.dosage --clump-r2 0.1 --clump-kb 3000 --out test3 --clump-p1 0.0001 --clump-verbose --clump-range input MAGMA limits
+
+
+# rewrite all of this, use the altered.names files to get the right list of SNPs for the CLOZUK dataset, PGC is fine, you cacn move it around alright
+
+CLOZUK_before <- fread("CLOZUK_GWAS_BGE_chr22.bim")  
+CLOZUK_AFTER <- fread("CLOZUK_altered_names_chr22.txt")
+CLOZUK_together <- CLOZUK_before[,.(V2)][,SNP := CLOZUK_AFTER$SNP]
+write.table(CLOZUK_together, file = "CLOZUK_chr22_chr.pos.txt", quote = F, row.names = F, col.names = F)
 
