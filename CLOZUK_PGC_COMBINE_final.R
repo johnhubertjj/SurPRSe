@@ -267,7 +267,7 @@ check2 <- PGC.data.frame[check1_index]
 
 if (all(check1$OR == 1) & all(check2$OR == 1)){
   cat("You have",length(check1$CHR),"flipped SNPs with OR = 1")
-}else{
+} else {
   stop("There is an uneven amount of flipped SNPs")
 }
 
@@ -294,21 +294,33 @@ if (length(which(is.na(SNPs))) > 0 ) {
 # Write out update file for use in plink
 CLOZUK_together <- CLOZUK.original[,.(V2)][,SNP := CLOZUK.alternative$SNP]
 rm(CLOZUK.original)
-write.table(CLOZUK_together, file = "CLOZUK_chr22_chr.pos.txt", quote = F, row.names = F, col.names = F)
+
+# Write according to destination
+if (whereami == 'johnhubert' | whereami == 'JJ'){
+  filename.CLOZUK.together <- "CLOZUK_chr22_chr.pos.txt"
+  new.PGC.table <- "PGC_table22.txt"
+  filename.common.snps <- "chr22PGC_CLOZUK_common_SNPs.txt"
+} else {  
+  filename.CLOZUK.together <- paste0("./output/CLOZUK_chr",chromosome.number,"_chr.pos.txt")
+  new.PGC.table <- paste0("./output/PGC_table",chromosome.number,".txt")
+  filename.common.snps <- paste0("./output/chr",chromosome.number,"PGC_CLOZUK_common_SNPs.txt")
+}
+
+# Write update file for plink
+write.table(CLOZUK_together, file = filename.CLOZUK.together, quote = F, row.names = F, col.names = F)
 
 # Write out new PGC table
-new.PGC.table <- paste0("PGC_table",chromosome.number,".txt")
 write.table(PGC.data.frame, file = new.PGC.table, row.names = F, quote = F)
 
 ## Write out the common SNPs between CLOZUK and PGC
-write(combined.CLOZUK.PGC$SNP.x,file = paste0("chr",chromosome.number,"PGC_CLOZUK_common_SNPs.txt"))
+write(combined.CLOZUK.PGC$SNP.x,file = filename.common.snps)
 
 ### End timer
 proc.time() - ptm
 
 
 #################################################################
-##################### PROPER SCRIPT END #######################
+##################### PROPER SCRIPT END #########################
 #################################################################
 
 ### TODO ###

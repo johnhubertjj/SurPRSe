@@ -37,8 +37,11 @@ plink
  --bfile CLOZUK_GWAS_BGE_chr${PBS_ARRAY_INDEX} 
  --update-name CLOZUK_chr${PBS_ARRAY_INDEX}_chr.pos.txt 
  --make-bed 
- --out CLOZUK_GWAS_BGE_chr${PBS_ARRAY_INDEX}_2
+ --out ./output/CLOZUK_GWAS_BGE_chr${PBS_ARRAY_INDEX}_2
 
+#re-package the original files
+
+tar -czvf CLOZUK_GWAS_BGE_chr${PBS_ARRAY_INDEX}.tar.gz CLOZUK_GWAS_BGE_chr${PBS_ARRAY_INDEX}.bed CLOZUK_GWAS_BGE_chr${PBS_ARRAY_INDEX}.bim CLOZUK_GWAS_BGE_chr${PBS_ARRAY_INDEX}.fam
 # create files containing duplicate SNPs
 R CMD BATCH Clumping_CLOZUK_PGC.R ./extrainfo/Rout_files/CLOZUK_PGC_clumpinginfo_chr${PBS_ARRAY_INDEX}.Rout 
 
@@ -46,15 +49,15 @@ R CMD BATCH Clumping_CLOZUK_PGC.R ./extrainfo/Rout_files/CLOZUK_PGC_clumpinginfo
 # Extract the SNPs common between PGC and CLOZUK
 # Remove the duplicate SNPs
 plink 
- --bfile CLOZUK_GWAS_BGE_chr${PBS_ARRAY_INDEX}_2
- --extract chr${PBS_ARRAY_INDEX}PGC_CLOZUK_common_SNPs.txt
- --exclude extracted_Duplicate_snps_chr${PBS_ARRAY_INDEX}
- --clump PGC_table${PBS_ARRAY_INDEX}.txt
+ --bfile ./output/CLOZUK_GWAS_BGE_chr${PBS_ARRAY_INDEX}_2
+ --extract ./output/chr${PBS_ARRAY_INDEX}PGC_CLOZUK_common_SNPs.txt
+ --exclude ./output/extracted_Duplicate_snps_chr${PBS_ARRAY_INDEX}
+ --clump ./output/PGC_table${PBS_ARRAY_INDEX}.txt
  --clump-kb 1000 
  --clump-p1 0.5 
  --clump-p2 0.5 
  --clump-r2 0.2 
- --out CLOZUK_PGC_bge_removed_A.T_C.G.target_r0.2_1000kb_non_verbose_chr${PBS_ARRAY_INDEX}
+ --out ./output/CLOZUK_PGC_bge_removed_A.T_C.G.target_r0.2_1000kb_non_verbose_chr${PBS_ARRAY_INDEX}
  
 # Clean up the files to leave a dataset that can be read into R/Python as well as a list of SNPs to extract for the CLUMPED plink files
 tr -s ' ' '\t' < FT4.training_bge_LOC_removed_A.T_C.G.target_r0.2_1000kb.clumped_chr${PBS_ARRAY_INDEX} > CLOZUK_PGC_CLUMPED_chr${PBS_ARRAY_INDEX}.txt
