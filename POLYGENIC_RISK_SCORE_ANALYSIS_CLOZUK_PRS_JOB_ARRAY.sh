@@ -32,22 +32,12 @@ fi
 # Output is in PGC_CLOZUK_SNP_table.txt
 R CMD BATCH CLOZUK_PGC_COMBINE_final.R ./extrainfo/Rout_files/CLOZUK_PGC_COMBINE_chr${PBS_ARRAY_INDEX}.Rout
  
-# recreating the bim file...need to change so that you are also altering the BED file as well... use plink...
-R CMD BATCH Extracting_and_checking_PGC_CLOZUK_merged_SNPS.R ./PGC_CLOZUK_GWAS_INPUT/PGC_CLOZUK_PRS/extrainfo/Rout_files/CLOZUK_PGC_EXTRACT_chr${PBS_ARRAY_INDEX}.Rout
-
 # using plink to change the names to a CHR.POS identifier and remaking the files
 plink 
  --bfile CLOZUK_GWAS_BGE_chr${PBS_ARRAY_INDEX} 
  --update-name CLOZUK_chr${PBS_ARRAY_INDEX}_chr.pos.txt 
  --make-bed 
  --out CLOZUK_GWAS_BGE_chr${PBS_ARRAY_INDEX}_2
-
-## delete the relevant files here
-## you want to feed it into the analysis below, all you need are the three input files
-
-# #Unpack the altered files (!!!!depreciated lines!!!!!!)
-tar -zxvf ALT_CLOZUK_GWAS_BGE_chr${PBS_ARRAY_INDEX}.tar.gz
-gzip -dc PGC_table${PBS_ARRAY_INDEX}.txt.gz
 
 # create files containing duplicate SNPs
 R CMD BATCH Clumping_CLOZUK_PGC.R ./extrainfo/Rout_files/CLOZUK_PGC_clumpinginfo_chr${PBS_ARRAY_INDEX}.Rout 
