@@ -18,7 +18,7 @@ platform_system = platform.system()
 if platform_system == 'Darwin' :
     os.chdir('/Users/johnhubert/Documents/PhD scripts/Schizophrenia_PRS_pipeline_scripts/')
 elif platform_system == 'Windows' :
-    os.chdir(C:\Users\JJ\Documents\PhD)
+    os.chdir('C:\Users\JJ\Documents\PhD')
 
 os.getcwd()
 
@@ -121,9 +121,9 @@ if __name__=='__main__':
 
     prs_results_clump=pd.concat(res, axis=1)
 
-    prs_results_clump.to_csv('PRS_scoring/prs_results_clump_miss', header=True, index=None, sep=' ')
+    prs_results_clump.to_csv('output/PRS_scoring/prs_results_clump_miss', header=True, index=None, sep=' ')
 
-timer_end= time.time()-timer_start
+timer_end=time.time()-timer_start
 
 print timer_end
 
