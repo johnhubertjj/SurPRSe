@@ -15,3 +15,6 @@
 
 # PGC table
 PGC_table22.txt
+
+# any R_output files
+*.Rout
