@@ -92,6 +92,7 @@ library(data.table)
 
 # Set Working directory
 setwd(".")
+getwd()
 
 ### Adding in PGC data ###
 PGC.data.frame <- fread(paste0("PGC_table",chromosome.number,".txt"))
@@ -297,12 +298,12 @@ rm(CLOZUK.original)
 
 # Write according to destination
 if (whereami == 'johnhubert' | whereami == 'JJ'){
-  filename.CLOZUK.together <- "CLOZUK_chr22_chr.pos.txt"
-  new.PGC.table <- "PGC_table22.txt"
-  filename.common.snps <- "chr22PGC_CLOZUK_common_SNPs.txt"
+  filename.CLOZUK.together <- "./output/CLOZUK_chr22_chr.pos.txt"
+  new.PGC.table <- "./output/PGC_table22_new.txt"
+  filename.common.snps <- "./output/chr22PGC_CLOZUK_common_SNPs.txt"
 } else {  
   filename.CLOZUK.together <- paste0("./output/CLOZUK_chr",chromosome.number,"_chr.pos.txt")
-  new.PGC.table <- paste0("./output/PGC_table",chromosome.number,".txt")
+  new.PGC.table <- paste0("./output/PGC_table",chromosome.number,"_new.txt")
   filename.common.snps <- paste0("./output/chr",chromosome.number,"PGC_CLOZUK_common_SNPs.txt")
 }
 
@@ -328,7 +329,7 @@ proc.time() - ptm
 ## Incorporate the new ID's into CLOZUK data including the genotype information etc... tar all together and keep in bim format#
 ## correspond SNP's to genomic regions by reading in the NCBI data source
 
----------------------------
+#---------------------------
 ## clumping per gene ##
 ## plink --bfile CLOZUK_GWAS_BGE_chr22 --clump CLOZUK2_COGS_GWAS_noPGC2.assoc.dosage --clump-r2 0.1 --clump-kb 3000 --out test3 --clump-p1 0.0001 --clump-verbose --clump-range input MAGMA limits
 ## rewrite all of this, use the altered.names files to get the right list of SNPs for the CLOZUK dataset, PGC is fine, you cacn move it around alright
