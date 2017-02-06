@@ -1,6 +1,25 @@
-# Preparing to run in Job array
-AI <- Sys.getenv("PBS_ARRAY_INDEX")
-chromosome.number <- as.numeric(AI)
+##################################################
+# Checking location for serial or batch analysis #
+##################################################
+
+System_information <- Sys.info()
+whereami <- System_information['user']
+
+if (whereami == "johnhubert") {
+  chromosome.number <- 22
+  
+} else if (whereami == 'JJ') {
+  chromosome.number <- 22
+  
+} else if (whereami == "c1020109") {
+  
+  # Preparing to run in Job array
+  AI <- Sys.getenv("PBS_ARRAY_INDEX")
+  chromosome.number <- as.numeric(AI)
+  
+} else {
+  stop("current environment NOT at work/home or on servers, please add to script above to specify where you are and what type of analysis you want to do")
+}
 
 ### Library
 library(data.table)
@@ -18,7 +37,7 @@ if(GR == "MAGMA.gene.regions.for.chromosome"){
   gene_ID_vector <- rep(0,nrow(clumped_SNPs))
   
     for (i in 1:nrow(clumped_SNPs)) {
-    tmp_gene <- which ((gene.regions$BP_start <= BP.clumped.SNPs[i] & gene.regions$BP_finish >= BP.clumped.SNPs[i]) == T)
+    tmp_gene <- which ((gene.regions$BP_1 <= BP.clumped.SNPs[i] & gene.regions$BP_2 >= BP.clumped.SNPs[i]) == T)
     if (length(tmp_gene) == 1) {
       test_vector[i] <- gene.regions$Gene_symbol[tmp_gene]
       gene_ID_vector[i] <- gene.regions$ID[tmp_gene]
@@ -45,7 +64,7 @@ if(GR == "MAGMA.gene.regions.for.chromosome"){
   
   ## Print out new table (replace with fwrite once you update it)
   write.table(Gene_clumped_SNPs, 
-              file = paste0(outputfilename, chromosome.number, ".txt"), 
+              file = paste0("./output/", outputfilename, chromosome.number, ".txt"), 
               quote = F, 
               row.names = F)
   assign("Gene_clumped_SNPs",Gene_clumped_SNPs, envir = e)
@@ -57,7 +76,7 @@ if(GR == "MAGMA.expanded.gene.regions.for.chromosome"){
   gene_ID <- rep(0,nrow(clumped_SNPs))
   
   for (i in 1:nrow(clumped_SNPs)) {
-    tmp_gene <- which ((gene.regions$BP_start <= BP.clumped.SNPs[i] & gene.regions$BP_finish >= BP.clumped.SNPs[i]) == T)
+    tmp_gene <- which ((gene.regions$BP_1 <= BP.clumped.SNPs[i] & gene.regions$BP_2 >= BP.clumped.SNPs[i]) == T)
     if (length(tmp_gene) == 1) {
       test_vector[i] <- gene.regions$Gene_symbol[tmp_gene]
       gene_ID[i] <- gene.regions$ID[tmp_gene]
@@ -85,7 +104,7 @@ Gene_clumped_SNPs <- Gene_clumped_SNPs[order(BP, decreasing = F)]
 
 ## Print out new table (replace with fwrite once you update it)
 write.table(Gene_clumped_SNPs, 
-            file = paste0(outputfilename, chromosome.number, ".txt"), 
+            file = paste0("./output/", outputfilename, chromosome.number, ".txt"), 
             quote = F, 
             row.names = F)
 
@@ -96,37 +115,42 @@ assign("Expanded_Gene_clumped_SNPs",Gene_clumped_SNPs, envir = e)
 
 ## PERFORM CLUMPING (not added yet) ##
 ## Read in clumped data
-clumped_SNPs <- fread(paste0("CLOZUK_PGC_CLUMPED_FINAL",chromosome.number,".txt"))
+clumped_SNPs <- fread(paste0("./output/CLOZUK_PGC_CLUMPED_FINAL_chr",chromosome.number,".txt"))
 wd <-getwd()
 
 ## read in MAGMA's the gene regions 
 MAGMA.gene.regions <- fread("NCBI37.3.gene.loc",colClasses = c("numeric","character",rep("numeric",2),rep("character",2)))
-colnames(MAGMA.gene.regions) <- c("ID","Chromosome","BP_start","BP_finish","strand","Gene_symbol")
+colnames(MAGMA.gene.regions) <- c("ID","Chromosome","BP_1","BP_2","strand","Gene_symbol")
 
 ## Limit the data down to the specific chromsome the array is on
 Index.for.chromosome <- MAGMA.gene.regions[,.I[grep(paste0("^",chromosome.number),Chromosome, perl = T, invert = F)]]
 MAGMA.gene.regions.for.chromosome <- MAGMA.gene.regions[Index.for.chromosome]
-MAGMA.gene.regions.for.chromosome <- MAGMA.gene.regions.for.chromosome[,c('ID','Chromosome','BP_start','BP_finish','Gene_symbol'),with = F]
+MAGMA.gene.regions.for.chromosome <- MAGMA.gene.regions.for.chromosome[,c('ID','Chromosome','BP_1','BP_2','Gene_symbol'),with = F]
+########## DO I NEED THE BELOW?#########
 write.table(MAGMA.gene.regions.for.chromosome,file = paste0("Chromosome_", chromosome.number, "_MAGMA_GENE_REGIONS_NCBI37.3.txt"),quote = F,row.names = F,col.names = F)
-
+########################################
 ## read in -35kb upstream and 10kb downstream regions for genes
 
 # Note that there is an overlap between genes
 # This shouldn't make any difference at the moment but if you were to specify which genes are used as the p-values there might be a problem determining in which areas the SNP's belong to
 # Additionally, you should find out how magma does it's analysis
 
+##### different script: keep separate #####
 MAGMA.expanded.gene.regions <- MAGMA_different_gene_regions <- fread("NCBI37_-35kb_+10kb.gene.loc",colClasses = c("numeric","character",rep("numeric",2),rep("character",2)))
-colnames(MAGMA.expanded.gene.regions) <- c("ID","Chromosome","BP_start","BP_finish","strand","Gene_symbol")
+colnames(MAGMA.expanded.gene.regions) <- c("ID","Chromosome","BP_1","BP_2","strand","Gene_symbol")
 
 ## Limit the data down to the specific chromsome the array is on
 Index.for.chromosome.expanded <- MAGMA.expanded.gene.regions[,.I[grep(paste0("^",chromosome.number),Chromosome, perl = T, invert = F)]]
 MAGMA.expanded.gene.regions.for.chromosome <- MAGMA.expanded.gene.regions[Index.for.chromosome]
-MAGMA.expanded.gene.regions.for.chromosome <- MAGMA.expanded.gene.regions.for.chromosome[,c('ID','Chromosome','BP_start','BP_finish','Gene_symbol'), with = F]
+MAGMA.expanded.gene.regions.for.chromosome <- MAGMA.expanded.gene.regions.for.chromosome[,c('ID','Chromosome','BP_1','BP_2','Gene_symbol'), with = F]
 write.table(MAGMA.expanded.gene.regions.for.chromosome, file = paste0("Chromosome_", chromosome.number, "_MAGMA_GENE_REGIONS_EXPANDED_NCBI37.3.txt"), quote = F, row.names = F, col.names = F)
-
+###################################
 ## remove orginal tables
 rm(MAGMA.gene.regions)
+
+###################################
 rm(MAGMA.expanded.gene.regions)
+###################################
 
 ## Using Data tables to get the gene name printed in the row against the SNP
 ## Mapping Genes to SNP's and storing in Data.table
@@ -136,7 +160,7 @@ BP.clumped.SNPs <- clumped_SNPs$BP
 Assigning_genes(MAGMA.gene.regions.for.chromosome, BP.clumped.SNPs = BP.clumped.SNPs, clumped_SNPs = clumped_SNPs, outputfilename = "Genomic_1000kb_r2_zeropoint2_PGC_CLOZUK_chr_")
 Assigning_genes(MAGMA.expanded.gene.regions.for.chromosome, BP.clumped.SNPs = BP.clumped.SNPs, clumped_SNPs = clumped_SNPs, outputfilename = "Genomic_expanded_1000kb_r2_zeropoint2_PGC_CLOZUK_chr_")
 
-GENES_to_snps <- scan(file = "CLOZUK_PGC_gene_locataions_magma_process.genes.annot", what = "", sep = "\n")
+GENES_to_snps <- scan(file = paste0("CLOZUK_PRS_CLUMPED_chr",chromosome.number,".genes.annot"), what = "", sep = "\n")
 y <- strsplit(GENES_to_snps, "[[:space:]]+")
 names(y) <- sapply(y, '[[', 1)
 y <- lapply(y, '[', -1)
@@ -245,7 +269,7 @@ for (i in 1:length(p.value.thresholds)) {
     if (length(SNPs) != 0){
     a <- a[SNPs, .(SNP,A1,BETA)]
   
-    filename <- paste0('score_1/chr22_test_', Genes_index[l],'_',p.value.thresholds[i],".score")
+    filename <- paste0('score_1/chr22_test_', Genes_index[l],'_', p.value.thresholds[i],".score")
   
 
     write.table(file = filename, a, row.names = F, col.names = F, quote = F, sep="\t")
