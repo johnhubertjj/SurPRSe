@@ -12,13 +12,19 @@
 #PBS -N c1020109_job_array
 
 
+echo "Press CTRL+C to proceed."
+trap "pkill -f 'sleep 1h'" INT
+trap "set +x ; sleep 1h ; set -x" DEBUG
+
 # Run locally or on ARCCA
 whereami=$(uname -n)
 echo "$whereami"
 if [ "$whereami" == "raven13" ]; then
   cd $PBS_O_WORKDIR
+  path_to_scripts='~/c1020109/PRS_scripts/'
 
   # Load both Plink and R
+  module purge
   module load R/3.3.0
   module load plink/1.9a
 
@@ -26,6 +32,7 @@ if [ "$whereami" == "raven13" ]; then
   chromosome_number=${PBS_ARRAY_INDEX}
 elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   cd ~/Documents/testing_PRS_chromosome_22/
+  path_to_scripts='/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/'
   chromosome_number=22
 fi
 
@@ -46,7 +53,7 @@ fi
 
 # Run R script that will combine PGC and CLOZUK to an individual table
 # Output is in PGC_CLOZUK_SNP_table.txt
-R CMD BATCH CLOZUK_PGC_COMBINE_final.R ./extrainfo/CLOZUK_PGC_COMBINE_chr${chromosome_number}.Rout
+R CMD BATCH ${path_to_scripts}CLOZUK_PGC_COMBINE_final.R ./extrainfo/CLOZUK_PGC_COMBINE_chr${chromosome_number}.Rout
  
 # using plink to change the names to a CHR.POS identifier and remaking the files
 plink --bfile CLOZUK_GWAS_BGE_chr${chromosome_number} --update-name CLOZUK_chr${chromosome_number}_chr.pos.txt --make-bed --out ./output/CLOZUK_GWAS_BGE_chr${chromosome_number}_2
@@ -54,12 +61,12 @@ plink --bfile CLOZUK_GWAS_BGE_chr${chromosome_number} --update-name CLOZUK_chr${
 #re-package the original files
 #tar -czvf CLOZUK_GWAS_BGE_chr${chromosome_number}.tar.gz CLOZUK_GWAS_BGE_chr${chromosome_number}.bed CLOZUK_GWAS_BGE_chr${chromosome_number}.bim CLOZUK_GWAS_BGE_chr${chromosome_number}.fam
 
-echo "Press CTRL+C to proceed."
-trap "pkill -f 'sleep 1h'" INT
-trap "set +x ; sleep 1h ; set -x" DEBUG
-
 # create files containing duplicate SNPs
-R CMD BATCH Clumping_CLOZUK_PGC.R ./extrainfo/CLOZUK_PGC_clumpinginfo_chr${chromosome_number}.Rout 
+R CMD BATCH ${path_to_scripts}Clumping_CLOZUK_PGC.R ./extrainfo/CLOZUK_PGC_clumpinginfo_chr${chromosome_number}.Rout 
+
+# Create files for MAGMA
+plink --bfile ./output/CLOZUK_GWAS_BGE_chr${chromosome_number}_2 --exclude ./output/extracted_Duplicate_snps_chr${chromosome_number}.txt --extract ./output/chr${chromosome_number}PGC_CLOZUK_common_SNPs.txt --make-bed --out ./output/CLOZUK_GWAS_BGE_chr22_magma_input
+
 
 # Clump the datasets
 # Extract the SNPs common between PGC and CLOZUK
@@ -84,7 +91,7 @@ plink --bfile ./output/CLOZUK_GWAS_BGE_CLUMPED_chr${chromosome_number} --freq --
 awk '{ $6=$7=$8=$10=$12=$13=$14=$15=$16=$17=""; print$0}' ./output/PGC_table${chromosome_number}_new.txt > ./output/PGC_table_for_python${chromosome_number}.txt
 
 # match the SNP rows to the MAF rows using R script
-R CMD BATCH Prepare_both_CLOZUK_AND_PGC_for_PRS_MAF_Genotype.R ./extrainfo/Prepare_both_CLOZUK_PGC_MAF_chr${chromosome_number}.Rout
+R CMD BATCH ${path_to_scripts}Prepare_both_CLOZUK_AND_PGC_for_PRS_MAF_Genotype.R ./extrainfo/Prepare_both_CLOZUK_PGC_MAF_chr${chromosome_number}.Rout
 
 # Final removal of headings for PRS analysis
 awk 'NR>1' ./output/CLOZUK_GWAS_BGE_CLUMPED_chr${chromosome_number}.raw > ./output/CLOZUK_GWAS_BGE_CLUMPED_chr${chromosome_number}_no_head.raw 
@@ -94,8 +101,12 @@ if [ ! -d "./output/PRS_scoring" ]; then
    mkdir ./output/PRS_scoring
 fi
 
-# Run PRS python script
-python PRS_scoring_parallel_clump_maf_JJ.py
+# Needs the MAGMA script
+sh ${path_to_scripts}PRS_with_magma.sh ${chromosome_number} 
+
+
+# Run PRS python script # Loop through significance thresholds
+python ${path_to_scripts}PRS_scoring_parallel_clump_maf_JJ.py
 
 
 #### alter below ####
