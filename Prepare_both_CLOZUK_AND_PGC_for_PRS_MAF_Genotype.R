@@ -30,8 +30,8 @@ library("data.table")
 setwd(".")
 
 # Read in MAF data
-MAF_clumped_CLOZUK_data <- fread(paste0("CLOZUK_GWAS_BGE_CLUMPED_chr",chromosome.number,".frq"))
-PGC_useful_columns <- fread(paste0("PGC_table_for_python",chromosome.number,".txt"))
+MAF_clumped_CLOZUK_data <- fread(paste0("./output/CLOZUK_GWAS_BGE_CLUMPED_chr",chromosome.number,".frq"))
+PGC_useful_columns <- fread(paste0("./output/PGC_table_for_python",chromosome.number,".txt"))
 
 # use data table structure to merge tables together and add MAF while removing useless columns
 PGC_CLOZUK_python_table <- merge(MAF_clumped_CLOZUK_data,PGC_useful_columns, by = c('CHR','SNP',"A1","A2"), all.x = T, all.y = F)
@@ -39,7 +39,7 @@ PGC_CLOZUK_python_table[, NCHROBS := NULL][,.(CHR,SNP,BP,A1,A2,BETA,P,MAF)]
 ###INSERT CONTROL SO THAT NO EXTRA COLUMNS ARE ADDED (as you've specified that you want to include all x columns)
 
 #Read in .raw file
-RAW.CLOZUK.CLUMPED <- fread(paste0("test_clumped_CLOZUK_PGC_PRS_recode_chr",chromosome.number,".raw"))
+RAW.CLOZUK.CLUMPED <- fread(paste0("./output/test_clumped_CLOZUK_PGC_PRS_recode_chr",chromosome.number,".raw"))
 
 # Flow control for assigning Row ID
 testing_col_names <- paste0(PGC_CLOZUK_python_table$SNP,"_",PGC_CLOZUK_python_table$A1)
