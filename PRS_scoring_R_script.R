@@ -160,7 +160,7 @@ BP.clumped.SNPs <- clumped_SNPs$BP
 Assigning_genes(MAGMA.gene.regions.for.chromosome, BP.clumped.SNPs = BP.clumped.SNPs, clumped_SNPs = clumped_SNPs, outputfilename = "Genomic_1000kb_r2_zeropoint2_PGC_CLOZUK_chr_")
 Assigning_genes(MAGMA.expanded.gene.regions.for.chromosome, BP.clumped.SNPs = BP.clumped.SNPs, clumped_SNPs = clumped_SNPs, outputfilename = "Genomic_expanded_1000kb_r2_zeropoint2_PGC_CLOZUK_chr_")
 
-GENES_to_snps <- scan(file = paste0("CLOZUK_PRS_CLUMPED_chr",chromosome.number,".genes.annot"), what = "", sep = "\n")
+GENES_to_snps <- scan(file = paste0("./output/CLOZUK_PRS_CLUMPED_chr",chromosome.number,".genes.annot"), what = "", sep = "\n")
 y <- strsplit(GENES_to_snps, "[[:space:]]+")
 names(y) <- sapply(y, '[[', 1)
 y <- lapply(y, '[', -1)
@@ -183,7 +183,6 @@ for (i in 1:length(y)) {
                         clumped_SNPs$BP[Base.pairs.index], 
                         clumped_SNPs$P[Base.pairs.index], 
                         MAGMA.gene.regions.for.chromosome$Gene_symbol[Gene.names.for.table], 
-                        MAGMA.gene.regions.for.chromosome$Gene_symbol[Gene.names.for.table],
                         gene.to.include)
         Gene_clumped_SNPs <- rbindlist(list(Gene_clumped_SNPs,new.row))
       }
@@ -215,9 +214,15 @@ for (i in 1:length(y)) {
 }
 
 adding_unread_genes(e$test_clumped_snps,MAGMA.gene.regions.for.chromosome, clumped_SNPs, y, chromosome.number)  
-names(test_data_frame) <- c("CHR" ,"SNP", "BP", "P", "Gene_name", "Gene_ID")
+names(test_data_frame) <- c("CHR" ,"SNP", "BP", "P", "Gene_name", "Gene_ID","BP_1","BP_2")
+
+#ALTER HERE TO MATCH PYTHON# 
+#ONE for the gene names and one for the gene number
+
 #!!!!!!!!!!!!!!!! Check if the SNPs are being assigned to the correct genes, if not then you will ignore some genes in the analysis  
 which(duplicated(test_data_frame$SNP,fromLast = T))
+
+write.table(test_data_frame,file = paste0("./output/MAGMA_Gene_regions_for_python_script_chr_",chromosome.number,".txt")
 ##############
 
 ##Read in PGC.data
