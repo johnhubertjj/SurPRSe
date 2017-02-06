@@ -6,6 +6,7 @@
 *.frq
 *.nosex
 *.log
+*.fam
 
 # reformatted plink files
 *.raw
