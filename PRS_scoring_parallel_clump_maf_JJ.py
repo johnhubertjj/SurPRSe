@@ -124,12 +124,12 @@ if __name__ == '__main__':
     
     # Read in Annot Data #
     annot_names = ["CHR", "SNP", "BP", "GENE", "BP_START","BP_END"]
-    annot = pd.read_table('all_genes_with_SNPS.txt', sep=' ', names=annot_names)
+    annot = pd.read_table('/output/MAGMA_Gene_regions_for_python_script_chr_' + str(chromosome_number) + '.txt', sep=' ', names=annot_names)
     
     # Read in CLOZUK_PGC Assoc Data Pruned Data # #Is this the PGC alternative?#
     
     CLOZUK_PGC_names = ["ROW.NUM","ROW.ID", "CHR", "SNP", "BP", "A1", "A2", "BETA", "P", "MAF"]
-    CLOZUK_PGC_clump = pd.read_table('CLOZUK_GWAS_BGE_CLUMPED_PGC_MAF_FINAL' + str(chromosome_number) + '.txt', sep = ' ', names = CLOZUK_PGC_names)
+    CLOZUK_PGC_clump = pd.read_table('./output/CLOZUK_GWAS_BGE_CLUMPED_PGC_MAF_FINAL' + str(chromosome_number) + '.txt', sep = ' ', names = CLOZUK_PGC_names)
 
     # If the data is from R, the indexing standard needs to be changed
     CLOZUK_PGC_clump[['ROW.NUM']] = CLOZUK_PGC_clump[["ROW.NUM"]] - 1
