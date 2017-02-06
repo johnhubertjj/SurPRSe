@@ -14,13 +14,16 @@ import time
 import os
 import platform
 
-platform_system = platform.system()
-if platform_system == 'Darwin' :
-    os.chdir('/Users/johnhubert/Documents/PhD scripts/Schizophrenia_PRS_pipeline_scripts/')
-elif platform_system == 'Windows' :
-    os.chdir('C:\Users\JJ\Documents\PhD')
+platform_system = platform.uname()
 
-os.getcwd()
+if platform_system[1] == 'v1711-0ab8c3db.mobile.cf.ac.uk' :
+    os.chdir('~/Documents/testing_PRS_chromosome_22/output')
+elif platform_system[1] == 'JJ' :
+    os.chdir('~/Documents/testing_PRS_chromosome_22/output')
+elif platform_system[1] == 'rocks.psycm.cf.ac.uk' :
+    os.chdir('~/output/')
+elif platform_system[1] == 'raven13' :
+    os.chdir('/scratch/c1020109/PR54/PGC_CLOZUK_PRS/output/')
 
 
 timer_start=time.time()
@@ -30,7 +33,7 @@ timer_start=time.time()
 def f(gene):
 
     # Create empty datasets for results #
-    indiv_id=range(1, 13165)
+    indiv_id=range(1, 35802)
     results=pd.DataFrame(index=indiv_id, columns=['GeneName'])
 
     # Find SNPs in gene #
