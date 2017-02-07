@@ -39,7 +39,7 @@ PGC_CLOZUK_python_table[, NCHROBS := NULL][,.(CHR,SNP,BP,A1,A2,BETA,P,MAF)]
 ###INSERT CONTROL SO THAT NO EXTRA COLUMNS ARE ADDED (as you've specified that you want to include all x columns)
 
 #Read in .raw file
-RAW.CLOZUK.CLUMPED <- fread(paste0("./output/test_clumped_CLOZUK_PGC_PRS_recode_chr",chromosome.number,".raw"))
+RAW.CLOZUK.CLUMPED <- fread(paste0("./output/CLOZUK_GWAS_BGE_CLUMPED_chr",chromosome.number,".raw"))
 
 # Flow control for assigning Row ID
 testing_col_names <- paste0(PGC_CLOZUK_python_table$SNP,"_",PGC_CLOZUK_python_table$A1)
@@ -54,7 +54,7 @@ if(all(testing_col_names == testing_col_names_raw[7:length(testing_col_names_raw
 setcolorder(PGC_CLOZUK_python_table, c(9,1,2,6,3,4,7,8,5)) 
 
 # Write MAF file to working_directory
-write.table(PGC_CLOZUK_python_table, file = paste0("./output/CLOZUK_GWAS_BGE_CLUMPED_PGC_MAF_FINAL",chromosome.number,".txt"),quote = F,row.names = T,col.names = F)
+write.table(PGC_CLOZUK_python_table, file = paste0("./output/CLOZUK_GWAS_BGE_CLUMPED_PGC_MAF_FINAL",chromosome.number,".txt"),quote = F, row.names = T, col.names = F)
 
 # End timer 
 proc.time() - ptm

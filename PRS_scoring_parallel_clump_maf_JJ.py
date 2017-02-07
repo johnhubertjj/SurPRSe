@@ -96,7 +96,7 @@ def PRS_func(gene):
                     # Calculate the PRS, find individual genotype corresponding to correct SNP using rowID #
                     prs = prs + (float(indiv_snp[(effect.iloc[i]['ROW.NUM'] + 6)]) * effect.iloc[i]['BETA'])
                 else:
-                    prs = prs + (2*effect.iloc[i]['BETA'] * effect.iloc[i]['MAF'])
+                    prs = prs + (2 * effect.iloc[i]['BETA'] * effect.iloc[i]['MAF'])
         
                 results.loc[indiv, 'GeneName'] = (prs / float(len(effect.index)))
 
@@ -109,17 +109,17 @@ def PRS_func(gene):
         return results
 
 # If on the main processor #
-if __name__ == '__main__':
+if __name__ == '__main__' :
 
     # -------------- READ IN DATA -------------- #
 
     # Read in Unique Gene file #
     unigene_names = ["GENE"]
-    unigene = pd.read_table('PGC_CLOZUK_unique_genes.txt', names = unigene_names)
+    unigene = pd.read_table('PGC_CLOZUK_unique_genes_chr_' + str(chromosome_number) + '.txt', names = unigene_names)
 
     # Read in Pruned Bim file #
     bim_names = ["CHR", "SNP", "GD", "BP", "A1", "A2"]
-    bim_clump = pd.read_table( 'CLOZUK_GWAS_BGE_CLUMPED_chr' + str(chromosome_number) + '.bim', names=bim_names)
+    bim_clump = pd.read_table( 'CLOZUK_GWAS_BGE_CLUMPED_chr' + str(chromosome_number) + '.bim', names = bim_names)
 
     
     # Read in Annot Data #
@@ -148,7 +148,7 @@ if __name__ == '__main__':
 
     prs_results_clump.to_csv('./PRS_scoring/prs_results_clump_miss' + str(chromosome_number), header = True, index = None, sep = ' ')
 
-timer_end=time.time()-timer_start
+timer_end = time.time()-timer_start
 
 print timer_end
 

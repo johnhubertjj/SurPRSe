@@ -87,7 +87,9 @@ Assigning_genes <- function(gene.regions, BP.clumped.SNPs, clumped_SNPs, outputf
     BP2 <- rep(0,nrow(clumped_SNPs))
     
     for (i in 1:nrow(clumped_SNPs)) {
+      
       tmp_gene <- which ((gene.regions$BP_1 <= BP.clumped.SNPs[i] & gene.regions$BP_2 >= BP.clumped.SNPs[i]) == T)
+      
       if (length(tmp_gene) == 1) {
         test_vector[i] <- gene.regions$Gene_symbol[tmp_gene]
         gene_ID[i] <- gene.regions$ID[tmp_gene]
@@ -130,38 +132,7 @@ Assigning_genes <- function(gene.regions, BP.clumped.SNPs, clumped_SNPs, outputf
   }
 }
 
-## Read in clumped data
-clumped_SNPs <- fread(paste0("./output/CLOZUK_PGC_CLUMPED_FINAL_chr",chromosome.number,".txt"))
-wd <-getwd()
-
-## read in MAGMA's the gene regions 
-MAGMA.gene.regions <- fread("NCBI37.3.gene.loc",colClasses = c("numeric","character",rep("numeric",2),rep("character",2)))
-colnames(MAGMA.gene.regions) <- c("ID","Chromosome","BP_1","BP_2","strand","Gene_symbol")
-
-## Limit the data down to the specific chromsome the array is on
-Index.for.chromosome <- MAGMA.gene.regions[,.I[grep(paste0("^",chromosome.number),Chromosome, perl = T, invert = F)]]
-MAGMA.gene.regions.for.chromosome <- MAGMA.gene.regions[Index.for.chromosome]
-MAGMA.gene.regions.for.chromosome <- MAGMA.gene.regions.for.chromosome[,c('ID','Chromosome','BP_1','BP_2','Gene_symbol'),with = F]
-
-## remove orginal tables
-rm(MAGMA.gene.regions)
-
-# Find clumped SNPs
-BP.clumped.SNPs <- clumped_SNPs$BP
-
-Assigning_genes(MAGMA.gene.regions.for.chromosome, 
-                BP.clumped.SNPs = BP.clumped.SNPs, 
-                clumped_SNPs = clumped_SNPs, 
-                outputfilename = "Genomic_1000kb_r2_zeropoint2_PGC_CLOZUK_chr_")
-
-GENES_to_snps <- scan(file = paste0("./output/CLOZUK_PRS_CLUMPED_chr",chromosome.number,".genes.annot"), what = "", sep = "\n")
-y <- strsplit(GENES_to_snps, "[[:space:]]+")
-names(y) <- sapply(y, '[[', 1)
-y <- lapply(y, '[', -1)
-
-y[[1]] <- NULL
-y[[1]] <- NULL
-
+### Function which adds duplicate SNPs which happen to be inside other genes
 adding_unread_genes <- function(Gene_clumped_SNPs, MAGMA.gene.regions.for.chromosome, clumped_SNPs, y, chromosome.number){
   for (i in 1:length(y)) {
     index_of_gene <- which(Gene_clumped_SNPs$Gene_ID == names(y[i]))
@@ -210,14 +181,48 @@ adding_unread_genes <- function(Gene_clumped_SNPs, MAGMA.gene.regions.for.chromo
   assign("test_data_frame",Gene_clumped_SNPs,envir = .GlobalEnv)
 }
 
-adding_unread_genes(e$test_clumped_snps,MAGMA.gene.regions.for.chromosome, clumped_SNPs, y, chromosome.number)  
-test_data_frame[,V5 := NULL]
-names(test_data_frame) <- c("CHR" ,"SNP", "BP", "P", "Gene_name", "Gene_ID","BP_1","BP_2")
+## Read in clumped data
+clumped_SNPs <- fread(paste0("./output/CLOZUK_PGC_CLUMPED_FINAL_chr",chromosome.number,".txt"))
+wd <-getwd()
 
-#ALTER HERE TO MATCH PYTHON# 
-#ONE for the gene names and one for the gene number
+## read in MAGMA's the gene regions 
+MAGMA.gene.regions <- fread("NCBI37.3.gene.loc",colClasses = c("numeric","character",rep("numeric",2),rep("character",2)))
+colnames(MAGMA.gene.regions) <- c("ID","Chromosome","BP_1","BP_2","strand","Gene_symbol")
+
+## Limit the data down to the specific chromsome the array is on
+Index.for.chromosome <- MAGMA.gene.regions[,.I[grep(paste0("^",chromosome.number),Chromosome, perl = T, invert = F)]]
+MAGMA.gene.regions.for.chromosome <- MAGMA.gene.regions[Index.for.chromosome]
+MAGMA.gene.regions.for.chromosome <- MAGMA.gene.regions.for.chromosome[,c('ID','Chromosome','BP_1','BP_2','Gene_symbol'),with = F]
+
+## remove orginal tables
+rm(MAGMA.gene.regions)
+
+# Find clumped SNPs
+BP.clumped.SNPs <- clumped_SNPs$BP
+
+# Create table and write to file for reference
+Assigning_genes(MAGMA.gene.regions.for.chromosome, 
+                BP.clumped.SNPs = BP.clumped.SNPs, 
+                clumped_SNPs = clumped_SNPs, 
+                outputfilename = "Genomic_1000kb_r2_zeropoint2_PGC_CLOZUK_chr_")
+
+# read in MAGMA's input and add any genes which happen to be inside other genes or crossed over with other genes
+GENES_to_snps <- scan(file = paste0("./output/CLOZUK_PRS_CLUMPED_chr",chromosome.number,".genes.annot"), what = "", sep = "\n")
+y <- strsplit(GENES_to_snps, "[[:space:]]+")
+names(y) <- sapply(y, '[[', 1)
+y <- lapply(y, '[', -1)
+
+y[[1]] <- NULL
+y[[1]] <- NULL
+
+adding_unread_genes(e$test_clumped_snps,MAGMA.gene.regions.for.chromosome, clumped_SNPs, y, chromosome.number)  
+
+names(test_data_frame) <- c("CHR" ,"SNP", "BP", "P", "Gene_name","BP_START","BP_END","GENE")
+setcolorder(test_data_frame, c("CHR","SNP","BP","GENE","BP_START","BP_END","P","Gene_name"))
+
 which(duplicated(test_data_frame$SNP,fromLast = T))
 
-write.table(test_data_frame,file = paste0("./output/MAGMA_Gene_regions_for_python_script_chr_",chromosome.number,".txt"))
-            
+write.table(test_data_frame[, c(1:6), with = F],file = paste0("./output/MAGMA_Gene_regions_for_python_script_chr_",chromosome.number,".txt"), quote = F, row.names = F)
+write(unique(test_data_frame$Gene_name),file = paste0("./output/PGC_CLOZUK_unique_genes_chr_",chromosome.number,".txt"))
+
 

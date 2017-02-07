@@ -1,16 +1,14 @@
 #!/bin/bash
 
-
 #PBS -q batch-long
 #PBS -P PR54
-#PBS -l select=1:ncpus=1:mpiprocs=1
+#PBS -l select=1:ncpus=10:mem=50GB
 #PBS -l walltime 10:00:00
 #PBS -o /home/c1020109/
 #PBS -e /home/c1020109/
 #PBS -j oe
 #PBS -J 21-22:2
 #PBS -N c1020109_job_array
-
 
 echo "Press CTRL+C to proceed."
 trap "pkill -f 'sleep 1h'" INT
@@ -27,6 +25,7 @@ if [ "$whereami" == "raven13" ]; then
   module purge
   module load R/3.3.0
   module load plink/1.9a
+  module load python/2.7.9-mpi
 
   # assign a new variable for the PBS_ARRAY_variable
   chromosome_number=${PBS_ARRAY_INDEX}
@@ -104,14 +103,20 @@ fi
 # Needs the MAGMA script
 sh ${path_to_scripts}PRS_with_magma.sh ${chromosome_number} 
 
+# Run preparation for annotation file for python scripts
+R CMD BATCH ${path_to_scripts}MAGMA_python_annotation_table_creator.R ./extrainfo/MAGMA_annotation_table_creator.Rout
 
 # Run PRS python script # Loop through significance thresholds
-python ${path_to_scripts}PRS_scoring_parallel_clump_maf_JJ.py
-
+# Change for Raven or Local
+if [ "$whereami" == "raven13" ]; then
+   python ${path_to_scripts}PRS_scoring_parallel_clump_maf_JJ.py
+else
+   python ${path_to_scripts}PRS_scoring_parallel_clump_maf_JJ.py 
+fi
 
 #### alter below ####
 # Calculate the PRS and profiles
-#R CMD BATCH PRS_scoring_R_script.R ./extrainfo/PRS_SCORING_INFO_CLOZUK_PGC_chr${chromosome_number}.Rout
+# R CMD BATCH PRS_scoring_R_script.R ./extrainfo/PRS_SCORING_INFO_CLOZUK_PGC_chr${chromosome_number}.Rout
 
 #significant=(0.0001 0.001 0.01 0.05 0.1 0.2 0.3 0.4 0.5)
 

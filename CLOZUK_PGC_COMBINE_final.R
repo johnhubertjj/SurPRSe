@@ -254,7 +254,7 @@ Checking_allele_swapping(PGC.data.frame,PGC.data.frame.original,which.is.combine
 Checking_allele_swapping(CLOZUK.alternative,CLOZUK.data,which.is.combined = "NONE")
 
 if (length(e$CLOZUK.alternativeflipped.alleles) != 0) {
-  stop("alleles have been flipped on CLOZUK")
+  warning("alleles have been flipped on CLOZUK")
 }
 
 checking.which.OR.do.not.equal.each.other <- which(PGC.data.frame$OR != PGC.data.frame.original$OR)
@@ -269,7 +269,7 @@ check2 <- PGC.data.frame[check1_index]
 if (all(check1$OR == 1) & all(check2$OR == 1)){
   cat("You have",length(check1$CHR),"flipped SNPs with OR = 1")
 } else {
-  stop("There is an uneven amount of flipped SNPs")
+  warning("There is an uneven amount of flipped SNPs")
 }
 
 ### Checking conversions of SNPs ###
@@ -277,7 +277,7 @@ checking.duplications.PGC <- which (duplicated(combined.CLOZUK.PGC$SNP.x))
 checking.duplications.CZK <- which (duplicated(combined.CLOZUK.PGC$SNP.y))
 
 if (length(checking.duplications.CZK) != 0 & length(checking.duplications.PGC) != 0) {
-  stop("There are duplicated SNPs common between CLOZUK and PGC")
+  warning("There are duplicated SNPs common between CLOZUK and PGC")
 }
 
 ## Altering data tables to fit previous input files ##
@@ -289,7 +289,7 @@ PGC.data.frame <- PGC.data.frame[, namesPGC, with = F]
 ## checking for combined SNPs ##
 SNPs <- match(combined.CLOZUK.PGC$SNP.x,combined.CLOZUK.PGC$SNP.y)
 if (length(which(is.na(SNPs))) > 0 ) {
-  stop("there is an uneven number of SNPs common between both data.tables")
+  warning("there is an uneven number of SNPs common between both data.tables")
 }
 
 # Write out update file for use in plink
