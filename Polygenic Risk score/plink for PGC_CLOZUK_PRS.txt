@@ -1,0 +1,15 @@
+# plink 	--bfile CLOZUK_GWAS_BGE_chr${PBS_ARRAY_VARIABLE} 
+		—-extract SNP-list (to be created)
+	   	--clump PGC_table{PBS_ARRAY_VARIABLE.txt 
+		--clump-r2 0.1 
+		--clump-kb 3000 
+		—-clump-p1 0.0001
+		—-clump-field P 
+		— clump-snp-field (filename??)
+		--out test3 
+		--clump-verbose 
+		--clump-range NCBI37.3.gene.loc
+
+#plink		—-extract MAGMA1.06ranges.txt
+
+PGC_CLOZUK_GWAS_INPUT/CHR_POS_CLOZUK_PGC/ALT_CLOZUK_GWAS_BGE_chr21.tar.gz:
