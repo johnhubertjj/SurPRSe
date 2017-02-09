@@ -3,7 +3,7 @@
 sig=(0.0001 0.001 0.01 0.05 0.1 0.2 0.3 0.4 0.5)
 length_PGC=(521 1435 4787 13603 23369 40794 57657 74106 89961)
 
-ig[i]}CLOZUK_PGC_Filter_SNPS_per_pvalue.txt
+sig[i]}CLOZUK_PGC_Filter_SNPS_per_pvalue.txt
 for i in `seq 0 8` ;
 do 
 	
