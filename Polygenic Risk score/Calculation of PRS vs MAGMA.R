@@ -2,8 +2,8 @@ library(zoom)
 library(ggplot2)
 library(data.table)
 
-setwd("/Volumes/NO NAME/LOG10 graphs/")
-wd <- getwd()
+setwd("/Users/johnhubert/Dropbox/testing_PRS_chromosome_22/")
+wd <- paste0(getwd(),"PRSvsMAGMA_testing_MAGMA")
 sig <- c("0.0001","0.001","0.01","0.05","0.1","0.2","0.3","0.4","0.5")
 sig2 <- c(1e-4,1e-3,1e-2,0.05,0.1,0.2,0.3,0.4,0.5)
 correlations <- rep(0,length(sig2))
@@ -104,7 +104,7 @@ number_of_SNPs_MAGMA <- rep(0, length(sig))
 gglist <- list()
 
 for (i in 1:length(sig)) {
-MAGMA <- fread(paste0(sig[i], "gene_annotation_for_CLOZUK_test.genes.out"))
+MAGMA <- fread(paste0(sig[i], "gene_annotation_for_CLOZUK_without_selecting_genes.genes.out"))
 PRS <- fread(paste0(sig2[i], "CLOZUK_PGC_PRS_residuals_with_genes_using_fam_file.txt"))
 names(PRS) <- c("P","GENE")
 
@@ -112,7 +112,7 @@ Merged_table <- merge(PRS,MAGMA,by = 'GENE')
 
 Merged_table[,logp.x := -log10(P.x)]
 Merged_table[,logp.y := -log10(P.y)]
-write(Merged_table$GENE, file = paste0(sig[i],"merged_PRS_MAGMA_COMMON_GENES.txt"),ncolumns = 1)
+# write(Merged_table$GENE, file = paste0(sig[i],"merged_PRS_MAGMA_COMMON_GENES.txt"),ncolumns = 1)
 title <- sig[i]
 PRS.pvalue <- Merged_table$P.x
 MAGMA.P <- Merged_table$P.y
@@ -144,15 +144,15 @@ SNPs_per_genes_MAGMA_mean_interesting[i] <- mean_interesting
 SNPs_per_genes_MAGMA_mean_compare[i] <- mean_compare
 SNPs_per_genes_MAGMA_sd_compare[i] <- sd_compare
 number_of_SNPs_MAGMA[i] <- sum(MAGMA$NPARAM)
-}
+
 
 gglist[[i]]
-mypath <- paste0(wd,sig[i],"PRSvsMAGMA_CLOZUK.png")
-ggsave(filename = mypath,plot = plots)
+mypath <- paste0(wd,sig[i],"PRSvsMAGMA_CLOZUK_testing_magma_without_selecting_genes.png")
+ggsave(filename = mypath)
 }
 
 multiplot(gglist,col =3)
-mypath <- paste0(wd,sig[i],"PRSvsMAGMA_CLOZUK.png")
+mypath <- paste0(wd,sig[i],"/PRSvsMAGMA_CLOZUK_testing_magma_without_selecting_genes.png")
 png(file = mypath)
 plots
 dev.off()
