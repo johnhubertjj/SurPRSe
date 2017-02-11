@@ -1,0 +1,13 @@
+#! /bin/bash
+
+chr=(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22)
+
+
+for i in `seq 0 21` ;
+do 
+	
+	magma --annotate window=35,10 --snp-loc CLOZUK_GWAS_BGE_chr${chr[i]}_magma_input.bim --gene-loc NCBI37.3.gene.loc --out ${chr[i]}_CLOZUK_PGC_SNPs_pathway
+
+done 
+
+# magma --bfile CLOZUK_GWAS_BGE_chr22_magma_input_2 --gene-annot ${chr[i]}_CLOZUK_PGC_SNPs_pathway.genes.annot --out ${chr[i]}gene_annotation_for_CLOZUK_test 
