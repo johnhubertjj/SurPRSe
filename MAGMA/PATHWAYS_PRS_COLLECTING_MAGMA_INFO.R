@@ -4,7 +4,7 @@ library(data.table)
 e <- new.env()
 
 ### Function which assigns genes to the SNP data ####
-Assigning_genes <- function(pathway_input, BP.clumped.SNPs, clumped_SNPs, outputfilename, gene.regions = c("normal", "extended")){
+Assigning_genes <- function(pathway_input, BP.clumped.SNPs, clumped_SNPs, outputfilename, gene.regions = c("normal", "extended"),chromosome.number = l){
   GR <- deparse(substitute(pathway_input))
   
   if(gene.regions == "MAGMA.gene.regions.for.chromosome"){
@@ -63,7 +63,6 @@ Assigning_genes <- function(pathway_input, BP.clumped.SNPs, clumped_SNPs, output
     BP2 <- rep(0,nrow(clumped_SNPs))
     
     for (i in 1:nrow(clumped_SNPs)) {
-      
       tmp_gene <- which ((pathway_input$BP_start_extended <= BP.clumped.SNPs[i] & pathway_input$BP_end_extended >= BP.clumped.SNPs[i]) == T)
       
       if (length(tmp_gene) == 1) {
@@ -83,7 +82,6 @@ Assigning_genes <- function(pathway_input, BP.clumped.SNPs, clumped_SNPs, output
     ## This is specialised notation for a data.table R object
     ## it is essentially saying, take all rows (defalt blank before comma), assign column Genes to the R object test_vector
     ## data.table will automatically create a new column because the column Gene does not exist in the original data.table
-    browser()
     clumped_SNPs[, GENE_NAME := test_vector]
     clumped_SNPs[, Gene := gene_ID]
     clumped_SNPs[, BP_start_extended := BP1]
@@ -104,29 +102,31 @@ Assigning_genes <- function(pathway_input, BP.clumped.SNPs, clumped_SNPs, output
                 quote = F, 
                 row.names = F)
     
-    assign("Expanded_Gene_clumped_SNPs",Gene_clumped_SNPs, envir = e)
+    assign("Expanded_Gene_clumped_SNPs", Gene_clumped_SNPs, envir = e)
   }
 }
 
 ### Function which adds duplicate SNPs which happen to be inside other genes
-adding_unread_genes <- function(Gene_clumped_SNPs, MAGMA.gene.regions.for.chromosome, clumped_SNPs, y, chromosome.number){
+adding_unread_genes <- function(Gene_clumped_SNPs, MAGMA.gene.regions.for.chromosome, clumped_SNPs, y, chromosome.number, pathway){
   for (i in 1:length(y)) {
-    index_of_gene <- which(Gene_clumped_SNPs$Gene_ID == names(y[i]))
+    index_of_gene <- which(Gene_clumped_SNPs$Gene == names(y[i]))
     if (length(index_of_gene) == 0){
       gene.to.include <- names(y[i])
       SNPs.to.include <- y[[i]][2:length(y[[i]])]
       
-      Gene.names.for.table <- which(gene.to.include == MAGMA.gene.regions.for.chromosome$ID)
+      Gene.names.for.table <- which(gene.to.include == MAGMA.gene.regions.for.chromosome$Gene)
       for (f in 1:length(SNPs.to.include)) {
         Base.pairs.index <- which(clumped_SNPs$SNP == SNPs.to.include[f])
         new.row <- list(chromosome.number, 
                         SNPs.to.include[f], 
-                        clumped_SNPs$BP[Base.pairs.index], 
-                        clumped_SNPs$P[Base.pairs.index], 
-                        MAGMA.gene.regions.for.chromosome$Gene_symbol[Gene.names.for.table],
-                        MAGMA.gene.regions.for.chromosome$BP_1[Gene.names.for.table],
-                        MAGMA.gene.regions.for.chromosome$BP_2[Gene.names.for.table],
-                        gene.to.include)
+                        clumped_SNPs$GD[Base.pairs.index],
+                        clumped_SNPs$BP[Base.pairs.index],
+                        clumped_SNPs$A1[Base.pairs.index],
+                        clumped_SNPs$A2[Base.pairs.index],
+                        MAGMA.gene.regions.for.chromosome$GENE_NAME[Gene.names.for.table],
+                        gene.to.include,
+                        MAGMA.gene.regions.for.chromosome$BP_start_extended[Gene.names.for.table],
+                        MAGMA.gene.regions.for.chromosome$BP_end_extended[Gene.names.for.table])
         Gene_clumped_SNPs <- rbindlist(list(Gene_clumped_SNPs,new.row))
       }
     }else{
@@ -136,19 +136,22 @@ adding_unread_genes <- function(Gene_clumped_SNPs, MAGMA.gene.regions.for.chromo
       if (length(unrecorded_SNPs) != 0 ) {
         
         gene.to.include <- names(y[i])
-        Gene.names.for.table <- which(gene.to.include == MAGMA.gene.regions.for.chromosome$ID)
+        Gene.names.for.table <- which(gene.to.include == MAGMA.gene.regions.for.chromosome$Gene)
         SNPs.to.include <- y[[i]][2:length(y[[i]])]
         
         for (f in 1:length(unrecorded_SNPs)) {
           Base.pairs.index <- which(clumped_SNPs$SNP == SNPs.to.include[unrecorded_SNPs[f]])
           new.row <- list(chromosome.number, 
-                          SNPs.to.include[unrecorded_SNPs[f]], 
-                          clumped_SNPs$BP[Base.pairs.index], 
-                          clumped_SNPs$P[Base.pairs.index], 
-                          MAGMA.gene.regions.for.chromosome$Gene_symbol[Gene.names.for.table],
-                          MAGMA.gene.regions.for.chromosome$BP_1[Gene.names.for.table],
-                          MAGMA.gene.regions.for.chromosome$BP_2[Gene.names.for.table],
-                          gene.to.include)
+                          SNPs.to.include[unrecorded_SNPs[f]],
+                          clumped_SNPs$GD[Base.pairs.index],
+                          clumped_SNPs$BP[Base.pairs.index],
+                          clumped_SNPs$A1[Base.pairs.index],
+                          clumped_SNPs$A2[Base.pairs.index],
+                          MAGMA.gene.regions.for.chromosome$GENE_NAME[Gene.names.for.table],
+                          gene.to.include,
+                          MAGMA.gene.regions.for.chromosome$BP_start_extended[Gene.names.for.table],
+                          MAGMA.gene.regions.for.chromosome$BP_end_extended[Gene.names.for.table]
+                          )
           Gene_clumped_SNPs <- rbindlist(list(Gene_clumped_SNPs,new.row))
         }
       } #name of gene not in list then add row of SNPs with gene identifier to the table()
@@ -174,8 +177,10 @@ for (i in 1:length(useful_pathways)) {
   assign(useful_pathways[i], subset(pathway_sets, Pathway == useful_pathways[i]), envir = .GlobalEnv)
 } 
 
-MAGMA.gene.regions <- fread("NCBI37.3.gene.loc",colClasses = c("numeric","character",rep("numeric",2),rep("character",2)))
+MAGMA.gene.regions <- fread("./output/NCBI37.3.gene.loc",colClasses = c("numeric","character",rep("numeric",2),rep("character",2)))
 setnames(MAGMA.gene.regions, c("Gene","CHR","BP_START","BP_END","STRAND","GENE_NAME"))
+## read in MAGMA's the gene regions 
+
 
 for (i in 1:length(useful_pathways)) {
   assign(paste0("merged",useful_pathways[i]), merge(eval(parse(text = paste0("`",useful_pathways[i],"`"))), MAGMA.gene.regions, by = "Gene", all = F, sort = F), envir = .GlobalEnv)
@@ -188,13 +193,42 @@ for (i in 1:length(useful_pathways)) {
   setkey(current_table_name, CHR)
   current_table_name <- current_table_name[!"X"]
   assign(paste0("Gene_regions_all_",useful_pathways[i]), current_table_name, envir = .GlobalEnv)
-  
+
 for (l in 1:22){
-  selecting_chromosomes <- fread(paste0(fpath,"Dropbox/testing_PRS_chromosome_22/output/CLOZUK_GWAS_BGE_chr22_magma_input.bim"))
+
+  selecting_chromosomes <- fread(paste0(fpath,"Documents/testing_PRS_chromosome_22/test_chr5/output/CLOZUK_GWAS_BGE_chr",l,"_magma_input.bim"))
   names(selecting_chromosomes) <- c("CHR", "SNP", "GD", "BP", "A1", "A2")
   temp_pathway_table <- current_table_name[CHR == l]
   selecting_chromosomes_BP <- selecting_chromosomes$BP
   Assigning_genes(pathway_input = temp_pathway_table, clumped_SNPs = selecting_chromosomes, BP.clumped.SNPs = selecting_chromosomes_BP, outputfilename = "testing_gene_output", chromosome.number = l, gene.regions = "extended")
+
+  
+
+# read in MAGMA's input and add any genes which happen to be inside other genes or crossed over with other genes
+GENES_to_snps <- scan(file = paste0("./output/",l,"_CLOZUK_PGC_SNPs_",useful_pathways[i],"pathway.genes.annot"), what = "", sep = "\n")
+y <- strsplit(GENES_to_snps, "[[:space:]]+")
+names(y) <- sapply(y, '[[', 1)
+y <- lapply(y, '[', -1)
+
+y[[1]] <- NULL
+y[[1]] <- NULL
+
+adding_unread_genes(Gene_clumped_SNPs = e$Expanded_Gene_clumped_SNPs, MAGMA.gene.regions.for.chromosome = temp_pathway_table, clumped_SNPs = selecting_chromosomes, y = y, chromosome.number = l, pathway = useful_pathways[i])  
+SNPs_for_clumping <- paste0("chromosome_",l,"_", useful_pathways[i],"SNPs_for_clumping")
+assign(SNPs_for_clumping, unique(test_data_frame$SNP), envir = .GlobalEnv)
+write.table(test_data_frame,file = paste0("./output/",useful_pathways[i],"_chromosome_",l,"_extended_data_table.txt"),quote = F, row.names = F)
+write(eval(parse(text = SNPs_for_clumping)), file = paste0("./output/chromosome_",l,"_", useful_pathways[i],"SNPs_for_clumping.txt"))
 }
-}  
-selecting_chromosomes <- fread(paste0(fpath,"Dropbox/testing_PRS_chromosome_22/output/CLOZUK_GWAS_BGE_chr22_magma_input.bim"))
+}
+
+
+
+names(test_data_frame) <- c("CHR" ,"SNP", "BP", "P", "Gene_name","BP_START","BP_END","GENE")
+setcolorder(test_data_frame, c("CHR","SNP","BP","GENE","BP_START","BP_END","P","Gene_name"))
+
+which(duplicated(test_data_frame$SNP,fromLast = T))
+
+write.table(test_data_frame[, c(1:6), with = F],file = paste0("./output/MAGMA_Gene_regions_for_python_script_chr_",chromosome.number,".txt"), quote = F, row.names = F)
+write(unique(test_data_frame$Gene_name),file = paste0("./output/PGC_CLOZUK_unique_genes_chr_",chromosome.number,".txt"))
+
+
