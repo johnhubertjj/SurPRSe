@@ -214,10 +214,12 @@ y[[1]] <- NULL
 y[[1]] <- NULL
 
 adding_unread_genes(Gene_clumped_SNPs = e$Expanded_Gene_clumped_SNPs, MAGMA.gene.regions.for.chromosome = temp_pathway_table, clumped_SNPs = selecting_chromosomes, y = y, chromosome.number = l, pathway = useful_pathways[i])  
-SNPs_for_clumping <- paste0("chromosome_",l,"_", useful_pathways[i],"SNPs_for_clumping")
+SNPs_for_clumping <- paste0("chromosome_",l,"_",useful_pathways[i],"SNPs_for_clumping")
 assign(SNPs_for_clumping, unique(test_data_frame$SNP), envir = .GlobalEnv)
 write.table(test_data_frame,file = paste0("./output/",useful_pathways[i],"_chromosome_",l,"_extended_data_table.txt"),quote = F, row.names = F)
+SNPs_for_clumping <- paste0("`","chromosome_",l,"_",useful_pathways[i],"SNPs_for_clumping","`")
 write(eval(parse(text = SNPs_for_clumping)), file = paste0("./output/chromosome_",l,"_", useful_pathways[i],"SNPs_for_clumping.txt"))
+rm(list = paste0("chromosome_",l,"_", useful_pathways[i],"SNPs_for_clumping"))
 }
 }
 
