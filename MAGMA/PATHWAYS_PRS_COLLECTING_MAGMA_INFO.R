@@ -4,6 +4,7 @@ library(data.table)
 e <- new.env()
 
 ### Function which assigns genes to the SNP data ####
+### Currently designed for the input from bim files ###
 Assigning_genes <- function(pathway_input, BP.clumped.SNPs, clumped_SNPs, outputfilename, gene.regions = c("normal", "extended"),chromosome.number = l){
   GR <- deparse(substitute(pathway_input))
   
@@ -107,16 +108,25 @@ Assigning_genes <- function(pathway_input, BP.clumped.SNPs, clumped_SNPs, output
 }
 
 ### Function which adds duplicate SNPs which happen to be inside other genes
+### Currently designed for extended gene regions ONLY
+### requires the run of gene.out R script to obtain the specific gene.annot file for each pathway and chromosome
 adding_unread_genes <- function(Gene_clumped_SNPs, MAGMA.gene.regions.for.chromosome, clumped_SNPs, y, chromosome.number, pathway){
+  # y is the input gene list from MAGMA
+  # Gene_clumped_SNPs is the updated bim table from the initial assignment of SNPs
   for (i in 1:length(y)) {
+    # check whether the gene exists in the updated Gene_clumped_SNPs file
+    # If it does not, this means that there is a gene inside a gene or the SNPs were only found inside one of the genes 
     index_of_gene <- which(Gene_clumped_SNPs$Gene == names(y[i]))
     if (length(index_of_gene) == 0){
       gene.to.include <- names(y[i])
+      # the first elemnt of y[[i]] is the bp start and end so need to take it into account when finding the SNP in question
       SNPs.to.include <- y[[i]][2:length(y[[i]])]
       
       Gene.names.for.table <- which(gene.to.include == MAGMA.gene.regions.for.chromosome$Gene)
       for (f in 1:length(SNPs.to.include)) {
+        # clumped_SNPS is the original unaltered Bim file for each chromosome and pathway
         Base.pairs.index <- which(clumped_SNPs$SNP == SNPs.to.include[f])
+        # add a new row corresponding to the Gene_clumped_SNPs format
         new.row <- list(chromosome.number, 
                         SNPs.to.include[f], 
                         clumped_SNPs$GD[Base.pairs.index],
@@ -130,9 +140,10 @@ adding_unread_genes <- function(Gene_clumped_SNPs, MAGMA.gene.regions.for.chromo
         Gene_clumped_SNPs <- rbindlist(list(Gene_clumped_SNPs,new.row))
       }
     }else{
+      # check if some SNPs are missing
       gene.names.in.y <- Gene_clumped_SNPs[index_of_gene]
       unrecorded_SNPs <- which(!y[[i]][2:length(y[[i]])] %in% gene.names.in.y$SNP)
-      
+      # if they are, identify them and do the same for if the gene was missing
       if (length(unrecorded_SNPs) != 0 ) {
         
         gene.to.include <- names(y[i])
@@ -164,38 +175,49 @@ adding_unread_genes <- function(Gene_clumped_SNPs, MAGMA.gene.regions.for.chromo
 system_information<-Sys.info()
 
 if (system_information[1] == "Windows") fpath <-  "/Users/JJ/" else fpath <-"/Users/johnhubert/"
-#####
+
+##### read in pathway sets from Antonio
 pathway_sets <- fread(paste0(fpath,"Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Pocklington2015_134sets_LoFi.txt"))
 pathway_sets2 <- fread(paste0(fpath, "Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/GeneWide_BGS_strength.txt"))
+
+# input the name of the pathways from the orignal file
 useful_pathways <- c("FMRP_targets", "abnormal_behavior", "abnormal_nervous_system_electrophysiology", "abnormal_learning|memory|conditioning", "abnormal_CNS_synaptic_transmission", "Cav2_channels", "abnormal_synaptic_transmission", "5HT_2C", "abnormal_long_term_potentiation", "abnormal_motor_capabilities|coordination|movement", "abnormal_behavioral_response_to_xenobiotic", "abnormal_associative_learning", "Lek2015_LoFintolerant_90", "BGS_top2_mean", "BGS_top2_max")
 setnames(pathway_sets, c("V1", "V2"), c("Pathway", "Gene"))
 setnames(pathway_sets2, c("V1", "V2"), c("Pathway", "Gene"))
+
+# merge the two input pathway files together
 pathway_sets <- merge(pathway_sets, pathway_sets2, by = c("Pathway","Gene"), all = T)
+# set the key to the pathway name
 setkey(pathway_sets, Pathway)
 
+# assign an individual table for each pathway
 for (i in 1:length(useful_pathways)) {
   assign(useful_pathways[i], subset(pathway_sets, Pathway == useful_pathways[i]), envir = .GlobalEnv)
 } 
 
+#read in general MAGMA annotation file
 MAGMA.gene.regions <- fread("./output/NCBI37.3.gene.loc",colClasses = c("numeric","character",rep("numeric",2),rep("character",2)))
 setnames(MAGMA.gene.regions, c("Gene","CHR","BP_START","BP_END","STRAND","GENE_NAME"))
-## read in MAGMA's the gene regions 
 
 
+# loop through both chromosomes and pathway tables
 for (i in 1:length(useful_pathways)) {
+  # merge the original MAGMA annotation file and the pathway file in order to get extra info including BP extensions for regulatory regions 
   assign(paste0("merged",useful_pathways[i]), merge(eval(parse(text = paste0("`",useful_pathways[i],"`"))), MAGMA.gene.regions, by = "Gene", all = F, sort = F), envir = .GlobalEnv)
   setkey(eval(parse(text = paste0("`","merged",useful_pathways[i],"`"))),STRAND) 
   current_table_name <- eval(parse(text = paste0("`","merged",useful_pathways[i],"`")))
+  # equivalent to MAGMAs window option without ignoring strand
   current_table_name <- current_table_name[STRAND == "+",BP_start_extended := BP_START - 35000]
   current_table_name <- current_table_name[STRAND == "+",BP_end_extended := BP_END + 10000]
   current_table_name <- current_table_name[STRAND == "-",BP_start_extended := BP_START - 10000]
   current_table_name <- current_table_name[STRAND == "-",BP_end_extended := BP_END + 35000]
+  # setkey to the chromosome and remove all SNPs in the X chromosome to save time
   setkey(current_table_name, CHR)
   current_table_name <- current_table_name[!"X"]
   assign(paste0("Gene_regions_all_",useful_pathways[i]), current_table_name, envir = .GlobalEnv)
-
+# Now start on the chromosomes
 for (l in 1:22){
-
+  
   selecting_chromosomes <- fread(paste0(fpath,"Documents/testing_PRS_chromosome_22/test_chr5/output/CLOZUK_GWAS_BGE_chr",l,"_magma_input.bim"))
   names(selecting_chromosomes) <- c("CHR", "SNP", "GD", "BP", "A1", "A2")
   temp_pathway_table <- current_table_name[CHR == l]
