@@ -162,7 +162,7 @@ adding_unread_genes <- function(Gene_clumped_SNPs, MAGMA.gene.regions.for.chromo
                           gene.to.include,
                           MAGMA.gene.regions.for.chromosome$BP_start_extended[Gene.names.for.table],
                           MAGMA.gene.regions.for.chromosome$BP_end_extended[Gene.names.for.table]
-                          )
+          )
           Gene_clumped_SNPs <- rbindlist(list(Gene_clumped_SNPs,new.row))
         }
       } #name of gene not in list then add row of SNPs with gene identifier to the table()
@@ -215,32 +215,39 @@ for (i in 1:length(useful_pathways)) {
   setkey(current_table_name, CHR)
   current_table_name <- current_table_name[!"X"]
   assign(paste0("Gene_regions_all_",useful_pathways[i]), current_table_name, envir = .GlobalEnv)
-# Now start on the chromosomes
-for (l in 1:22){
-  
-  selecting_chromosomes <- fread(paste0(fpath,"Documents/testing_PRS_chromosome_22/test_chr5/output/CLOZUK_GWAS_BGE_chr",l,"_magma_input.bim"))
-  names(selecting_chromosomes) <- c("CHR", "SNP", "GD", "BP", "A1", "A2")
-  temp_pathway_table <- current_table_name[CHR == l]
-  selecting_chromosomes_BP <- selecting_chromosomes$BP
-  Assigning_genes(pathway_input = temp_pathway_table, clumped_SNPs = selecting_chromosomes, BP.clumped.SNPs = selecting_chromosomes_BP, outputfilename = "testing_gene_output", chromosome.number = l, gene.regions = "extended")
-
-  
-
-# read in MAGMA's input and add any genes which happen to be inside other genes or crossed over with other genes
-GENES_to_snps <- scan(file = paste0("./output/",l,"_CLOZUK_PGC_SNPs_",useful_pathways[i],"pathway.genes.annot"), what = "", sep = "\n")
-y <- strsplit(GENES_to_snps, "[[:space:]]+")
-names(y) <- sapply(y, '[[', 1)
-y <- lapply(y, '[', -1)
-
-y[[1]] <- NULL
-y[[1]] <- NULL
-
-adding_unread_genes(Gene_clumped_SNPs = e$Expanded_Gene_clumped_SNPs, MAGMA.gene.regions.for.chromosome = temp_pathway_table, clumped_SNPs = selecting_chromosomes, y = y, chromosome.number = l, pathway = useful_pathways[i])  
-SNPs_for_clumping <- paste0("chromosome_",l,"_", useful_pathways[i],"SNPs_for_clumping")
-assign(SNPs_for_clumping, unique(test_data_frame$SNP), envir = .GlobalEnv)
-write.table(test_data_frame,file = paste0("./output/",useful_pathways[i],"_chromosome_",l,"_extended_data_table.txt"),quote = F, row.names = F)
-write(eval(parse(text = SNPs_for_clumping)), file = paste0("./output/chromosome_",l,"_", useful_pathways[i],"SNPs_for_clumping.txt"))
-}
+  # Now start on the chromosomes
+  for (l in 1:22){
+    
+    selecting_chromosomes <- fread(paste0(fpath,"Documents/testing_PRS_chromosome_22/test_chr5/output/CLOZUK_GWAS_BGE_chr",l,"_magma_input.bim"))
+    names(selecting_chromosomes) <- c("CHR", "SNP", "GD", "BP", "A1", "A2")
+    temp_pathway_table <- current_table_name[CHR == l]
+    if(nrow(temp_pathway_table == 0)) {
+      message <- paste0("The number of SNPs for",useful_pathways[i],"on chromosome ",l,"is empty"
+      write(message, file = "Pathways_analysis_info.txt", append = T)
+      next()
+    }
+    selecting_chromosomes_BP <- selecting_chromosomes$BP
+    Assigning_genes(pathway_input = temp_pathway_table, clumped_SNPs = selecting_chromosomes, BP.clumped.SNPs = selecting_chromosomes_BP, outputfilename = "testing_gene_output", chromosome.number = l, gene.regions = "extended")
+    
+    
+    
+    # read in MAGMA's input and add any genes which happen to be inside other genes or crossed over with other genes
+    GENES_to_snps <- scan(file = paste0("./output/",l,"_CLOZUK_PGC_SNPs_",useful_pathways[i],"pathway.genes.annot"), what = "", sep = "\n")
+    y <- strsplit(GENES_to_snps, "[[:space:]]+")
+    names(y) <- sapply(y, '[[', 1)
+    y <- lapply(y, '[', -1)
+    
+    y[[1]] <- NULL
+    y[[1]] <- NULL
+    
+    adding_unread_genes(Gene_clumped_SNPs = e$Expanded_Gene_clumped_SNPs, MAGMA.gene.regions.for.chromosome = temp_pathway_table, clumped_SNPs = selecting_chromosomes, y = y, chromosome.number = l, pathway = useful_pathways[i])  
+    SNPs_for_clumping <- paste0("chromosome_",l,"_", useful_pathways[i],"SNPs_for_clumping")
+    assign(SNPs_for_clumping, unique(test_data_frame$SNP), envir = .GlobalEnv)
+    write.table(test_data_frame,file = paste0("./output/",useful_pathways[i],"_chromosome_",l,"_extended_data_table.txt"),quote = F, row.names = F)
+    SNPs_for_clumping <- paste0("`","chromosome_",l,"_",useful_pathways[i],"SNPs_for_clumping","`")
+    write(eval(parse(text = SNPs_for_clumping)), file = paste0("./output/chromosome_",l,"_", useful_pathways[i],"SNPs_for_clumping.txt"))
+    rm(list = paste0("chromosome_",l,"_", useful_pathways[i],"SNPs_for_clumping"))
+  }
 }
 
 
