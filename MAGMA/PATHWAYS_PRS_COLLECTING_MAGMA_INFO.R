@@ -191,7 +191,7 @@ pathway_sets <- merge(pathway_sets, pathway_sets2, by = c("Pathway","Gene"), all
 setkey(pathway_sets, Pathway)
 
 # assign an individual table for each pathway
-for (i in 1:length(useful_pathways)) {
+for (i in length(useful_pathways)) {
   assign(useful_pathways[i], subset(pathway_sets, Pathway == useful_pathways[i]), envir = .GlobalEnv)
 } 
 
@@ -221,8 +221,8 @@ for (i in 1:length(useful_pathways)) {
     selecting_chromosomes <- fread(paste0(fpath,"Documents/testing_PRS_chromosome_22/test_chr5/output/CLOZUK_GWAS_BGE_chr",l,"_magma_input.bim"))
     names(selecting_chromosomes) <- c("CHR", "SNP", "GD", "BP", "A1", "A2")
     temp_pathway_table <- current_table_name[CHR == l]
-    if(nrow(temp_pathway_table == 0)) {
-      message <- paste0("The number of SNPs for",useful_pathways[i],"on chromosome ",l,"is empty"
+    if(nrow(temp_pathway_table) == 0) {
+      message <- paste0("The number of SNPs for",useful_pathways[i],"on chromosome ",l,"is empty")
       write(message, file = "Pathways_analysis_info.txt", append = T)
       next()
     }
@@ -257,7 +257,7 @@ setcolorder(test_data_frame, c("CHR","SNP","BP","GENE","BP_START","BP_END","P","
 
 which(duplicated(test_data_frame$SNP,fromLast = T))
 
-write.table(test_data_frame[, c(1:6), with = F],file = paste0("./output/MAGMA_Gene_regions_for_python_script_chr_",chromosome.number,".txt"), quote = F, row.names = F)
+write.table(test_data_frame[, c(1:6), with = F], file = paste0("./output/MAGMA_Gene_regions_for_python_script_chr_",chromosome.number,".txt"), quote = F, row.names = F)
 write(unique(test_data_frame$Gene_name),file = paste0("./output/PGC_CLOZUK_unique_genes_chr_",chromosome.number,".txt"))
 
 
