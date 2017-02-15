@@ -41,7 +41,7 @@ fi
 
 
 
-plink --bfile ${pathways[${current_pathway_output}]}_Clumping_input --clump combined_PGC_table_with_CHR.POS_identifiers.txt --clump-p1 1 --clump-p2 1 --clump-r2 0.2 --out ${pathways[${current_pathway_output}]}_CLOZUK_PGC_pathways_r0.2_removed_AT_CG_1000kb
+plink --bfile ${pathways[${current_pathway_output}]}_Clumping_input --clump combined_PGC_table_with_CHR.POS_identifiers.txt --clump-p1 1 --clump-p2 1 --clump-r2 0.2 --clump-kb 1000 --out ${pathways[${current_pathway_output}]}_CLOZUK_PGC_pathways_r0.2_removed_AT_CG_1000kb
 
 # Clean up the files to leave a dataset that can be read into R/Python as well as a list of SNPs to extract for the CLUMPED plink files
 tr -s ' ' '\t' < ${pathways[${current_pathway_output}]}_CLOZUK_PGC_pathways_r0.2_removed_AT_CG_1000kb.clumped > pathways_CLOZUK_PGC_CLUMPED_${pathways[${current_pathway_output}]}.txt
