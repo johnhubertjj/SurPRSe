@@ -6,7 +6,7 @@ setwd("~/Documents/testing_PRS_chromosome_22/test_chr5/output/")
 
 library("data.table")
 #SCORING#
-Useful_pathways <- c("FMRP_targets", "abnormal_behavior", "abnormal_nervous_system_electrophysiology", "abnormal_learning|memory|conditioning", "abnormal_CNS_synaptic_transmission", "Cav2_channels", "abnormal_synaptic_transmission", "5HT_2C", "abnormal_long_term_potentiation", "abnormal_motor_capabilities|coordination|movement", "abnormal_behavioral_response_to_xenobiotic", "abnormal_associative_learning", "Lek2015_LoFintolerant_90", "BGS_top2_mean", "BGS_top2_max")
+Useful_pathways <- c("FMRP_targets", "abnormal_behavior", "abnormal_nervous_system_electrophysiology", "abnormal_learning_memory_conditioning", "abnormal_CNS_synaptic_transmission", "Cav2_channels", "abnormal_synaptic_transmission", "5HT_2C", "abnormal_long_term_potentiation", "abnormal_motor_capabilities_coordination_movement", "abnormal_behavioral_response_to_xenobiotic", "abnormal_associative_learning", "Lek2015_LoFintolerant_90", "BGS_top2_mean", "BGS_top2_max")
 PGC_final <- fread("combined_PGC_table_with_CHR.POS_identifiers.txt")
 p.value.thresholds <- c(0.05,1)
 
@@ -41,8 +41,20 @@ for (w in 1:length(p.value.thresholds)) {
       a <- a[SNPs, .(SNP,A1.y,BETA)]
       
       filename <- paste0(Useful_pathways[i],'/score/', Useful_pathways[i],'_with_', p.value.thresholds[w],".score")
-      
       write.table(file = filename, a, row.names = F, col.names = F, quote = F, sep="\t")
+
+#      if (Useful_pathways[i] == "abnormal_learning|memory|conditioning" | Useful_pathways[i] == "abnormal_motor_capabilities|coordination|movement") {
+#        Useful_pathways[i] <- "abnormal_learning\\|memory\\|conditioning"
+#        filename <- paste0(Useful_pathways[i],'/score/', Useful_pathways[i],'_with_', p.value.thresholds[w],".score")
+#        path_to_pathway_plink_file <- paste0(Useful_pathways[i],"/pathways_CLOZUK_GWAS_BGE_CLUMPED_",Useful_pathways[i])                         
+#        }
+      
+#      if (Useful_pathways[i] == "abnormal_motor_capabilities|coordination|movement") {
+#        Useful_pathways[i] <-"abnormal_learning_motor_capabilities\|coordination\|movement"
+#        filename <- paste0(Useful_pathways[i],'/score/', Useful_pathways[i],'_with_', p.value.thresholds[w],".score")
+#        path_to_pathway_plink_file <- paste0(Useful_pathways[i],"/pathways_CLOZUK_GWAS_BGE_CLUMPED_",Useful_pathways[i])                         
+#        
+#      }
 
       command <- paste0('/Users/johnhubert/Documents/plink_mac//plink --bfile ',path_to_pathway_plink_file, ' --score ', filename, " --out ", path_to_pathway_plink_file, "_", p.value.thresholds[w])
       system(command)
