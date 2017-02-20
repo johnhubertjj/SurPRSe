@@ -282,7 +282,11 @@ if (length(checking.duplications.CZK) != 0 & length(checking.duplications.PGC) !
 }
 
 ## Altering data tables to fit previous input files ##
+<<<<<<< HEAD
 PGC.data.frame <- PGC.data.frame[, OR := NULL]
+=======
+PGC.data.frame <- PGC.data.frame[,-"OR",with = F]
+>>>>>>> f1453e0ee59bc2ed7d1165fcb816ea27845efcb2
 namesPGC <- names(PGC.data.frame)
 namesPGC <- namesPGC[c(1:8,17,9:16)]
 PGC.data.frame <- PGC.data.frame[, namesPGC, with = F]
