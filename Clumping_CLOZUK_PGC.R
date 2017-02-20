@@ -32,15 +32,9 @@ library(data.table)
 ### Read in updated_raw data
 setwd(".")
 getwd()
-<<<<<<< HEAD
 PGC <- fread(paste0("./output/PGC_table",chromosome.number,"_new.txt"))
 CLOZUK.data <- fread(paste0("./output/CLOZUK_GWAS_BGE_chr",chromosome.number,"_2.bim"))
 Common_SNPs <- scan(paste0("./output/chr",chromosome.number,"PGC_CLOZUK_common_SNPs.txt"), what = "numeric")
-=======
-PGC <- fread(paste0("PGC_table",chromosome.number,"_new.txt"))
-CLOZUK.data <- fread(paste0("./output/CLOZUK_GWAS_BGE_chr",chromosome.number,"_2.bim"))
-Common_SNPs <- scan(paste0("chr",chromosome.number,"PGC_CLOZUK_common_SNPs.txt"), what = "numeric")
->>>>>>> f1453e0ee59bc2ed7d1165fcb816ea27845efcb2
 
 ### Check for duplicated SNPs.PGC
 PGCa <- which(duplicated(PGC$SNP))
@@ -67,8 +61,4 @@ write(extract_SNPs,file = paste0("./output/extracted_Duplicate_snps_chr",chromos
 which(removed_SNPs %in% Common_SNPs)
 
 #End Timer
-<<<<<<< HEAD
 proc.time() - ptm
-=======
-proc.time() - ptm
->>>>>>> f1453e0ee59bc2ed7d1165fcb816ea27845efcb2

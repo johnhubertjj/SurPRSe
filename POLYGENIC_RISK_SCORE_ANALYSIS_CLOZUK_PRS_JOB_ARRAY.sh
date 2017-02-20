@@ -1,58 +1,35 @@
 #!/bin/bash
 
-<<<<<<< HEAD
 #PBS -q batch_long
 #PBS -P PR54
 #PBS -l select=1:ncpus=1:mem=10GB
 #PBS -l walltime=10:00:00
-=======
-#PBS -q batch-long
-#PBS -P PR54
-#PBS -l select=1:ncpus=10:mem=50GB
-#PBS -l walltime 10:00:00
->>>>>>> f1453e0ee59bc2ed7d1165fcb816ea27845efcb2
 #PBS -o /home/c1020109/
 #PBS -e /home/c1020109/
 #PBS -j oe
 #PBS -J 21-22:2
-<<<<<<< HEAD
-#PBS -N c1020109_job_array_whole_genome
-
-=======
 #PBS -N c1020109_job_array
 
 echo "Press CTRL+C to proceed."
 trap "pkill -f 'sleep 1h'" INT
 trap "set +x ; sleep 1h ; set -x" DEBUG
->>>>>>> f1453e0ee59bc2ed7d1165fcb816ea27845efcb2
 
 # Run locally or on ARCCA
 whereami=$(uname -n)
 echo "$whereami"
-<<<<<<< HEAD
 if [[ "$whereami" == *"raven"* ]]; then
-=======
-if [ "$whereami" == "raven13" ]; then
->>>>>>> f1453e0ee59bc2ed7d1165fcb816ea27845efcb2
   cd $PBS_O_WORKDIR
   path_to_scripts='~/c1020109/PRS_scripts/'
 
   # Load both Plink and R
   module purge
   module load R/3.3.0
-<<<<<<< HEAD
   module load plink/1.9c3
-=======
-  module load plink/1.9a
->>>>>>> f1453e0ee59bc2ed7d1165fcb816ea27845efcb2
   module load python/2.7.9-mpi
 
   # assign a new variable for the PBS_ARRAY_variable
   chromosome_number=${PBS_ARRAY_INDEX}
-<<<<<<< HEAD
 
-=======
->>>>>>> f1453e0ee59bc2ed7d1165fcb816ea27845efcb2
 elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   cd ~/Documents/testing_PRS_chromosome_22/
   path_to_scripts='/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/'
