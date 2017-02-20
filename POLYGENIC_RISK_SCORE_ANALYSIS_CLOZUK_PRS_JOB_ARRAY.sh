@@ -1,14 +1,14 @@
 #!/bin/bash
 
-#PBS -q batch-long
+#PBS -q batch_long
 #PBS -P PR54
-#PBS -l select=1:ncpus=10:mem=50GB
+#PBS -l select=1:ncpus=2:mem=20GB
 #PBS -l walltime 10:00:00
 #PBS -o /home/c1020109/
 #PBS -e /home/c1020109/
 #PBS -j oe
 #PBS -J 21-22:2
-#PBS -N c1020109_job_array
+#PBS -N c1020109_job_array_whole_genome
 
 echo "Press CTRL+C to proceed."
 trap "pkill -f 'sleep 1h'" INT
@@ -17,18 +17,19 @@ trap "set +x ; sleep 1h ; set -x" DEBUG
 # Run locally or on ARCCA
 whereami=$(uname -n)
 echo "$whereami"
-if [ "$whereami" == "raven13" ]; then
+if [[ "$whereami" == *"raven"* ]]; then
   cd $PBS_O_WORKDIR
   path_to_scripts='~/c1020109/PRS_scripts/'
 
   # Load both Plink and R
   module purge
   module load R/3.3.0
-  module load plink/1.9a
+  module load plink/1.9c3
   module load python/2.7.9-mpi
 
   # assign a new variable for the PBS_ARRAY_variable
   chromosome_number=${PBS_ARRAY_INDEX}
+
 elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   cd ~/Documents/testing_PRS_chromosome_22/
   path_to_scripts='/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/'
