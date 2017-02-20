@@ -7,11 +7,7 @@
 #PBS -o /home/c1020109/
 #PBS -e /home/c1020109/
 #PBS -j oe
-<<<<<<< HEAD
-#PBS -J 1-15
-=======
-#PBS -J 21-22:2
->>>>>>> f1453e0ee59bc2ed7d1165fcb816ea27845efcb2
+#PBS -J 8-9:2
 #PBS -N c1020109_job_array_pathways
 
 # Run locally or on ARCCA
@@ -21,13 +17,7 @@ if [[ "$whereami" == *"raven"* ]]; then
   path_to_scripts='/home/c1020109/PRS_scripts/'
   # Load both Plink and R
   module purge
-<<<<<<< HEAD
   module load plink/1.9c3
-=======
-  module load R/3.1.0
-  module load plink/1.9c3
-  module load python/2.7.9-mpi
->>>>>>> f1453e0ee59bc2ed7d1165fcb816ea27845efcb2
 
   # assign a new variable for the PBS_ARRAY_variable
   chromosome_number=${PBS_ARRAY_INDEX}
@@ -37,13 +27,9 @@ if [[ "$whereami" == *"raven"* ]]; then
   num1=1
   current_pathway_output=`echo "$((${chromosome_number} - ${num1}))"`
 
-<<<<<<< HEAD
   WDPATH=/scratch/$USER/PR54/PGC_CLOZUK_PRS/PRS_CLOZUK_PGC/pathways_PRS_Antonio_paper/${pathways[${current_pathway_output}]}/
   PATH_for_PGC=/scratch/$USER/PR54/PGC_CLOZUK_PRS/PRS_CLOZUK_PGC/
-=======
-  WDPATH=/scratch/$USER/PR54/PGC_CLOZUK_PRS/PRS_CLOZUK_PGC/pathways_PRS_Antonio_paper/output/${pathways[${current_pathway_output}]}/
   
->>>>>>> f1453e0ee59bc2ed7d1165fcb816ea27845efcb2
   cd $WDPATH
 
 elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
@@ -54,11 +40,7 @@ fi
 
 
 
-<<<<<<< HEAD
 plink --bfile ${pathways[${current_pathway_output}]}_Clumping_input --clump ${PATH_for_PGC}combined_PGC_table_with_CHR.POS_identifiers.txt --clump-p1 1 --clump-p2 1 --clump-r2 0.2 --clump-kb 1000 --out ${pathways[${current_pathway_output}]}_CLOZUK_PGC_pathways_r0.2_removed_AT_CG_1000kb
-=======
-plink --bfile ${pathways[${current_pathway_output}]}_Clumping_input --clump combined_PGC_table_with_CHR.POS_identifiers.txt --clump-p1 1 --clump-p2 1 --clump-r2 0.2 --clump-kb 1000 --out ${pathways[${current_pathway_output}]}_CLOZUK_PGC_pathways_r0.2_removed_AT_CG_1000kb
->>>>>>> f1453e0ee59bc2ed7d1165fcb816ea27845efcb2
 
 # Clean up the files to leave a dataset that can be read into R/Python as well as a list of SNPs to extract for the CLUMPED plink files
 tr -s ' ' '\t' < ${pathways[${current_pathway_output}]}_CLOZUK_PGC_pathways_r0.2_removed_AT_CG_1000kb.clumped > pathways_CLOZUK_PGC_CLUMPED_${pathways[${current_pathway_output}]}.txt
