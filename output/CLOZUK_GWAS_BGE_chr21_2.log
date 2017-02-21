@@ -1,0 +1,11 @@
+PLINK v1.90b3c 64-bit (2 Feb 2015) 
+7 arguments: --bfile CLOZUK_GWAS_BGE_chr21 --make-bed --out ./output/CLOZUK_GWAS_BGE_chr21_2 --update-name CLOZUK_chr21_chr.pos.txt
+Hostname: raven36
+Working directory: /home/c1020109/PRS_scripts
+Start time: Thu Feb 16 13:32:33 2017
+
+Random number seed: 1487251953
+48258 MB RAM detected; reserving 24129 MB for main workspace.
+Error: Failed to open CLOZUK_GWAS_BGE_chr21.bed.
+
+End time: Thu Feb 16 13:32:33 2017
