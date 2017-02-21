@@ -19,6 +19,7 @@ for chromosome_number in `seq 1 ${length_of_array}` ;
 printf "${input_file_name}_${number_of_files[chromosome_number]}\n%.0s" {1} >> ./output/CLOZUK_PGC_FULL_GENOME_MAKE_LIST_INPUT.txt
 done
 
+# merge all the clumped chromosomes together
 plink --merge-list ./output/CLOZUK_PGC_FULL_GENOME_MAKE_LIST.txt --make-bed --out ./output/CLOZUK_PGC_FULL_GENOME
  
 # recode genotypes for input into Python
