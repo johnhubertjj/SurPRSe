@@ -18,8 +18,9 @@ trap "set +x ; sleep 1h ; set -x" DEBUG
 whereami=$(uname -n)
 echo "$whereami"
 if [[ "$whereami" == *"raven"* ]]; then
-  cd $PBS_O_WORKDIR
-  path_to_scripts='~/c1020109/PRS_scripts/'
+  WDPATH=/scratch/$USER/PR54/PGC_CLOZUK_PRS/PRS_CLOZUK_PGC
+  cd $WDPATH
+  path_to_scripts='/home/c1020109/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/'
 
   # Load both Plink and R
   module purge
@@ -37,7 +38,10 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
 fi
 
 ## rewrite so that the file input is an argument for the script instead, this will work for now
-if [ -f *.tar.gz ] && [ ! -f *.bim  ] && [ ! -f *.bed ] && [ !  -f *.fam ]; then
+shopt -s nullglob
+set -- *${chromosome_number}.tar.gz
+if [ "$#" -gt 0 ]; then
+
 # unpack the CLOZUK datasets
 tar -zxvf CLOZUK_GWAS_BGE_chr${chromosome_number}.tar.gz
 fi
@@ -56,7 +60,7 @@ fi
 R CMD BATCH ${path_to_scripts}CLOZUK_PGC_COMBINE_final.R ./extrainfo/CLOZUK_PGC_COMBINE_chr${chromosome_number}.Rout
  
 # using plink to change the names to a CHR.POS identifier and remaking the files
-plink --bfile CLOZUK_GWAS_BGE_chr${chromosome_number} --update-name CLOZUK_chr${chromosome_number}_chr.pos.txt --make-bed --out ./output/CLOZUK_GWAS_BGE_chr${chromosome_number}_2
+plink --bfile CLOZUK_GWAS_BGE_chr${chromosome_number} --update-name ./output/CLOZUK_chr${chromosome_number}_chr.pos.txt --make-bed --out ./output/CLOZUK_GWAS_BGE_chr${chromosome_number}_2
 
 # re-package the original files
 # tar -czvf CLOZUK_GWAS_BGE_chr${chromosome_number}.tar.gz CLOZUK_GWAS_BGE_chr${chromosome_number}.bed CLOZUK_GWAS_BGE_chr${chromosome_number}.bim CLOZUK_GWAS_BGE_chr${chromosome_number}.fam
