@@ -24,7 +24,7 @@ for (l in 1:length(Useful_pathways)){
     
     
     # read in profiles
-    PRS.profiles <-fread(paste0(Useful_pathways[l],"/pathways_CLOZUK_GWAS_BGE_CLUMPED_",Useful_pathways[l],"_",sig[i],".profile"))
+    PRS.profiles <-fread(paste0(Useful_pathways[l],"/pathways_CLOZUK_GWAS_BGE_CLUMPED_",Useful_pathways[l],"_",sig[i],"_removing_SE_equaltoandmorethan_five.profile"))
     PRS.profiles2 <- merge(PRS.profiles,fam2,by="FID")
     PRS.Profiles.with.covariates <- merge(covariates,PRS.profiles2,by.x="FID", by.y="FID", all = F)
     #PRS.Profiles.with.covariates_new_fam <- merge(PRS.Profiles.with.covariates, fam2, by.x = "FID", by.y = "FID", all = F)
@@ -54,10 +54,9 @@ for (l in 1:length(Useful_pathways)){
 
 write.table(file=fout, res, col.names=T, row.names=F, quote=F, sep="\t")
 x2 <- x
-x2[,1:12] <- format.pval(x[,2],digits = 3,eps = 1e-80)
-x2[,1] <- format.pval(x[,1],digits = 3)
+x2[,1:12] <- format.pval(x[,1:12],digits = 3,eps = 1e-200)
 
-write.csv(x3, file = "/Users/johnhubert/Dropbox/Pathway_analysis_background_selection_range.csv")
+write.csv(x2, file = "/Users/johnhubert/Dropbox/Pathway_analysis_background_selection_range_withoutSNPSwithSE=>5_after_clumping.csv")
 
 
 library(reshape2)
