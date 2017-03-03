@@ -27,22 +27,25 @@ change.odds <- function (odds.ratios) {
 # COMBINING CLOZUK AND PGC SNPS #
 #################################
 
-# Preparing to run in Job array
-AI <- Sys.getenv("PBS_ARRAY_INDEX")
-chromosome.number <- as.numeric(AI)
+# Preparing to run in local
+chromosome.number <- 22
+system_information<-Sys.info()
+if (system_information[1] == "Windows") fpath <-  "/Users/JJ/Dropbox/" else fpath <-"/Users/johnhubert/Dropbox/"
 
 # load libraries
 library(data.table)
 
 # Set Working directory
-setwd(".")
+setwd(paste0(fpath,"PGC_CLOZUK_GWAS_INPUT/"))
 
 ### Adding in PGC data ###
 PGC.test.data.frame <- fread(paste0("gzip -dc PGC_table",chromosome.number,".txt.gz"))
+cat("Chr:",chromosome.number, nrow(PGC.test.data.frame))
 
 ### Read in the CLOZUK data ###
 untar(paste0("CLOZUK_GWAS_BGE_chr",chromosome.number,".tar.gz"),files = paste0("CLOZUK_GWAS_BGE_chr",chromosome.number,".bim"))
 CLOZUK.data <- fread(paste0("CLOZUK_GWAS_BGE_chr",chromosome.number,".bim"))
+cat("Chr:",chromosome.number, nrow(CLOZUK.data))
 
 ### Replace the column names ###
 setnames(CLOZUK.data, c("CHR","SNP","GENEDIST","BP","A1","A2"))
