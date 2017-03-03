@@ -17,7 +17,6 @@ Type 'demo()' for some demos, 'help()' for on-line help, or
 'help.start()' for an HTML browser interface to help.
 Type 'q()' to quit R.
 
-> ### Summary Stat Annotation Filter ###
 > 
 > args=(commandArgs(trailingOnly = T))
 > 
@@ -28,8 +27,6 @@ Type 'q()' to quit R.
 +     eval(parse(text=args[[i]]))
 +   }
 + }
->   print(a)
-[1] "PGC"
-> }
-Error: unexpected '}' in "}"
+Error in eval(expr, envir, enclos) : object 'PGC' not found
+Calls: eval -> eval
 Execution halted
