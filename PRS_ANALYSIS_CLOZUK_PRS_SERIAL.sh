@@ -10,6 +10,9 @@
 #PBS -J 21-22:2
 #PBS -N c1020109_job_array_whole_genome
 
+echo "Press CTRL+C to proceed."
+trap "pkill -f 'sleep 1h'" INT
+trap "set +x ; sleep 1h ; set -x" DEBUG
 
 # Run locally or on ARCCA
 whereami=$(uname -n)
@@ -19,22 +22,27 @@ if [[ "$whereami" == *"raven"* ]]; then
   path_to_scripts="~/c1020109/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/"
   path_to_PGC_conversion="~/c1020109/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Summary_stat_manipulation"
   path_to_CLOZUK_conversion="~/c1020109/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Genotype_dataset_manipulation"
-  number_of_files=($(find -E . -type f -regex '^./output/CLOZUK_GWAS_BGE_CLUMPED_chr[0-9]+.bed' -exec basename {} \;))	
 # Load both Plink and R
   module purge
   module load R/3.3.0
   module load plink/1.9c3
   module load python/2.7.9-mpi
 
+# assign a new variable for the PBS_ARRAY_variable
+  chromosome_number=${PBS_ARRAY_INDEX}
 
 elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
-  cd ~/Documents/testing_PRS_chromosome_22/whole_genome_testing/
+  cd ~/Documents/testing_PRS_chromosome_22/
   path_to_scripts='/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/'
-  number_of_files=($(find -E . -type f -regex '^./output/CLOZUK_GWAS_BGE_CLUMPED_chr[0-9]+.bed' -exec basename {} \;))  
-  path_to_PGC_conversion="/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Summary_stat_manipulation"
-  path_to_CLOZUK_conversion="/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Genotype_dataset_manipulation"
+  chromosome_number=22
 fi
 
+input_file_name="./output/CLOZUK_GWAS_BGE_CLUMPED_chr"
+
+# List the number of files matching the output from the previous Job array script "POLYGENIC_RISK_SCORE*.sh"
+shopt -s nullglob
+number_of_files=(*${input_file_name}*)
+shopt -u nullglob # Turn off nullglob to make sure it doesn't interfere with anything later
 
 # Find the length of the array containing the names of the files
 # Note double-quotes to avoid extra parsing of funny characters in filenames
@@ -42,30 +50,19 @@ echo "${number_of_files[@]}"
 length_of_array=`echo "${#number_of_files[@]}"`
 
 # Check for make_list_file
-if [ -f ./output/CLOZUK_PGC_FULL_GENOME_MAKE_LIST_INPUT.txt ]; then
-  rm ./output/CLOZUK_PGC_FULL_GENOME_MAKE_LIST_INPUT.txt
+if [ -f ./output/CLOZUK_PGC_FULL_GENOME_MAKE_LIST.txt ]; then
+  rm ./${pathways[a]}/make_full_plink_${pathways[a]}.txt
 fi
 
 # Create Make-list file by repeating the name of each file on each line of the make-list text document
-# 1 line per name to prefix each .bin/.fam/.bed format
-num1=1
-length_of_array=`echo "$((${length_of_array} - ${num1}))"`
- 
-for chromosome_number in `seq 0 ${length_of_array}` ;
-do
-current_file=$(basename ${number_of_files[$chromosome_number]} .bed)
-printf "${current_file}\n%.0s" {1} >> ./output/CLOZUK_PGC_FULL_GENOME_MAKE_LIST_INPUT.txt
+# 1 line per name to prefix each .bin/.fam/.bed format 
+for chromosome_number in `seq 1 ${length_of_array}` ;
+printf "${input_file_name}_${number_of_files[chromosome_number]}\n%.0s" {1} >> ./output/CLOZUK_PGC_FULL_GENOME_MAKE_LIST_INPUT.txt
 done
 
-echo "Press CTRL+C to proceed."
-trap "pkill -f 'sleep 1h'" INT
-trap "set +x ; sleep 1h ; set -x" DEBUG
-
 # merge all the clumped chromosomes together
-cd ./output/
-plink --merge-list ./CLOZUK_PGC_FULL_GENOME_MAKE_LIST_INPUT.txt --make-bed --out ./CLOZUK_PGC_FULL_GENOME
-cd ..
-
+plink --merge-list ./output/CLOZUK_PGC_FULL_GENOME_MAKE_LIST.txt --make-bed --out ./output/CLOZUK_PGC_FULL_GENOME
+ 
 # merge all the PGC SNPs together into one table
 R CMD BATCH ${path_to_PGC_conversion}combining_summary_stats_tables_after_conversion_to_CHR_POS.R ./extrainfo/PGC_conversion.Rout 
 
