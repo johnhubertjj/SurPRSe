@@ -9,6 +9,6 @@ if (length(args) == 0) {
     eval(parse(text=args[[i]]))
   }
 }
-  print(a)
-}
+
+
 
