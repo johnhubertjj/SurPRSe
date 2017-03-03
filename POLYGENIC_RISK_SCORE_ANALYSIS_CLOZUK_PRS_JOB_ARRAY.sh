@@ -2,24 +2,22 @@
 
 #PBS -q batch_long
 #PBS -P PR54
-#PBS -l select=1:ncpus=1:mem=10GB
-#PBS -l walltime=10:00:00
+#PBS -l select=1:ncpus=1:mem=20GB
+#PBS -l walltime=48:00:00
 #PBS -o /home/c1020109/
 #PBS -e /home/c1020109/
 #PBS -j oe
-#PBS -J 21-22:2
+#PBS -J 4-5:2
 #PBS -N c1020109_job_array_whole_genome
 
-echo "Press CTRL+C to proceed."
-trap "pkill -f 'sleep 1h'" INT
-trap "set +x ; sleep 1h ; set -x" DEBUG
 
 # Run locally or on ARCCA
 whereami=$(uname -n)
 echo "$whereami"
 if [[ "$whereami" == *"raven"* ]]; then
-  cd $PBS_O_WORKDIR
-  path_to_scripts='~/c1020109/PRS_scripts/'
+  WDPATH=/scratch/$USER/PR54/PGC_CLOZUK_PRS/PRS_CLOZUK_PGC
+  cd $WDPATH
+  path_to_scripts='/home/c1020109/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/'
 
   # Load both Plink and R
   module purge
@@ -37,7 +35,10 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
 fi
 
 ## rewrite so that the file input is an argument for the script instead, this will work for now
-if [ -f *.tar.gz ] && [ ! -f *.bim  ] && [ ! -f *.bed ] && [ !  -f *.fam ]; then
+shopt -s nullglob
+set -- *${chromosome_number}.tar.gz
+if [ "$#" -gt 0 ]; then
+
 # unpack the CLOZUK datasets
 tar -zxvf CLOZUK_GWAS_BGE_chr${chromosome_number}.tar.gz
 fi
@@ -56,7 +57,7 @@ fi
 R CMD BATCH ${path_to_scripts}CLOZUK_PGC_COMBINE_final.R ./extrainfo/CLOZUK_PGC_COMBINE_chr${chromosome_number}.Rout
  
 # using plink to change the names to a CHR.POS identifier and remaking the files
-plink --bfile CLOZUK_GWAS_BGE_chr${chromosome_number} --update-name CLOZUK_chr${chromosome_number}_chr.pos.txt --make-bed --out ./output/CLOZUK_GWAS_BGE_chr${chromosome_number}_2
+plink --bfile CLOZUK_GWAS_BGE_chr${chromosome_number} --update-name ./output/CLOZUK_chr${chromosome_number}_chr.pos.txt --make-bed --out ./output/CLOZUK_GWAS_BGE_chr${chromosome_number}_2
 
 # re-package the original files
 # tar -czvf CLOZUK_GWAS_BGE_chr${chromosome_number}.tar.gz CLOZUK_GWAS_BGE_chr${chromosome_number}.bed CLOZUK_GWAS_BGE_chr${chromosome_number}.bim CLOZUK_GWAS_BGE_chr${chromosome_number}.fam
@@ -71,7 +72,7 @@ plink --bfile ./output/CLOZUK_GWAS_BGE_chr${chromosome_number}_2 --exclude ./out
 # Clump the datasets
 # Extract the SNPs common between PGC and CLOZUK
 # Remove the duplicate SNPs
-# plink --bfile ./output/CLOZUK_GWAS_BGE_chr${chromosome_number}_2 --extract ./output/chr${chromosome_number}PGC_CLOZUK_common_SNPs.txt --exclude ./output/extracted_Duplicate_snps_chr${chromosome_number}.txt --clump ./output/PGC_table${chromosome_number}_new.txt --clump-kb 1000 --clump-p1 0.5 --clump-p2 0.5 --clump-r2 0.2 --out ./output/CLOZUK_PGC_bge_removed_A.T_C.G.target_r0.2_1000kb_non_verbose_chr${chromosome_number}
+plink --bfile ./output/CLOZUK_GWAS_BGE_chr${chromosome_number}_2 --extract ./output/chr${chromosome_number}PGC_CLOZUK_common_SNPs.txt --exclude ./output/extracted_Duplicate_snps_chr${chromosome_number}.txt --clump ./output/PGC_table${chromosome_number}_new.txt --clump-kb 1000 --clump-p1 0.5 --clump-p2 0.5 --clump-r2 0.2 --out ./output/CLOZUK_PGC_bge_removed_A.T_C.G.target_r0.2_1000kb_non_verbose_chr${chromosome_number}
  
 # Clean up the files to leave a dataset that can be read into R/Python as well as a list of SNPs to extract for the CLUMPED plink files
 tr -s ' ' '\t' < ./output/CLOZUK_PGC_bge_removed_A.T_C.G.target_r0.2_1000kb_non_verbose_chr${chromosome_number}.clumped > ./output/CLOZUK_PGC_CLUMPED_chr${chromosome_number}.txt
