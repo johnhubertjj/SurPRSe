@@ -1,0 +1,16 @@
+#!/bin/bash
+#PBS -q serial #selecting the queue to use
+#PBS -P PR54 # User project ID
+#PBS -l select = 1:ncpus=12 # use 12 CPUs spread across one node #select = node, ncpus = number of nodes mpiprocs = number of mpi processes per node
+#PBS -l walltime 10:00:00 # all processes need a runtime max 72 hours for parallel, 120 for normal. 
+#PBS -o output.txt # the output file
+#PBS -e error-file.txt # the error file
+#PBS -N jobname
+
+module load git #commands on command line, run by module
+
+
+
+scp ./*.tar.gz c1020109@ravenlogin.arcca.cf.ac.uk:/scratch/c1020109/PR54/PGC_CLOZUK_PRS/
+
+
