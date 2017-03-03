@@ -166,7 +166,7 @@ adding_unread_genes <- function(Gene_clumped_SNPs, MAGMA.gene.regions.for.chromo
         Base.pairs.index <- which(clumped_SNPs$SNP == SNPs.to.include[f])
 
         if (args == 'Serial') {
-          chromosome.number <- sub("(?<=^d+)\:.*","",SNPs.to.include, perl = F) # Not sure if this works, test it 
+          chromosome.number <- sub("(?<=^d+\:).*","",SNPs.to.include) # Not sure if this works, test it 
         } 
         new.row <- list(chromosome.number, 
                         SNPs.to.include[f], 

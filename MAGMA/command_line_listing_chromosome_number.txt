@@ -1,1 +1,0 @@
-chromosome_number_total=(`ls ${number_of_files[a]} | egrep -o [0-9]+`) 
