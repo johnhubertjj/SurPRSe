@@ -1,0 +1,21 @@
+# plink files
+*.bed
+*.bim
+*.bim
+*.map
+*.frq
+*.nosex
+*.log
+*.fam
+
+# reformatted plink files
+*.raw
+
+# annoying pycharm files
+*.idea
+
+# PGC table
+PGC_table22.txt
+
+# any R_output files
+*.Rout
