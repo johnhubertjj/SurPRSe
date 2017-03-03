@@ -1,0 +1,13 @@
+Welcome to MAGMA v1.06 (mac)
+Using flags:
+	--annotate
+	--snp-loc CLOZUK_GWAS_BGE_chr22_magma_input2.bim
+	--gene-loc NCBI37.3.gene.loc
+	--out _CLOZUK_clumped
+
+Start time is 15:38:15, Monday 06 Feb 2017
+
+
+ERROR - parsing arguments: file 'CLOZUK_GWAS_BGE_chr22_magma_input2.bim' specified in --snp-loc does not exist or is not a file.
+
+Terminating program.

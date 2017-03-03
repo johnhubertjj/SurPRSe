@@ -1,0 +1,35 @@
+PLINK v1.90b3.38 64-bit (7 Jun 2016)
+Options in effect:
+  --allow-no-sex
+  --bfile CLOZUK2_IMPUTE2
+  --chr 22
+  --extract CLOZUK_imputed_polymorphic_SNPs_INFO03.txt
+  --keep /scratch/mpnap1/CRESTAR/r2/ASSOC/CLOZUK2.r7.select2PC.ids
+  --make-bed
+  --memory 60000
+  --out /scratch/mpnap1/CRESTAR/r2/FINAL/FinalGWAS/CLOZUK_GWAS_BGE_chr22
+
+Hostname: raven173
+Working directory: /scratch/mpnap1/CRESTAR/r2/BGE
+Start time: Fri Jul  1 11:25:54 2016
+
+Random number seed: 1467368754
+64392 MB RAM detected; reserving 60000 MB for main workspace.
+641404 variants loaded from .bim file.
+41021 people (24131 males, 16888 females, 2 ambiguous) loaded from .fam.
+Ambiguous sex IDs written to
+/scratch/mpnap1/CRESTAR/r2/FINAL/FinalGWAS/CLOZUK_GWAS_BGE_chr22.nosex .
+--extract: 641404 variants remaining.
+--keep: 35802 people remaining.
+Using 1 thread (no multithreaded calculations invoked).
+Before main variant filters, 35802 founders and 0 nonfounders present.
+Calculating allele frequencies... done.
+Total genotyping rate in remaining samples is 0.972178.
+641404 variants and 35802 people pass filters and QC.
+Note: No phenotypes present.
+--make-bed to
+/scratch/mpnap1/CRESTAR/r2/FINAL/FinalGWAS/CLOZUK_GWAS_BGE_chr22.bed +
+/scratch/mpnap1/CRESTAR/r2/FINAL/FinalGWAS/CLOZUK_GWAS_BGE_chr22.bim +
+/scratch/mpnap1/CRESTAR/r2/FINAL/FinalGWAS/CLOZUK_GWAS_BGE_chr22.fam ... done.
+
+End time: Fri Jul  1 11:27:07 2016

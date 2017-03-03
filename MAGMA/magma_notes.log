@@ -1,0 +1,12 @@
+# What I did for Magma
+
+- From the first analysis: took the SNPs within genes common to both PRS and MAGMA when doing a combined analysis
+- limited the plink files down to clumped SNPs and to a P-value threshold -> FOR GENES.
+- Ran the analysis through Magma, again limiting the annotation file to the SNPs common to the PGC thresholds -> for SNPs
+- included covariates into the analysis
+- printed out the NPARAMs in PRS and MAGMA
+
+
+ did the same but straight from the clumped file without limiting to genes
+ both exactly the same result
+
