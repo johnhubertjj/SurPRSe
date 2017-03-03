@@ -15,6 +15,8 @@
 whereami=$(uname -n)
 echo "$whereami"
 if [[ "$whereami" == *"raven"* ]]; then
+  training_set_usually_summary="PGC_table"$chromosome_number}".txt"
+  validation_set_usually_genotype="CLOZUK_GWAS_BGE_chr"${chromosome_number}
   WDPATH=/scratch/$USER/PR54/PGC_CLOZUK_PRS/PRS_CLOZUK_PGC
   cd $WDPATH
   path_to_scripts='/home/c1020109/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/'
@@ -54,7 +56,8 @@ fi
 
 # Run R script that will combine PGC and CLOZUK to an individual table
 # Output is in PGC_CLOZUK_SNP_table.txt
-R CMD BATCH ${path_to_scripts}CLOZUK_PGC_COMBINE_final.R ./extrainfo/CLOZUK_PGC_COMBINE_chr${chromosome_number}.Rout
+arguments="'--args a=${training_set_usually_summary} b=${validation_set_usually_genotype}'"
+R CMD BATCH -- no-save --no-restore ${arguments} ${path_to_scripts}CLOZUK_PGC_COMBINE_final.R ./extrainfo/CLOZUK_PGC_COMBINE_chr${chromosome_number}.Rout
  
 # using plink to change the names to a CHR.POS identifier and remaking the files
 plink --bfile CLOZUK_GWAS_BGE_chr${chromosome_number} --update-name ./output/CLOZUK_chr${chromosome_number}_chr.pos.txt --make-bed --out ./output/CLOZUK_GWAS_BGE_chr${chromosome_number}_2

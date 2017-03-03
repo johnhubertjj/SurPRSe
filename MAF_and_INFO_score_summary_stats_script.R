@@ -1,4 +1,3 @@
-### Summary Stat Annotation Filter ###
 
 args=(commandArgs(trailingOnly = T))
 
@@ -9,6 +8,4 @@ if (length(args) == 0) {
     eval(parse(text=args[[i]]))
   }
 }
-
-
-
+print(a)
