@@ -1,0 +1,14 @@
+Welcome to MAGMA v1.06 (mac)
+Using flags:
+	--bfile CLOZUK_GWAS_BGE_magma_input_chr22
+	--pval 1e-3CLOZUK_PGC_P_Vals_reference_file.txt N=1435
+	--gene-annot 1e-3_CLOZUK_clumped.genes.annot
+	--covar file=CLOZUK2.r7.select2PC.eigenvec include=PC1-PC5,PC6,PC9,PC11,PC12,PC13,PC19
+	--out 1e-3gene_annotation_for_CLOZUK
+
+Start time is 15:38:15, Monday 06 Feb 2017
+
+
+ERROR - configuration: flag --covar and flag --pval cannot be set simultaneously.
+
+Terminating program.
