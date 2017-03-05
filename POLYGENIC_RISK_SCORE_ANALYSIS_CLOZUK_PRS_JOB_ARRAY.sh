@@ -7,7 +7,7 @@
 #PBS -o /home/c1020109/
 #PBS -e /home/c1020109/
 #PBS -j oe
-#PBS -J 4-5:2
+#PBS -J 21-22:2
 #PBS -N c1020109_job_array_whole_genome
 
 
