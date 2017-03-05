@@ -15,8 +15,11 @@
 whereami=$(uname -n)
 echo "$whereami"
 if [[ "$whereami" == *"raven"* ]]; then
-  training_set_usually_summary="PGC_table"$chromosome_number}".txt"
+  training_set_usually_summary="PGC_table"${chromosome_number}
   validation_set_usually_genotype="CLOZUK_GWAS_BGE_chr"${chromosome_number}
+  training_set_name="PGC"
+  validation_set_name="CLOZUK"
+  
   WDPATH=/scratch/$USER/PR54/PGC_CLOZUK_PRS/PRS_CLOZUK_PGC
   cd $WDPATH
   path_to_scripts='/home/c1020109/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/'
@@ -56,7 +59,7 @@ fi
 
 # Run R script that will combine PGC and CLOZUK to an individual table
 # Output is in PGC_CLOZUK_SNP_table.txt
-arguments="'--args a=${training_set_usually_summary} b=${validation_set_usually_genotype}'"
+arguments="'--args a=${training_set_usually_summary} b=${validation_set_usually_genotype} c=${training_set_name} d=${validation_set_name}'"
 R CMD BATCH -- no-save --no-restore ${arguments} ${path_to_scripts}CLOZUK_PGC_COMBINE_final.R ./extrainfo/CLOZUK_PGC_COMBINE_chr${chromosome_number}.Rout
  
 # using plink to change the names to a CHR.POS identifier and remaking the files
@@ -66,7 +69,7 @@ plink --bfile CLOZUK_GWAS_BGE_chr${chromosome_number} --update-name ./output/CLO
 # tar -czvf CLOZUK_GWAS_BGE_chr${chromosome_number}.tar.gz CLOZUK_GWAS_BGE_chr${chromosome_number}.bed CLOZUK_GWAS_BGE_chr${chromosome_number}.bim CLOZUK_GWAS_BGE_chr${chromosome_number}.fam
 
 # create files containing duplicate SNPs
-R CMD BATCH ${path_to_scripts}Clumping_CLOZUK_PGC.R ./extrainfo/CLOZUK_PGC_clumpinginfo_chr${chromosome_number}.Rout 
+R CMD BATCH -- no-save --no-restore ${arguments} ${path_to_scripts}Clumping_CLOZUK_PGC.R ./extrainfo/CLOZUK_PGC_clumpinginfo_chr${chromosome_number}.Rout 
 
 # Create files for MAGMA
 plink --bfile ./output/CLOZUK_GWAS_BGE_chr${chromosome_number}_2 --exclude ./output/extracted_Duplicate_snps_chr${chromosome_number}.txt --extract ./output/chr${chromosome_number}PGC_CLOZUK_common_SNPs.txt --make-bed --out ./output/CLOZUK_GWAS_BGE_chr22_magma_input
