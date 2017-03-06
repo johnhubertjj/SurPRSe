@@ -34,17 +34,12 @@ if (whereami == "johnhubert") {
 #######################################
 system_arguments <- Sys.getenv(x = c(training_set_usually_summary, training_set_name, MAF, INFO))
 
-training_set_usually_summary <- system_arguments[1]
-training_set_name <- system_arguments[2]
-MAF <- system_arguments[3]
-INFO <- system_arguments[4]
-
 # specify the different input tables #
-Training_datatable <- paste0("./output/",training_set_usually_summary,".txt")
-Training_datatable_output <- paste0("./output/",training_set_usually_summary,"_new.txt")
-Training_name <- training_set_name
-MAF_decision <- MAF
-INFO_decision <- INFO
+Training_datatable <- paste0("./output/",a,".txt")
+Training_datatable_output <- paste0("./output/",a,"_new.txt")
+Training_name <- c
+MAF_decision <- e
+INFO_decision <- f
 
 # Read in Training set
 PGC_table <- fread(Training_datatable)

@@ -21,7 +21,8 @@ if [[ "$whereami" == *"raven"* ]]; then
   validation_set_name="CLOZUK"
   MAF="YES"
   INFO="YES"
-  
+  export training_set_usually_summary validation_set_usually_genotype training_set_name validation_set_name MAF INFO
+
   WDPATH=/scratch/$USER/PR54/PGC_CLOZUK_PRS/PRS_CLOZUK_PGC
   cd $WDPATH
   path_to_scripts='/home/c1020109/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/'
@@ -59,8 +60,7 @@ if [ ! -d "extrainfo" ]; then
 fi
 
 # Run R script that removes SNPs based on INFO score and MAF
-arguments="'--args a=${training_set_usually_summary} b=${validation_set_usually_genotype} c=${training_set_name} d=${validation_set_name} e=${MAF} f=${INFO}'"
-R CMD BATCH --no-save --no-restore ${arguments} ${path_to_scripts}MAF_and_INFO_score_summary_stats_script.R ./extrainfo/PGC_remove_MAF_INFO.Rout
+R CMD BATCH  ${path_to_scripts}MAF_and_INFO_score_summary_stats_script.R ./extrainfo/PGC_remove_MAF_INFO.Rout
 
 # Run R script that will combine PGC and CLOZUK to an individual table
 # Output is in PGC_CLOZUK_SNP_table.txt
