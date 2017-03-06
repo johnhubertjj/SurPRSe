@@ -7,9 +7,9 @@
 ptm <- proc.time()
 
 
-###############################
+##################################################
 # Checking location for serial or batch analysis #
-###############################
+##################################################
 
 System_information <- Sys.info()
 whereami <- System_information['user']
@@ -29,6 +29,23 @@ chromosome.number <- as.numeric(AI)
 } else {
   stop("current environment NOT at work/home or on servers, please add to script above to specify where you are and what type of analysis you want to do")
 }
+
+#######################################
+# adding in arguments from BASH script#
+#######################################
+args=(commandArgs(trailingOnly = T))
+
+if (length(args) == 0) {
+  print ("No arguments supplied.")
+}else{
+  for(i in 1:length(args)){
+    eval(parse(text=args[[i]]))
+  }
+}
+
+# specify the different input tables #
+Training_datatable <- paste0(a,".txt")
+Validation_datatable_bim_file <- paste0(b,".bim")
 
 
 ###############################
@@ -96,13 +113,13 @@ setwd(".")
 getwd()
 
 ### Adding in PGC data ###
-PGC.data.frame <- fread(paste0("PGC_table",chromosome.number,".txt"))
+PGC.data.frame <- fread(Training_datatable)
 PGC.data.frame.original <- copy(PGC.data.frame)
 
 cat("Number of SNPS in PGC Chr:",chromosome.number, nrow(PGC.data.frame))
 
 ### Read in the CLOZUK data ###
-CLOZUK.data <- fread(paste0("CLOZUK_GWAS_BGE_chr",chromosome.number,".bim"))
+CLOZUK.data <- fread(Validation_datatable_bim_file)
 CLOZUK.original <- copy(CLOZUK.data)
 # Number of SNPs in CLOZUK data
 cat("Number of SNPs in CLOZUK Chr:",chromosome.number, nrow(CLOZUK.data))

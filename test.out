@@ -17,7 +17,10 @@ Type 'demo()' for some demos, 'help()' for on-line help, or
 'help.start()' for an HTML browser interface to help.
 Type 'q()' to quit R.
 
+<<<<<<< HEAD
 > ### Summary Stat Annotation Filter ###
+=======
+>>>>>>> 7334960baac1d709832c2927099969c29da24a9a
 > 
 > args=(commandArgs(trailingOnly = T))
 > 
@@ -28,8 +31,13 @@ Type 'q()' to quit R.
 +     eval(parse(text=args[[i]]))
 +   }
 + }
+<<<<<<< HEAD
 >   print(a)
 [1] "PGC"
 > }
 Error: unexpected '}' in "}"
+=======
+Error in eval(expr, envir, enclos) : object 'PGC' not found
+Calls: eval -> eval
+>>>>>>> 7334960baac1d709832c2927099969c29da24a9a
 Execution halted

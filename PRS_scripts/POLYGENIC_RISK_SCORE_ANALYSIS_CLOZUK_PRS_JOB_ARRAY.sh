@@ -17,16 +17,28 @@ echo "$whereami"
 if [[ "$whereami" == *"raven"* ]]; then
   WDPATH=/scratch/$USER/PR54/PGC_CLOZUK_PRS/PRS_CLOZUK_PGC
   cd $WDPATH
+<<<<<<< HEAD
   path_to_scripts='/home/c1020109/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/'
+=======
+>>>>>>> 7334960baac1d709832c2927099969c29da24a9a
 
-  # Load both Plink and R
+  # assign a new variable for the PBS_ARRAY_variable
+  chromosome_number=${PBS_ARRAY_INDEX}
+
+  path_to_scripts='/home/c1020109/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/'
+  training_set_usually_summary='PGC_table'${chromosome_number}'.txt'
+  validation_set_usually_genotype='CLOZUK_GWAS_BGE_chr'${chromosome_number}
+# Load both Plink and R
   module purge
   module load R/3.3.0
   module load plink/1.9c3
   module load python/2.7.9-mpi
 
+<<<<<<< HEAD
   # assign a new variable for the PBS_ARRAY_variable
   chromosome_number=${PBS_ARRAY_INDEX}
+=======
+>>>>>>> 7334960baac1d709832c2927099969c29da24a9a
 
 elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   cd ~/Documents/testing_PRS_chromosome_22/
@@ -54,7 +66,7 @@ fi
 
 # Run R script that will combine PGC and CLOZUK to an individual table
 # Output is in PGC_CLOZUK_SNP_table.txt
-R CMD BATCH ${path_to_scripts}CLOZUK_PGC_COMBINE_final.R ./extrainfo/CLOZUK_PGC_COMBINE_chr${chromosome_number}.Rout
+R CMD BATCH --no-save --no-restore '--args training=${training_set_usually_summary} validation=${validation_set_usually_summary}' ${path_to_scripts}CLOZUK_PGC_COMBINE_final.R ./extrainfo/CLOZUK_PGC_COMBINE_chr${chromosome_number}.Rout &
  
 # using plink to change the names to a CHR.POS identifier and remaking the files
 plink --bfile CLOZUK_GWAS_BGE_chr${chromosome_number} --update-name ./output/CLOZUK_chr${chromosome_number}_chr.pos.txt --make-bed --out ./output/CLOZUK_GWAS_BGE_chr${chromosome_number}_2
