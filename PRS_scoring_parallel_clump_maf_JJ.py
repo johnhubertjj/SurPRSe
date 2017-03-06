@@ -27,24 +27,24 @@ elif platform_system[1] == 'JJ' :
     chromosome_number = 22
 elif platform_system[1] == 'rocks.psycm.cf.ac.uk' :
     os.chdir('~/output/')
-    # below is wrong, haven't run a loop on rocks yet #
+    # below is wrong, raven will not always be on raven13 #
     chromosome_number = os.getenv('PBS_ARRAY_INDEX')
 elif platform_system[1] == 'raven13' :
     os.chdir('/scratch/c1020109/PR54/PGC_CLOZUK_PRS/output/')
     chromosome_number = os.getenv('PBS_ARRAY_INDEX')
-
+#
 os.getcwd()
 
 timer_start = time.time()
 
 # --------------- CREATE SIGNIFICANCE THRESHOLD FUNCTION --------------- #
-def Sig_func() :
-    sig_threshold = np.array(sys.argv)
-    to_exclude = [0]
-    sig_threshold_without_scriptpath = np.delete(sig_threshold, to_exclude)
-    print(sig_threshold_without_scriptpath)
+#def Sig_func() :
+#    sig_threshold = np.array(sys.argv)
+#    to_exclude = [0]
+#    sig_threshold_without_scriptpath = np.delete(sig_threshold, to_exclude)
+#    print(sig_threshold_without_scriptpath)
 
-    for i in range(0, len(sig_threshold_without_scriptpath)) :
+#    for i in range(0, len(sig_threshold_without_scriptpath)) :
     # alter file input here for each and assign to a new object
     # make sure to keep is separate from other sources of code as well
 
