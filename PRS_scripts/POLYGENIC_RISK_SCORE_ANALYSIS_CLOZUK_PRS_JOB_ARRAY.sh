@@ -7,46 +7,34 @@
 #PBS -o /home/c1020109/
 #PBS -e /home/c1020109/
 #PBS -j oe
-#PBS -J 21-22:2
+#PBS -J 4-5:2
 #PBS -N c1020109_job_array_whole_genome
-# Run locally or on ARCCA
 
+
+# Run locally or on ARCCA
 whereami=$(uname -n)
 echo "$whereami"
 if [[ "$whereami" == *"raven"* ]]; then
-  training_set_usually_summary="PGC_table"${chromosome_number}
-  validation_set_usually_genotype="CLOZUK_GWAS_BGE_chr"${chromosome_number}
-  training_set_name="PGC"
-  validation_set_name="CLOZUK"
-  MAF_summary="NO"
-  MAF_genotype="YES"
-  INFO_summary="YES"
-  
   WDPATH=/scratch/$USER/PR54/PGC_CLOZUK_PRS/PRS_CLOZUK_PGC
   cd $WDPATH
-  path_to_scripts='/home/c1020109/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/'
-
-  # Load both Plink and R
-  module purge
-  module load R/3.3.0
-  module load plink/1.9c3
 
   # assign a new variable for the PBS_ARRAY_variable
   chromosome_number=${PBS_ARRAY_INDEX}
+
+  path_to_scripts='/home/c1020109/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/'
+  training_set_usually_summary='PGC_table'${chromosome_number}'.txt'
+  validation_set_usually_genotype='CLOZUK_GWAS_BGE_chr'${chromosome_number}
+# Load both Plink and R
+  module purge
+  module load R/3.3.0
+  module load plink/1.9c3
+  module load python/2.7.9-mpi
+
 
 elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   cd ~/Documents/testing_PRS_chromosome_22/
   path_to_scripts='/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/'
   chromosome_number=22
-
-  training_set_usually_summary="PGC_table"${chromosome_number}
-  validation_set_usually_genotype="CLOZUK_GWAS_BGE_chr"${chromosome_number}
-  training_set_name="PGC"
-  validation_set_name="CLOZUK"
-  MAF_summary="NO"
-  MAF_genotype="YES"
-  INFO_summary="YES"
-
 fi
 
 ## rewrite so that the file input is an argument for the script instead, this will work for now
@@ -67,12 +55,10 @@ if [ ! -d "extrainfo" ]; then
    mkdir extrainfo
 fi
 
-# Run R script that removes SNPs based on INFO score and MAF
-Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}MAF_and_INFO_score_summary_stats_script.R ./extrainfo/PGC_remove_MAF_INFO.Rout ${training_set_usually_summary} ${training_set_name} ${MAF_summary} ${INFO_summary} 
 # Run R script that will combine PGC and CLOZUK to an individual table
 # Output is in PGC_CLOZUK_SNP_table.txt
-Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}CLOZUK_PGC_COMBINE_final.R ./extrainfo/CLOZUK_PGC_COMBINE_chr${chromosome_number}.Rout ${training_set_usually_summary} ${validation_set_usually_genotype}
-
+R CMD BATCH --no-save --no-restore '--args training=${training_set_usually_summary} validation=${validation_set_usually_summary}' ${path_to_scripts}CLOZUK_PGC_COMBINE_final.R ./extrainfo/CLOZUK_PGC_COMBINE_chr${chromosome_number}.Rout &
+ 
 # using plink to change the names to a CHR.POS identifier and remaking the files
 plink --bfile CLOZUK_GWAS_BGE_chr${chromosome_number} --update-name ./output/CLOZUK_chr${chromosome_number}_chr.pos.txt --make-bed --out ./output/CLOZUK_GWAS_BGE_chr${chromosome_number}_2
 
@@ -80,7 +66,7 @@ plink --bfile CLOZUK_GWAS_BGE_chr${chromosome_number} --update-name ./output/CLO
 # tar -czvf CLOZUK_GWAS_BGE_chr${chromosome_number}.tar.gz CLOZUK_GWAS_BGE_chr${chromosome_number}.bed CLOZUK_GWAS_BGE_chr${chromosome_number}.bim CLOZUK_GWAS_BGE_chr${chromosome_number}.fam
 
 # create files containing duplicate SNPs
-Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}Clumping_CLOZUK_PGC.R ./extrainfo/CLOZUK_PGC_clumpinginfo_chr${chromosome_number}.Rout ${training_set_usually_summary} ${validation_set_usually_genotype} ${training_set_name} ${validation_set_name}  
+R CMD BATCH ${path_to_scripts}Clumping_CLOZUK_PGC.R ./extrainfo/CLOZUK_PGC_clumpinginfo_chr${chromosome_number}.Rout 
 
 # Create files for MAGMA
 plink --bfile ./output/CLOZUK_GWAS_BGE_chr${chromosome_number}_2 --exclude ./output/extracted_Duplicate_snps_chr${chromosome_number}.txt --extract ./output/chr${chromosome_number}PGC_CLOZUK_common_SNPs.txt --make-bed --out ./output/CLOZUK_GWAS_BGE_chr22_magma_input
@@ -100,8 +86,4 @@ printf "%s\n\n" "$(tail -n +2 ./output/CLUMPED_EXTRACT_CLOZUK_chr${chromosome_nu
 
 # Create clumped plink files
 plink --bfile ./output/CLOZUK_GWAS_BGE_chr${chromosome_number}_2 --extract ./output/CLUMPED_EXTRACT_CLOZUK_chr${chromosome_number}.txt --make-bed --out ./output/CLOZUK_GWAS_BGE_CLUMPED_chr${chromosome_number}
-
-
-
-
 

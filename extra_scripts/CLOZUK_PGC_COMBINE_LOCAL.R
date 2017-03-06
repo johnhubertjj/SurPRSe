@@ -188,7 +188,6 @@ write.table(PGC.test.data.frame,file = zc,row.names = F, quote = F)
 # write the index as well just in case for clumping
 write(x = CLOZUK.final.index,file = paste0("./extrainfo/CLOZUK.merged.index.chr",chromosome.number,".txt"))
 write(x = PGC.final.index,file = paste0("./extrainfo/PGC.merged.index.chr",chromosome.number,".txt"))
-system("rm CLOZUK_GWAS_BGE_chr${PBS_ARRAY_INDEX}.bim", intern = T)
 
 ##### TODO #####
 ## Run in a job array using the job number as the chromosome number
