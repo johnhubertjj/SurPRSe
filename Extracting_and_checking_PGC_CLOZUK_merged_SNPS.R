@@ -1,6 +1,6 @@
 ### Finding list of useful SNPs from both CLOZUK and PGC ### 
 
-### Chromosome 14 ###
+### Chromosome 22 ###
 
 # Add new environment for variables created within a function
 e <- new.env()
@@ -38,13 +38,12 @@ Checking_allele_swapping <- function(alteredtable1,table2,which.is.combined = c(
 
 
 # Preparing to run in local
-chromosome.number <- 14
+chromosome.number <- 22
 system_information<-Sys.info()
 if (system_information[1] == "Windows") fpath <-  "/Users/JJ/" else fpath <-"/Users/johnhubert/"
 
 # load libraries
 library(data.table)
-
 
 # Set Working directory
 setwd(paste0(fpath,"Documents/PGC_CLOZUK_GWAS_INPUT/"))
@@ -131,7 +130,6 @@ za <- gzfile(paste0("CHR.POS CLOZUK PGC/PGC_table",chromosome.number,".txt.gz"))
 write.table(PGC.altered,file = za ,quote = F,row.names = F)
 
 ### Taring multiple files together ###
-# MAY NEED TO ADD NEW PLINK COMMAND -MAKE-BED here) #
 system(paste0("tar -zcf ",fpath,"Documents/PGC_CLOZUK_GWAS_INPUT/CHR.POS\\ CLOZUK\\ PGC/ALT_CLOZUK_GWAS_BGE_chr",chromosome.number,".tar.gz ",
               "CLOZUK_GWAS_BGE_chr",chromosome.number,".bed ",
               "CLOZUK_GWAS_BGE_chr",chromosome.number,".bim ",
@@ -154,11 +152,7 @@ MAGMA.gene.regions <- fread(paste0(fpath,"Documents/PGC_CLOZUK_GWAS_INPUT/NCBI37
 
 ## clumping per gene ##
 # plink --bfile CLOZUK_GWAS_BGE_chr22 --clump CLOZUK2_COGS_GWAS_noPGC2.assoc.dosage --clump-r2 0.1 --clump-kb 3000 --out test3 --clump-p1 0.0001 --clump-verbose --clump-range input MAGMA limits
+# 
 
 
-# rewrite all of this, use the altered.names files to get the right list of SNPs for the CLOZUK dataset, PGC is fine, you cacn move it around alright
-
-CLOZUK_before <- fread("CLOZUK_GWAS_BGE_chr22.bim")  
-CLOZUK_AFTER <- fread("CLOZUK_altered_names_chr22.txt")
-CLOZUK_together <- CLOZUK_before[,.(V2)][,SNP := CLOZUK_AFTER$SNP]
-write.table(CLOZUK_together, file = "CLOZUK_chr22_chr.pos.txt", quote = F, row.names = F, col.names = F)
+  

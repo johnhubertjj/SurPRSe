@@ -24,26 +24,17 @@ if (whereami == "johnhubert") {
   stop("current environment NOT at work/home or on servers, please add to script above to specify where you are and what type of analysis you want to do")
 }
 
-#######################################
-# adding in arguments from BASH script#
-#######################################
-args <- commandArgs(trailingOnly = T)
 
-# specify the different input tables #
-Training_datatable <- paste0("./output/",args[3],"_new.txt")
-Validation_datatable_bim_file <- paste0("./output/",args[4],"_2.bim")
-Common_SNPs <- paste0("./output/chr", chromosome.number,args[5],"_",args[6],"_common_SNPs.txt")
-
-### Library ###
+### Library
 
 library(data.table)
 
 ### Read in updated_raw data
 setwd(".")
 getwd()
-PGC <- fread(Training_datatable)
-CLOZUK.data <- fread(Validation_datatable_bim_file)
-Common_SNPs <- scan(Common_SNPs, what = "numeric")
+PGC <- fread(paste0("./output/PGC_table",chromosome.number,"_new.txt"))
+CLOZUK.data <- fread(paste0("./output/CLOZUK_GWAS_BGE_chr",chromosome.number,"_2.bim"))
+Common_SNPs <- scan(paste0("./output/chr",chromosome.number,"PGC_CLOZUK_common_SNPs.txt"), what = "numeric")
 
 ### Check for duplicated SNPs.PGC
 PGCa <- which(duplicated(PGC$SNP))
