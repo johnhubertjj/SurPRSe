@@ -9,8 +9,8 @@
 #PBS -j oe
 #PBS -J 21-22:2
 #PBS -N c1020109_job_array_whole_genome
-
 # Run locally or on ARCCA
+
 whereami=$(uname -n)
 echo "$whereami"
 if [[ "$whereami" == *"raven"* ]]; then
@@ -58,8 +58,7 @@ if [ ! -d "extrainfo" ]; then
 fi
 
 # Run R script that removes SNPs based on INFO score and MAF
-arguments="'--args a=${training_set_usually_summary} b=${validation_set_usually_genotype} c=${training_set_name} d=${validation_set_name} e=${MAF} f=${INFO}'"
-R CMD BATCH --no-save --no-restore ${arguments} ${path_to_scripts}MAF_and_INFO_score_summary_stats_script.R ./extrainfo/PGC_remove_MAF_INFO.Rout
+R CMD BATCH  ${path_to_scripts}MAF_and_INFO_score_summary_stats_script.R ./extrainfo/PGC_remove_MAF_INFO.Rout
 
 # Run R script that will combine PGC and CLOZUK to an individual table
 # Output is in PGC_CLOZUK_SNP_table.txt
