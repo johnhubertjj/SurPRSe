@@ -21,7 +21,7 @@ if [[ "$whereami" == *"raven"* ]]; then
   MAF_summary="NO"
   MAF_genotype="YES"
   INFO_summary="YES"
-  
+  INFO_threshold=0.6
   WDPATH=/scratch/$USER/PR54/PGC_CLOZUK_PRS/PRS_CLOZUK_PGC
   cd $WDPATH
   path_to_scripts='/home/c1020109/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/'
@@ -46,7 +46,7 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   MAF_summary="NO"
   MAF_genotype="YES"
   INFO_summary="YES"
-
+  INFO_threshold=0.6	
 fi
 
 ## rewrite so that the file input is an argument for the script instead, this will work for now
@@ -68,7 +68,8 @@ if [ ! -d "extrainfo" ]; then
 fi
 
 # Run R script that removes SNPs based on INFO score and MAF
-Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}MAF_and_INFO_score_summary_stats_script.R ./extrainfo/PGC_remove_MAF_INFO.Rout ${training_set_usually_summary} ${training_set_name} ${MAF_summary} ${INFO_summary} 
+Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}MAF_and_INFO_score_summary_stats_script.R ./extrainfo/PGC_remove_MAF_INFO.Rout ${training_set_usually_summary} ${training_set_name} ${MAF_summary} ${INFO_summary} ${INFO_threshold} 
+
 # Run R script that will combine PGC and CLOZUK to an individual table
 # Output is in PGC_CLOZUK_SNP_table.txt
 Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}CLOZUK_PGC_COMBINE_final.R ./extrainfo/CLOZUK_PGC_COMBINE_chr${chromosome_number}.Rout ${training_set_usually_summary} ${validation_set_usually_genotype}
