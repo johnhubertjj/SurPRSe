@@ -50,8 +50,14 @@ changed_PGC_table <- copy(PGC_table)
 
 if (INFO_decision == "YES") {
 # remove all SNPs with INFO > 0.9
-changed_PGC_table <- changed_PGC_table[INFO > 0.9]
+Info_threshold <- as.numeric(args[7])
+changed_PGC_table <- changed_PGC_table[INFO > Info_threshold]
 }
+
+Vector_of_major_alleles_FRQ_A_29415 <- which(changed_PGC_table$FRQ_A_29415 > 0.5)
+Vector_of_major_alleles_FRQ_U_40101 <- which(changed_PGC_table$FRQ_U_40101 > 0.5)
+changed_PGC_table <- changed_PGC_table[Vector_of_major_alleles_FRQ_A_29415, FRQ_A_29415 := (1 - FRQ_A_29415)]
+changed_PGC_table <- changed_PGC_table[Vector_of_major_alleles_FRQ_U_40101, FRQ_U_40101 := (1 - FRQ_U_40101)]
 
 # Do I want to remove SNPs based on MAF
 if (MAF_decision == "YES") {
