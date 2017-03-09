@@ -69,9 +69,6 @@ cd ..
 # merge all the PGC SNPs together into one table
 R CMD BATCH ${path_to_PGC_conversion}combining_summary_stats_tables_after_conversion_to_CHR_POS.R ./extrainfo/PGC_conversion.Rout 
 
-# merge all the CLOZUK SNPs together into one table
-R CMD BATCH ${path_to_CLOZUK_conversion}combining_clumped_CLOZUK_BGE_datasets.R ./extrainfo/PGC_conversion.Rout 
-
 # recode genotypes for input into Python
 plink --bfile ./output/CLOZUK_PGC_FULL_GENOME --recode A --out ./output/CLOZUK_PGC_FULL_GENOME
 plink --bfile ./output/CLOZUK_PGC_FULL_GENOME --freq --out ./output/CLOZUK_PGC_FULL_GENOME
@@ -96,8 +93,6 @@ sh ${path_to_scripts}PRS_with_magma.sh ${chromosome_number}
 # Run preparation for annotation file for python scripts
 R CMD BATCH ${path_to_scripts}MAGMA_python_annotation_table_creator.R ./extrainfo/MAGMA_annotation_table_creator.Rout
 
-# Run PRS python script # Loop through significance thresholds
-# Change for Raven or Local
 if [ "$whereami" == "raven13" ]; then
    	python ${path_to_scripts}PRS_scoring_parallel_clump_maf_JJ.py
 else
