@@ -38,7 +38,7 @@ getwd()
 print(args)
 
 # specify the different input tables #
-Training_datatable <- paste0("./output/",args[3],".txt")
+Training_datatable <- paste0(args[3],".txt")
 Training_datatable_output <- paste0("./output/",args[3],"_new.txt")
 Training_name <- args[4]
 MAF_decision <- args[5]
