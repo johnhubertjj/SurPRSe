@@ -4,6 +4,7 @@ ptm <- proc.time()
 ### Library
 library(data.table)
 
+
 ## set wd
 setwd(".")
 
@@ -15,9 +16,6 @@ System_information <- Sys.info()
 whereami <- System_information['user']
 
 if (whereami == "johnhubert") {
-  chromosome.number <- 22
-  
-} else if (whereami == 'JJ') {
   chromosome.number <- 22
   
 } else if (whereami == "c1020109") {
