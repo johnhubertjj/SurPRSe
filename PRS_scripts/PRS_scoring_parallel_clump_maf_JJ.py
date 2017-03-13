@@ -14,7 +14,7 @@ import fileinput
 # -------------- DECLARE VARIABLES -------------- #
 
 indiv_snp = []
-significance_threshold = os.getenv('Significance_threshold')
+# significance_threshold = os.getenv('Significance_threshold')
 
 # set the script for analysis depending on the system on which you are running the PRS analysis
 platform_system = platform.uname()
@@ -38,13 +38,13 @@ os.getcwd()
 timer_start = time.time()
 
 # --------------- CREATE SIGNIFICANCE THRESHOLD FUNCTION --------------- #
-def Sig_func() :
-    sig_threshold = np.array(sys.argv)
-    to_exclude = [0]
-    sig_threshold_without_scriptpath = np.delete(sig_threshold, to_exclude)
-    print(sig_threshold_without_scriptpath)
-
-    for i in range(0, len(sig_threshold_without_scriptpath)) :
+#def Sig_func() :
+#    sig_threshold = np.array(sys.argv)
+#    to_exclude = [0]
+#    sig_threshold_without_scriptpath = np.delete(sig_threshold, to_exclude)
+#    print(sig_threshold_without_scriptpath)
+#
+#    for i in range(0, len(sig_threshold_without_scriptpath)) :
     # alter file input here for each and assign to a new object
     # make sure to keep is separate from other sources of code as well
 
@@ -56,7 +56,7 @@ def PRS_func(gene):
 
     # Create empty datasets for results #
     indiv_id = range(1, 35802)
-    results=pd.DataFrame(index = indiv_id, columns = ['GeneName'])
+    results=pd.DataFrame(index = indiv_id, columns=['GeneName'])
 
     # Find SNPs in gene #
     gene_snp = annot[annot.GENE == unigene.iloc[gene]['GENE']]
@@ -103,7 +103,7 @@ def PRS_func(gene):
         gen_clump.close()
 
         # Rename the column header with the actual gene name #
-        results = results.rename(columns = {'GeneName': unigene.iloc[gene]['GENE']})
+        results = results.rename(columns={'GeneName': unigene.iloc[gene]['GENE']})
 
         # Send results to main processor #
         return results
@@ -119,7 +119,7 @@ if __name__ == '__main__' :
 
     # Read in Pruned Bim file #
     bim_names = ["CHR", "SNP", "GD", "BP", "A1", "A2"]
-    bim_clump = pd.read_table( 'CLOZUK_GWAS_BGE_CLUMPED_chr' + str(chromosome_number) + '.bim', names = bim_names)
+    bim_clump = pd.read_table( 'CLOZUK_GWAS_BGE_CLUMPED_chr' + str(chromosome_number) + '.bim', names=bim_names)
 
     
     # Read in Annot Data #
