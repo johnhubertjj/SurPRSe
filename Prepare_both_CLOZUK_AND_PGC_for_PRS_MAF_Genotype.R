@@ -74,25 +74,54 @@ if( args[1] == 'Batch') {
   
 # Read in MAF data
 MAF_clumped_CLOZUK_data <- fread("./output/CLOZUK_PGC_FULL_GENOME.frq")
+vector_for_place_of_SNP <- c(1:length(MAF_clumped_CLOZUK_data$CHR))
+MAF_clumped_CLOZUK_data[,place.names := vector_for_place_of_SNP]
 PGC_useful_columns <- fread("./output/PGC_table_for_python.txt")
 
 # use data table structure to merge tables together and add MAF while removing useless columns
 PGC_CLOZUK_python_table <- merge(MAF_clumped_CLOZUK_data,PGC_useful_columns, by = c('CHR','SNP',"A1","A2"), all.x = T, all.y = F)
-PGC_CLOZUK_python_table[, NCHROBS := NULL][,.(CHR,SNP,BP,A1,A2,BETA,P,MAF)]
+PGC_CLOZUK_python_table[, NCHROBS := NULL][,.(CHR,SNP,BP,A1,A2,BETA,P,MAF,place.names)]
+
+# Check alleles
+test_1 <- any(nchar(PGC_CLOZUK_python_table$A1) > 1)
+test_2 <- any(nchar(PGC_CLOZUK_python_table$A2) > 1)
+
+if (test_1 == T | test_2 == T) {
+  warning("you have some alleles which are larger than 1 bp long, check before clumping")
+}
 
 # INSERT CONTROL SO THAT NO EXTRA COLUMNS ARE ADDED (as you've specified that you want to include all x columns)
 
 # Read in .raw file
-RAW.CLOZUK.CLUMPED <- fread("./output/CLOZUK_PGC_FULL_GENOME.raw")
+## File
+file <- "./output/CLOZUK_PGC_FULL_GENOME.raw"
+
+## Create connection
+con <- file(description=file, open="r")
+tmp <- scan(file=con, nlines=1, quiet=TRUE,what = "character")
+
+## Hopefully you know the number of lines from some other source or
+#com <- paste("wc -l ", file, " | awk '{ print $1 }'", sep="")
+#n <- system(command=com, intern=TRUE)
+
+# RAW.CLOZUK.CLUMPED <- fread("./output/CLOZUK_PGC_FULL_GENOME.raw")
+ones_to_remove <- which(is.na(PGC_CLOZUK_python_table$BP))
+#testa <- PGC_CLOZUK_python_table$place.names[ones_to_remove]
+#testb <- PGC_CLOZUK_python_table[ones_to_remove]
+#testc <- PGC_CLOZUK_python_table$SNP[ones_to_remove]
+#write(testb$SNP,file = "./output/SNPs_which_were_erroneous.txt")
+#PGC_CLOZUK_python_table <- PGC_CLOZUK_python_table[-ones_to_remove]
 
 # Flow control for assigning Row ID
-testing_col_names <- paste0(PGC_CLOZUK_python_table$SNP,"_",PGC_CLOZUK_python_table$A1)
-testing_col_names_raw <- colnames(RAW.CLOZUK.CLUMPED)
+setkey(PGC_CLOZUK_python_table, place.names)
+testing_col_names <- paste0(PGC_CLOZUK_python_table$SNP[place_names_for_raw],"_",PGC_CLOZUK_python_table$A1[place_names_for_raw])
+testing_col_names_raw <- tmp
 
 if(all(testing_col_names == testing_col_names_raw[7:length(testing_col_names_raw)]) != T){
   stop("ROW.ID from input data does not match genotype data, check the column names of both .raw file and the merged file")
 }else{
   PGC_CLOZUK_python_table[, ROW.ID := c(testing_col_names)]
+  PGC_CLOZUK_python_table <- PGC_CLOZUK_python_table[, place.names := NULL]
 }
 
 # rearrange order to match Python script downstream
