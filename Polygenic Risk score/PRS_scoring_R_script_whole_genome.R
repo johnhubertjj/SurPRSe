@@ -254,7 +254,7 @@ setnames(test_data_frame, c("CHR", "SNP", "BP", "Gene_ID", "BP_1", "BP_2"))
 
 # SCORING 
   
-p.value.thresholds <- c(0.0001,0.001,0.01,0.05,0.1,0.2,0.3,0.4,0.5)
+p.value.thresholds <- c(0.05,0.1,0.2,0.3,0.4,0.5)
 
 scoring_output_file <- paste0("scoring_PGC_CLOZUK_chromosome_", chromosome.number)
 
