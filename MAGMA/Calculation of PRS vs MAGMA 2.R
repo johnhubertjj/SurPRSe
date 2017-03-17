@@ -2,8 +2,8 @@ library(zoom)
 library(ggplot2)
 setwd("/Volumes/NO NAME/LOG10 graphs/")
 wd <- getwd()
-sig <- c("0.0001","0.001","0.01","0.05","0.1","0.2","0.3","0.4","0.5")
-sig2 <- c(1e-4,1e-3,1e-2,0.05,0.1,0.2,0.3,0.4,0.5)
+sig <- c("0.0001","0.001", "0.01", "0.05", "0.1", "0.2", "0.3", "0.4", "0.5")
+sig2 <- c(1e-4,1e-3)
 correlations <- rep(0,length(sig2))
 par(mfrow=c(3,3))
 
@@ -52,7 +52,7 @@ number_genes_MAGMA <- rep(0,length(sig))
 par(mfrow=c(3,3))
 
 for (i in 1:length(sig)) {
-MAGMA <- fread(paste0(sig[i], "gene_annotation_for_CLOZUK_test.genes.out"))
+MAGMA <- fread(paste0("./output/",sig[i], "gene_annotation_for_CLOZUK_without_selecting_genes.genes.out"))
 PRS <- fread(paste0(sig2[i], "CLOZUK_PGC_PRS_residuals_with_genes_using_fam_file.txt"))
 names(PRS) <- c("P","GENE")
 
