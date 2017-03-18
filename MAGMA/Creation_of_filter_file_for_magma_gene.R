@@ -1,41 +1,55 @@
+### Start Timer
+ptm <- proc.time()
 
-# Read in arguments for script
-CLOZUK_data_set_args <- commandArgs(trailingOnly = T)
-print(CLOZUK_data_set_args)
+########################################
+# Adding in arguments from BASH script #
+########################################
+args <- commandArgs(trailingOnly = T)
+print(args)
+getwd()
 
-Sig <- as.numeric(CLOZUK_data_set_args[1])
-  
-library(data.table)
+
+# specify the different input tables #
+Training_name <- args[3]
+Validation_name <- args[4]
+Sig_thresholds <- as.numeric(args[5])
+
+# Set up library
+library("data.table")
+
+# Set working directory
+setwd(".")
+
 
 # Output a file if no output is specified
-if (length(CLOZUK_data_set_args)==0) {
+if (length(args)==0) {
   stop("At least one argument must be supplied (input file).n", call.=FALSE)
-} else if (length(CLOZUK_data_set_args)==1) {
+} #else if (length(CLOZUK_data_set_args)==1) {
   # default output file
-  CLOZUK_data_set_args[3] = "./output/out.txt"
-}
+ # CLOZUK_data_set_args[3] = "./output/out.txt"
+#}
 
 CLOZUK_magma_input2 <- fread(CLOZUK_data_set_args[1])
 names(CLOZUK_magma_input2) <- c("CHR", "SNP", "GD", "BP", "A1", "A2")
 PGC <- fread ("./output/PGC_table22_new.txt")
 PGC_CLOZUK_merged <- merge(CLOZUK_magma_input2,PGC,by = "SNP", all = F)
 
-sig <- c(1e-4,1e-3,1e-2,0.05,0.1,0.2,0.3,0.4,0.5)
-sig2 <- c("0.0001","0.001","0.01","0.05","0.1","0.2","0.3","0.4","0.5")
+Sig_thresholds <- c(1e-4,1e-3,1e-2,0.05,0.1,0.2,0.3,0.4,0.5)
+Sig_thresholds2 <- c("0.0001","0.001","0.01","0.05","0.1","0.2","0.3","0.4","0.5")
 x <- NULL
 SNPs <- list(x,x,x,x,x,x,x,x,x)
-names(SNPs) <- sig
+names(SNPs) <- Sig_thresholds
 
-for (i in 1:length(sig)) {
-  SNPs_to_extract_for_magma <- which(PGC_CLOZUK_merged$P <= sig[i])
+for (i in 1:length(Sig_thresholds)) {
+  SNPs_to_extract_for_magma <- which(PGC_CLOZUK_merged$P <= Sig_thresholds[i])
   reference_file <- PGC_CLOZUK_merged[SNPs_to_extract_for_magma]
   reference_file <- reference_file[,.(CHR.x,SNP,P,BETA)]
   names(reference_file) <- c("CHR","SNP","P","BETA")
   SNPs[[i]] <- reference_file
 }
 
-for (i in 1:length(sig)) {
-  write.table(SNPs[[i]], file = paste0(sig2[i],"CLOZUK_PGC_P_Vals_reference_file_without_selecting_genes.txt"),quote = F,row.names = F)
+for (i in 1:length(Sig_thresholds)) {
+  write.table(SNPs[[i]], file = paste0(Sig_thresholds2[i],"CLOZUK_PGC_P_Vals_reference_file_without_selecting_genes.txt"),quote = F,row.names = F)
 }
 
 

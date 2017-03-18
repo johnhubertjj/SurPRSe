@@ -1,4 +1,4 @@
-#!/Library/Frameworks/Python.framework/Versions/2.7/bin/python2.7
+#! /Library/Frameworks/Python.framework/Versions/2.7/bin/python2.7
 
 # -------------- READ IN FUNCTIONS -------------- #
 
@@ -10,17 +10,20 @@ import time
 import os
 import platform
 import fileinput
+import csv
+
 
 # -------------- DECLARE VARIABLES -------------- #
 
 indiv_snp = []
-significance_threshold = os.getenv('Significance_threshold')
+
+#significance_threshold = os.getenv('Significance_threshold')
 
 # set the script for analysis depending on the system on which you are running the PRS analysis
 platform_system = platform.uname()
 
 if platform_system[1] == 'v1711-0ab8c3db.mobile.cf.ac.uk' :
-    os.chdir('/Users/johnhubert/Documents/testing_PRS_chromosome_22/output/')
+    os.chdir('/Users/johnhubert/Dropbox/whole_genome_testing/output/')
     chromosome_number = 22
 elif platform_system[1] == 'JJ' :
     os.chdir('~/Documents/testing_PRS_chromosome_22/output')
@@ -73,7 +76,7 @@ def PRS_func(gene):
     if (len(effect.index) != 0):
         # The raw file uses recode-A NOT AD and the ROW ID is a recorder of the row for the right SNP (+6 for python because of zero indexing but +5 otherwise)
         # then take the headers off - command line will work on shell script
-        gen_clump = open('CLOZUK_GWAS_BGE_CLUMPED_chr' + str(chromosome_number) + '_no_head.raw', 'r')
+        gen_clump = open('CLOZUK_PGC_FULL_GENOME_no_head.raw', 'r')
 
         indiv = 0
         
@@ -115,21 +118,21 @@ if __name__ == '__main__' :
 
     # Read in Unique Gene file #
     unigene_names = ["GENE"]
-    unigene = pd.read_table('PGC_CLOZUK_unique_genes_chr_' + str(chromosome_number) + '.txt', names = unigene_names)
+    unigene = pd.read_table('PGC_CLOZUK_unique_genes.txt', names = unigene_names)
 
     # Read in Pruned Bim file #
     bim_names = ["CHR", "SNP", "GD", "BP", "A1", "A2"]
-    bim_clump = pd.read_table( 'CLOZUK_GWAS_BGE_CLUMPED_chr' + str(chromosome_number) + '.bim', names = bim_names)
+    bim_clump = pd.read_table( 'CLOZUK_PGC_FULL_GENOME_without_erroneous_SNPS.bim', names = bim_names)
 
     
     # Read in Annot Data #
     annot_names = ["CHR", "SNP", "BP", "GENE", "BP_START","BP_END"]
-    annot = pd.read_table('/output/MAGMA_Gene_regions_for_python_script_chr_' + str(chromosome_number) + '.txt', sep=' ', names=annot_names)
+    annot = pd.read_table('MAGMA_Gene_regions_for_python_script.txt', sep=' ', names=annot_names)
     
     # Read in CLOZUK_PGC Assoc Data Pruned Data # #Is this the PGC alternative?#
     
     CLOZUK_PGC_names = ["ROW.NUM","ROW.ID", "CHR", "SNP", "BP", "A1", "A2", "BETA", "P", "MAF"]
-    CLOZUK_PGC_clump = pd.read_table('./output/CLOZUK_GWAS_BGE_CLUMPED_PGC_MAF_FINAL' + str(chromosome_number) + '.txt', sep = ' ', names = CLOZUK_PGC_names)
+    CLOZUK_PGC_clump = pd.read_table('CLOZUK_GWAS_BGE_CLUMPED_PGC_MAF_FINAL.txt', sep=' ', names=CLOZUK_PGC_names)
 
     # If the data is from R, the indexing standard needs to be changed
     CLOZUK_PGC_clump[['ROW.NUM']] = CLOZUK_PGC_clump[["ROW.NUM"]] - 1
@@ -144,9 +147,9 @@ if __name__ == '__main__' :
 
     # -------------- GROUP AND OUTPUT RESULTS -------------- #
 
-    prs_results_clump = pd.concat(res, axis = 1)
+    prs_results_clump = pd.concat(res, axis=1)
 
-    prs_results_clump.to_csv('./PRS_scoring/prs_results_clump_miss' + str(chromosome_number), header = True, index = None, sep = ' ')
+    prs_results_clump.to_csv('prs_results_clump_miss', header=True, index=None, sep=' ')
 
 timer_end = time.time()-timer_start
 
