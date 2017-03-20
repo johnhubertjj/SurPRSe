@@ -35,6 +35,8 @@ if [[ "$whereami" == *"raven"* ]]; then
   Multiple_Training_set_tables="TRUE"
   Running_in_Serial="TRUE"
   sig_thresholds=(0.0001 0.001 0.01 0.05 0.1 0.2 0.3 0.4 0.5)
+  Perform_Magma_as_well="FALSE"
+  Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates" 
 
 # Load both Plink and R
   module purge
@@ -56,21 +58,54 @@ fi
 # Note double-quotes to avoid extra parsing of funny characters in filenames
 echo "${number_of_files[@]}" 
 length_of_array=`echo "${#number_of_files[@]}"`
+num1=1
 
 # Check for make_list_file
 if [ -f ./output/${validation_set_name}_${training_set_name}_FULL_GENOME_MAKE_LIST_INPUT.txt ]; then
-  rm ./output/${validation_set_name}_${training_set_name}_FULL_GENOME_MAKE_LIST_INPUT.txt
+	rm ./output/${validation_set_name}_${training_set_name}_FULL_GENOME_MAKE_LIST_INPUT.txt
 fi
 
+# If running MAGMA as well
+if [ ${Perform_Magma_as_well} == True ]; then
+
+	# Create output directory for MAGMA results
+	if [ ! d "./output/MAGMA_set_analysis" ]; then
+		mkdir ./output/MAGMA_set_analysis
+	fi
+	
+	# Calculate the number of files there are in the table and print them to the screen
+	number_of_files_magma=($(find -E . -type f -regex '^./output/MAGMA_set_analysis/${validation_set_name}_GWAS_BGE_chr[0-9]+${Magma_validation_set_name}.bed' -exec basename {} \;))	
+	length_of_array_magma=`echo "${#number_of_files_magma[@]}"`
+	echo "${number_of_files_magma[@]}"
+	length_of_array_magma=`echo "$((${length_of_array_magma} - ${num1}))"`
+
+	# Create a make-list file specifically for magma results 
+	if [ -f ./output/MAGMA_set_analysis/${validation_set_name}_GWAS_BGE_${Magma_validation_set_name}_FULL_GENOME_MAKE_LIST_INPUT.txt ]; then
+		rm ./output/MAGMA_set_analysis/${validation_set_name}_GWAS_BGE_${Magma_validation_set_name}_FULL_GENOME_MAKE_LIST_INPUT.txt
+	fi
+	
+	for chromosome_number in `seq 0 ${length_of_array_magma}` ;
+	do
+		current_file=$(basename ${number_of_files_magma[$chromosome_number]} .bed)
+		printf "${current_file}\n%.0s" {1} >> ./output/MAGMA_set_analysis/${validation_set_name}_GWAS_BGE_${Magma_validation_set_name}_FULL_GENOME_MAKE_LIST_INPUT.txt
+	done
+	
+	cd ./output/MAGMA_set_analysis/
+	plink --merge-list ./output/MAGMA_set_analysis/${validation_set_name}_GWAS_BGE_${Magma_validation_set_name}_FULL_GENOME_MAKE_LIST_INPUT.txt --make-bed --out ./${validation_set_name}_${training_set_name}_MAGMA_FULL_GENOME
+    cd ${PBS_O_WORKDIR}
+	
+	Validation_set_name_Magma="./output/MAGMA_set_analysis/${validation_set_name}_${training_set_name}_MAGMA_FULL_GENOME"
+	
+fi
+	
 # Create Make-list file by repeating the name of each file on each line of the make-list text document
 # 1 line per name to prefix each .bin/.fam/.bed format
-num1=1
 length_of_array=`echo "$((${length_of_array} - ${num1}))"`
  
 for chromosome_number in `seq 0 ${length_of_array}` ;
 do
-current_file=$(basename ${number_of_files[$chromosome_number]} .bed)
-printf "${current_file}\n%.0s" {1} >> ./output/${validation_set_name}_${training_set_name}_FULL_GENOME_MAKE_LIST_INPUT.txt
+	current_file=$(basename ${number_of_files[$chromosome_number]} .bed)
+	printf "${current_file}\n%.0s" {1} >> ./output/${validation_set_name}_${training_set_name}_FULL_GENOME_MAKE_LIST_INPUT.txt
 done
 
 # echo "Press CTRL+C to proceed."
@@ -106,15 +141,21 @@ fi
 #########################
 #### MAGMA ANALYSIS #####
 #########################
-if [ ! -d "./extrainfo/MAGMA_analysis" ]; then
-	mkdir ./extrainfo/MAGMA_analysis
-fi
+
 ### WHERE I GOT TO ####
-Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}Creation_of_filter_file_for_magma_gene.R ./extrainfo/Creation_of_filter_file_for_magma_gene.R ${training_set_name} ${validation_set_name} ${sig_thresholds[@]}
+if [ ${Perform_Magma_as_well} == "TRUE" ]; then
+
+	Rscript ${path_to_MAGMA_scripts}RscriptEcho.R ${path_to_scripts}Creation_of_filter_file_for_magma_gene.R ./extrainfo/Creation_of_filter_file_for_magma_gene.R ${training_set_name} ${validation_set_name} ${sig_thresholds[@]} ${validation_set_name_MAGMA}.bim ${Perform_Magma_as_well}
+    sh ${path_to_scripts}PRS_with_magma.sh ${sig_thresholds[@]} ${validation_set_name} ${training_set_name} ${validation_set_name_MAGMA} ${Perform_Magma_as_well}
+
+fi
+	Perform_Magma_as_well="FALSE"
+	Validataion_FULL_GENOME="./output/${validation_set_name}_${training_set_name}_FULL_GENOME"
+	Rscript ${path_to_MAGMA_scripts}RscriptEcho.R ${path_to_scripts}Creation_of_filter_file_for_magma_gene.R ./extrainfo/Creation_of_filter_file_for_magma_gene.R ${training_set_name} ${validation_set_name} ${sig_thresholds[@]} ${validation_FULL_GENOME}.bim ${Perform_Magma_as_well}
 
 
 # Run with MAGMA
-sh ${path_to_scripts}PRS_with_magma.sh ${sig_thresholds[@]} ${validation_set_name} ${training_set_name}
+sh ${path_to_scripts}PRS_with_magma.sh ${sig_thresholds[@]} ${validation_set_name} ${training_set_name} ${validation_set_name_MAGMA} ${Perform_Magma_as_well}
 
 # Run preparation for annotation file for python scripts
 R CMD BATCH ${path_to_scripts}MAGMA_python_annotation_table_creator.R ./extrainfo/MAGMA_annotation_table_creator.Rout
