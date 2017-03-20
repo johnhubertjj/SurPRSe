@@ -112,8 +112,13 @@ rm ./output/CLOZUK_PGC_CLUMPED_chr${chromosome_number}.txt
 awk '{ print $2 }' ./output/CLOZUK_PGC_CLUMPED_FINAL_chr${chromosome_number}.txt > ./output/CLUMPED_EXTRACT_CLOZUK_chr${chromosome_number}.txt
 printf "%s\n\n" "$(tail -n +2 ./output/CLUMPED_EXTRACT_CLOZUK_chr${chromosome_number}.txt)" > ./output/CLUMPED_EXTRACT_CLOZUK_chr${chromosome_number}.txt 
 
+# Create output directory for MAGMA results
+if [ ! d "./output/MAGMA_set_analysis" ]; then
+	mkdir ./output/MAGMA_set_analysis
+fi
+	
 # Create clumped plink files
-plink --bfile ./output/CLOZUK_GWAS_BGE_chr${chromosome_number}_2 --extract ./output/CLUMPED_EXTRACT_CLOZUK_chr${chromosome_number}.txt --make-bed --out ./output/CLOZUK_GWAS_BGE_CLUMPED_chr${chromosome_number}
+plink --bfile ./output/CLOZUK_GWAS_BGE_chr${chromosome_number}_2 --extract ./output/CLUMPED_EXTRACT_CLOZUK_chr${chromosome_number}.txt --make-bed --out ./output/MAGMA_set_analysis/CLOZUK_GWAS_BGE_CLUMPED_chr${chromosome_number}
 
 # purge all modules
 module purge
