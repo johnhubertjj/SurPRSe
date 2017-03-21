@@ -19,7 +19,11 @@ if [[ "$whereami" == *"raven"* ]]; then
   path_to_PGC_conversion="~/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Summary_stat_manipulation/"
   path_to_CLOZUK_conversion="~/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Genotype_dataset_manipulation/"
   path_to_MAGMA_scripts="~/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/MAGMA/"
-  number_of_files=($(find -E . -type f -regex '^./output/CLOZUK_GWAS_BGE_CLUMPED_chr[0-9]+.bed' -exec basename {} \;))	
+  number_of_files=($(find -E . -type f -regex '^./output/CLOZUK_GWAS_BGE_CLUMPED_chr[0-9]+.bed' -exec basename {} \;))
+  path_to_covariate_file="~/c1020109/NCBI37.3/CLOZUK2.r7.select2PC.eigenvec.txt" 
+  path_to_chromosome_length_file="~/c1020109/NCBI37.3/UCSC_hg19_chromeinfo_length_of_chromosomes.txt"
+  path_to_new_fam_file="~/c1020109/NCBI37.3/CLOZUK.r7.GWAS_IDs.fam"
+  path_to_gene_annotation_file="~/c1020109/NCBI37.3/NCBI37.3.gene.loc"  
   
   # assign arguments here for now because there are so many
   training_set_usually_summary="PGC_table"
@@ -30,7 +34,7 @@ if [[ "$whereami" == *"raven"* ]]; then
   MAF_threshold=0.01
   MAF_genotype="TRUE"
   INFO_summary="TRUE"
-  INFO_threshold=0.6	
+  INFO_threshold=0.9	
   Chromosomes_to_analyse=(`seq 1 22`)
   Multiple_Training_set_tables="TRUE"
   Running_in_Serial="TRUE"
@@ -42,8 +46,8 @@ if [[ "$whereami" == *"raven"* ]]; then
   module purge
   module load R/3.3.0
   module load plink/1.9c3
-  module load python/2.7.9-mpi
-  module load magma...something
+  module load python/2.7.11
+  module load magma/1.06
 
 elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   cd ~/Documents/testing_PRS_chromosome_22/whole_genome_testing/
@@ -142,11 +146,10 @@ fi
 #### MAGMA ANALYSIS #####
 #########################
 
-### WHERE I GOT TO ####
 if [ ${Perform_Magma_as_well} == "TRUE" ]; then
 
-	Rscript ${path_to_MAGMA_scripts}RscriptEcho.R ${path_to_scripts}Creation_of_filter_file_for_magma_gene.R ./extrainfo/Creation_of_filter_file_for_magma_gene.R ${training_set_name} ${validation_set_name} ${sig_thresholds[@]} ${validation_set_name_MAGMA}.bim ${Perform_Magma_as_well}
-    sh ${path_to_scripts}PRS_with_magma.sh ${sig_thresholds[@]} ${validation_set_name} ${training_set_name} ${validation_set_name_MAGMA} ${Perform_Magma_as_well}
+	Rscript ${path_to_MAGMA_scripts}RscriptEcho.R ${path_to_scripts}Creation_of_filter_file_for_magma_gene.R ./extrainfo/Creation_of_filter_file_for_magma_gene.R ${training_set_name} ${validation_set_name} ${sig_thresholds[@]} ${validation_set_name_MAGMA}.bim ${Perform_Magma_as_well} ${INFO_summary} ${INFO_threshold}
+    sh ${path_to_scripts}MAGMA_analysis_whole_genome_complete.sh ${sig_thresholds[@]} ${validation_set_name} ${training_set_name} ${validation_set_name_MAGMA} ${Perform_Magma_as_well}
 
 fi
 	Perform_Magma_as_well="FALSE"
@@ -155,8 +158,9 @@ fi
 
 
 # Run with MAGMA
-sh ${path_to_scripts}PRS_with_magma.sh ${sig_thresholds[@]} ${validation_set_name} ${training_set_name} ${validation_set_name_MAGMA} ${Perform_Magma_as_well}
+sh ${path_to_scripts}MAGMA_analysis_whole_genome_complete.sh ${sig_thresholds[@]} ${validation_set_name} ${training_set_name} ${validation_set_name_MAGMA} ${Perform_Magma_as_well}
 
+### THE FOLLOWING BELOW NEEDS TO BE IN A NEW SCRIPT ####
 # Run preparation for annotation file for python scripts
 R CMD BATCH ${path_to_scripts}MAGMA_python_annotation_table_creator.R ./extrainfo/MAGMA_annotation_table_creator.Rout
 
