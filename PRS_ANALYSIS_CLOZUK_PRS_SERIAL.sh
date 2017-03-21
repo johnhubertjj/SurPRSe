@@ -41,6 +41,8 @@ if [[ "$whereami" == *"raven"* ]]; then
   sig_thresholds=(0.0001 0.001 0.01 0.05 0.1 0.2 0.3 0.4 0.5)
   Perform_Magma_as_well="FALSE"
   Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates" 
+  # either "extended" "normal" or "both" : change to a numerical input in the future
+  Gene_regions= "both"
 
 # Load both Plink and R
   module purge
@@ -122,7 +124,7 @@ plink --merge-list ./${validation_set_name}_${training_set_name}_FULL_GENOME_MAK
 cd ..
 
 # merge all the PGC SNPs together into one table
-Rscript ${path_to_scripts}RscriptEcho.R ${path_to_PGC_conversion}combining_summary_stats_tables_after_conversion_to_CHR_POS.R ./extrainfo/${training_set_name}_conversion.Rout ${training_set_usually_name} ${Multiple_Training_set_tables} ${Chromosomes_to_analyse}  
+Rscript ${path_to_scripts}RscriptEcho.R ${path_to_PGC_conversion}combining_summary_stats_tables_after_conversion_to_CHR_POS.R ./extrainfo/${training_set_name}_conversion.Rout ${training_set_usually_name} ${Multiple_Training_set_tables} ${Chromosomes_to_analyse[@]}  
 
 # recode genotypes for input into Python
 plink --bfile ./output/${validation_set_name}_${training_set_name}_FULL_GENOME --recode A --out ./output/${validation_set_name}_${training_set_name}_FULL_GENOME
@@ -162,7 +164,7 @@ sh ${path_to_scripts}MAGMA_analysis_whole_genome_complete.sh ${sig_thresholds[@]
 
 ### THE FOLLOWING BELOW NEEDS TO BE IN A NEW SCRIPT ####
 # Run preparation for annotation file for python scripts
-R CMD BATCH ${path_to_scripts}MAGMA_python_annotation_table_creator.R ./extrainfo/MAGMA_annotation_table_creator.Rout
+Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}MAGMA_python_annotation_table_creator.R ./extrainfo/MAGMA_annotation_table_creator.Rout ${training_set_name} ${validation_set_name} ${path_to_chromosome_length_file} ${Validation_FULL_GENOME} ${path_to_gene_annotation_file} ${gene_regions} ${Chromosomes_to_analyse[@]}   
 
 if [ "$whereami" == "raven13" ]; then
    	python ${path_to_scripts}PRS_scoring_parallel_clump_maf_JJ.py
