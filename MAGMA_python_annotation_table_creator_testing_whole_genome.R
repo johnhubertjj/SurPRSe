@@ -12,6 +12,12 @@ System_information <- Sys.info()
 whereami <- System_information['user']
 args <- commandArgs(trailingOnly = T)
 
+Training_name <- args[3]
+Validation_name <- args[4]
+UCSC_file <- args[5]
+Validation_dataset <- args[6]
+NCBI_file <- args[7]
+
 # Set up library
 library("data.table")
 library("gtools")
@@ -22,25 +28,6 @@ setwd(".")
 ###############################
 ## Location Finding Function ##
 ###############################
-
-Batch.assignment <- function(wherami) {
-  if (whereami == "johnhubert") {
-    assign("chromosome.number", 22, envir = .GlobalEnv)
-    
-  } else if (whereami == 'JJ') {
-    assign("chromosome.number", 22, envir = .GlobalEnv)
-    
-  } else if (whereami == "c1020109") {
-    
-    # Preparing to run in Job array
-    AI <- Sys.getenv("PBS_ARRAY_INDEX")
-    AI <- as.numeric(AI)
-    assign("chromosome.number", AI, envir = .GlobalEnv)
-    
-  } else {
-    stop("current environment NOT at work/home or on servers, please add to script above to specify where you are and what type of analysis you want to do")
-  }
-}
 
 # Find out whether you want to run the script in a batch format or in serial
 
@@ -214,128 +201,75 @@ adding_unread_genes <- function(Gene_clumped_SNPs, MAGMA.gene.regions.for.chromo
   assign("test_data_frame",Gene_clumped_SNPs,envir = .GlobalEnv)
 }
 
-# Run script if you are running as a Job array #
 
-if( args[1] == 'Batch') {
-  # Assign chromosome number as job array variable
-  Batch.assignment(whereami)
-
-
-  ## Read in clumped data
-  clumped_SNPs <- fread("combined_CLOZUK_PGC_CLUMPED_FINAL.txt")
-  wd <-getwd()
-
-  ## read in MAGMA's the gene regions 
-  MAGMA.gene.regions <- fread("NCBI37.3.gene.loc",colClasses = c("numeric","character",rep("numeric",2),rep("character",2)))
-  colnames(MAGMA.gene.regions) <- c("ID","Chromosome","BP_1","BP_2","strand","Gene_symbol")
+## Read in maximum Gene limits for each chromosome
+UCSC_chromosome_lengths <- fread(UCSC_file)
+setnames(UCSC_chromosome_lengths,c("CHR","BP","hyperlink"))
+UCSC_chromosome_lengths <- UCSC_chromosome_lengths[,.(CHR,BP)]
   
-  ## Limit the data down to the specific chromsome the array is on
-  Index.for.chromosome <- MAGMA.gene.regions[,.I[grep(paste0("^",chromosome.number),Chromosome, perl = T, invert = F)]]
-  MAGMA.gene.regions.for.chromosome <- MAGMA.gene.regions[Index.for.chromosome]
-  MAGMA.gene.regions.for.chromosome <- MAGMA.gene.regions.for.chromosome[,c('ID','Chromosome','BP_1','BP_2','Gene_symbol'), with = F]
+## Sex chromosomes involved?
+# if (argument_for_sex_chromosomes == F) {
+UCSC_chromosome_lengths <- UCSC_chromosome_lengths[!(CHR == "chrX" | CHR == "chrY")] 
+UCSC_chromosome_lengths <- UCSC_chromosome_lengths[mixedorder(UCSC_chromosome_lengths$CHR)]
+#}
   
-  ## remove orginal tables
-  rm(MAGMA.gene.regions)
   
-  # Find clumped SNPs
-  BP.clumped.SNPs <- clumped_SNPs$BP
+## Read in clumped data
+clumped_SNPs <- fread(Validation_dataset)
+setnames(clumped_SNPs,c("CHR","SNP", "GD", "BP", "A1", "A2"))
+wd <- getwd()
+  
 
-  # Create table and write to file for reference
-  Assigning_genes(MAGMA.gene.regions.for.chromosome, 
-                  BP.clumped.SNPs = BP.clumped.SNPs, 
-                  clumped_SNPs = clumped_SNPs, 
-                  outputfilename = "Genomic_1000kb_r2_zeropoint2_PGC_CLOZUK_chr_")
-
-  # read in MAGMA's input and add any genes which happen to be inside other genes or crossed over with other genes
-  GENES_to_snps <- scan(file = paste0("./output/CLOZUK_PRS_CLUMPED_chr",chromosome.number,".genes.annot"), what = "", sep = "\n")
-  y <- strsplit(GENES_to_snps, "[[:space:]]+")
-  names(y) <- sapply(y, '[[', 1)
-  y <- lapply(y, '[', -1)
-
-  y[[1]] <- NULL
-  y[[1]] <- NULL
-
-  adding_unread_genes(e$test_clumped_snps,MAGMA.gene.regions.for.chromosome, clumped_SNPs, y, chromosome.number)  
-
-  names(test_data_frame) <- c("CHR" ,"SNP", "BP", "P", "Gene_name","BP_START","BP_END","GENE")
-  setcolorder(test_data_frame, c("CHR","SNP","BP","GENE","BP_START","BP_END","P","Gene_name"))
-
-  which(duplicated(test_data_frame$SNP,fromLast = T))
-
-  write.table(test_data_frame[, c(1:6), with = F], file = paste0("./output/MAGMA_Gene_regions_for_python_script_chr_",chromosome.number,".txt"), quote = F, row.names = F)
-  write(unique(test_data_frame$Gene_name), file = paste0("./output/PGC_CLOZUK_unique_genes_chr_",chromosome.number,".txt"))
+## read in MAGMA's the gene regions 
+MAGMA.gene.regions <- fread(NCBI_file,colClasses = c("numeric","character",rep("numeric",2),rep("character",2)))
+setnames(MAGMA.gene.regions, c("Gene","CHR","BP_START","BP_END","STRAND","GENE_NAME"))
+  
+current_table_name <- MAGMA.gene.regions
+# equivalent to MAGMAs window option without ignoring strand
+  
+current_table_name <- current_table_name[STRAND == "+", BP_start_extended := BP_START - 35000]
+current_table_name <- current_table_name[STRAND == "+", BP_end_extended := BP_END + 10000]
+current_table_name <- current_table_name[STRAND == "-", BP_start_extended := BP_START - 10000]
+current_table_name <- current_table_name[STRAND == "-",BP_end_extended := BP_END + 35000]
+  
+if (any(current_table_name$BP_start_extended < 0)) {
+  reset.to.zero <- which(current_table_name$BP_start_extended < 0)
+  current_table_name <- current_table_name[reset.to.zero,BP_start_extended := 0]
 }
-
-# Run script if you are running in serial #
-if (args[1] == 'Serial' ) {
   
-  ## Read in maximum Gene limits for each chromosome
-  UCSC_chromosome_lengths <- fread("./output/UCSC_hg19_chromeinfo_length_of_chromosomes.txt")
-  setnames(UCSC_chromosome_lengths,c("CHR","BP","hyperlink"))
-  UCSC_chromosome_lengths <- UCSC_chromosome_lengths[,.(CHR,BP)]
-  
-  ## Sex chromosomes involved?
-  # if (argument_for_sex_chromosomes == F) {
-  UCSC_chromosome_lengths <- UCSC_chromosome_lengths[!(CHR == "chrX" | CHR == "chrY")] 
-  UCSC_chromosome_lengths <- UCSC_chromosome_lengths[mixedorder(UCSC_chromosome_lengths$CHR)]
-  #}
-  
-  
-  ## Read in clumped data
-  clumped_SNPs <- fread("./output/CLOZUK_PGC_FULL_GENOME_without_erroneous_SNPs.bim")
-  setnames(clumped_SNPs,c("CHR","SNP", "GD", "BP", "A1", "A2"))
-  wd <- getwd()
-  
-
-  ## read in MAGMA's the gene regions 
-  MAGMA.gene.regions <- fread("./output/NCBI37.3.gene.loc",colClasses = c("numeric","character",rep("numeric",2),rep("character",2)))
-  setnames(MAGMA.gene.regions, c("Gene","CHR","BP_START","BP_END","STRAND","GENE_NAME"))
-  
-  current_table_name <- MAGMA.gene.regions
-  # equivalent to MAGMAs window option without ignoring strand
-  
-  current_table_name <- current_table_name[STRAND == "+", BP_start_extended := BP_START - 35000]
-  current_table_name <- current_table_name[STRAND == "+", BP_end_extended := BP_END + 10000]
-  current_table_name <- current_table_name[STRAND == "-", BP_start_extended := BP_START - 10000]
-  current_table_name <- current_table_name[STRAND == "-",BP_end_extended := BP_END + 35000]
-  
-  if (any(current_table_name$BP_start_extended < 0)) {
-    reset.to.zero <- which(current_table_name$BP_start_extended < 0)
-    current_table_name <- current_table_name[reset.to.zero,BP_start_extended := 0]
+for (ichr in 1:nrow(UCSC_chromosome_lengths)) {
+  current_table_chromosome_specific <- current_table_name[CHR == ichr]
+    
+  if (any(current_table_chromosome_specific$BP_end_extended > UCSC_chromosome_lengths$BP[ichr])){
+    set_chromosome_length_limit <- which (current_table_chromosome_specific$BP_end_extended > UCSC_chromosome_lengths$BP[ichr])
+    current_table_chromosome_specific <- current_table_chromosome_specific[set_chromosome_length_limit, UCSC_chromosome_lengths$BP[ichr]]
+    assign(x = paste0("MAGMA.gene.regions.chromosome", ichr), value = current_table_chromosome_specific, envir = .GlobalEnv)
+    print(paste0("needed to adjust gene boundaries at chromosome", ichr, " at Genes: ", current_table_chromosome_specific$GENE_NAME[set_chromosome_length_limit]))
+  }else{
+    assign(x = paste0("MAGMA.gene.regions.chromosome", ichr), value = current_table_chromosome_specific, envir = .GlobalEnv)
   }
-  
-  for (ichr in 1:nrow(UCSC_chromosome_lengths)) {
-    current_table_chromosome_specific <- current_table_name[CHR == ichr]
-    
-    if (any(current_table_chromosome_specific$BP_end_extended > UCSC_chromosome_lengths$BP[ichr])){
-      set_chromosome_length_limit <- which (current_table_chromosome_specific$BP_end_extended > UCSC_chromosome_lengths$BP[ichr])
-      current_table_chromosome_specific <- current_table_chromosome_specific[set_chromosome_length_limit, UCSC_chromosome_lengths$BP[ichr]]
-      assign(x = paste0("MAGMA.gene.regions.chromosome", ichr), value = current_table_chromosome_specific, envir = .GlobalEnv)
-      print(paste0("needed to adjust gene boundaries at chromosome", ichr, " at Genes: ", current_table_chromosome_specific$GENE_NAME[set_chromosome_length_limit]))
-    }else{
-      assign(x = paste0("MAGMA.gene.regions.chromosome", ichr), value = current_table_chromosome_specific, envir = .GlobalEnv)
-    }
-  } 
+} 
 
   
   
-  # Now start on the chromosomes
-  for (l in 1:22){
+# Now start on the chromosomes
+for (l in 1:22){
     
-    temp_whole_genome_table <- clumped_SNPs[CHR == l]
-    temp_gene_annotation_table <- eval(parse(text = paste0("MAGMA.gene.regions.chromosome",l)))
+  temp_whole_genome_table <- clumped_SNPs[CHR == l]
+  temp_gene_annotation_table <- eval(parse(text = paste0("MAGMA.gene.regions.chromosome",l)))
     
-    if(nrow(temp_whole_genome_table) == 0) {
-      message <- paste0("The number of SNPs on chromosome ",l,"is empty")
-      write(message, file = "whole_genome_analysis_info.txt", append = T)
-      next()
-    }
-    
-    # Find clumped SNPs
-    BP.clumped.SNPs <- temp_whole_genome_table$BP
-    outputfilename_normal <- paste0("testing_gene_output_chromosome_",l)
-    Assigning_genes(MAGMA_file = temp_gene_annotation_table, clumped_SNPs = temp_whole_genome_table, BP.clumped.SNPs = BP.clumped.SNPs, outputfilename = outputfilename_normal, gene.regions = "normal")
+  if(nrow(temp_whole_genome_table) == 0) {
+    message <- paste0("The number of SNPs on chromosome ",l,"is empty")
+    write(message, file = "./output/whole_genome_analysis_info.txt", append = T)
+    next()
   }
+    
+  # Find clumped SNPs
+  BP.clumped.SNPs <- temp_whole_genome_table$BP
+  outputfilename_normal <- paste0("testing_gene_output_chromosome_",l)
+  
+  Assigning_genes(MAGMA_file = temp_gene_annotation_table, clumped_SNPs = temp_whole_genome_table, BP.clumped.SNPs = BP.clumped.SNPs, outputfilename = outputfilename_normal, gene.regions = "normal")
+}
   
   
 # Read in the 22 tables here and continue!

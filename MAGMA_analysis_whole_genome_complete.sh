@@ -1,5 +1,5 @@
 #! /bin/bash
-module load magma/versionhere
+module load magma/1.06
 
 # Read in the significance thresholds you wish to perform on the dataset: make sure you read the variable in as an array 
 sig=( "${1[@]}" )

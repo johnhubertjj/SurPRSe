@@ -228,7 +228,7 @@ write.table(test_data_frame,file = paste0("./output/MAGMA_Gene_regions_for_pytho
 ##Read in PGC.data
 
 PGC <- fread("./output/PGC_table_for_python.txt")
-test_data_frame <- fread("./output/MAGMA_Gene_regions_for_python_script.txt ")
+test_data_frame <- fread("./output/MAGMA_Gene_regions_for_python_script.txt")
 setnames(test_data_frame, c("CHR", "SNP", "BP", "Gene_ID", "BP_1", "BP_2"))
 ## Excess info if required ##
 #############################
@@ -254,8 +254,8 @@ setnames(test_data_frame, c("CHR", "SNP", "BP", "Gene_ID", "BP_1", "BP_2"))
 
 # SCORING 
   
+#p.value.thresholds <- c(0.0001,0.001,0.01,0.05,0.1,0.2,0.3,0.4,0.5)
 p.value.thresholds <- c(0.05,0.1,0.2,0.3,0.4,0.5)
-
 scoring_output_file <- paste0("scoring_PGC_CLOZUK_chromosome_", chromosome.number)
 
 ## check that it is merging properly here (after analysis is run)
@@ -276,22 +276,29 @@ for (i in 1:length(p.value.thresholds)) {
     a <- a[SNPs, .(SNP,A1,BETA)]
   
     filename <- paste0('./output/score/whole_Genome_test_', Genes_index[l],'_', p.value.thresholds[i],".score")
-  
+    
+    if(length(a$SNP) == 1){
+      one_SNP_file <- paste0("./output/whole_Genome_test_", p.value.thresholds[i],"_one_SNP_only_dictionary.txt")
+      genes_and_pvalue_one_SNP <- data.frame(Genes_index[l],p.value.thresholds[i])
+      
+      write.table(genes_and_pvalue_one_SNP,file = one_SNP_file, quote = F, append = T, col.names = F, row.names = F)
+    }
 
     write.table(file = filename, a, row.names = F, col.names = F, quote = F, sep="\t")
   
     command <- paste0('plink --bfile ./output/CLOZUK_PGC_FULL_GENOME_without_erroneous_SNPS --score ', filename, " --out /Users/JJ/Dropbox/whole_genome_testing/output/Profiles/whole_Genome_test_", Genes_index[l],'_', p.value.thresholds[i], "_a")
     system(command)
     rm(a)
-    genes_and_pvalue <- c(Genes_index[l],p.value.thresholds[i])
-    Genes_used <- rbind(Genes_used,genes_and_pvalue)
+    genes_and_pvalue <- data.frame(Genes_index[l],p.value.thresholds[i])
+    write.table(genes_and_pvalue, file = "./output/Index_of_genes_and_pval_1.txt", quote = F, col.names = F, row.names = F, append = T)
+    
     }else{
       next()
     }
   }
 }
-write.table(Genes_used, file = "./output/Index_of_genes_and_pval_1.txt", quote = F, col.names = T, row.names = F)
-  #score
+
+#score
   
 for (i in 1:(length(p.value.thresholds)))
 {

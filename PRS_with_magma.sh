@@ -1,6 +1,10 @@
 #!/bin/bash
 
-chromosome_number=$1
+sig=$1
+Validation_name=$2
+Training_name=$3
+Validation_dataset=$4
+
 echo $PWD
 whereami=$(uname -n)
 echo "$whereami"
