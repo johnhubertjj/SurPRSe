@@ -392,8 +392,8 @@ if(Gene_regions_to_analyse == "normal" | Gene_regions_to_analyse == "both"){
     
     which(duplicated(test_data_frame$SNP,fromLast = T))
     
-    write.table(test_data_frame[, c(1:6), with = F], file = paste0("./output/MAGMA_Gene_regions_for_python_script.txt"), quote = F, row.names = F, col.names = F)
-    write(unique(test_data_frame$Gene_name),file = paste0("./output/PGC_CLOZUK_unique_genes.txt"))
+    write.table(test_data_frame[, c(1:6), with = F], file = paste0("./output/MAGMA_Gene_regions_for_",Validation_name, "_", Training_name,"txt"), quote = F, row.names = F, col.names = F)
+    write(unique(test_data_frame$Gene_name),file = paste0("./output/",Training_name, "_", Validation_name, "_unique_genes.txt"))
     
 
 }

@@ -98,7 +98,7 @@ if [ ${Perform_Magma_as_well} == True ]; then
 	
 	cd ./output/MAGMA_set_analysis/
 	plink --merge-list ./output/MAGMA_set_analysis/${validation_set_name}_GWAS_BGE_${Magma_validation_set_name}_FULL_GENOME_MAKE_LIST_INPUT.txt --make-bed --out ./${validation_set_name}_${training_set_name}_MAGMA_FULL_GENOME
-    cd ${PBS_O_WORKDIR}
+        cd ${PBS_O_WORKDIR}
 	
 	Validation_set_name_Magma="./output/MAGMA_set_analysis/${validation_set_name}_${training_set_name}_MAGMA_FULL_GENOME"
 	
