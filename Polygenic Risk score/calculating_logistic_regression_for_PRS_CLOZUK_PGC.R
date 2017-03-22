@@ -1,25 +1,27 @@
 # Library
 library(mgcv)
 library(testit)
+library(data.table)
 
-
-# logistic regression calculation #
+## logistic regression calculation #
 sig <-c(1e-4,1e-3,1e-2,0.05,0.1,0.2,0.3,0.4,0.5)
 
 
 ## Read in covariates and fam file !may need to put fam file earlier
 covariates <- fread("/Users/JJ/Documents/PhD_clumping/Profiles/CLOZUK2.r7.select2PC.eigenvec")
-fam2 <- fread("/Users/JJ/Dropbox/PhD_clumping/Profiles/CLOZUK.r7.GWAS_IDs.fam")
+fam2 <- fread("/Users/JJ/Dropbox/CLOZUK.r7.GWAS_IDs.fam")
 colnames(fam2) <- c("FID","IID","PID","MID","Sex","PHENO")
 
 ## Read in the file identifiers and check for duplicates
-Files_to_parse_total <- read.table("Index_of_genes_and_pval_1.txt",stringsAsFactors = F)
-Files_to_parse_total <- Files_to_parse_total[3:nrow(Files_to_parse_total),]
+Files_to_parse_total <- fread("./output/Index_of_genes_and_pval_1.txt",stringsAsFactors = F)
+names(Files_to_parse_total) <- c("Genes", "pval")
+Files_to_parse_total <- Files_to_parse_total[,unique(Genes), by = pval]
+Files_to_parse_total <- Files_to_parse_total[,.(V1,pval)]
 names(Files_to_parse_total) <- c("Genes", "pval")
 duplicate_rows <- uniquecombs(Files_to_parse_total, ordered = T)
 
 ## Create list for storage of p-values from logistic regression
-x <- matrix(data=rep(NA,2*length(unique(Files_to_parse_total$Genes))), ncol = 2, nrow = 422)
+x <- matrix(data=rep(NA,2*length(unique(Files_to_parse_total$Genes))), ncol = 2, nrow = 10407)
 residuals <- list(x,x,x,x,x,x,x,x,x)
 names(residuals) <- sig
 
@@ -39,22 +41,26 @@ colnames(no_score) <- c("Genes", "pval")
 memory.limit(20000)
 ## Calculate PRS using plink file format
 for (i in 1:length(sig)) {
-  
+
   # Use the same table and select out the pvalue matching all the genes
   Files_to_parse <- Files_to_parse_total[which(Files_to_parse_total$pval == sig[i]), ]
   
   # Calculate PRS per gene per individual for each pval threshold
   for (l in 1:nrow(Files_to_parse)){
     
+    if( l == 1){
+      cat("threshold",sig[i],"has begun")
+    }
+    
     # Check if you can read in the file from reference guide 
-    if(has_error(fread(paste0("./CLOZUK_PGC_PRS_test/Profiles/chr22_test_", Files_to_parse$Genes[l], "_", Files_to_parse$pval[l], "_a.profile"))) == T){
+    if(has_error(fread(paste0("./output/Profiles/whole_Genome_test_", Files_to_parse$Genes[l], "_", Files_to_parse$pval[l], "_a.profile"))) == T){
       unrecorded_pvals_genes <- Files_to_parse[l,]
       erroneous_genes <- rbind(erroneous_genes, unrecorded_pvals_genes)
       next()
     }
     
     # read in profiles
-    PRS.profiles <-fread(paste0("./CLOZUK_PGC_PRS_test/Profiles/chr22_test_", Files_to_parse$Genes[l], "_", Files_to_parse$pval[l], "_a.profile"))
+    PRS.profiles <-fread(paste0("./output/Profiles/whole_Genome_test_", Files_to_parse$Genes[l], "_", Files_to_parse$pval[l], "_a.profile"))
      
      if (length(which(PRS.profiles$PHENO == -9)) >= 1){
     rows_to_remove <- which(PRS.profiles$PHENO == -9)
