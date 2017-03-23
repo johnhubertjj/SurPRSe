@@ -19,6 +19,7 @@ Validation_dataset <- args[6]
 NCBI_file <- args[7]
 Gene_regions_to_analyse <- args[8]
 chromosomes_to_analyse <- as.numeric(args[9])
+
 #chromosomes_to_analyse <- c(1:22)
 #Gene_regions_to_analyse <- "both"
 
@@ -416,17 +417,7 @@ if (Gene_regions_to_analyse == "expanded" | Gene_regions_to_analyse == "both"){
   
   which(duplicated(test_data_frame_extended$SNP,fromLast = T))
   
-  write.table(test_data_frame_extended[, c(1:6), with = F], file = paste0("./output/MAGMA_Gene_regions_for_python_script_extended.txt"), quote = F, row.names = F,col.names = F)
-  write(unique(test_data_frame_extended$Gene_name),file = paste0("./output/PGC_CLOZUK_unique_genes_extended.txt"))
+  write.table(test_data_frame_extended[, c(1:6), with = F], file = paste0("./output/MAGMA_Gene_regions_for_",Validation_name, "_", Training_name,"_extended.txt"), quote = F, row.names = F, col.names = F)
+  write(unique(test_data_frame_extended$Gene_name),file = paste0("./output/",Training_name, "_", Validation_name, "_unique_genes_extended.txt"))
 }
 
-
-  
-  names(test_data_frame) <- c("CHR" ,"SNP", "BP", "P", "Gene_name","BP_START","BP_END","GENE")
-  setcolorder(test_data_frame, c("CHR","SNP","BP","GENE","BP_START","BP_END","P","Gene_name"))
-  
-  which(duplicated(test_data_frame$SNP,fromLast = T))
-  
-  write.table(test_data_frame[, c(1:6), with = F], file = paste0("./output/MAGMA_Gene_regions_for_python_script_chr_",chromosome.number,".txt"), quote = F, row.names = F)
-  write(unique(test_data_frame$Gene_name), file = paste0("./output/PGC_CLOZUK_unique_genes_chr_",chromosome.number,".txt"))
-}

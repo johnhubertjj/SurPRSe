@@ -39,7 +39,7 @@ if (INFO_decision == "YES") {
   Info_threshold <- as.numeric(args[9])
   PGC_CLOZUK_merged <- PGC_CLOZUK_merged[INFO > Info_threshold]
 }
-
+# Sig_thresholds <- c(0.0001, 0.001, 0.01 ,0.05, 0.1, 0.2, 0.3, 0.4, 0.5)
 Sig_thresholds2 <- c("0.0001","0.001","0.01","0.05","0.1","0.2","0.3","0.4","0.5")
 
 x <- NULL
@@ -57,11 +57,11 @@ for (i in 1:length(Sig_thresholds)) {
 if (Magma_or_no_Magma_analysis == "TRUE") {
   
   for (i in 1:length(Sig_thresholds)) {
-    write.table(SNPs[[i]], file = paste0("./MAGMA_set_analysis/", Sig_thresholds2[i], Validation_name, "_", Training_name, "_P_Vals_reference_file_magma_analysis.txt"), quote = F, row.names = F)
+    write.table(SNPs[[i]], file = paste0("./output/MAGMA_set_analysis/", Sig_thresholds2[i], Validation_name, "_", Training_name, "_P_Vals_reference_file_magma_analysis.txt"), quote = F, row.names = F)
 }
 }else{
   for (i in 1:length(Sig_thresholds)) {
-    write.table(SNPs[[i]], file = paste0(Sig_thresholds2[i], Validation_name, "_", Training_name, "_P_Vals_reference_file.txt"), quote = F, row.names = F)
+    write.table(SNPs[[i]], file = paste0("./output/",Sig_thresholds2[i], Validation_name, "_", Training_name, "_P_Vals_reference_file.txt"), quote = F, row.names = F)
   }
 }
 
