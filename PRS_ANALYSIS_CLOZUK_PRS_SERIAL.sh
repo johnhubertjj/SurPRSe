@@ -42,7 +42,7 @@ if [[ "$whereami" == *"raven"* ]]; then
   Perform_Magma_as_well="FALSE"
   Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates" 
   # either "extended" "normal" or "both" : change to a numerical input in the future
-  Gene_regions= "both"
+  Gene_regions= "expanded"
 
 # Load both Plink and R
   module purge
@@ -75,12 +75,12 @@ fi
 if [ ${Perform_Magma_as_well} == True ]; then
 
 	# Create output directory for MAGMA results
-	if [ ! d "./output/MAGMA_set_analysis" ]; then
+	if [ ! -d "./output/MAGMA_set_analysis" ]; then
 		mkdir ./output/MAGMA_set_analysis
 	fi
 	
 	# Calculate the number of files there are in the table and print them to the screen
-	number_of_files_magma=($(find -E . -type f -regex '^./output/MAGMA_set_analysis/${validation_set_name}_GWAS_BGE_chr[0-9]+${Magma_validation_set_name}.bed' -exec basename {} \;))	
+	number_of_files_magma=($(find -E . -type f -regex "^./output/MAGMA_set_analysis/${validation_set_name}_GWAS_BGE_chr[0-9]+${Magma_validation_set_name}.bed" -exec basename {} \;))	
 	length_of_array_magma=`echo "${#number_of_files_magma[@]}"`
 	echo "${number_of_files_magma[@]}"
 	length_of_array_magma=`echo "$((${length_of_array_magma} - ${num1}))"`
@@ -160,11 +160,23 @@ fi
 
 
 # Run with MAGMA
-sh ${path_to_scripts}MAGMA_analysis_whole_genome_complete.sh ${sig_thresholds[@]} ${validation_set_name} ${training_set_name} ${validation_set_name_MAGMA} ${Perform_Magma_as_well}
+sh ${path_to_scripts}MAGMA_analysis_whole_genome_complete.sh ${sig_thresholds[@]} ${validation_set_name} ${training_set_name} ${validation_set_name_MAGMA} ${Perform_Magma_as_well} ${Gene_regions}
 
 ### THE FOLLOWING BELOW NEEDS TO BE IN A NEW SCRIPT ####
 # Run preparation for annotation file for python scripts
-Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}MAGMA_python_annotation_table_creator.R ./extrainfo/MAGMA_annotation_table_creator.Rout ${training_set_name} ${validation_set_name} ${path_to_chromosome_length_file} ${Validation_FULL_GENOME} ${path_to_gene_annotation_file} ${gene_regions} ${Chromosomes_to_analyse[@]}   
+Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}MAGMA_python_annotation_table_creator.R ./extrainfo/MAGMA_annotation_table_creator.Rout ${training_set_name} ${validation_set_name} ${path_to_chromosome_length_file} ${Validation_FULL_GENOME} ${path_to_gene_annotation_file} ${Gene_regions} ${Chromosomes_to_analyse[@]}   
+
+# Make both directories for the profiles and the scores
+if [ ! -d "./output/PRS_scoring/score" ]; then
+	mkdir ./output/PRS_scoring/score
+fi
+
+if [ ! -d "./output/PRS_scoring/score" ]; then
+	mkdir ./output/PRS_scoring/Profiles
+fi
+
+# Calculate the Polygenic score using plink within an R script (for now)
+Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}PRS_scoring_whole_genome.R ./extrainfo/PRS_scoring_whole_genome.Rout ${training_set_name} ${validation_set_name} ${sig_thresholds[@]} ${Gene_regions} 
 
 if [ "$whereami" == "raven13" ]; then
    	python ${path_to_scripts}PRS_scoring_parallel_clump_maf_JJ.py

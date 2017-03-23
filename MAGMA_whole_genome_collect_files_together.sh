@@ -15,7 +15,7 @@
   Perform_Magma_as_well="True"
   Magma_validation_set_name="_magma_input"
   # either "extended" "normal" or "both" : change to a numerical input in the future
-  Gene_regions= "both"
+  Gene_regions="both"
 
 # Load both Plink and R
 #  module purge
@@ -26,7 +26,7 @@
 
   cd ~/Dropbox/whole_genome_testing/
   path_to_scripts='/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/'
-  number_of_files=($(find -E . -type f -regex '^./output/CLOZUK_GWAS_BGE_CLUMPED_chr[0-9]+.bed' -exec basename {} \;))
+  number_of_files=($(find -E . -type f -regex "^./output/CLOZUK_GWAS_BGE_CLUMPED_chr[0-9]+.bed" -exec basename {} \;))
   path_to_PGC_conversion="/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Summary_stat_manipulation"
   path_to_CLOZUK_conversion="/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Genotype_dataset_manipulation"
 
@@ -36,14 +36,14 @@
 
 # If running MAGMA as well
 # Create output directory for MAGMA results
-if [ ! d "./output/MAGMA_set_analysis" ]; then
+if [ ! -d "./output/MAGMA_set_analysis" ]; then
         mkdir ./output/MAGMA_set_analysis
 fi
 
 num1=1
         
 # Calculate the number of files there are in the table and print them to the screen
-number_of_files_magma=($(find -E . -type f -regex '^./output/${validation_set_name}_GWAS_BGE_chr[0-9]+${Magma_validation_set_name}.bed' -exec basename {} \;))       
+number_of_files_magma=($(find -E . -type f -regex "^./output/${validation_set_name}_GWAS_BGE_chr[0-9]+${Magma_validation_set_name}.bed" -exec basename {} \;))       
 length_of_array_magma=`echo "${#number_of_files_magma[@]}"`
 echo "${number_of_files_magma[@]}"
 length_of_array_magma=`echo "$((${length_of_array_magma} - ${num1}))"`
