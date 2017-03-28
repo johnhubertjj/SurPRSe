@@ -20,27 +20,41 @@ if [[ "$whereami" == *"raven"* ]]; then
   # assign a new variable for the PBS_ARRAY_variable
   chromosome_number=${PBS_ARRAY_INDEX}
   
-  # assign arguments here for now because there are so many (later use qsub -v var1=a,var2=b *POLY*.sh)
-  training_set_usually_summary="PGC_table${chromosome_number}"
-  validation_set_usually_genotype="Gem_chromosome_${chromosome_number}"
-  training_set_name="PGC"
-  validation_set_name="Gem"
-  MAF_summary="NO"
-  MAF_genotype="YES"
-  INFO_summary="YES"
-  INFO_threshold=0.9
-  dataset_directory=GeM_work
+  cd $PBS_O_WORKDIR
+  path_to_scripts="~/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/"
+  path_to_PGC_conversion="~/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Summary_stat_manipulation/"
+  path_to_CLOZUK_conversion="~/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Genotype_dataset_manipulation/"
+  path_to_MAGMA_scripts="~/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/MAGMA/"
+  number_of_files=($(find -E . -type f -regex '^./output/CLOZUK_GWAS_BGE_CLUMPED_chr[0-9]+.bed' -exec basename {} \;))
+  path_to_covariate_file="~/c1020109/NCBI37.3/CLOZUK2.r7.select2PC.eigenvec.txt" 
+  path_to_chromosome_length_file="~/c1020109/NCBI37.3/UCSC_hg19_chromeinfo_length_of_chromosomes.txt"
+  path_to_new_fam_file="~/c1020109/NCBI37.3/CLOZUK.r7.GWAS_IDs.fam"
+  path_to_gene_annotation_file="~/c1020109/NCBI37.3/NCBI37.3.gene.loc"  
   
-  # set the Working directory to where the input files are located
-  WDPATH=/scratch/$USER/PR54/PGC_CLOZUK_PRS/PRS_CLOZUK_PGC/${dataset_directory}
-  cd $WDPATH
-  path_to_scripts='/home/c1020109/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/'
+  # assign arguments here for now because there are so many
+  training_set_usually_summary="PGC_table"
+  validation_set_usually_genotype="CLOZUK_GWAS_BGE_chr"
+  training_set_name="PGC"
+  validation_set_name="CLOZUK"
+  MAF_summary="FALSE"
+  MAF_threshold=0.01
+  MAF_genotype="TRUE"
+  INFO_summary="TRUE"
+  INFO_threshold=0.9	
+  Chromosomes_to_analyse=(`seq 1 22`)
+  Multiple_Training_set_tables="TRUE"
+  Running_in_Serial="TRUE"
+  sig_thresholds=(0.0001 0.001 0.01 0.05 0.1 0.2 0.3 0.4 0.5)
+  Perform_Magma_as_well="FALSE"
+  Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates" 
+  # either "extended" "normal" or "both" : change to a numerical input in the future
+  Gene_regions= "both"
 
   # Load both Plink and R
   module purge
   module load R/3.3.0
   module load plink/1.9c3
-
+  module load magma/1.06
 
 elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   cd ~/Documents/testing_PRS_chromosome_22/
@@ -95,10 +109,16 @@ fi
 # create files containing duplicate SNPs
 Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}Clumping_CLOZUK_PGC.R ./extrainfo/CLOZUK_PGC_clumpinginfo_chr${chromosome_number}.Rout ${training_set_usually_summary} ${validation_set_usually_genotype} ${training_set_name} ${validation_set_name}  
 
+
+if [ ${Peform_Magma_as_well} == "True" ]; then
+
+# Create output directory for MAGMA results
+	if [ ! d "./output/MAGMA_set_analysis" ]; then
+		mkdir ./output/MAGMA_set_analysis
+	fi
 # Create files for MAGMA
 plink --bfile ./output/${validation_set_usually_genotype}_2 --exclude ./output/extracted_Duplicate_snps_chr${chromosome_number}.txt --extract ./output/chr${chromosome_number}${training_set_name}_${validation_set_name}_common_SNPs.txt --make-bed --out ./output/${validation_set_usually_genotype}_consensus_with_${training_set_name}_flipped_alleles_no_duplicates
-
-exit 1
+fi
 
 # Clump the datasets
 # Extract the SNPs common between PGC and CLOZUK
@@ -112,8 +132,10 @@ rm ./output/CLOZUK_PGC_CLUMPED_chr${chromosome_number}.txt
 awk '{ print $2 }' ./output/CLOZUK_PGC_CLUMPED_FINAL_chr${chromosome_number}.txt > ./output/CLUMPED_EXTRACT_CLOZUK_chr${chromosome_number}.txt
 printf "%s\n\n" "$(tail -n +2 ./output/CLUMPED_EXTRACT_CLOZUK_chr${chromosome_number}.txt)" > ./output/CLUMPED_EXTRACT_CLOZUK_chr${chromosome_number}.txt 
 
+	
 # Create clumped plink files
-plink --bfile ./output/CLOZUK_GWAS_BGE_chr${chromosome_number}_2 --extract ./output/CLUMPED_EXTRACT_CLOZUK_chr${chromosome_number}.txt --make-bed --out ./output/CLOZUK_GWAS_BGE_CLUMPED_chr${chromosome_number}
+plink --bfile ./output/CLOZUK_GWAS_BGE_chr${chromosome_number}_2 --extract ./output/CLUMPED_EXTRACT_CLOZUK_chr${chromosome_number}.txt --make-bed --out ./output/MAGMA_set_analysis/CLOZUK_GWAS_BGE_CLUMPED_chr${chromosome_number}
+
 
 # purge all modules
 module purge

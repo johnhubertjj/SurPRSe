@@ -29,7 +29,7 @@ if (length(args)==0) {
   # default output file
  # CLOZUK_data_set_args[3] = "./output/out.txt"
 #}
-CLOZUK_magma_input2 <- fread(Validation_dataset)
+CLOZUK_magma_input2 <- fread(paste0("./output/",Validation_dataset))
 names(CLOZUK_magma_input2) <- c("CHR", "SNP", "GD", "BP", "A1", "A2")
 PGC <- fread(paste0("./output/combined_", Training_name, "_table_with_CHR.POS_identifiers.txt"))
 PGC_CLOZUK_merged <- merge(CLOZUK_magma_input2, PGC, by = "SNP", all = F)
@@ -39,6 +39,7 @@ if (INFO_decision == "YES") {
   Info_threshold <- as.numeric(args[9])
   PGC_CLOZUK_merged <- PGC_CLOZUK_merged[INFO > Info_threshold]
 }
+
 # Sig_thresholds <- c(0.0001, 0.001, 0.01 ,0.05, 0.1, 0.2, 0.3, 0.4, 0.5)
 Sig_thresholds2 <- c("0.0001","0.001","0.01","0.05","0.1","0.2","0.3","0.4","0.5")
 
@@ -64,8 +65,3 @@ if (Magma_or_no_Magma_analysis == "TRUE") {
     write.table(SNPs[[i]], file = paste0("./output/",Sig_thresholds2[i], Validation_name, "_", Training_name, "_P_Vals_reference_file.txt"), quote = F, row.names = F)
   }
 }
-
-
-
-
-

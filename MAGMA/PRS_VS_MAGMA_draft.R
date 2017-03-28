@@ -1,4 +1,4 @@
-ibrary(zoom)
+library(zoom)
 library(ggplot2)
 library(data.table)
 library(grid)
@@ -104,6 +104,7 @@ SNPs_per_genes_MAGMA_mean_interesting <- rep(0, length(sig))
 SNPs_per_genes_MAGMA_sd_compare <- rep(0, length(sig))
 SNPs_per_genes_MAGMA_mean_compare <- rep(0, length(sig))
 number_of_SNPs_MAGMA <- rep(0, length(sig))
+number_of_PARAMs_MAGMA <- rep(0, length(sig))
 
 SNPs_per_genes_MAGMA_sd_interesting2 <- rep(0, length(sig))
 SNPs_per_genes_MAGMA_mean_interesting2 <- rep(0, length(sig))
@@ -114,14 +115,29 @@ gglist <- list()
 
 testing_PRS_VS_MAGMA <- function() {
 for (i in 1:length(sig)) {
-  MAGMA <- fread(paste0("./output/MAGMA_set_analysis/",sig[i], "gene_annotation_for_CLOZUK_without_selecting_genes_magma.genes.out"))
+   MAGMA <- fread(paste0("./output/MAGMA_set_analysis/",sig[i], "gene_annotation_for_CLOZUK_without_selecting_genes_magma.genes.out"))
+   #MAGMA <- fread(paste0("./output/",sig[i], "gene_annotation_for_CLOZUK_without_selecting_genes.genes.out"))
+   
    #PRS <- fread(paste0("~/Dropbox/PhDwork-PRS/",sig2[i], "CLOZUK_PGC_PRS_residuals_with_genes_using_fam_file_whole_genome_more_than_one_SNP.txt"))
    PRS <- fread(paste0("~/Dropbox/PhDwork-PRS/",sig2[i], "CLOZUK_PGC_PRS_residuals_with_genes_using_fam_file_whole_genome.txt"))
    names(PRS) <- c("P","GENE")
    #names(PRS) <- c("GENE", "P")
   
   Merged_table <- merge(PRS,MAGMA,by = 'GENE')
-  Merged_table <- Merged_table[NSNPS > 1]
+  
+  # Merged_table <- Merged_table[NSNPS > 1]
+  #Merged_table <- Merged_table[NPARAM > 1]
+  a <- Merged_table[START > 25000000 & START < 34000000 & CHR == 6]
+  a.place.names <- which(Merged_table$START > 25000000 & Merged_table$START < 34000000 & Merged_table$CHR == 6)
+  a <- a[,position := a.place.names]
+  
+  b <- Merged_table[CHR == 6 & STOP > 25000000 & STOP < 34000000]
+  b.place.names <- which(Merged_table$CHR == 6 & Merged_table$STOP > 25000000 & Merged_table$STOP < 34000000)
+  b <- b[,position := b.place.names]
+  
+  test_position <- merge(a,b,by = "position", all = T)
+  position_of_SNPs_to_remove <- test_position$position
+  Merged_table <- Merged_table[!position_of_SNPs_to_remove]
   
   Merged_table[,logp.x := -log10(P.x)]
   Merged_table[,logp.y := -log10(P.y)]
@@ -142,7 +158,7 @@ for (i in 1:length(sig)) {
   plot.subtitle <- paste0("correlation = ", as.character(correlations[i]))
   
   p1 <- ggplot(Merged_table, aes_string(x = "logp.x", y = "logp.y"))+ geom_point() + geom_abline() + theme(axis.line.x = element_line(colour = "black"), axis.line.y = element_line(colour = "black"), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank())
-  p1 <- p1 + xlim(0,8) + ylim(0,8) + labs (x = expression(PRS~~-log[10](italic(p))), y = expression(MAGMA~~-log[10](italic(p)))) + ggtitle(sig[i], subtitle = plot.subtitle)
+  p1 <- p1 + xlim(0,25) + ylim(0,25) + labs (x = expression(PRS~~-log[10](italic(p))), y = expression(MAGMA~~-log[10](italic(p)))) + ggtitle(sig[i], subtitle = plot.subtitle)
   p1 <- p1 + theme(plot.title = element_text(family = "", color="#666666", face="bold", size=32, hjust=0))
   
   gglist[[i]] <- p1
@@ -151,6 +167,10 @@ for (i in 1:length(sig)) {
   
   finding_out_magma_SNPS <- subset(Merged_table, (logp.y > 10 & logp.x < 10))
   finding_out_the_rest <- subset(Merged_table, (!(logp.y > 10 & logp.x < 10)))
+  
+  finding_out_magma_SNPS_all <- subset(Merged_table, (logp.y > 10))
+  finding_out_the_rest_all <- subset(Merged_table, (!(logp.y > 10)))
+  
   #browser()
   sd_interesting <- sd(finding_out_magma_SNPS$NPARAM)
   sd_compare <- sd(finding_out_the_rest$NPARAM)
@@ -171,9 +191,11 @@ for (i in 1:length(sig)) {
   SNPs_per_genes_MAGMA_mean_interesting[i] <- mean_interesting
   SNPs_per_genes_MAGMA_mean_compare[i] <- mean_compare
   SNPs_per_genes_MAGMA_sd_compare[i] <- sd_compare
-  number_of_SNPs_MAGMA[i] <- sum(MAGMA$NSNPS)
-  #browser()
-  #print(gglist[[i]])
+  number_of_SNPs_MAGMA[i] <- mean(Merged_table$NSNPS)
+  number_of_PARAMs_MAGMA[i] <- mean(Merged_table$NPARAM)
+  
+  # browser()
+  # print(gglist[[i]])
   
   #  mypath <- paste0(wd,sig[i],"PRSvsMAGMA_CLOZUK_without_one_SNP.png")
   #  mypath <- paste0(wd,sig[i],"PRSvsMAGMA_CLOZUK_no_boundaries.png")
@@ -188,6 +210,12 @@ assign("SNPs_per_genes_MAGMA_mean_compare2",SNPs_per_genes_MAGMA_mean_compare2, 
 assign("SNPs_per_genes_MAGMA_mean_compare",SNPs_per_genes_MAGMA_mean_compare, envir = e)
 assign("SNPs_per_genes_MAGMA_mean_interesting",SNPs_per_genes_MAGMA_mean_interesting, envir = e)
 assign("SNPs_per_genes_MAGMA_mean_interesting2",SNPs_per_genes_MAGMA_mean_interesting2, envir = e)
+assign("finding_out_outliers", finding_out_magma_SNPS, envir = e)
+assign("finding_out_the_rest", finding_out_the_rest, envir = e)
+assign("finding_out_outliers_all", finding_out_magma_SNPS_all, envir = e)
+assign("finding_out_the_rest_all", finding_out_the_rest_all, envir = e)
+assign("number_of_SNPs_MAGMA", number_of_SNPs_MAGMA, envir = e)
+assign("number_of_PARAMs_MAGMA", number_of_PARAMs_MAGMA, envir = e)
 
 names_for_matrix <- list()
 names_for_matrix[[2]] <- sig
@@ -199,10 +227,9 @@ SD_for_NSNPS <- matrix(c(e$SNPs_per_genes_MAGMA_sd_interesting2,SNPs_per_genes_M
 Mean_for_NPARAMS <- matrix(c(e$SNPs_per_genes_MAGMA_mean_interesting,SNPs_per_genes_MAGMA_mean_compare), nrow = 2, byrow = T, dimnames = names_for_matrix)
 SD_for_NPARAMS <- matrix(c(e$SNPs_per_genes_MAGMA_sd_interesting,SNPs_per_genes_MAGMA_sd_compare), nrow = 2, byrow = T, dimnames = names_for_matrix)
 test_list <- list(Mean_for_NSNPS,SD_for_NSNPS,Mean_for_NPARAMS,SD_for_NPARAMS)
-names_of_tables <- c("Mean_for_NSNPS","SD_for_NSNPS","Mean_for_NPARAMS","SD_for_NPARAMS")
-for (i in 1:4){
-  write.csv(test_list[[i]], file = paste0(names_of_tables[i],".csv"))
-} 
+#names_of_tables <- c("Mean_for_NSNPS","SD_for_NSNPS","Mean_for_NPARAMS","SD_for_NPARAMS")
+names_of_tables_2 <- c("Mean_for_NSNPS_one_snp","SD_for_NSNPS_one_snp","Mean_for_NPARAMS_one_snp","SD_for_NPARAMS_one_snp")
+
 
 assign("Mean_for_NSNPs", Mean_for_NSNPS, envir = .GlobalEnv)
 assign("SD_for_NSNPs", SD_for_NSNPS, envir = .GlobalEnv)
