@@ -58,6 +58,7 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   number_of_files=($(find -E . -type f -regex '^./output/CLOZUK_GWAS_BGE_CLUMPED_chr[0-9]+.bed' -exec basename {} \;))  
   path_to_PGC_conversion="/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Summary_stat_manipulation"
   path_to_CLOZUK_conversion="/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Genotype_dataset_manipulation"
+<<<<<<< HEAD
   number_of_files=($(find -E . -type f -regex '^./output/CLOZUK_GWAS_BGE_CLUMPED_chr[0-9]+.bed' -exec basename {} \;))
   path_to_covariate_file="/Users/Dropbox/whole_genome_testing/Stationary_data/CLOZUK2.r7.select2PC.eigenvec.txt"
   path_to_chromosome_length_file="/Users/Dropbox/whole_genome_testing/Stationary_data/UCSC_hg19_chromeinfo_length_of_chromosomes.txt"
