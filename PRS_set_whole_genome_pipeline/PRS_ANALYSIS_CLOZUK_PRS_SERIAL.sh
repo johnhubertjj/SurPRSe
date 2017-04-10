@@ -191,7 +191,7 @@ sh ${path_to_scripts}MAGMA_analysis_whole_genome_complete.sh ${sig_thresholds[@]
 
 ### THE FOLLOWING BELOW NEEDS TO BE IN A NEW SCRIPT ####
 # Run preparation for annotation file for python scripts
-Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}MAGMA_python_annotation_table_creator.R ./extrainfo/MAGMA_annotation_table_creator.Rout ${training_set_name} ${validation_set_name} ${path_to_chromosome_length_file} ${Validation_FULL_GENOME} ${path_to_gene_annotation_file} ${Gene_regions} ${Chromosomes_to_analyse[@]}   
+Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}MAGMA_python_annotation_table_creator_testing_whole_genome.R ./extrainfo/MAGMA_annotation_table_creator_testing_whole_genome.Rout ${training_set_name} ${validation_set_name} ${path_to_chromosome_length_file} ${Validation_FULL_GENOME} ${path_to_gene_annotation_file} ${Gene_regions} ${Chromosomes_to_analyse[@]}   
 
 # Make both directories for the profiles and the scores
 if [ ! -d "./output/PRS_scoring/score" ]; then
