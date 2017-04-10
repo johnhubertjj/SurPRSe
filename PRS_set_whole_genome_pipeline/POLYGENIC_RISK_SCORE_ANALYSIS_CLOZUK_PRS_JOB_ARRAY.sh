@@ -32,8 +32,8 @@ if [[ "$whereami" == *"raven"* ]]; then
   path_to_gene_annotation_file="~/c1020109/NCBI37.3/NCBI37.3.gene.loc"  
   
   # assign arguments here for now because there are so many
-  training_set_usually_summary="PGC_table"
-  validation_set_usually_genotype="CLOZUK_GWAS_BGE_chr"
+  training_set_usually_summary="PGC_table${chromosome_number}"
+  validation_set_usually_genotype="CLOZUK_GWAS_BGE_chr${chromosome_number}"
   training_set_name="PGC"
   validation_set_name="CLOZUK"
   MAF_summary="FALSE"
@@ -57,19 +57,34 @@ if [[ "$whereami" == *"raven"* ]]; then
   module load magma/1.06
 
 elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
-  cd ~/Documents/testing_PRS_chromosome_22/
+  cd ~/Documents/testing_cross_disorder/
   path_to_scripts='/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/'
-  chromosome_number=22
+  chromosome_number=14
 
   training_set_usually_summary="PGC_table${chromosome_number}"
   validation_set_usually_genotype="CLOZUK_GWAS_BGE_chr${chromosome_number}"
   training_set_name="PGC"
   validation_set_name="CLOZUK"
-  MAF_summary="NO"
+  MAF_summary="FALSE"
   MAF_threshold=0.01
-  MAF_genotype="YES"
-  INFO_summary="YES"
-  INFO_threshold=0.6	
+  MAF_genotype="TRUE"
+  INFO_summary="TRUE"
+  INFO_threshold=0.9
+  Chromosomes_to_analyse=14
+  Multiple_Training_set_tables="TRUE"
+  Running_in_Serial="TRUE"
+  sig_thresholds=(0.0001 0.001 0.01 0.05 0.1 0.2 0.3 0.4 0.5)
+  Perform_Magma_as_well="FALSE"
+  Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates"
+  # either "extended" "normal" or "both" : change to a numerical input in the future
+  Gene_regions="both"	
+  external_harddrive="TRUE"
+fi
+
+if [ "$external_harddrive" == 'TRUE' ]; then
+  path_to_harddrive=/Volumes/HD-PCU2
+  cp $path_to_harddrive/CLOZUK_data/${validation_set_usually_genotype}.tar.gz .
+  cp $path_to_harddrive/PGC_noCLOZUK_data/${training_set_usually_summary}.txt .
 fi
 
 ## rewrite so that the file input is an argument for the script instead, this will work for now
@@ -78,6 +93,7 @@ set -- *${chromosome_number}.tar.gz
 if [ "$#" -gt 0 ]; then
 
 # unpack the CLOZUK datasets
+# remember to delete after unpacking at the end of the analysis
 tar -zxvf CLOZUK_GWAS_BGE_chr${chromosome_number}.tar.gz
 fi
 
@@ -90,6 +106,7 @@ if [ ! -d "extrainfo" ]; then
    mkdir extrainfo
 fi
 
+exit 1 
 # Run R script that removes SNPs based on INFO score and MAF
 Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}MAF_and_INFO_score_summary_stats_script.R ./extrainfo/PGC_remove_MAF_INFO${chromosome_number}.Rout ${training_set_usually_summary} ${training_set_name} ${MAF_summary} ${INFO_summary} ${INFO_threshold} 
 
