@@ -15,10 +15,10 @@ System_information <- Sys.info()
 whereami <- System_information['user']
 
 if (whereami == "johnhubert") {
-  chromosome.number <- 22
+  chromosome.number <- args[7]
   
 } else if (whereami == 'JJ') {
-  chromosome.number <- 22
+  chromosome.number <- args[7]
   
 } else if (whereami == "c1020109") {
 
@@ -42,6 +42,9 @@ Validation_datatable_bim_file <- paste0(args[4],".bim")
 Training_name <- args[5]
 Validation_name <- args[6]
 
+# setwd("~/Documents/testing_cross_disorder") 
+# Validation_datatable <- "CLOZUK_GWAS_BGE_chr14.bim"
+# Training_datatable <- "/Volumes/HD-PCU2/ADD/daner_meta_filtered_NA_iPSYCH23_PGC11_sigPCs_woSEX_2ell6sd_EUR_Neff_70.meta"
 ###############################
 # ODDS RATIO TO BETA FUNCTION #
 ###############################
@@ -95,6 +98,35 @@ Checking_allele_swapping <- function(alteredtable1,table2,which.is.combined = c(
   assign(paste0(argument.name,"flipped.alleles"), iterations.to.remain, envir = e)
 }
 
+Checking_length_of_alleles <- function(input_table1){
+  # Removes all multiple allele counts (aka indels and deletions) to clean up the data.
+  input_table1 <- input_table1[!(nchar(A1.x) > 1 | nchar(A2.x) > 1)]
+  input_table1 <- input_table1[!(nchar(A1.y) > 1 | nchar(A2.y) > 1)]
+  
+  # Checks for any Alleles which are not standard 1:1
+  integers_to_check <- which(input_table1$A1.x != "A" & input_table1$A1.x != "C" & input_table1$A1.x !=  "T" & input_table1$A1.x !=  "G")
+  integers_to_check2 <- which(input_table1$A1.y != "A" & input_table1$A1.y != "C" & input_table1$A1.y !=  "T" & input_table1$A1.y !=  "G")
+  integers_to_check3 <- which(input_table1$A2.x != "A" & input_table1$A2.x != "C" & input_table1$A2.x !=  "T" & input_table1$A2.x !=  "G")
+  integers_to_check4 <- which(input_table1$A2.y != "A" & input_table1$A2.y != "C" & input_table1$A2.y !=  "T" & input_table1$A2.y !=  "G")
+   
+  # Would probably work better in a loop but I got too lazy
+  if(length(integers_to_check) != 0){
+    input_table1 <- input_table1[!integers_to_check]
+  }
+  
+  if(length(integers_to_check2) != 0){
+    input_table1 <- input_table1[!integers_to_check2]
+  }
+  
+  if(length(integers_to_check3) != 0){
+    input_table1 <- input_table1[!integers_to_check3]
+  }
+  
+  if(length(integers_to_check4) != 0){
+    input_table1 <- input_table1[!integers_to_check4]
+  }
+  assign("combined.CLOZUK.PGC", input_table1, envir = .GlobalEnv)
+}
 
 #################################
 # COMBINING CLOZUK AND PGC SNPS #
@@ -123,7 +155,7 @@ cat("Number of SNPs in CLOZUK Chr:",chromosome.number, nrow(CLOZUK.data))
 setnames(CLOZUK.data, c("CHR","SNP","GENEDIST","BP","A1","A2"))
 
 ### Replacing PGC values###
-PGC.integers.to.change <- PGC.data.frame[,.I[grep(paste0("^",chromosome.number,":\\d+:\\w+:\\w+"),SNP, perl = T,invert = T)]]
+PGC.integers.to.change <- PGC.data.frame[,.I[grep(paste0("^",chromosome.number,":\\d+:\\w+:\\w+"),SNP, perl = T, invert = T)]]
 PGC.divisive.names <- PGC.data.frame[PGC.integers.to.change]
 PGC.alternative <- PGC.data.frame[,SNP := paste0(CHR,":",BP)]
 PGC.data.frame <- PGC.data.frame[,SNP := paste0(CHR,":",BP)]
@@ -146,7 +178,10 @@ CLOZUK.alternative$place <- c(1:length(CLOZUK.alternative$CHR))
 PGC.alternative$place <- c(1:length(PGC.alternative$CHR))
 
 ### Merging based on BP position ###
-combined.CLOZUK.PGC <- merge(x = PGC.alternative,y = CLOZUK.alternative,by = c('BP','CHR'), all = F, sort = F)
+combined.CLOZUK.PGC <- merge(x = PGC.alternative, y = CLOZUK.alternative, by = c('BP','CHR'), all = F, sort = F)
+
+### Checking and limiting to SNPs with only one allele for each A1 and A2
+Checking_length_of_alleles(combined.CLOZUK.PGC)
 
 # Change all alleles to uppercase: saving time method
 # below it states:
@@ -156,6 +191,10 @@ cols <- c('A1.x','A2.x','A1.y','A2.y')
 combined.CLOZUK.PGC[, (cols) := lapply(.SD, toupper), .SDcols = cols ]
 
 cat("Number of SNPs BEFORE flipping between CLOZUK and PGC Chr:",chromosome.number ,nrow(combined.CLOZUK.PGC))
+
+if (nrow(combined.CLOZUK.PGC) > nrow(PGC.alternative) | nrow(CLOZUK.alternative)){
+  warning("combined dataset size is larger than one/both of the input datasets, check for duplicates")
+}
 
 a <- which(combined.CLOZUK.PGC$A1.x == "C" & combined.CLOZUK.PGC$A2.x == "G"); if (length(a)>0) {combined.CLOZUK.PGC<-combined.CLOZUK.PGC[-a]}
 a <- which(combined.CLOZUK.PGC$A1.x == "G" & combined.CLOZUK.PGC$A2.x == "C"); if (length(a)>0) {combined.CLOZUK.PGC<-combined.CLOZUK.PGC[-a]}
@@ -311,9 +350,9 @@ rm(CLOZUK.original)
 
 # Write according to destination
 if (whereami == 'johnhubert' | whereami == 'JJ'){
-  filename.CLOZUK.together <- paste0("./output/",Validation_name,"_chr22_chr.pos.txt")
-  new.PGC.table <- paste0("./output/",Training_name,"_table22_new.txt")
-  filename.common.snps <- paste0("./output/chr22",Training_name,"_",Validation_name,"_common_SNPs.txt")
+  filename.CLOZUK.together <- paste0("./output/",Validation_name,"_chr",chromosome.number,"_chr.pos.txt")
+  new.PGC.table <- paste0("./output/",Training_name,"_table",chromosome.number,"_new.txt")
+  filename.common.snps <- paste0("./output/chr",chromosome.number,"Training_name","_",Validation_name,"_common_SNPs.txt")
 } else {  
   filename.CLOZUK.together <- paste0("./output/",Validation_name,"_chr",chromosome.number,"_chr.pos.txt")
   new.PGC.table <- paste0("./output/",Training_name,"_table",chromosome.number,"_new.txt")
