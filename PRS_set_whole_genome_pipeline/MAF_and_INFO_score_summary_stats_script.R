@@ -56,49 +56,54 @@ new_column_names_controls <- gsub(pattern = "(?<=FRQ_U)_\\d+", replacement = "",
 # set new names for columns
 setnames(changed_PGC_table, c(Allele_cases_location,Allele_controls_location), c(new_column_names_cases,new_column_names_controls))
 
-if (INFO_decision == "YES") {
+if (INFO_decision == "TRUE") {
 # remove all SNPs with INFO > 0.9
 Info_threshold <- as.numeric(args[7])
 changed_PGC_table <- changed_PGC_table[INFO > Info_threshold]
 }
 
+# Do I want to remove SNPs based on MAF
+
+if (MAF_decision == "TRUE") {
 # Change all values to MAF,
 # Frequencies are just stated so in order to find the MAF you need to find the values for which the frequency is above 0.5 for 
 # each cases and controls individually, and subtract one from each in order to find MAF
+  
 Vector_of_major_alleles_FRQ_A <- which(changed_PGC_table$FRQ_A > 0.5)
 Vector_of_major_alleles_FRQ_U <- which(changed_PGC_table$FRQ_U > 0.5)
-changed_PGC_table <- changed_PGC_table[Vector_of_major_alleles_FRQ_A, FRQ_A := (1 - FRQ_A)]
-changed_PGC_table <- changed_PGC_table[Vector_of_major_alleles_FRQ_U, FRQ_U := (1 - FRQ_U)]
+changed_PGC_table <- changed_PGC_table[Vector_of_major_alleles_FRQ_A, FRQ_A_MAF := (1 - FRQ_A)]
+changed_PGC_table <- changed_PGC_table[Vector_of_major_alleles_FRQ_U, FRQ_U_MAF := (1 - FRQ_U)]
+changed_PGC_table <- changed_PGC_table[is.na(FRQ_A_MAF), FRQ_A_MAF := FRQ_A]
+changed_PGC_table <- changed_PGC_table[is.na(FRQ_U_MAF), FRQ_U_MAF := FRQ_U]
 
-# Do I want to remove SNPs based on MAF
-if (MAF_decision == "YES") {
-  
-# remove all SNPs lower that 0.01
-FRQ_to_keep_helpful3 <- which(changed_PGC_table$FRQ_A <= 0.01 & changed_PGC_table$FRQ_U <= 0.01)
+# remove all SNPs lower than 0.01
+FRQ_to_keep_helpful3 <- which(changed_PGC_table$FRQ_A_MAF <= 0.01 & changed_PGC_table$FRQ_U_MAF <= 0.01)
 changed_PGC_table <- changed_PGC_table[!FRQ_to_keep_helpful3]
 
 #Find out which columns have one value below MAF 0.01
-FRQ_U_helpful2 <- which(changed_PGC_table$FRQ_A <= 0.01 & changed_PGC_table$FRQ_U > 0.01)
-FRQ_A_helpful1 <- which(changed_PGC_table$FRQ_A > 0.01 & changed_PGC_table$FRQ_U <= 0.01)
+FRQ_U_helpful2 <- which(changed_PGC_table$FRQ_A_MAF <= 0.01 & changed_PGC_table$FRQ_U_MAF > 0.01)
+FRQ_A_helpful1 <- which(changed_PGC_table$FRQ_A_MAF > 0.01 & changed_PGC_table$FRQ_U_MAF <= 0.01)
 
 # add extra column with MAF for each SNP according to the rule, keep the minimum allele frequency (except those below 0.01)
-changed_PGC_table[,MAF := pmin(FRQ_A,FRQ_U)]
-changed_PGC_table[FRQ_A_helpful1, MAF := changed_PGC_table[FRQ_A_helpful1,FRQ_A]]
-changed_PGC_table[FRQ_U_helpful2, MAF := changed_PGC_table[FRQ_U_helpful2,FRQ_U]]
+changed_PGC_table[,MAF := pmin(FRQ_A_MAF,FRQ_U_MAF)]
+changed_PGC_table[FRQ_A_helpful1, MAF := changed_PGC_table[FRQ_A_helpful1,FRQ_A_MAF]]
+changed_PGC_table[FRQ_U_helpful2, MAF := changed_PGC_table[FRQ_U_helpful2,FRQ_U_MAF]]
 
 # Do a check 
-if (all(changed_PGC_table$MAF == changed_PGC_table$FRQ_A | changed_PGC_table$FRQ_U) == FALSE){
+if (all(changed_PGC_table$MAF == changed_PGC_table$FRQ_A_MAF | changed_PGC_table$FRQ_U_MAF) == FALSE){
   warning("MAF is not neccessarily correct for this chromosome, check back please")
 }
 }
+
+changed_PGC_table[, c("FRQ_A_MAF", "FRQ_U_MAF") := NULL ]
 
 # Reassign the column names back to the table
 setnames(changed_PGC_table, c(Allele_cases_location,Allele_controls_location), old_column_names)
   
 # write new table overwriting the previous PGC_new_table
 write.table(changed_PGC_table, file = Training_datatable_output, row.names = F, quote = F)
-cat("Number of SNPs in", Training_name, "before isolating MAF > 0.01 and INFO > 0.9 =", nrow(PGC_table))
-cat("Number of SNPs in", Training_name, "after isolating MAF > 0.01 and INFO > 0.9 =", nrow(changed_PGC_table))
+cat("Number of SNPs in", Training_name, "before MAF and/or INFO correction: N=", nrow(PGC_table))
+cat("Number of SNPs in", Training_name, "after MAF and/or INFO correction: N=", nrow(changed_PGC_table))
 
 #End Timer
 proc.time() - ptm

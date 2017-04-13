@@ -69,7 +69,7 @@ if [[ "$whereami" == *"raven"* ]]; then
 elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   cd ~/Documents/testing_cross_disorder/
   # Arguments
-  path_to_scripts='/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/'
+  path_to_scripts='/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/'
   chromosome_number=14
   # Datasets
   training_set_usually_summary="PGC_table${chromosome_number}"
@@ -93,28 +93,28 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   Multiple_Training_set_tables="TRUE"
   Running_in_Serial="TRUE"
   sig_thresholds=(0.0001 0.001 0.01 0.05 0.1 0.2 0.3 0.4 0.5)
-  Perform_Magma_as_well="FALSE"
+  Perform_Magma_as_well="TRUE"
   Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates"
   # either "extended" "normal" or "both" : change to a numerical input in the future
   Gene_regions="both"	
-  external_harddrive="TRUE"
+  external_harddrive="FALSE"
 fi
 
-if [ "$external_harddrive" == 'TRUE' ]; then
+if [ "$external_harddrive" == "TRUE" ]; then
   path_to_harddrive=/Volumes/HD-PCU2
   cp $path_to_harddrive/CLOZUK_data/${validation_set_usually_genotype}.tar.gz .
   cp $path_to_harddrive/PGC_noCLOZUK_data/${training_set_usually_summary}.txt .
 fi
 
 ## rewrite so that the file input is an argument for the script instead, this will work for now
-shopt -s nullglob
-set -- *${chromosome_number}.tar.gz
-if [ "$#" -gt 0 ]; then
+#shopt -s nullglob
+#set -- *${chromosome_number}.tar.gz
+#if [ "$#" -gt 0 ]; then
 
 # unpack the CLOZUK datasets
 # remember to delete after unpacking at the end of the analysis
-tar -zxvf CLOZUK_GWAS_BGE_chr${chromosome_number}.tar.gz
-fi
+#tar -zxvf CLOZUK_GWAS_BGE_chr${chromosome_number}.tar.gz
+#fi
 
 # make directories for output and extra info
 if [ ! -d "output" ]; then
@@ -131,21 +131,22 @@ Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}MAF_and_INFO_score_sum
 # Run R script that will combine PGC and CLOZUK to an individual table
 # Output is in PGC_CLOZUK_SNP_table.txt
 Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}CLOZUK_PGC_COMBINE_final.R ./extrainfo/CLOZUK_PGC_COMBINE_chr${chromosome_number}.Rout ${training_set_usually_summary} ${validation_set_usually_genotype} ${training_set_name} ${validation_set_name} ${chromosome_number}
-if [[ ${MAF_genotype} == "YES" ]]; then
+
+#if [[ ${MAF_genotype} == "TRUE" ]]; then
    # using plink to change the names to a CHR.POS identifier and remaking the files
-  plink --bfile ${validation_set_usually_genotype} --update-name ./output/${validation_set_name}_chr${chromosome_number}_chr.pos.txt --maf 0.01 --make-bed --out ./output/${validation_set_usually_genotype}_2
-elif [[ ${MAF_genotype} == "NO" ]]; then 
-  plink --bfile ${validation_set_usually_genotype} --update-name ./output/${validation_set_name}_chr${chromosome_number}_chr.pos.txt --make-bed --out ./output/${validation_set_usually_genotype}_2
-fi
+ # plink --bfile ${validation_set_usually_genotype} --update-name ./output/${validation_set_name}_chr${chromosome_number}_chr.pos.txt --maf ${MAF_threshold} --make-bed --out ./output/${validation_set_usually_genotype}_2
+#elif [[ ${MAF_genotype} == "FALSE" ]]; then 
+ # plink --bfile ${validation_set_usually_genotype} --update-name ./output/${validation_set_name}_chr${chromosome_number}_chr.pos.txt --make-bed --out ./output/${validation_set_usually_genotype}_2
+#fi
 
 # re-package the original files
 # tar -czvf CLOZUK_GWAS_BGE_chr${chromosome_number}.tar.gz CLOZUK_GWAS_BGE_chr${chromosome_number}.bed CLOZUK_GWAS_BGE_chr${chromosome_number}.bim CLOZUK_GWAS_BGE_chr${chromosome_number}.fam
 
 # create files containing duplicate SNPs
-Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}Clumping_CLOZUK_PGC.R ./extrainfo/CLOZUK_PGC_clumpinginfo_chr${chromosome_number}.Rout ${training_set_usually_summary} ${validation_set_usually_genotype} ${training_set_name} ${validation_set_name}  
+Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}Clumping_CLOZUK_PGC.R ./extrainfo/CLOZUK_PGC_clumpinginfo_chr${chromosome_number}.Rout ${training_set_usually_summary} ${validation_set_usually_genotype} ${training_set_name} ${validation_set_name} ${chromosome_number}  
 
 
-if [ ${Peform_Magma_as_well} == "True" ]; then
+if [[ ${Perform_Magma_as_well} == "TRUE" ]]; then
 
 # Create output directory for MAGMA results
 	if [ ! d "./output/MAGMA_set_analysis" ]; then
@@ -155,6 +156,7 @@ if [ ${Peform_Magma_as_well} == "True" ]; then
 plink --bfile ./output/${validation_set_usually_genotype}_2 --exclude ./output/extracted_Duplicate_snps_chr${chromosome_number}.txt --extract ./output/chr${chromosome_number}${training_set_name}_${validation_set_name}_common_SNPs.txt --make-bed --out ./output/${validation_set_usually_genotype}_consensus_with_${training_set_name}_flipped_alleles_no_duplicates
 fi
 
+exit 1
 # Clump the datasets
 # Extract the SNPs common between PGC and CLOZUK
 # Remove the duplicate SNPs

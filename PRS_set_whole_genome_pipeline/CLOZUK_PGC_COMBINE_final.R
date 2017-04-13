@@ -6,6 +6,11 @@
 ### Start Timer
 ptm <- proc.time()
 
+#######################################
+# adding in arguments from BASH script#
+#######################################
+args <- commandArgs(trailingOnly = T)
+print(args)
 
 ##################################################
 # Checking location for serial or batch analysis #
@@ -30,17 +35,14 @@ chromosome.number <- as.numeric(AI)
   stop("current environment NOT at work/home or on servers, please add to script above to specify where you are and what type of analysis you want to do")
 }
 
-#######################################
-# adding in arguments from BASH script#
-#######################################
-args <- commandArgs(trailingOnly = T)
-print(args)
+
 
 # specify the different input tables #
 Training_datatable <- paste0("./output/",args[3],"_new.txt")
 Validation_datatable_bim_file <- paste0(args[4],".bim")
 Training_name <- args[5]
 Validation_name <- args[6]
+chromosome.number <- args[7]
 
 # setwd("~/Documents/testing_cross_disorder") 
 # Validation_datatable <- "CLOZUK_GWAS_BGE_chr14.bim"
@@ -143,13 +145,13 @@ getwd()
 PGC.data.frame <- fread(Training_datatable)
 PGC.data.frame.original <- copy(PGC.data.frame)
 
-cat("Number of SNPS in PGC Chr:",chromosome.number, nrow(PGC.data.frame))
+cat("Number of SNPS in PGC Chr:",chromosome.number, "N=" ,nrow(PGC.data.frame))
 
 ### Read in the CLOZUK data ###
 CLOZUK.data <- fread(Validation_datatable_bim_file)
 CLOZUK.original <- copy(CLOZUK.data)
 # Number of SNPs in CLOZUK data
-cat("Number of SNPs in CLOZUK Chr:",chromosome.number, nrow(CLOZUK.data))
+cat("Number of SNPs in CLOZUK Chr:",chromosome.number, "N=" ,nrow(CLOZUK.data))
 
 ### Replace the column names ###
 setnames(CLOZUK.data, c("CHR","SNP","GENEDIST","BP","A1","A2"))
@@ -165,7 +167,6 @@ PGC.alternative <- PGC.alternative[,c("CHR","SNP","BP","A1","A2","OR"),with = F]
 log.to.odds(PGC.alternative)
 PGC.alternative[,BETA := e$PGC.BETA]
 PGC.data.frame[,BETA := e$PGC.BETA]
-
 
 ### Changes the CLOZUK identifiers ###
 CLOZUK.integers.to.change <- CLOZUK.data[,.I[grep(paste0("^",chromosome.number,":\\d+:\\w+:\\w+"),SNP, perl = T,invert = T)]]
@@ -190,7 +191,7 @@ Checking_length_of_alleles(combined.CLOZUK.PGC)
 cols <- c('A1.x','A2.x','A1.y','A2.y')
 combined.CLOZUK.PGC[, (cols) := lapply(.SD, toupper), .SDcols = cols ]
 
-cat("Number of SNPs BEFORE flipping between CLOZUK and PGC Chr:",chromosome.number ,nrow(combined.CLOZUK.PGC))
+cat("Number of SNPs BEFORE flipping between CLOZUK and PGC Chr:", chromosome.number , "N=", nrow(combined.CLOZUK.PGC))
 
 if (nrow(combined.CLOZUK.PGC) > nrow(PGC.alternative) | nrow(CLOZUK.alternative)){
   warning("combined dataset size is larger than one/both of the input datasets, check for duplicates")
@@ -201,7 +202,7 @@ a <- which(combined.CLOZUK.PGC$A1.x == "G" & combined.CLOZUK.PGC$A2.x == "C"); i
 a <- which(combined.CLOZUK.PGC$A1.x == "A" & combined.CLOZUK.PGC$A2.x == "T"); if (length(a)>0) {combined.CLOZUK.PGC<-combined.CLOZUK.PGC[-a]}
 a <- which(combined.CLOZUK.PGC$A1.x == "T" & combined.CLOZUK.PGC$A2.x == "A"); if (length(a)>0) {combined.CLOZUK.PGC<-combined.CLOZUK.PGC[-a]}
 
-cat("Chr:",chromosome.number ,nrow(combined.CLOZUK.PGC))
+cat(Validation_name,"_", Training_name, "Chr:",chromosome.number,"remove A-T, C-G Step one: N=" ,nrow(combined.CLOZUK.PGC))
 
 a <- which(combined.CLOZUK.PGC$A1.y=="C" & combined.CLOZUK.PGC$A2.y=="G"); if (length(a)>0) {combined.CLOZUK.PGC<-combined.CLOZUK.PGC[-a]}
 a <- which(combined.CLOZUK.PGC$A1.y=="G" & combined.CLOZUK.PGC$A2.y=="C"); if (length(a)>0) {combined.CLOZUK.PGC<-combined.CLOZUK.PGC[-a]}
@@ -209,11 +210,11 @@ a <- which(combined.CLOZUK.PGC$A1.y=="A" & combined.CLOZUK.PGC$A2.y=="T"); if (l
 a <- which(combined.CLOZUK.PGC$A1.y=="T" & combined.CLOZUK.PGC$A2.y=="A"); if (length(a)>0) {combined.CLOZUK.PGC<-combined.CLOZUK.PGC[-a]}
 
 
-cat("CLOZUK_PGC Chr:",chromosome.number, "remove A-T, C-G: N=", nrow(combined.CLOZUK.PGC))
+cat("CLOZUK_PGC Chr:", chromosome.number, "remove A-T, C-G Step two: N=", nrow(combined.CLOZUK.PGC))
 
 ## FLIPPING ##
-# A1.x/A2.x are PGC alleles
-# A1.y/A2.y are CLOZUK alleles
+# A1.x/A2.x are Training set alleles
+# A1.y/A2.y are Genotype set alleles
 
 a <- which (combined.CLOZUK.PGC$A1.y == combined.CLOZUK.PGC$A2.x & combined.CLOZUK.PGC$A2.y == combined.CLOZUK.PGC$A1.x)
 combined.CLOZUK.PGC$BETA[a] <- (-combined.CLOZUK.PGC$BETA[a])
@@ -263,8 +264,8 @@ if (length(a) >= 1){
   combined.CLOZUK.PGC$OR[a]<- e$PGC.NEW.OR
   rm(PGC.NEW.OR, envir = e)
   rm(PGC.OR)
-  combined.CLOZUK.PGC$A1.x[a] <-as.character(combined.CLOZUK.PGC$A1.y[a])
-  combined.CLOZUK.PGC$A2.x[a] <-as.character(combined.CLOZUK.PGC$A2.y[a])
+  combined.CLOZUK.PGC$A1.x[a] <- as.character(combined.CLOZUK.PGC$A1.y[a])
+  combined.CLOZUK.PGC$A2.x[a] <- as.character(combined.CLOZUK.PGC$A2.y[a])
 }
 
 a <- which(combined.CLOZUK.PGC$A1.y != combined.CLOZUK.PGC$A1.x | combined.CLOZUK.PGC$A2.y!=combined.CLOZUK.PGC$A2.x)
@@ -350,13 +351,13 @@ rm(CLOZUK.original)
 
 # Write according to destination
 if (whereami == 'johnhubert' | whereami == 'JJ'){
-  filename.CLOZUK.together <- paste0("./output/",Validation_name,"_chr",chromosome.number,"_chr.pos.txt")
-  new.PGC.table <- paste0("./output/",Training_name,"_table",chromosome.number,"_new.txt")
-  filename.common.snps <- paste0("./output/chr",chromosome.number,"Training_name","_",Validation_name,"_common_SNPs.txt")
+  filename.CLOZUK.together <- paste0("./output/",Validation_name,"_chr", chromosome.number,"_chr.pos.txt")
+  new.PGC.table <- paste0("./output/",Training_name,"_table", chromosome.number,"_new.txt")
+  filename.common.snps <- paste0("./output/chr", chromosome.number, Training_name,"_", Validation_name,"_common_SNPs.txt")
 } else {  
-  filename.CLOZUK.together <- paste0("./output/",Validation_name,"_chr",chromosome.number,"_chr.pos.txt")
-  new.PGC.table <- paste0("./output/",Training_name,"_table",chromosome.number,"_new.txt")
-  filename.common.snps <- paste0("./output/chr",chromosome.number,Training_name,"_",Validation_name,"_common_SNPs.txt")
+  filename.CLOZUK.together <- paste0("./output/", Validation_name,"_chr", chromosome.number,"_chr.pos.txt")
+  new.PGC.table <- paste0("./output/", Training_name,"_table", chromosome.number,"_new.txt")
+  filename.common.snps <- paste0("./output/chr", chromosome.number, Training_name,"_", Validation_name,"_common_SNPs.txt")
 }
 
 # Write update file for plink
@@ -366,7 +367,7 @@ write.table(CLOZUK_together, file = filename.CLOZUK.together, quote = F, row.nam
 write.table(PGC.data.frame, file = new.PGC.table, row.names = F, quote = F)
 
 ## Write out the common SNPs between CLOZUK and PGC
-write(combined.CLOZUK.PGC$SNP.x,file = filename.common.snps)
+write(combined.CLOZUK.PGC$SNP.x, file = filename.common.snps)
 
 ### End timer
 proc.time() - ptm
