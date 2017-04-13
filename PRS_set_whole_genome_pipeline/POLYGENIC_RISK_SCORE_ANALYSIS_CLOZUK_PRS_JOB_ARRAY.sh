@@ -149,7 +149,7 @@ Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}Clumping_CLOZUK_PGC.R 
 if [[ ${Perform_Magma_as_well} == "TRUE" ]]; then
 
 # Create output directory for MAGMA results
-	if [ ! d "./output/MAGMA_set_analysis" ]; then
+	if [ ! -d "./output/MAGMA_set_analysis" ]; then
 		mkdir ./output/MAGMA_set_analysis
 	fi
 # Create files for MAGMA
