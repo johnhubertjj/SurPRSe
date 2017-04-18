@@ -44,9 +44,11 @@ Training_name <- args[5]
 Validation_name <- args[6]
 chromosome.number <- args[7]
 
-# setwd("~/Documents/testing_cross_disorder") 
-# Validation_datatable <- "CLOZUK_GWAS_BGE_chr14.bim"
+ #setwd("~/Documents/testing_cross_disorder") 
+ #Validation_datatable_bim_file <- "CLOZUK_GWAS_BGE_chr14.bim"
+# Validation_datatable_bim_file <- "/Volumes/HD-PCU2/g1000_European_cohort_only_NO_bad_LD_Extracted.bim"
 # Training_datatable <- "/Volumes/HD-PCU2/ADD/daner_meta_filtered_NA_iPSYCH23_PGC11_sigPCs_woSEX_2ell6sd_EUR_Neff_70.meta"
+ #Training_datatable <- "/Volumes/HD-PCU2/PGC_noCLOZUK_data/PGC_table14.txt"
 ###############################
 # ODDS RATIO TO BETA FUNCTION #
 ###############################
@@ -180,6 +182,22 @@ PGC.alternative$place <- c(1:length(PGC.alternative$CHR))
 
 ### Merging based on BP position ###
 combined.CLOZUK.PGC <- merge(x = PGC.alternative, y = CLOZUK.alternative, by = c('BP','CHR'), all = F, sort = F)
+
+### Remove Duplicated SNPs here ###
+combined_a <- which(duplicated(combined.CLOZUK.PGC$SNP.x))
+combined_a_rev <- which(duplicated(combined.CLOZUK.PGC$SNP.x,fromLast = T))
+combined_b <- which(duplicated(combined.CLOZUK.PGC$SNP.y))
+combined_b_rev <- which(duplicated(combined.CLOZUK.PGC$SNP.y,fromLast = T))
+
+### One-line duplication check ###
+length(combined.CLOZUK.PGC$SNP.x)
+if (all(combined_a == combined_b)){
+  duplicate_SNPS <- combined.CLOZUK.PGC$SNP.x[(duplicated(combined.CLOZUK.PGC$SNP.x) | duplicated(combined.CLOZUK.PGC$SNP.x, fromLast = TRUE)) ]
+  combined.CLOZUK.PGC <- combined.CLOZUK.PGC[!(duplicated(combined.CLOZUK.PGC$SNP.x) | duplicated(combined.CLOZUK.PGC$SNP.x, fromLast = TRUE)) ]
+}else{
+  stop("duplicated SNPs in training datset, refer back and correct")
+}
+length(combined.CLOZUK.PGC$SNP.x)
 
 ### Checking and limiting to SNPs with only one allele for each A1 and A2
 Checking_length_of_alleles(combined.CLOZUK.PGC)
@@ -354,6 +372,7 @@ if (whereami == 'johnhubert' | whereami == 'JJ'){
   filename.CLOZUK.together <- paste0("./output/",Validation_name,"_chr", chromosome.number,"_chr.pos.txt")
   new.PGC.table <- paste0("./output/",Training_name,"_table", chromosome.number,"_new.txt")
   filename.common.snps <- paste0("./output/chr", chromosome.number, Training_name,"_", Validation_name,"_common_SNPs.txt")
+  filename.duplicate.snps <- paste0("./output/extracted_Duplicate_snps_",Validation_name,"_", Training_name,"_chr",chromosome.number,".txt")
 } else {  
   filename.CLOZUK.together <- paste0("./output/", Validation_name,"_chr", chromosome.number,"_chr.pos.txt")
   new.PGC.table <- paste0("./output/", Training_name,"_table", chromosome.number,"_new.txt")
@@ -368,6 +387,9 @@ write.table(PGC.data.frame, file = new.PGC.table, row.names = F, quote = F)
 
 ## Write out the common SNPs between CLOZUK and PGC
 write(combined.CLOZUK.PGC$SNP.x, file = filename.common.snps)
+
+### write SNPs back to file
+write(duplicate_SNPS, file = filename.duplicate.snps)
 
 ### End timer
 proc.time() - ptm

@@ -72,7 +72,7 @@ if [ ! -d "extrainfo" ]; then
 fi
 
 if [[ ${split_genotype_dataset_into_chromosomes} == "YES" ]]; then
-   Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}splitting_Genotype_datasets.R ./extrainfo/splitting_HD_genotype_dataset.Rout
+   Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}splitting_Genotype_datasets.R ./extrainfo/splitting_${Validation_set_name}_genotype_dataset.Rout
 
 # Run R script that removes SNPs based on INFO score and MAF
 Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}MAF_and_INFO_score_summary_stats_script.R ./extrainfo/PGC_remove_MAF_INFO.Rout ${training_set_usually_summary} ${training_set_name} ${MAF_summary} ${INFO_summary} ${INFO_threshold} 
