@@ -21,13 +21,19 @@ if [[ "$whereami" == *"raven"* ]]; then
   # assign a new variable for the PBS_ARRAY_variable
   chromosome_number=${PBS_ARRAY_INDEX}
   
+  # Load both Plink and R
+  module purge
+  module load R/3.3.0
+  module load plink/1.9c3
+  module load python/2.7.11
+  module load magma/1.06
+
   cd $PBS_O_WORKDIR
   path_to_scripts="~/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/"
   
   # Assign the shell variables
   source ${path_to_scripts}/PRS_arguments_script.sh
-  set
-  
+  cat ${path_to_scripts}/PRS_arguments_script.sh 
 elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   cd ~/Documents/testing_cross_disorder/
   # Arguments
@@ -35,19 +41,23 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   
   # Assign the shell variables
   source ${path_to_scripts}/PRS_arguments_script.sh
-  printenv
-  set
+  cat ${path_to_scripts}/PRS_arguments_script.sh 
+  
+exit 1
 fi  
 
 ## rewrite so that the file input is an argument for the script instead, this will work for now
-#shopt -s nullglob
-#set -- *${chromosome_number}.tar.gz
-#if [ "$#" -gt 0 ]; then
+## -gt is greater than
+## set essentially sets the arguments, so by nullglobbing everything, set will record the instances in which the pattern exists in the directory
+shopt -s nullglob #enable
+set -- *${chromosome_number}.tar.gz
+if [ "$#" -gt 0 ]; then
 
 # unpack the CLOZUK datasets
 # remember to delete after unpacking at the end of the analysis
-#tar -zxvf CLOZUK_GWAS_BGE_chr${chromosome_number}.tar.gz
-#fi
+tar -zxvf CLOZUK_GWAS_BGE_chr${chromosome_number}.tar.gz
+shopt -u nullglob # disable
+fi
 
 # make directories for output and extra info
 if [ ! -d "output" ]; then
@@ -106,6 +116,14 @@ printf "%s\n\n" "$(tail -n +2 ./output/CLUMPED_EXTRACT_CLOZUK_chr${chromosome_nu
 	
 # Create clumped plink files
 plink --bfile ./output/CLOZUK_GWAS_BGE_chr${chromosome_number}_consensus_with_${training_set_name}_flipped_alleles_no_duplicates --extract ./output/CLUMPED_EXTRACT_CLOZUK_chr${chromosome_number}.txt --make-bed --out ./output/CLOZUK_GWAS_BGE_CLUMPED_chr${chromosome_number}
+
+# Clean up original datasets to only leave the tar.gz file 
+shopt -s nullglob
+set -- *${validation_set_usually_genotype}*
+if [ "$#" -gt 3 ]; then
+	rm -rf ${validation_set_usually_genotype}.{bim,bed,fam} 
+	shopt -u nullglob
+fi
 
 if [[ "$whereami" == *"raven"* ]]; then
 # purge all modules

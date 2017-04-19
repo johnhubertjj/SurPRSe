@@ -5,7 +5,6 @@ echo "$whereami"
 
 if [[ "$whereami" == *"raven"* ]]; then
   # assign a new variable for the PBS_ARRAY_variable
-  chromosome_number=${PBS_ARRAY_INDEX}
   
   cd $PBS_O_WORKDIR
   path_to_scripts="~/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/"
@@ -47,14 +46,19 @@ if [[ "$whereami" == *"raven"* ]]; then
   Gene_regions= "both"
   external_harddrive="FALSE"
 
-  # Load both Plink and R
-  module purge
-  module load R/3.3.0
-  module load plink/1.9c3
-  module load magma/1.06
 
 elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   cd ~/Documents/testing_cross_disorder/
+  path_to_scripts='/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/'
+  number_of_files=($(find -E . -type f -regex '^./output/CLOZUK_GWAS_BGE_CLUMPED_chr[0-9]+.bed' -exec basename {} \;))
+  path_to_PGC_conversion="/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Summary_stat_manipulation"
+  path_to_CLOZUK_conversion="/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Genotype_dataset_manipulation"
+  number_of_files=($(find -E . -type f -regex '^./output/CLOZUK_GWAS_BGE_CLUMPED_chr[0-9]+.bed' -exec basename {} \;))
+  path_to_covariate_file="/Users/Dropbox/whole_genome_testing/Stationary_data/CLOZUK2.r7.select2PC.eigenvec.txt"
+  path_to_chromosome_length_file="/Users/Dropbox/whole_genome_testing/Stationary_data/UCSC_hg19_chromeinfo_length_of_chromosomes.txt"
+  path_to_new_fam_file="/Users/Dropbox/whole_genome_testing/output/Stationary_data/CLOZUK.r7.GWAS_IDs.fam"
+  path_to_gene_annotation_file="/Users/Dropbox/whole_genome_testing/output/Stationary_data/NCBI37.3.gene.loc"
+
   # Arguments
   path_to_scripts='/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/'
   chromosome_number=14
@@ -70,7 +74,7 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   INFO_summary="TRUE"
   INFO_threshold=0.9
   # The number of chromosomes you wish to analyse (PRS_serial)
-  Chromosomes_to_analyse=14
+  Chromosomes_to_analyse=(`seq 1 22`)
   # Clumping Arguments
   p1=0.5
   p2=0.5
