@@ -377,6 +377,7 @@ if (whereami == 'johnhubert' | whereami == 'JJ'){
   filename.CLOZUK.together <- paste0("./output/", Validation_name,"_chr", chromosome.number,"_chr.pos.txt")
   new.PGC.table <- paste0("./output/", Training_name,"_table", chromosome.number,"_new.txt")
   filename.common.snps <- paste0("./output/chr", chromosome.number, Training_name,"_", Validation_name,"_common_SNPs.txt")
+  filename.duplicate.snps <- paste0("./output/extracted_Duplicate_snps_",Validation_name,"_", Training_name,"_chr",chromosome.number,".txt")
 }
 
 # Write update file for plink
