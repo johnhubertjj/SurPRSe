@@ -18,16 +18,18 @@ if [[ "$whereami" == *"raven"* ]]; then
   
   # assign arguments here for now because there are so many
   # Datasets
-  training_set_usually_summary="PGC_table${chromosome_number}"
+  training_set_usually_summary="bip1.scz1.ruderfer2014"
   validation_set_usually_genotype="CLOZUK_GWAS_BGE_chr${chromosome_number}"
   training_set_name="PGC"
   validation_set_name="CLOZUK"
-  # MAF and INFO
+  # MAF, INFO and SE
   MAF_summary="FALSE"
   MAF_threshold=0.01
   MAF_genotype="TRUE"
   INFO_summary="TRUE"
-  INFO_threshold=0.9	
+  INFO_threshold=0.9
+  SE_summary="FALSE"
+  SE_threshold=5	
   # The number of chromosomes you wish to analyse (PRS_serial)
   Chromosomes_to_analyse=(`seq 1 22`) 
   # Clumping Arguments
@@ -62,7 +64,7 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   path_to_scripts='/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/'
   chromosome_number=14
   # Datasets
-  training_set_usually_summary="PGC_table${chromosome_number}"
+  training_set_usually_summary="bip1.scz1.ruderfer2014"
   validation_set_usually_genotype="CLOZUK_GWAS_BGE_chr${chromosome_number}"
   training_set_name="PGC"
   validation_set_name="CLOZUK"

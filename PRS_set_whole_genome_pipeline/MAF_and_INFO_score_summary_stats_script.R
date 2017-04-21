@@ -40,10 +40,23 @@ Training_datatable_output <- paste0("./output/", args[3], "_new.txt")
 Training_name <- args[4]
 MAF_decision <- args[5]
 INFO_decision <- args[6]
+SE_decision <- args[7]
 
 # Read in Training set
 PGC_table <- fread(Training_datatable)
 changed_PGC_table <- copy(PGC_table)
+
+
+if (INFO_decision == "TRUE") {
+# remove all SNPs with INFO > 0.9
+Info_threshold <- as.numeric(args[7])
+changed_PGC_table <- changed_PGC_table[INFO > Info_threshold]
+}
+
+# Do I want to remove SNPs based on MAF
+if (MAF_decision == "TRUE") {
+ 
+# This is assuming that the FRQ_A columns exist 
 Allele_cases_location <- grep("FRQ_A_\\d+",colnames(changed_PGC_table), perl = T)
 Allele_controls_location <-grep("FRQ_U_\\d+",colnames(changed_PGC_table), perl = T)
 
@@ -54,21 +67,11 @@ new_column_names_cases <- gsub(pattern = "(?<=FRQ_A)_\\d+", replacement = "", x 
 new_column_names_controls <- gsub(pattern = "(?<=FRQ_U)_\\d+", replacement = "", x = colnames(changed_PGC_table[,Allele_controls_location,with = F]), perl = T)
 
 # set new names for columns
-setnames(changed_PGC_table, c(Allele_cases_location,Allele_controls_location), c(new_column_names_cases,new_column_names_controls))
+setnames(changed_PGC_table, c(Allele_cases_location,Allele_controls_location), c(new_column_names_cases, new_column_names_controls))
 
-if (INFO_decision == "TRUE") {
-# remove all SNPs with INFO > 0.9
-Info_threshold <- as.numeric(args[7])
-changed_PGC_table <- changed_PGC_table[INFO > Info_threshold]
-}
-
-# Do I want to remove SNPs based on MAF
-
-if (MAF_decision == "TRUE") {
 # Change all values to MAF,
 # Frequencies are just stated so in order to find the MAF you need to find the values for which the frequency is above 0.5 for 
 # each cases and controls individually, and subtract one from each in order to find MAF
-  
 Vector_of_major_alleles_FRQ_A <- which(changed_PGC_table$FRQ_A > 0.5)
 Vector_of_major_alleles_FRQ_U <- which(changed_PGC_table$FRQ_U > 0.5)
 changed_PGC_table <- changed_PGC_table[Vector_of_major_alleles_FRQ_A, FRQ_A_MAF := (1 - FRQ_A)]
@@ -93,12 +96,14 @@ changed_PGC_table[FRQ_U_helpful2, MAF := changed_PGC_table[FRQ_U_helpful2,FRQ_U_
 if (all(changed_PGC_table$MAF == changed_PGC_table$FRQ_A_MAF | changed_PGC_table$FRQ_U_MAF) == FALSE){
   warning("MAF is not neccessarily correct for this chromosome, check back please")
 }
-}
 
+# Remove un-required columns for previous MAF thresholding
 changed_PGC_table[, c("FRQ_A_MAF", "FRQ_U_MAF") := NULL ]
 
 # Reassign the column names back to the table
 setnames(changed_PGC_table, c(Allele_cases_location,Allele_controls_location), old_column_names)
+}
+
   
 # write new table overwriting the previous PGC_new_table
 write.table(changed_PGC_table, file = Training_datatable_output, row.names = F, quote = F)

@@ -12,7 +12,6 @@
 
 # script requries 22 files for each validation and training set
 
-
 # Run locally or on ARCCA
 whereami=$(uname -n)
 echo "$whereami"
@@ -37,6 +36,7 @@ if [[ "$whereami" == *"raven"* ]]; then
 
 elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   cd ~/Documents/testing_cross_disorder/
+  
   # Arguments
   path_to_scripts='/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/'
   
@@ -67,10 +67,9 @@ fi
 if [ ! -d "extrainfo" ]; then
    mkdir extrainfo
 fi
-
  
 # Run R script that removes SNPs based on INFO score and MAF
-Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}MAF_and_INFO_score_summary_stats_script.R ./extrainfo/${training_set_name}_remove_MAF_INFO${chromosome_number}.Rout ${training_set_usually_summary} ${training_set_name} ${MAF_summary} ${INFO_summary} ${INFO_threshold} ${chromosome_number} 
+Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}MAF_and_INFO_score_summary_stats_script.R ./extrainfo/${training_set_name}_remove_MAF_INFO${chromosome_number}.Rout ${training_set_usually_summary} ${training_set_name} ${MAF_summary} ${MAF_threshold} ${INFO_summary} ${INFO_threshold} ${SE_summary} ${SE_threshold} ${chromosome_number} 
 
 # Run R script that will combine PGC and CLOZUK to an individual table
 # Output is in PGC_CLOZUK_SNP_table.txt
