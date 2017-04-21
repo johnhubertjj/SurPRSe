@@ -29,11 +29,12 @@ if [[ "$whereami" == *"raven"* ]]; then
   module load magma/1.06
 
   cd $PBS_O_WORKDIR
-  path_to_scripts="~/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/"
+  path_to_scripts="/home/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/"
   
   # Assign the shell variables
-  source ${path_to_scripts}/PRS_arguments_script.sh
-  cat ${path_to_scripts}/PRS_arguments_script.sh 
+  source ${path_to_scripts}PRS_arguments_script.sh 
+  cat ${path_to_scripts}PRS_arguments_script.sh 
+
 elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   cd ~/Documents/testing_cross_disorder/
   # Arguments
@@ -43,7 +44,6 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   source ${path_to_scripts}/PRS_arguments_script.sh
   cat ${path_to_scripts}/PRS_arguments_script.sh 
   
-exit 1
 fi  
 
 ## rewrite so that the file input is an argument for the script instead, this will work for now
@@ -121,7 +121,7 @@ plink --bfile ./output/CLOZUK_GWAS_BGE_chr${chromosome_number}_consensus_with_${
 shopt -s nullglob
 set -- *${validation_set_usually_genotype}*
 if [ "$#" -gt 3 ]; then
-	rm -rf ${validation_set_usually_genotype}.{bim,bed,fam} 
+	rm -rf ${validation_set_usually_genotype}.{bim,bed,fam,log} 
 	shopt -u nullglob
 fi
 

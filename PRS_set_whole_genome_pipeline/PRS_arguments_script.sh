@@ -7,15 +7,14 @@ if [[ "$whereami" == *"raven"* ]]; then
   # assign a new variable for the PBS_ARRAY_variable
   
   cd $PBS_O_WORKDIR
-  path_to_scripts="~/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/"
-  path_to_PGC_conversion="~/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Summary_stat_manipulation/"
-  path_to_CLOZUK_conversion="~/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Genotype_dataset_manipulation/"
-  path_to_MAGMA_scripts="~/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/MAGMA/"
+  path_to_PGC_conversion="/home/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Summary_stat_manipulation/"
+  path_to_CLOZUK_conversion="/home/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Genotype_dataset_manipulation/"
+  path_to_MAGMA_scripts="/home/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/MAGMA/"
   number_of_files=($(find -E . -type f -regex '^./output/CLOZUK_GWAS_BGE_CLUMPED_chr[0-9]+.bed' -exec basename {} \;))
-  path_to_covariate_file="~/c1020109/NCBI37.3/CLOZUK2.r7.select2PC.eigenvec.txt" 
-  path_to_chromosome_length_file="~/c1020109/NCBI37.3/UCSC_hg19_chromeinfo_length_of_chromosomes.txt"
-  path_to_new_fam_file="~/c1020109/NCBI37.3/CLOZUK.r7.GWAS_IDs.fam"
-  path_to_gene_annotation_file="~/c1020109/NCBI37.3/NCBI37.3.gene.loc"  
+  path_to_covariate_file="/home/c1020109/NCBI37.3/CLOZUK2.r7.select2PC.eigenvec.txt" 
+  path_to_chromosome_length_file="/home/c1020109/NCBI37.3/UCSC_hg19_chromeinfo_length_of_chromosomes.txt"
+  path_to_new_fam_file="/home/c1020109/NCBI37.3/CLOZUK.r7.GWAS_IDs.fam"
+  path_to_gene_annotation_file="/home/c1020109/NCBI37.3/NCBI37.3.gene.loc"  
   
   # assign arguments here for now because there are so many
   # Datasets
@@ -40,7 +39,7 @@ if [[ "$whereami" == *"raven"* ]]; then
   Multiple_Training_set_tables="TRUE"
   Running_in_Serial="TRUE"
   sig_thresholds=(0.0001 0.001 0.01 0.05 0.1 0.2 0.3 0.4 0.5)
-  Perform_Magma_as_well="FALSE"
+  Perform_Magma_as_well="TRUE"
   Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates" 
   # either "extended" "normal" or "both" : change to a numerical input in the future
   Gene_regions= "both"
