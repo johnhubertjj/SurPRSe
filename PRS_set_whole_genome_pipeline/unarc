@@ -1,0 +1,164 @@
+#!/usr/bin/env bash
+# COPYRIGHT (c) 2011 Elliott Frisch
+# FREE TO USE OR MODIFY. NO WARRANTIES.
+
+function unTarBzip2 {
+	if [ "$2" == "1" ]; then
+		bzip2 -dc "$1" | tar xvvf -
+	else
+		bzip2 -dc "$1" | tar xf - > /dev/null 2>&1
+	fi
+	exit $?
+}
+function unTarGzip {
+	if [ "$2" == "1" ]; then
+		gzip -dc "$1" | tar xvvf -
+	else
+		gzip -dc "$1" | tar xf - > /dev/null 2>&1
+	fi
+	exit $?
+}
+function unTarXz {
+	if [ "$2" == "1" ]; then
+		xz -dc "$1" | tar xvvf -
+	else
+		xz -dc "$1" | tar xf - > /dev/null 2>&1
+	fi
+	exit $?
+}
+
+VERBOSE="1"
+FILE="$1"
+if [ "$FILE" == "" ]; then
+	echo "$0 filename [missing mandatory file]"
+	exit 1
+fi
+if [ ! -f "$FILE" ]; then
+	echo "$0 filename [$FILE is missing]"
+	exit 1
+fi
+# $FILE exists! Find its' extension.
+
+EXT1=`echo $FILE | awk -F . '{print $NF}'`
+EXT2=`basename $FILE .$EXT1 2>/dev/null| awk -F . '{print $NF}'`
+
+# Check for gzip (or bzip2) tar file.
+case "$EXT1" in
+	"tbz2" )
+		unTarBzip2 "$FILE" "$VERBOSE"
+		exit $?
+		;;
+	"tgz" )
+		unTarGzip "$FILE" "$VERBOSE"
+		exit $?
+		;;
+	"txz" )
+		unTarXz "$FILE" "$VERBOSE"
+		exit $?
+		;;
+	"deb" )
+		if [ "$VERBOSE" == "1" ]; then
+			dpkg -c "$FILE"
+			dpkg -x "$FILE" .
+		else
+			dpkg -x "$FILE" . > /dev/null 2>&1
+		fi
+		exit $?
+		;;
+	"rpm" )
+		if [ "$VERBOSE" == "1" ]; then
+			rpm2cpio "$FILE" | cpio -idmv
+		else
+			rpm2cpio "$FILE" | cpio -idm > /dev/null 2>&1
+		fi
+		exit $?
+		;;
+esac
+if [ "$EXT2" == "tar" ]; then
+	case "$EXT1" in
+	"bz2" )
+		unTarBzip2 "$FILE" "$VERBOSE"
+		exit $?
+		;;
+	"gz" ) 
+		unTarGzip "$FILE" "$VERBOSE"
+		exit $?
+		;;
+	"xz" )
+		unTarXz "$FILE" "$VERBOSE"
+		exit $?
+		;;
+	esac
+fi
+
+# Try a file type test.
+FILETYPE=`file "$FILE" | cut -f2 -d':' | awk '{print tolower($1)}'`
+case "$FILETYPE" in
+	"cpio" )
+		if [ "$VERBOSE" == "1" ]; then
+			cpio -idv < "$FILE"
+		else
+			cpio -id < "$FILE"
+		fi
+		exit $?	
+		;;
+	"xz" )
+		if [ "$VERBOSE" == "1" ]; then
+			xz -d "$FILE"
+		else
+			xz -d "$FILE" > /dev/null 2>&1
+		fi
+		exit $?
+		;;
+	"lha" )
+		if [ "$VERBOSE" == "1" ]; then
+			lha xv "$FILE"
+		else
+			lha xq "$FILE" > /dev/null 2>&1
+		fi
+		exit $?
+		;;
+	"7-zip" )
+		if [ "$VERBOSE" == "1" ]; then
+			7z x "$FILE"
+		else
+			7z x "$FILE" > /dev/null 2>&1
+		fi
+		exit $?
+		;;
+	"zip" )
+		if [ "$VERBOSE" == "1" ]; then
+			unzip -vj "$FILE"
+		else
+			unzip "$FILE" > /dev/null 2>&1
+		fi
+		exit $?
+		;;
+	"bzip2" )
+		if [ "$VERBOSE" == "1" ]; then
+			bzip2 -d "$FILE" 
+		else
+			bzip2 -d "$FILE" > /dev/null 2>&1
+		fi
+		exit $?
+		;;
+	"gzip" )
+		if [ "$VERBOSE" == "1" ]; then
+			gzip -d "$FILE" 
+		else
+			gzip -d "$FILE" > /dev/null 2>&1
+		fi
+		exit $?
+		;;	
+	"rar" )
+		if [ "$VERBOSE" == "1" ]; then
+			unrar vx "$FILE"
+		else
+			unrar x "$FILE" > /dev/null 2>&1
+		fi
+		exit $?
+		;;
+	* ) 
+		echo "File of type $FILETYPE is not recognized. $FILE not extracted."
+		exit 1 ;;
+esac

@@ -1,0 +1,99 @@
+# Arguments to be read into each analysis
+# Run locally or on ARCCA
+whereami=$(uname -n)
+echo "$whereami"
+
+if [[ "$whereami" == *"raven"* ]]; then
+  # assign a new variable for the PBS_ARRAY_variable
+  
+  cd $PBS_O_WORKDIR
+  path_to_PGC_conversion="/home/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Summary_stat_manipulation/"
+  path_to_CLOZUK_conversion="/home/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Genotype_dataset_manipulation/"
+  path_to_MAGMA_scripts="/home/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/MAGMA/"
+  number_of_files=($(find -E . -type f -regex '^./output/CLOZUK_GWAS_BGE_CLUMPED_chr[0-9]+.bed' -exec basename {} \;))
+  path_to_covariate_file="/home/c1020109/NCBI37.3/CLOZUK2.r7.select2PC.eigenvec.txt" 
+  path_to_chromosome_length_file="/home/c1020109/NCBI37.3/UCSC_hg19_chromeinfo_length_of_chromosomes.txt"
+  path_to_new_fam_file="/home/c1020109/NCBI37.3/CLOZUK.r7.GWAS_IDs.fam"
+  path_to_gene_annotation_file="/home/c1020109/NCBI37.3/NCBI37.3.gene.loc"  
+  
+  # assign arguments here for now because there are so many
+  # Datasets
+  training_set_usually_summary="bip1.scz1.ruderfer2014"
+  validation_set_usually_genotype="CLOZUK_GWAS_BGE_chr${chromosome_number}"
+  training_set_name="PGC"
+  validation_set_name="CLOZUK"
+  # MAF, INFO and SE
+  MAF_summary="FALSE"
+  MAF_threshold=0.01
+  MAF_genotype="TRUE"
+  INFO_summary="TRUE"
+  INFO_threshold=0.9
+  SE_summary="FALSE"
+  SE_threshold=5	
+  # The number of chromosomes you wish to analyse (PRS_serial)
+  Chromosomes_to_analyse=(`seq 1 22`) 
+  # Clumping Arguments
+  p1=0.5
+  p2=0.5
+  r2=0.2
+  window=1000
+  # PRS_serial arguments
+  Multiple_Training_set_tables="TRUE"
+  Running_in_Serial="TRUE"
+  sig_thresholds=(0.0001 0.001 0.01 0.05 0.1 0.2 0.3 0.4 0.5)
+  Perform_Magma_as_well="TRUE"
+  Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates" 
+  # either "extended" "normal" or "both" : change to a numerical input in the future
+  Gene_regions= "both"
+  external_harddrive="FALSE"
+
+
+elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
+  cd ~/Documents/testing_cross_disorder/
+  path_to_scripts='/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/'
+  number_of_files=($(find -E . -type f -regex '^./output/CLOZUK_GWAS_BGE_CLUMPED_chr[0-9]+.bed' -exec basename {} \;))
+  path_to_PGC_conversion="/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Summary_stat_manipulation"
+  path_to_CLOZUK_conversion="/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Genotype_dataset_manipulation"
+  number_of_files=($(find -E . -type f -regex '^./output/CLOZUK_GWAS_BGE_CLUMPED_chr[0-9]+.bed' -exec basename {} \;))
+  path_to_covariate_file="/Users/Dropbox/whole_genome_testing/Stationary_data/CLOZUK2.r7.select2PC.eigenvec.txt"
+  path_to_chromosome_length_file="/Users/Dropbox/whole_genome_testing/Stationary_data/UCSC_hg19_chromeinfo_length_of_chromosomes.txt"
+  path_to_new_fam_file="/Users/Dropbox/whole_genome_testing/output/Stationary_data/CLOZUK.r7.GWAS_IDs.fam"
+  path_to_gene_annotation_file="/Users/Dropbox/whole_genome_testing/output/Stationary_data/NCBI37.3.gene.loc"
+
+  # Arguments
+  path_to_scripts='/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/'
+  chromosome_number=14
+  # Datasets
+  training_set_usually_summary="bip1.scz1.ruderfer2014"
+  validation_set_usually_genotype="CLOZUK_GWAS_BGE_chr${chromosome_number}"
+  training_set_name="PGC"
+  validation_set_name="CLOZUK"
+  # MAF and INFO
+  MAF_summary="FALSE"
+  MAF_threshold=0.01
+  MAF_genotype="TRUE"
+  INFO_summary="TRUE"
+  INFO_threshold=0.9
+  # The number of chromosomes you wish to analyse (PRS_serial)
+  Chromosomes_to_analyse=(`seq 1 22`)
+  # Clumping Arguments
+  p1=0.5
+  p2=0.5
+  r2=0.2
+  window=1000
+  # Arguments for PRS_serial script
+  Multiple_Training_set_tables="TRUE"
+  Running_in_Serial="TRUE"
+  sig_thresholds=(0.0001 0.001 0.01 0.05 0.1 0.2 0.3 0.4 0.5)
+  Perform_Magma_as_well="TRUE"
+  Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates"
+  # either "extended" "normal" or "both" : change to a numerical input in the future
+  Gene_regions="both"	
+  external_harddrive="FALSE"
+fi
+
+if [ "$external_harddrive" == "TRUE" ]; then
+  path_to_harddrive=/Volumes/HD-PCU2
+  cp $path_to_harddrive/CLOZUK_data/${validation_set_usually_genotype}.tar.gz .
+  cp $path_to_harddrive/PGC_noCLOZUK_data/${training_set_usually_summary}.txt .
+fi

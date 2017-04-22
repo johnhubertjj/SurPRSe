@@ -41,6 +41,7 @@ if [[ "$whereami" == *"raven"* ]]; then
   sig_thresholds=(0.0001 0.001 0.01 0.05 0.1 0.2 0.3 0.4 0.5)
   Perform_Magma_as_well="FALSE"
   Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates" 
+  
   # either "extended" "normal" or "both" : change to a numerical input in the future
   Gene_regions= "expanded"
 
@@ -57,6 +58,32 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   number_of_files=($(find -E . -type f -regex '^./output/CLOZUK_GWAS_BGE_CLUMPED_chr[0-9]+.bed' -exec basename {} \;))  
   path_to_PGC_conversion="/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Summary_stat_manipulation"
   path_to_CLOZUK_conversion="/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Genotype_dataset_manipulation"
+<<<<<<< HEAD
+  number_of_files=($(find -E . -type f -regex '^./output/CLOZUK_GWAS_BGE_CLUMPED_chr[0-9]+.bed' -exec basename {} \;))
+  path_to_covariate_file="/Users/Dropbox/whole_genome_testing/Stationary_data/CLOZUK2.r7.select2PC.eigenvec.txt"
+  path_to_chromosome_length_file="/Users/Dropbox/whole_genome_testing/Stationary_data/UCSC_hg19_chromeinfo_length_of_chromosomes.txt"
+  path_to_new_fam_file="/Users/Dropbox/whole_genome_testing/output/Stationary_data/CLOZUK.r7.GWAS_IDs.fam"
+  path_to_gene_annotation_file="/Users/Dropbox/whole_genome_testing/output/Stationary_data/NCBI37.3.gene.loc"
+
+  # assign arguments here for now because there are so many
+  training_set_usually_summary="PGC_table"
+  validation_set_usually_genotype="CLOZUK_GWAS_BGE_chr"
+  training_set_name="PGC"
+  validation_set_name="CLOZUK"
+  MAF_summary="FALSE"
+  MAF_threshold=0.01
+  MAF_genotype="TRUE"
+  INFO_summary="TRUE"
+  INFO_threshold=0.9
+  Chromosomes_to_analyse=(`seq 1 22`)
+  Multiple_Training_set_tables="TRUE"
+  Running_in_Serial="TRUE"
+  sig_thresholds=(0.0001 0.001 0.01 0.05 0.1 0.2 0.3 0.4 0.5)
+  Perform_Magma_as_well="TRUE"
+  Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates"
+
+  # either "extended" "normal" or "both" : change to a numerical input in the future
+  Gene_regions= "expanded"
 fi
 
 
@@ -72,7 +99,7 @@ if [ -f ./output/${validation_set_name}_${training_set_name}_FULL_GENOME_MAKE_LI
 fi
 
 # If running MAGMA as well
-if [ ${Perform_Magma_as_well} == True ]; then
+if [ ${Perform_Magma_as_well} == TRUE ]; then
 
 	# Create output directory for MAGMA results
 	if [ ! -d "./output/MAGMA_set_analysis" ]; then
@@ -100,7 +127,7 @@ if [ ${Perform_Magma_as_well} == True ]; then
 	plink --merge-list ./output/MAGMA_set_analysis/${validation_set_name}_GWAS_BGE_${Magma_validation_set_name}_FULL_GENOME_MAKE_LIST_INPUT.txt --make-bed --out ./${validation_set_name}_${training_set_name}_MAGMA_FULL_GENOME
         cd ${PBS_O_WORKDIR}
 	
-	Validation_set_name_Magma="./output/MAGMA_set_analysis/${validation_set_name}_${training_set_name}_MAGMA_FULL_GENOME"
+	Validation_set_name_MAGMA="./output/MAGMA_set_analysis/${validation_set_name}_${training_set_name}_MAGMA_FULL_GENOME"
 	
 fi
 	
@@ -149,9 +176,10 @@ fi
 #########################
 
 if [ ${Perform_Magma_as_well} == "TRUE" ]; then
-
+	# Create the pvalue reference file which matching SNPs to genes depending on the pvalue threshold
 	Rscript ${path_to_MAGMA_scripts}RscriptEcho.R ${path_to_scripts}Creation_of_filter_file_for_magma_gene.R ./extrainfo/Creation_of_filter_file_for_magma_gene.R ${training_set_name} ${validation_set_name} ${sig_thresholds[@]} ${validation_set_name_MAGMA}.bim ${Perform_Magma_as_well} ${INFO_summary} ${INFO_threshold}
-    sh ${path_to_scripts}MAGMA_analysis_whole_genome_complete.sh ${sig_thresholds[@]} ${validation_set_name} ${training_set_name} ${validation_set_name_MAGMA} ${Perform_Magma_as_well}
+        # Run MAGMA gene-set analysis for the whole genome
+	 sh ${path_to_scripts}MAGMA_analysis_whole_genome_complete.sh ${sig_thresholds[@]} ${validation_set_name} ${training_set_name} ${validation_set_name_MAGMA} ${Perform_Magma_as_well}
 
 fi
 	Perform_Magma_as_well="FALSE"

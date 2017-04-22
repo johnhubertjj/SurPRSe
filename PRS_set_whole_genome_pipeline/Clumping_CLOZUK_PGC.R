@@ -1,6 +1,13 @@
 ### Start Timer
 ptm <- proc.time()
 
+#######################################
+# adding in arguments from BASH script#
+#######################################
+args <- commandArgs(trailingOnly = T)
+print(args)
+
+
 ###############################
 # Checking location for serial or batch analysis #
 ###############################
@@ -9,10 +16,10 @@ System_information <- Sys.info()
 whereami <- System_information['user']
 
 if (whereami == "johnhubert") {
-  chromosome.number <- 22
+  chromosome.number <- args[7]
   
 } else if (whereami == 'JJ') {
-  chromosome.number <- 22
+  chromosome.number <- args[7]
   
 } else if (whereami == "c1020109") {
   
@@ -24,15 +31,10 @@ if (whereami == "johnhubert") {
   stop("current environment NOT at work/home or on servers, please add to script above to specify where you are and what type of analysis you want to do")
 }
 
-#######################################
-# adding in arguments from BASH script#
-#######################################
-args <- commandArgs(trailingOnly = T)
-
 # specify the different input tables #
-Training_datatable <- paste0("./output/",args[3],"_new.txt")
-Validation_datatable_bim_file <- paste0("./output/",args[4],"_2.bim")
-Common_SNPs <- paste0("./output/chr", chromosome.number,args[5],"_",args[6],"_common_SNPs.txt")
+Training_datatable <- paste0("./output/", args[3],"_new.txt")
+Validation_datatable_bim_file <- paste0("./output/", args[4], "_2.bim")
+Common_SNPs <- paste0("./output/chr", chromosome.number, args[5], "_", args[6], "_common_SNPs.txt")
 
 ### Library ###
 
@@ -66,7 +68,7 @@ extract_SNPs <-c(removed_SNPs,removed_SNPs_cloz)
 extract_SNPs <- unique(extract_SNPs)
 
 ### write SNPs back to file
-write(extract_SNPs,file = paste0("./output/extracted_Duplicate_snps_chr",chromosome.number,".txt"))
+write(extract_SNPs,file = paste0("./output/extracted_Duplicate_snps_chr", chromosome.number,".txt"))
 which(removed_SNPs %in% Common_SNPs)
 
 #End Timer

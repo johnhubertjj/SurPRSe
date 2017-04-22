@@ -4,22 +4,23 @@ library(testit)
 library(data.table)
 library(parallel)
 
-## logistic regression calculation #
-sig <-c(1e-4,1e-3,1e-2,0.05,0.1,0.2,0.3,0.4,0.5)
 
 ## set new environment
 e <- new.env()
 
+## logistic regression calculation #
+assign("sig" , c(1e-4,1e-3,1e-2,0.05,0.1,0.2,0.3,0.4,0.5), envir = e)
+
 Calculating_PRS <- function(i) {
   
   # Use the same table and select out the pvalue matching all the genes
-  Files_to_parse <- e$Files_to_parse_total[which(Files_to_parse_total$pval == sig[i]), ]
+  Files_to_parse <- e$Files_to_parse_total[which(e$Files_to_parse_total$pval == e$sig[i]), ]
   
   # Calculate PRS per gene per individual for each pval threshold
   for (l in 1:nrow(Files_to_parse)){
     
     if( l == 1){
-      cat("threshold",sig[i],"has begun")
+      cat("threshold", e$sig[i], "has begun")
     }
     
     # Check if you can read in the file from reference guide 
@@ -36,10 +37,11 @@ Calculating_PRS <- function(i) {
       rows_to_remove <- which(PRS.profiles$PHENO == -9)
       PRS.profiles <- PRS.profiles[!rows_to_remove]
     }
+    
     # check if anyone actually has a score
     if(all(PRS.profiles$SCORE==0)){
       no_score_values <- Files_to_parse[l,]
-      no_score <- rbind(no_score, no_score_values)
+      e$no_score <- rbind(e$no_score, no_score_values)
       next()
     }
     
@@ -65,11 +67,13 @@ Calculating_PRS <- function(i) {
     #             res$Effect[i]<-summary(model)$coefficients[2, "Estimate"]
     #             res$SE[i]<-summary(model)$coefficients[2, "Std. Error"]
     
-    print(c(summary(model)$coefficients[2, "Pr(>|z|)"],Files_to_parse$Genes[l]))
+    # print(c(summary(model)$coefficients[2, "Pr(>|z|)"],Files_to_parse$Genes[l]))
+    
+    e$residuals[[i]][l,] <- c(summary(model)$coefficients[2, "Pr(>|z|)"],Files_to_parse$Genes[l])
+    
     if( l == 10){
       stop()
     }
-    residuals[[i]][l,] <- c(summary(model)$coefficients[2, "Pr(>|z|)"],Files_to_parse$Genes[l])
     #             res$NSNPs[i]<-max(dat$CNT)/2
   }#i
 }
@@ -92,8 +96,8 @@ duplicate_rows <- uniquecombs(e$Files_to_parse_total, ordered = T)
 
 ## Create list for storage of p-values from logistic regression
 x <- matrix(data=rep(NA,2*length(unique(e$Files_to_parse_total$Genes))), ncol = 2, nrow = 10407)
-residuals <- list(x,x,x,x,x,x,x,x,x)
-names(residuals) <- sig
+assign("residuals", list(x,x,x,x,x,x,x,x,x), envir = e)
+names(e$residuals) <- e$sig
 
 ## Stop if duplicates exist
 if (nrow(duplicate_rows) > nrow(Files_to_parse_total)) {
@@ -101,12 +105,12 @@ if (nrow(duplicate_rows) > nrow(Files_to_parse_total)) {
 }
 
 # Create a matrix recording files which do not exist
-erroneous_genes <- matrix(ncol = 2)
-colnames(erroneous_genes) <- c("Genes", "pval")
+assign("erroneous_genes", matrix(ncol = 2), envir = e)
+colnames(e$erroneous_genes) <- c("Genes", "pval")
 
 #create a matric recording instances where no score was found
-no_score <- matrix(ncol=2)
-colnames(no_score) <- c("Genes", "pval")
+assign("no_score", matrix(ncol=2), envir = e)
+colnames(e$no_score) <- c("Genes", "pval")
 
 # memory.limit(20000)
 
