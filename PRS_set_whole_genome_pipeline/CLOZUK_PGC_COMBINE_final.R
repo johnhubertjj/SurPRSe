@@ -43,6 +43,19 @@ Validation_datatable_bim_file <- paste0(args[4],".bim")
 Training_name <- args[5]
 Validation_name <- args[6]
 chromosome.number <- args[7]
+CHR <- args[8]
+SNP <- args[9]
+BP <- args[10]
+A1 <- args[11]
+A2 <- args[12]
+OR <- args[13]
+BETA <- args[14]
+number_of_frequency_columns <- args[15]
+
+Column_headers_to_keep <- c(CHR,SNP,BP,A1,A2,OR,BETA)
+Column_headers <- c("CHR", "SNP", "BP", "A1", "A2", "OR", "BETA")
+Column_headers_to_keep_elements <- which(Column_headers_to_keep == TRUE)
+Column_headers <- Column_headers[Column_headers_to_keep_elements]
 
  #setwd("~/Documents/testing_cross_disorder") 
  #Validation_datatable_bim_file <- "CLOZUK_GWAS_BGE_chr14.bim"
@@ -163,12 +176,16 @@ PGC.integers.to.change <- PGC.data.frame[,.I[grep(paste0("^",chromosome.number,"
 PGC.divisive.names <- PGC.data.frame[PGC.integers.to.change]
 PGC.alternative <- PGC.data.frame[,SNP := paste0(CHR,":",BP)]
 PGC.data.frame <- PGC.data.frame[,SNP := paste0(CHR,":",BP)]
-PGC.alternative <- PGC.alternative[,c("CHR","SNP","BP","A1","A2","OR"),with = F]
+#PGC.alternative <- PGC.alternative[,c("CHR","SNP","BP","A1","A2","OR"),with = F]
+PGC.alternative <- PGC.alternative[, Column_headers, with = F]
+
+if (BETA == FALSE){  
 
 ### Adding BETA column to data
 log.to.odds(PGC.alternative)
 PGC.alternative[,BETA := e$PGC.BETA]
 PGC.data.frame[,BETA := e$PGC.BETA]
+}
 
 ### Changes the CLOZUK identifiers ###
 CLOZUK.integers.to.change <- CLOZUK.data[,.I[grep(paste0("^",chromosome.number,":\\d+:\\w+:\\w+"),SNP, perl = T,invert = T)]]
@@ -238,12 +255,15 @@ a <- which (combined.CLOZUK.PGC$A1.y == combined.CLOZUK.PGC$A2.x & combined.CLOZ
 combined.CLOZUK.PGC$BETA[a] <- (-combined.CLOZUK.PGC$BETA[a])
 
 # Change the values of the OR to suit Allele changes #
-if (length(a) >= 1) {
+if (length(a) >= 1 & OR == TRUE) {
   PGC.OR <- combined.CLOZUK.PGC$OR[a]
   change.odds(PGC.OR)
   combined.CLOZUK.PGC$OR[a]<- e$PGC.NEW.OR
   rm(PGC.NEW.OR, envir = e)
   rm(PGC.OR)
+}
+
+if (length(a) >= 1){
   combined.CLOZUK.PGC$A1.x[a] <- as.character(combined.CLOZUK.PGC$A1.y[a])
   combined.CLOZUK.PGC$A2.x[a] <- as.character(combined.CLOZUK.PGC$A2.y[a])
 }
@@ -275,13 +295,16 @@ combined.CLOZUK.PGC$A2.x[d[b4]] <-"A"
 a <- which(combined.CLOZUK.PGC$A1.y==combined.CLOZUK.PGC$A2.x & combined.CLOZUK.PGC$A2.y==combined.CLOZUK.PGC$A1.x)
 
 # Same OR change #
-if (length(a) >= 1){
+if (length(a) >= 1 & OR == TRUE){
   combined.CLOZUK.PGC$BETA[a] <- (-combined.CLOZUK.PGC$BETA[a])
   PGC.OR <- combined.CLOZUK.PGC$OR[a]
   change.odds(PGC.OR)
   combined.CLOZUK.PGC$OR[a]<- e$PGC.NEW.OR
   rm(PGC.NEW.OR, envir = e)
   rm(PGC.OR)
+}
+# If OR is not there #
+if (length(a) >= 1){
   combined.CLOZUK.PGC$A1.x[a] <- as.character(combined.CLOZUK.PGC$A1.y[a])
   combined.CLOZUK.PGC$A2.x[a] <- as.character(combined.CLOZUK.PGC$A2.y[a])
 }

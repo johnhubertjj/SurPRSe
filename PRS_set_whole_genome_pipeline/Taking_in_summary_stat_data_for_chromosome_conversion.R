@@ -15,11 +15,15 @@ print(args)
 
 Training_name_full_unseparated <- args[3]
 Training_set_name <- args[4]
-MAF_summary <- args[6]
-INFO_summary <- args[7]
-SE_summary <- args[8]
-SE_threshold <- args[9]
-Chromosomes_to_split <- args[10]
+MAF_summary <- args[5]
+INFO_summary <- args[6]
+SE_summary <- args[7]
+SE_threshold <- as.numeric(args[8])
+
+Chromosomes_to_split <- as.numeric(args[c(9:length(args))])
+print(Chromosomes_to_split)
+
+# Chromosomes_to_split <- args[9]
 
 
 # Training_name_full_unseparated <- "/Users/johnhubert/Documents/testing_cross_disorder/BPSCZ.bp_v_scz.results.txt"
@@ -61,6 +65,7 @@ if(length(grep("\\bA2\\b", Parsing_colnames)) == 1){
   A2_name <- "A2_name=TRUE"
 }else{
   A2_name <- "A2_name=FALSE"  
+  warning("Major Allele is not present in the Training dataset or is not named \"A2\", please change column headers or add a column with Major allele")
 }
 
 if(length(grep("\\bFRQ", Parsing_colnames)) == 1 || length(grep("\\bFRQ", Parsing_colnames)) == 2){
@@ -69,7 +74,7 @@ if(length(grep("\\bFRQ", Parsing_colnames)) == 1 || length(grep("\\bFRQ", Parsin
 }else{
   MAF_calculation_summary <- "MAF_summary=FALSE"  
   number_of_frequency_columns <- "Number_of_frequency_columns=NA"
-  warning("MAF frequency calculation is impossible without an allele frequency estimation, please calculation MAF using Validation dataset and/or other genotyped data")
+  warning("MAF frequency calculation is impossible without an allele frequency estimation, please calculate MAF using Validation dataset and/or other genotyped data")
   if(MAF_summary == "TRUE"){
     warning("MAF_summary input argument has been changed from TRUE to FALSE due to constraints warned above")
   }
@@ -136,7 +141,7 @@ What_summary_columns_do_we_have(Parsing_colnames)
 if(length(grep("CHR", Parsing_colnames)) == 1){
 setkey(Training_data, CHR)
 }else{
-  stop("No Chromosome column found in summary stats dataset, re-organise dataset so a chromosome number identifier is a column")
+  stop("No chromosome column found in summary stats dataset, re-organise dataset so a chromosome number identifier is a column")
 }
 
 # separating out chromosome into certain sections
@@ -146,6 +151,6 @@ setkey(Training_data, CHR)
   # take a subset of the data matching the chromsome number
   # and write the subsetted table to a new table for each chromosome. 
 for (chromosome.number in Chromosomes_to_split) { 
-write.table(eval(parse(text = paste0("Training_data[J(",chromosome.number,")]"))), file = paste0(Training_set_name, chromosome.number,".txt"), quote = F, row.names = F)
+write.table(eval(parse(text = paste0("Training_data[J(",chromosome.number,")]"))), file = paste0(Training_set_name,"_table", chromosome.number,".txt"), quote = F, row.names = F)
 }
 

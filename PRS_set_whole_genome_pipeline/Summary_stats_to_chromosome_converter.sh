@@ -28,31 +28,42 @@ if [[ "$whereami" == *"raven"* ]]; then
   cd $PBS_O_WORKDIR
   path_to_scripts="/home/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/"
   
+  # make directories for output and extra info
+  if [ ! -d "output" ]; then
+     mkdir output
+  fi
+  
+  if [ ! -d "extrainfo" ]; then
+     mkdir extrainfo
+  fi
+  
   # Assign the shell variables
   source ${path_to_scripts}PRS_arguments_script.sh 
   cat ${path_to_scripts}PRS_arguments_script.sh 
 
 elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   cd ~/Documents/testing_cross_disorder/  
+  
   # Arguments
   path_to_scripts='/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/'
+   
+  # make directories for output and extra info
+  if [ ! -d "output" ]; then
+     mkdir output
+  fi
+  
+  if [ ! -d "extrainfo" ]; then
+     mkdir extrainfo
+  fi
   
   # Assign the shell variables
   source ${path_to_scripts}/PRS_arguments_script.sh
   cat ${path_to_scripts}/PRS_arguments_script.sh 
 
 fi
-# make directories for output and extra info
-if [ ! -d "output" ]; then
-   mkdir output
-fi
-  
-if [ ! -d "extrainfo" ]; then
-   mkdir extrainfo
-fi
 
 
-Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}Taking_in_summary_stats_for_chromosome_conversion.R ./extrainfo/${training_set_name}_summary_stats_for_chromosome_conversion.Rout ${training_file_name} ${training_set_name} ${MAF_summary} ${INFO_summary} ${SE_summary} ${SE_threshold} ${chromosomes_to_analyse}  
+Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}Taking_in_summary_stat_data_for_chromosome_conversion.R ./extrainfo/${training_set_name}_summary_stats_for_chromosome_conversion.Rout ${training_set_original_filename} ${training_set_name} ${MAF_summary} ${INFO_summary} ${SE_summary} ${SE_threshold} ${Chromosomes_to_analyse[@]}  
 
 source ./extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
 cat ./extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt 

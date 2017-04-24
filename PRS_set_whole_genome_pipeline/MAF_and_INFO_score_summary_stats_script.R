@@ -43,7 +43,7 @@ Training_datatable <- paste0(args[3],".txt")
 Training_datatable_output <- paste0("./output/", args[3], "_new.txt")
 Training_name <- args[4]
 MAF_decision <- args[5]
-MAF_threshold <- args[6]
+MAF_threshold <- as.numeric(args[6])
 INFO_decision <- args[7]
 Info_threshold <- as.numeric(args[8])
 SE_decision <- args[9]
@@ -55,12 +55,14 @@ changed_PGC_table <- copy(PGC_table)
 
 if (SE_decision == "TRUE"){
   changed_PGC_table <- changed_PGC_table[SE > SE_threshold]
+  cat("SNPs with SE > ", SE_threshold, " removed")
 }
 
 if (INFO_decision == "TRUE") {
   # remove all SNPs with INFO > 0.9
   Info_threshold <- as.numeric(args[7])
   changed_PGC_table <- changed_PGC_table[INFO > Info_threshold]
+  cat("SNPs with INFO > ", Info_threshold, " removed")
 }
 
 # Do I want to remove SNPs based on MAF
@@ -90,12 +92,12 @@ if (MAF_decision == "TRUE") {
   changed_PGC_table <- changed_PGC_table[is.na(FRQ_U_MAF), FRQ_U_MAF := FRQ_U]
   
   # remove all SNPs lower than 0.01
-  FRQ_to_keep_helpful3 <- which(changed_PGC_table$FRQ_A_MAF <= 0.01 & changed_PGC_table$FRQ_U_MAF <= 0.01)
+  FRQ_to_keep_helpful3 <- which(changed_PGC_table$FRQ_A_MAF <= MAF_threshold & changed_PGC_table$FRQ_U_MAF <= MAF_threshold)
   changed_PGC_table <- changed_PGC_table[!FRQ_to_keep_helpful3]
   
   #Find out which columns have one value below MAF 0.01
-  FRQ_U_helpful2 <- which(changed_PGC_table$FRQ_A_MAF <= 0.01 & changed_PGC_table$FRQ_U_MAF > 0.01)
-  FRQ_A_helpful1 <- which(changed_PGC_table$FRQ_A_MAF > 0.01 & changed_PGC_table$FRQ_U_MAF <= 0.01)
+  FRQ_U_helpful2 <- which(changed_PGC_table$FRQ_A_MAF <= MAF_threshold & changed_PGC_table$FRQ_U_MAF > MAF_threshold)
+  FRQ_A_helpful1 <- which(changed_PGC_table$FRQ_A_MAF > MAF_threshold & changed_PGC_table$FRQ_U_MAF <= MAF_threshold)
 
   # add extra column with MAF for each SNP according to the rule, keep the minimum allele frequency (except those below 0.01)
   changed_PGC_table[,MAF := pmin(FRQ_A_MAF,FRQ_U_MAF)]
@@ -112,13 +114,14 @@ if (MAF_decision == "TRUE") {
   
   # Reassign the column names back to the table
   setnames(changed_PGC_table, c(Allele_cases_location, Allele_controls_location), old_column_names)
+  cat("SNPs with MAF > ", MAF_threshold, " removed")
 }
 
   
 # write new table overwriting the previous PGC_new_table
 write.table(changed_PGC_table, file = Training_datatable_output, row.names = F, quote = F)
-cat("Number of SNPs in", Training_name, "before MAF and/or INFO correction: N=", nrow(PGC_table))
-cat("Number of SNPs in", Training_name, "after MAF and/or INFO correction: N=", nrow(changed_PGC_table))
+cat("Number of SNPs in", Training_name, "before MAF and/or INFO and/or SE correction: N=", nrow(PGC_table))
+cat("Number of SNPs in", Training_name, "after MAF and/or INFO and/or SE correction: N=", nrow(changed_PGC_table))
 
 #End Timer
 proc.time() - ptm

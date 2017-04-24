@@ -33,7 +33,11 @@ if [[ "$whereami" == *"raven"* ]]; then
   # Assign the shell variables
   source ${path_to_scripts}PRS_arguments_script.sh 
   cat ${path_to_scripts}PRS_arguments_script.sh 
-
+   
+  # Alter/add variables depending on what type of Training dataset you have
+  source ./extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
+  cat ./extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
+ 
 elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   cd ~/Documents/testing_cross_disorder/
   
@@ -44,6 +48,9 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   source ${path_to_scripts}/PRS_arguments_script.sh
   cat ${path_to_scripts}/PRS_arguments_script.sh 
   
+  # Alter/add variables depending on what type of Training dataset you have
+  source ./extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
+  cat ./extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
 fi  
 
 ## rewrite so that the file input is an argument for the script instead, this will work for now
@@ -73,7 +80,7 @@ Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}MAF_and_INFO_score_sum
 
 # Run R script that will combine PGC and CLOZUK to an individual table
 # Output is in PGC_CLOZUK_SNP_table.txt
-Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}CLOZUK_PGC_COMBINE_final.R ./extrainfo/${validation_set_name}_${training_set_name}_COMBINE_chr${chromosome_number}.Rout ${training_set_usually_summary} ${validation_set_usually_genotype} ${training_set_name} ${validation_set_name} ${chromosome_number}
+Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}CLOZUK_PGC_COMBINE_final.R ./extrainfo/${validation_set_name}_${training_set_name}_COMBINE_chr${chromosome_number}.Rout ${training_set_usually_summary} ${validation_set_usually_genotype} ${training_set_name} ${validation_set_name} ${chromosome_number} ${CHR_name} ${SNP_name} ${BP_name} ${A1_name} ${A2_name} ${OR_name} ${BETA_name} ${Number_of_frequency_columns}  
 
 if [[ ${MAF_genotype} == "TRUE" ]]; then
    # using plink to change the names to a CHR.POS identifier and remaking the files
