@@ -44,6 +44,10 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   
 fi
 
+#  echo "Press CTRL+C to proceed."
+#  trap "pkill -f 'sleep 1h'" INT
+#  trap "set +x ; sleep 1h ; set -x" DEBUG
+
 # Find out what type the input file is...quickly
 shopt -s nullglob #enable
 set -- *${training_set_usually_summary}*
