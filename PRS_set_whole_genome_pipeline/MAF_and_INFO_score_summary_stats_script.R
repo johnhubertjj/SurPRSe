@@ -111,7 +111,7 @@ if (MAF_decision == "TRUE") {
   changed_PGC_table[, c("FRQ_A_MAF", "FRQ_U_MAF") := NULL ]
   
   # Reassign the column names back to the table
-  setnames(changed_PGC_table, c(Allele_cases_location,Allele_controls_location), old_column_names)
+  setnames(changed_PGC_table, c(Allele_cases_location, Allele_controls_location), old_column_names)
 }
 
   
