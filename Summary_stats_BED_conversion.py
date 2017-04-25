@@ -1,8 +1,5 @@
 #! /Library/Frameworks/Python.framework/Versions/2.7/bin/python2.7
 
-#
-
-# !/usr/bin/python
 import sys, os
 
 
@@ -46,9 +43,9 @@ UNLIFTED_SET = set()
 
 def liftBed(fin, fout, funlifted):
     params = dict()
-    params['LIFTOVER_BIN'] = '/net/wonderland/home/zhanxw/mycode/liftOver/liftOver'
+    params['LIFTOVER_BIN'] = '/Users/johnhubert/Documents/liftOver'
     params['OLD'] = fin
-    params['CHAIN'] = '/home/zhanxw/mycode/liftOver/hg18ToHg19.over.chain.gz'
+    params['CHAIN'] = '/Users/johnhubert/Documents/hg18ToHg19.over.chain'
     params['NEW'] = fout
     params['UNLIFTED'] = fout + '.unlifted'
     from string import Template
@@ -134,7 +131,9 @@ if __name__ == '__main__':
     parser.add_argument('-o', dest='prefix', required=True)
     args = parser.parse_args()
 
-    oldBed = args.mapFile + '.bed'
+
+
+    oldBed =  args.mapFile+ '.bed'
     makesure(map2bed(args.mapFile, oldBed),
              'map->bed succ')
 
@@ -160,20 +159,3 @@ if __name__ == '__main__':
 
 
 
-
-# -------------- READ IN DATA -------------- #
-
-# Read in Annot Data #
-annot_names = ["CHR", "SNP", "BP", "GENE", "BP_START", "BP_END"]
-annot = pd.read_table('MAGMA_Gene_regions_for_python_script.txt', sep=' ', names=annot_names)
-
-# Read in CLOZUK_PGC Assoc Data Pruned Data # #Is this the PGC alternative?#
-
-CLOZUK_PGC_names = ["ROW.NUM", "ROW.ID", "CHR", "SNP", "BP", "A1", "A2", "BETA", "P", "MAF"]
-CLOZUK_PGC_clump = pd.read_table('CLOZUK_GWAS_BGE_CLUMPED_PGC_MAF_FINAL.txt', sep=' ', names=CLOZUK_PGC_names)
-
-# If the data is from R, the indexing standard needs to be changed
-CLOZUK_PGC_clump[['ROW.NUM']] = CLOZUK_PGC_clump[["ROW.NUM"]] - 1
-
-# File that Emily made herself: took the MAF from GERAD and then applied it above.
-# For me I would take the Minor allele frequency from CLOZUK and then apply the BETA and p for PGC for the common SNPs
