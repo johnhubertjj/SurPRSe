@@ -53,6 +53,22 @@ SE_threshold <- as.numeric(args[10])
 PGC_table <- fread(Training_datatable)
 changed_PGC_table <- copy(PGC_table)
 
+cat("Number of SNPS in ", Training_name,"before MAF/INFO/SE script Chr:",chromosome.number, "N=" ,nrow(PGC_table))
+
+### Remove Duplicated SNPs in Training here ###
+PGC.duplicated.removed <- which(duplicated(PGC_table$SNP))
+PGC.duplicated.removed.rev <- which(duplicated(PGC_table$SNP, fromLast = T))
+
+### One-line duplication check - Training ###
+length(PGC_table$SNP)
+if (length(PGC.duplicated.removed) >= 1){
+  PGC_duplicate_SNPS <- PGC_table$SNP[(duplicated(PGC_table$SNP) | duplicated(PGC_table$SNP, fromLast = TRUE)) ]
+  PGC_table <- PGC_table[!(duplicated(PGC_table$SNP) | duplicated(PGC_table$SNP, fromLast = TRUE)) ]
+}
+length(PGC_table$SNP)
+
+cat("Number of SNPS in ",Training_name," after duplication check one Chr:",chromosome.number, "N=" ,nrow(PGC_table))
+
 if (SE_decision == "TRUE"){
   changed_PGC_table <- changed_PGC_table[SE > SE_threshold]
   cat("SNPs with SE > ", SE_threshold, " removed")
@@ -60,7 +76,6 @@ if (SE_decision == "TRUE"){
 
 if (INFO_decision == "TRUE") {
   # remove all SNPs with INFO > 0.9
-  Info_threshold <- as.numeric(args[7])
   changed_PGC_table <- changed_PGC_table[INFO > Info_threshold]
   cat("SNPs with INFO > ", Info_threshold, " removed")
 }

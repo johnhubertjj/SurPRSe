@@ -57,7 +57,7 @@ if [ -f ./output/${validation_set_name}_${training_set_name}_FULL_GENOME_MAKE_LI
 fi
 
 # If running MAGMA as well
-if [ ${Perform_Magma_as_well} == True ]; then
+if [ ${Perform_Magma_as_well} == TRUE ]; then
 
 	# Create output directory for MAGMA results
 	if [ ! -d "./output/MAGMA_set_analysis" ]; then
@@ -137,13 +137,12 @@ if [ ${Perform_Magma_as_well} == "TRUE" ]; then
 	# Create the pvalue reference file which matching SNPs to genes depending on the pvalue threshold
 	Rscript ${path_to_MAGMA_scripts}RscriptEcho.R ${path_to_scripts}Creation_of_filter_file_for_magma_gene.R ./extrainfo/Creation_of_filter_file_for_magma_gene.R ${training_set_name} ${validation_set_name} ${sig_thresholds[@]} ${validation_set_name_MAGMA}.bim ${Perform_Magma_as_well} ${INFO_summary} ${INFO_threshold}
         # Run MAGMA gene-set analysis for the whole genome
-	 sh ${path_to_scripts}MAGMA_analysis_whole_genome_complete.sh ${sig_thresholds[@]} ${validation_set_name} ${training_set_name} ${validation_set_name_MAGMA} ${Perform_Magma_as_well}
+	sh ${path_to_scripts}MAGMA_analysis_whole_genome_complete.sh ${sig_thresholds[@]} ${validation_set_name} ${training_set_name} ${validation_set_name_MAGMA} ${Perform_Magma_as_well}
 
 fi
 	Perform_Magma_as_well="FALSE"
 	Validataion_FULL_GENOME="./output/${validation_set_name}_${training_set_name}_FULL_GENOME"
-	Rscript ${path_to_MAGMA_scripts}RscriptEcho.R ${path_to_scripts}Creation_of_filter_file_for_magma_gene.R ./extrainfo/Creation_of_filter_file_for_magma_gene.R ${training_set_name} ${validation_set_name} ${sig_thresholds[@]} ${validation_FULL_GENOME}.bim ${Perform_Magma_as_well}
-
+	Rscript ${path_to_MAGMA_scripts}RscriptEcho.R ${path_to_scripts}Creation_of_filter_file_for_magma_gene.R ./extrainfo/Creation_of_filter_file_for_magma_gene.R ${training_set_name} ${validation_set_name} ${validation_FULL_GENOME}.bim ${Perform_Magma_as_well} ${sig_thresholds[@]} 
 
 # Run with MAGMA
 sh ${path_to_scripts}MAGMA_analysis_whole_genome_complete.sh ${sig_thresholds[@]} ${validation_set_name} ${training_set_name} ${validation_set_name_MAGMA} ${Perform_Magma_as_well} ${Gene_regions}
@@ -162,7 +161,7 @@ if [ ! -d "./output/PRS_scoring/score" ]; then
 fi
 
 # Calculate the Polygenic score using plink within an R script (for now)
-Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}PRS_scoring_whole_genome.R ./extrainfo/PRS_scoring_whole_genome.Rout ${training_set_name} ${validation_set_name} ${sig_thresholds[@]} ${Gene_regions} 
+Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}PRS_scoring_whole_genome.R ./extrainfo/PRS_scoring_whole_genome.Rout ${training_set_name} ${validation_set_name} ${Gene_regions} ${sig_thresholds[@]} 
 
 if [ "$whereami" == "raven13" ]; then
    	python ${path_to_scripts}PRS_scoring_parallel_clump_maf_JJ.py

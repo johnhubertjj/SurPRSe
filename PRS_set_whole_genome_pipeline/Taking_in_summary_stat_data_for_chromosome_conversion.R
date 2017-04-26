@@ -106,7 +106,7 @@ if(BETA_name == "BETA_name=FALSE" & OR_name == "OR_name=FALSE"){
   stop("No Odds ratios or BETA scores supplied in Training set, please calculate at least one before attempting PRSset")
 }
   
-if(length(grep("\\bSE\\b", Parsing_colnames)) == 1){
+if(length(grep("\\bSE\\b", Parsing_colnames)) == 1 & BETA_name == "BETA_name=FALSE" & OR_name == "OR_name=FALSE"){
   SE_name <- "SE_summary=TRUE"
 } else {
   SE_name <- "SE_summary=FALSE"

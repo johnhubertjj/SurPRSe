@@ -60,7 +60,7 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   chromosome_number=14
   # Datasets
   training_set_usually_summary="BPvsSCZ_table${chromosome_number}"
-  training_set_original_filename="BPSCZ.bp_v_scz.results.txt"
+  training_set_original_filename="BPSCZ.bp_v_scz.results_GR37.p13.txt"
   validation_set_usually_genotype="CLOZUK_GWAS_BGE_chr${chromosome_number}"
   training_set_name="BPvsSCZ"
   validation_set_name="CLOZUK"

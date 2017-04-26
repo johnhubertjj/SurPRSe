@@ -56,15 +56,16 @@ fi
 ## rewrite so that the file input is an argument for the script instead, this will work for now
 ## -gt is greater than
 ## set essentially sets the arguments, so by nullglobbing everything, set will record the instances in which the pattern exists in the directory
-shopt -s nullglob #enable
-set -- *${chromosome_number}.tar.gz
-if [ "$#" -gt 0 ]; then
+
+#shopt -s nullglob #enable
+#set -- *${chromosome_number}.tar.gz
+#if [ "$#" -gt 0 ]; then
 
 # unpack the CLOZUK datasets
 # remember to delete after unpacking at the end of the analysis
-tar -zxvf CLOZUK_GWAS_BGE_chr${chromosome_number}.tar.gz
-shopt -u nullglob # disable
-fi
+#tar -zxvf CLOZUK_GWAS_BGE_chr${chromosome_number}.tar.gz
+#shopt -u nullglob # disable
+#fi
 
 # make directories for output and extra info
 if [ ! -d "output" ]; then
@@ -91,10 +92,6 @@ fi
 
 # re-package the original files
 # tar -czvf CLOZUK_GWAS_BGE_chr${chromosome_number}.tar.gz CLOZUK_GWAS_BGE_chr${chromosome_number}.bed CLOZUK_GWAS_BGE_chr${chromosome_number}.bim CLOZUK_GWAS_BGE_chr${chromosome_number}.fam
-
-# create files containing duplicate SNPs
-Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}Clumping_CLOZUK_PGC.R ./extrainfo/${validation_set_name}_${training_set_name}_clumpinginfo_chr${chromosome_number}.Rout ${training_set_usually_summary} ${validation_set_usually_genotype} ${training_set_name} ${validation_set_name} ${chromosome_number}  
-
 
 if [[ ${Perform_Magma_as_well} == "TRUE" ]]; then
 

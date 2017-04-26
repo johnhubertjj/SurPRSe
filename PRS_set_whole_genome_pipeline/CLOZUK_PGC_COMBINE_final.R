@@ -259,7 +259,7 @@ combined.CLOZUK.PGC[, (cols) := lapply(.SD, toupper), .SDcols = cols ]
 
 cat("Number of SNPs BEFORE flipping between CLOZUK and PGC Chr:", chromosome.number , "N=", nrow(combined.CLOZUK.PGC))
 
-if (nrow(combined.CLOZUK.PGC) > nrow(PGC.alternative) | nrow(CLOZUK.alternative)){
+if (nrow(combined.CLOZUK.PGC) > nrow(PGC.alternative) | nrow(combined.CLOZUK.PGC) > nrow(CLOZUK.alternative)){
   warning("combined dataset size is larger than one/both of the input datasets, check for duplicates")
 }
 
@@ -412,7 +412,7 @@ if (BETA == FALSE){
 namesPGC <- names(PGC.data.frame)
 OR_position <- which("OR" == oldnames_training)
 BETA_position <- which("BETA" == namesPGC)
-namesPGC <- namesPGC[c(1:(OR_position-1),BETA_position,OR_position:length(names_PGC))]
+namesPGC <- namesPGC[c(1:(OR_position-1), BETA_position, OR_position:(length(namesPGC)-1))]
 PGC.data.frame <- PGC.data.frame[, namesPGC, with = F]
 PGC.data.frame <- PGC.data.frame[, OR := NULL]
 }
