@@ -4,8 +4,7 @@ whereami=$(uname -n)
 echo "$whereami"
 
 if [[ "$whereami" == *"raven"* ]]; then
-  # assign a new variable for the PBS_ARRAY_variable
-  
+  # State paths to the relevant stationary folders required for the analysis
   path_to_PGC_conversion="/home/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Summary_stat_manipulation/"
   path_to_CLOZUK_conversion="/home/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Genotype_dataset_manipulation/"
   path_to_MAGMA_scripts="/home/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/MAGMA/"
@@ -17,9 +16,10 @@ if [[ "$whereami" == *"raven"* ]]; then
   
   # assign arguments here for now because there are so many
   # Datasets
-  training_set_usually_summary="bip1.scz1.ruderfer2014"
+  training_set_usually_summary="Neurot_Assoc_Biobank_table${chromosome_number}"
   validation_set_usually_genotype="CLOZUK_GWAS_BGE_chr${chromosome_number}"
-  training_set_name="PGC"
+  training_set_original_filename="Neurot_Assoc_Biobank_PCA_Imputed_91370_8cov_array_noDupl_miss0.05_info0.4_12.01.16.res"
+  training_set_name="Neurot_Assoc_Biobank"
   validation_set_name="CLOZUK"
   # MAF, INFO and SE
   MAF_summary="FALSE"
