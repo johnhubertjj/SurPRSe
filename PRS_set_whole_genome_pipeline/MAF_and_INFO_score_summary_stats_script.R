@@ -70,7 +70,7 @@ length(PGC_table$SNP)
 cat("Number of SNPS in ",Training_name," after duplication check one Chr:",chromosome.number, "N=" ,nrow(PGC_table))
 
 if (SE_decision == "TRUE"){
-  changed_PGC_table <- changed_PGC_table[SE > SE_threshold]
+  changed_PGC_table <- changed_PGC_table[SE < SE_threshold]
   cat("SNPs with SE > ", SE_threshold, " removed")
 }
 

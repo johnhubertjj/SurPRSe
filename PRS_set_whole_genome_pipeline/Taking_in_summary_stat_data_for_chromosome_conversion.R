@@ -7,6 +7,9 @@ library(data.table)
 ## setting working directory
 setwd(".")
 
+## new_env
+e <- new.env()
+
 #######################################
 # adding in arguments from BASH script#
 #######################################
@@ -39,16 +42,24 @@ if(length(grep("\\bCHR\\b", Parsing_colnames)) == 1){
   Chromosome_name <- "CHR_name=FALSE"  
 }
 
-if(length(grep("\\bSNP\\b", Parsing_colnames)) == 1){
+if(length(grep("\\bSNP\\b", Parsing_colnames)) == 1 | length(grep("\\bMARKERNAME\\b", Parsing_colnames)) == 1){
   SNP_name <- "SNP_name=TRUE"
+  if(length(grep("\\bMARKERNAME\\b", Parsing_colnames)) == 1){
+      place.of.change.snp <- grep("\\bMARKERNAME\\b", Parsing_colnames)
+      Parsing_colnames[place.of.change.snp] <- "SNP"
+  }
 }else{
   SNP_name <- "SNP_name=FALSE"  
   stop("Training dataset does NOT have a 'SNP' column essential for the pipeline to work, please add a 'SNP' column")
   
 }
 
-if(length(grep("\\bBP\\b", Parsing_colnames)) == 1){
+if(length(grep("\\bBP\\b", Parsing_colnames)) == 1 | length(grep("\\bPOS\\b", Parsing_colnames)) == 1){
   BP_name <- "BP_name=TRUE"
+  if(length(grep("\\bPOS\\b", Parsing_colnames)) == 1){
+    place.of.change.bp <- grep("\\bPOS\\b", Parsing_colnames)
+    Parsing_colnames[place.of.change.bp] <- "BP"
+  }
 }else{
   BP_name <- "BP_name=FALSE"  
   stop("Training dataset does NOT have a 'BP' column essential for the pipeline to work, please add a 'BP' column")
@@ -69,22 +80,24 @@ if(length(grep("\\bA2\\b", Parsing_colnames)) == 1){
 }
 
 if(length(grep("\\bFRQ", Parsing_colnames)) == 1 || length(grep("\\bFRQ", Parsing_colnames)) == 2){
-  MAF_calculation_summary <- "MAF_summary=TRUE"
-  number_of_frequency_columns <- paste0("Number_of_frequency_columns=",grep("FRQ", Parsing_colnames))
+  number_of_frequency_columns <- paste0("Number_of_frequency_columns=", grep("FRQ", Parsing_colnames))
 }else{
   MAF_calculation_summary <- "MAF_summary=FALSE"  
   number_of_frequency_columns <- "Number_of_frequency_columns=NA"
-  warning("MAF frequency calculation is impossible without an allele frequency estimation, please calculate MAF using Validation dataset and/or other genotyped data")
+  warning("MAF frequency calculation is impossible without an allele frequency estimation, please calculate MAF using Validation dataset or other genotyped data")
   if(MAF_summary == "TRUE"){
     warning("MAF_summary input argument has been changed from TRUE to FALSE due to constraints warned above")
   }
 }
 
 if(length(grep("\\bINFO\\b", Parsing_colnames)) == 1){
-  INFO_name <- "INFO_summary=TRUE"
+  if (INFO_summary == "FALSE"){
+    warning("INFO score has been supplied but will NOT be used for post-GWAS-QC, if human error, please change the argument to: INFO_Summary=TRUE")
+  }
 }else{
   INFO_name <- "INFO_summary=FALSE" 
   warning("INFO score not avaliable in summary stats dataset, will attempt to use Standard error instead (removing SNPS with SE >= ", SE_threshold, " )")
+  SE_summary <- "TRUE"
   if (INFO_summary == "TRUE"){
     warning("INFO_summary input argument has been changed from TRUE to FALSE due to constraints warned above")
   }
@@ -106,10 +119,13 @@ if(BETA_name == "BETA_name=FALSE" & OR_name == "OR_name=FALSE"){
   stop("No Odds ratios or BETA scores supplied in Training set, please calculate at least one before attempting PRSset")
 }
   
-if(length(grep("\\bSE\\b", Parsing_colnames)) == 1 & BETA_name == "BETA_name=FALSE" & OR_name == "OR_name=FALSE"){
+if(length(grep("\\bSE\\b", Parsing_colnames)) == 1 & INFO_name == "INFO_summary=FALSE"){
   SE_name <- "SE_summary=TRUE"
-} else {
+  warning("SE column found, will use SE as a Post-GWAS-QC measure")
+  
+} else if (length(grep("\\bSE\\b", Parsing_colnames)) == 1 & INFO_name == "INFO_summary=TRUE") {
   SE_name <- "SE_summary=FALSE"
+  
   if(SE_summary == "TRUE"){
     warning("SE_summary input argument has been changed from TRUE to FALSE because no Standard Error column is avaliable in the dataset")
   }
@@ -118,13 +134,18 @@ if(length(grep("\\bSE\\b", Parsing_colnames)) == 1 & BETA_name == "BETA_name=FAL
   }
 }
 
-if(length(grep("\\bP\\b", Parsing_colnames)) == 1){
+if(length(grep("\\bP\\b", Parsing_colnames)) == 1 | length(grep("\\bPVAL\\b", Parsing_colnames))){
   P_name <- "P_value_name=TRUE"
+  if(length(grep("\\bPVAL\\b", Parsing_colnames)) == 1){
+    place.of.change.P <- grep("\\bPVAL\\b", Parsing_colnames)
+    Parsing_colnames[place.of.change.P] <- "P"
+  }
 }else{
   P_name <- "P_value_name=FALSE"
   stop("No column matching \"P\" are supplied in this dataset, please re-name headers or calculate P_values")
 }
-
+assign("Parsing_colnames",Parsing_colnames, envir = e)
+  
 fileConn<-file(paste0("./extrainfo/new_PRS_set_arguments_for_", Training_set_name, ".txt"))
                
 writeLines(c(Chromosome_name, SNP_name, BP_name, A1_name, A2_name, MAF_calculation_summary, number_of_frequency_columns, INFO_name, OR_name, BETA_name, SE_name, P_name), fileConn)
@@ -135,8 +156,12 @@ close(fileConn)
 ## Select for CHR 22
 Training_data <- fread(Training_name_full_unseparated)
 Parsing_colnames <- colnames(Training_data)
+Parsing_colnames <- toupper(Parsing_colnames)
 
+## Run function to determine what type of data we have and change to standardised Column names
 What_summary_columns_do_we_have(Parsing_colnames)
+colnames(Training_data) <- e$Parsing_colnames
+
 
 if(length(grep("CHR", Parsing_colnames)) == 1){
 setkey(Training_data, CHR)

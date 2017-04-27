@@ -57,15 +57,15 @@ fi
 ## -gt is greater than
 ## set essentially sets the arguments, so by nullglobbing everything, set will record the instances in which the pattern exists in the directory
 
-#shopt -s nullglob #enable
-#set -- *${chromosome_number}.tar.gz
-#if [ "$#" -gt 0 ]; then
+shopt -s nullglob #enable
+set -- *${chromosome_number}.tar.gz
+if [ "$#" -gt 0 ]; then
 
 # unpack the CLOZUK datasets
 # remember to delete after unpacking at the end of the analysis
-#tar -zxvf CLOZUK_GWAS_BGE_chr${chromosome_number}.tar.gz
-#shopt -u nullglob # disable
-#fi
+tar -zxvf ${validation_set_usually_genotype}.tar.gz
+shopt -u nullglob # disable
+fi
 
 # make directories for output and extra info
 if [ ! -d "output" ]; then
@@ -107,18 +107,18 @@ fi
 # Clump the datasets
 # Extract the SNPs common between PGC and CLOZUK
 # Remove the duplicate SNPs
-plink --bfile ./output/CLOZUK_GWAS_BGE_chr${chromosome_number}_consensus_with_${training_set_name}_flipped_alleles_no_duplicates --extract ./output/chr${chromosome_number}PGC_CLOZUK_common_SNPs.txt --exclude ./output/extracted_Duplicate_snps_${validation_set_name}_${training_set_name}_chr${chromosome_number}.txt --clump ./output/PGC_table${chromosome_number}_new.txt --clump-kb ${window} --clump-p1 ${p1} --clump-p2 ${p2} --clump-r2 ${r2} --out ./output/CLOZUK_PGC_bge_removed_A.T_C.G.target_r0.2_1000kb_non_verbose_chr${chromosome_number}
+plink --bfile ./output/${validation_set_usually_genotype}_consensus_with_${training_set_name}_flipped_alleles_no_duplicates --extract ./output/chr${chromosome_number}${training_set_name}_${validation_set_name}_common_SNPs.txt --exclude ./output/extracted_Duplicate_snps_${validation_set_name}_${training_set_name}_chr${chromosome_number}.txt --clump ./output/${training_set_name}_table${chromosome_number}_new.txt --clump-kb ${window} --clump-p1 ${p1} --clump-p2 ${p2} --clump-r2 ${r2} --out ./output/${validation_set_name}_${training_set_name}_bge_removed_A.T_C.G.target_r0.2_1000kb_non_verbose_chr${chromosome_number}
  
 # Clean up the files to leave a dataset that can be read into R/Python as well as a list of SNPs to extract for the CLUMPED plink files
-tr -s ' ' '\t' < ./output/CLOZUK_PGC_bge_removed_A.T_C.G.target_r0.2_1000kb_non_verbose_chr${chromosome_number}.clumped > ./output/CLOZUK_PGC_CLUMPED_chr${chromosome_number}.txt
-cut -f 2,4,5,6 < ./output/CLOZUK_PGC_CLUMPED_chr${chromosome_number}.txt > ./output/CLOZUK_PGC_CLUMPED_FINAL_chr${chromosome_number}.txt
-rm ./output/CLOZUK_PGC_CLUMPED_chr${chromosome_number}.txt
-awk '{ print $2 }' ./output/CLOZUK_PGC_CLUMPED_FINAL_chr${chromosome_number}.txt > ./output/CLUMPED_EXTRACT_CLOZUK_chr${chromosome_number}.txt
-printf "%s\n\n" "$(tail -n +2 ./output/CLUMPED_EXTRACT_CLOZUK_chr${chromosome_number}.txt)" > ./output/CLUMPED_EXTRACT_CLOZUK_chr${chromosome_number}.txt 
+tr -s ' ' '\t' < ./output/${validation_set_name}_${training_set_name}_bge_removed_A.T_C.G.target_r0.2_1000kb_non_verbose_chr${chromosome_number}.clumped > ./output/${validation_set_name}_${training_set_name}_CLUMPED_chr${chromosome_number}.txt
+cut -f 2,4,5,6 < ./output/${validation_set_name}_${training_set_name}_CLUMPED_chr${chromosome_number}.txt > ./output/${validation_set_name}_${training_set_name}_CLUMPED_FINAL_chr${chromosome_number}.txt
+rm ./output/${validation_set_name}_${training_set_name}_CLUMPED_chr${chromosome_number}.txt
+awk '{ print $2 }' ./output/${validation_set_name}_${training_set_name}_CLUMPED_FINAL_chr${chromosome_number}.txt > ./output/CLUMPED_EXTRACT_${validation_set_name}_chr${chromosome_number}.txt
+printf "%s\n\n" "$(tail -n +2 ./output/CLUMPED_EXTRACT_${validation_set_name}_chr${chromosome_number}.txt)" > ./output/CLUMPED_EXTRACT_${validation_set_name}_chr${chromosome_number}.txt 
 
 	
 # Create clumped plink files
-plink --bfile ./output/CLOZUK_GWAS_BGE_chr${chromosome_number}_consensus_with_${training_set_name}_flipped_alleles_no_duplicates --extract ./output/CLUMPED_EXTRACT_CLOZUK_chr${chromosome_number}.txt --make-bed --out ./output/CLOZUK_GWAS_BGE_CLUMPED_chr${chromosome_number}
+plink --bfile ./output/${validation_set_usually_genotype}_consensus_with_${training_set_name}_flipped_alleles_no_duplicates --extract ./output/CLUMPED_EXTRACT_${validation_set_name}_chr${chromosome_number}.txt --make-bed --out ./output/${validation_set_usually_genotype}_${training_set_name}_CLUMPED
 
 # Clean up original datasets to only leave the tar.gz file 
 shopt -s nullglob
