@@ -29,6 +29,7 @@ if [[ "$whereami" == *"raven"* ]]; then
   INFO_threshold=0.9
   SE_summary="FALSE"
   SE_threshold=5	
+  Raven_out_info_directory="/Users/johnhubert/Documents/John_CLOZUK_PGC_PRS/CLOZUK_PRS_clumping_log_files"
   # The number of chromosomes you wish to analyse (PRS_serial)
   Chromosomes_to_analyse=(`seq 1 22`) 
   # Clumping Arguments
@@ -72,6 +73,7 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   INFO_threshold=0.9
   SE_summary="FALSE"
   SE_threshold=5
+  Raven_out_info_directory="/Users/johnhubert/Documents/John_CLOZUK_PGC_PRS/CLOZUK_PRS_clumping_log_files"
   # The number of chromosomes you wish to analyse (PRS_serial)
   Chromosomes_to_analyse=(`seq 1 22`)
   # Clumping Arguments
