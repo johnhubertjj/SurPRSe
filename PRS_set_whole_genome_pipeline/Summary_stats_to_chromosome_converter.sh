@@ -1,22 +1,23 @@
 #!/bin/bash
 
-#PBS -q workq
+#PBS -q serial
 #PBS -P PR54
-#PBS -l select=1:ncpus=1:mem=10GB
-#PBS -l walltime=24:00:00
-#PBS -o /home/c1020109/Separate_summary_stats.log
+#PBS -l select=1:ncpus=1
+#PBS -l walltime=1:00:00
 #PBS -j oe
+#PBS -o /home/c1020109/Summary_stats_info
 #PBS -N c1020109_separate_summary_stats_whole_genome
 
-# Script attempts to resolve what type of summary stats you have and how it influences the arguments further down the pipeline
+cd $PBS_O_WORKDIR
 
+# Script attempts to resolve what type of summary stats you have and how it influences the arguments further down the pipeline
+echo "I'm running"
 # Run locally or on ARCCA
 whereami=$(uname -n)
 echo "$whereami"
 
 if [[ "$whereami" == *"raven"* ]]; then
   # assign a new variable for the PBS_ARRAY_variable
-  chromosome_number=${PBS_ARRAY_INDEX}
   
   # Load both Plink and R
   module purge
@@ -25,7 +26,6 @@ if [[ "$whereami" == *"raven"* ]]; then
   module load python/2.7.11
   module load magma/1.06
 
-  cd $PBS_O_WORKDIR
   path_to_scripts="/home/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/"
   
   # make directories for output and extra info
