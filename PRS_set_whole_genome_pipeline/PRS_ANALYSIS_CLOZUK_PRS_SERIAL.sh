@@ -34,7 +34,7 @@ if [[ "$whereami" == *"raven"* ]]; then
   cat ${path_to_scripts}/PRS_arguments_script.sh
 
 elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
-  cd ~/Documents/testing_cross_disorder/
+  cd /Volumes/PhD_storage/testing_cross_disorder/
   
   # Arguments
   path_to_scripts='/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/'
