@@ -210,7 +210,7 @@ if (length(CLOZUK.duplicated.removed) >= 1){
 }
 length(CLOZUK.data$SNP)
 
-cat("Number of SNPS in ",Validation_name," after duplication check Chr:",chromosome.number, "N=" ,nrow(PGC.data.frame))
+cat("Number of SNPS in ",Validation_name," after duplication check Chr:",chromosome.number, "N=" ,nrow(CLOZUK.data))
 
 ### Replacing PGC values###
 PGC.integers.to.change <- PGC.data.frame[,.I[grep(paste0("^",chromosome.number,":\\d+:\\w+:\\w+"),SNP, perl = T, invert = T)]]
