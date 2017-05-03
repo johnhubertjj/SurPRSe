@@ -34,7 +34,7 @@ if [[ "$whereami" == *"raven"* ]]; then
   cat ${path_to_scripts}/PRS_arguments_script.sh
 
 elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
-  cd ~/Documents/testing_cross_disorder/
+  cd /Volumes/PhD_storage/testing_cross_disorder/
   
   # Arguments
   path_to_scripts='/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/'
@@ -44,7 +44,10 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   printenv
   set
 fi 
- 
+
+# Run Rscript to find out the important information from the previous run
+Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}extracting_useful_SNP_information.R ${training_set_name} ${validation_set_name} ${Raven_out_info_directory} ${INFO_summary} ${MAF_summary} ${MAF_threshold} ${INFO_threshold} ${SE_decision} ${SE_threshold} ${Chromosomes_to_analyse[@]}
+   
 # Find the length of the array containing the names of the files
 # Note double-quotes to avoid extra parsing of funny characters in filenames
 echo "${number_of_files[@]}" 

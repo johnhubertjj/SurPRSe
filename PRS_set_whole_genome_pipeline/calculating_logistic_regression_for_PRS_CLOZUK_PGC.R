@@ -8,9 +8,10 @@ sig <-c(1e-4,1e-3,1e-2,0.05,0.1,0.2,0.3,0.4,0.5)
 
 
 ## Read in covariates and fam file !may need to put fam file earlier
-covariates <- fread("/Users/JJ/Documents/PhD_clumping/Profiles/CLOZUK2.r7.select2PC.eigenvec")
-fam2 <- fread("/Users/JJ/Dropbox/PhD_clumping/Profiles/CLOZUK.r7.GWAS_IDs.fam")
-colnames(fam2) <- c("FID","IID","PID","MID","Sex","PHENO")
+#covariates <- fread("/Users/JJ/Documents/PhD_clumping/Profiles/CLOZUK2.r7.select2PC.eigenvec")
+covariates <- fread("/Volumes/HD-PCU2/Stationary_data/CLOZUK2.r7.select2PC.eigenvec.txt")
+# fam2 <- fread("/Users/JJ/Dropbox/PhD_clumping/Profiles/CLOZUK.r7.GWAS_IDs.fam")
+# colnames(fam2) <- c("FID","IID","PID","MID","Sex","PHENO")
 
 ## Read in the file identifiers and check for duplicates
 Files_to_parse_total <- read.table("Index_of_genes_and_pval_1.txt",stringsAsFactors = F)
@@ -55,7 +56,9 @@ for (i in 1:length(sig)) {
     
     # read in profiles
     PRS.profiles <-fread(paste0("./CLOZUK_PGC_PRS_test/Profiles/chr22_test_", Files_to_parse$Genes[l], "_", Files_to_parse$pval[l], "_a.profile"))
-     
+    # PRS.profiles <- fread("CLOZUK_PGC_PRS_Clumped_files/CLOZUK_PGC_FULL_GENOME_PRS.profile")
+    # PRS.profiles <- fread("CLOZUK_Neurot_FULL_GENOME_PRS_0.05_Prthresh.profile")
+    
      if (length(which(PRS.profiles$PHENO == -9)) >= 1){
     rows_to_remove <- which(PRS.profiles$PHENO == -9)
     PRS.profiles <- PRS.profiles[!rows_to_remove]

@@ -18,7 +18,10 @@ UCSC_file <- args[5]
 Validation_dataset <- args[6]
 NCBI_file <- args[7]
 Gene_regions_to_analyse <- args[8]
-chromosomes_to_analyse <- as.numeric(args[9])
+
+# Read in chromosome numbers as an array variable from BASH
+chromosomes_to_analyse <- as.numeric(args[c(9:length(args))])
+print(chromosomes_to_analyse)
 
 #chromosomes_to_analyse <- c(1:22)
 #Gene_regions_to_analyse <- "both"
