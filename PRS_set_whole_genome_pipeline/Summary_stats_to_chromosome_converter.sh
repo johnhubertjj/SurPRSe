@@ -2,7 +2,7 @@
 
 #PBS -q serial
 #PBS -P PR54
-#PBS -l select=1:ncpus=1
+#PBS -l select=1:ncpus=1:mem=5GB
 #PBS -l walltime=1:00:00
 #PBS -j oe
 #PBS -o /home/c1020109/Summary_stats_info
