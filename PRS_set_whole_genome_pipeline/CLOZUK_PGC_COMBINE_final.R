@@ -43,6 +43,19 @@ Validation_datatable_bim_file <- paste0(args[4],".bim")
 Training_name <- args[5]
 Validation_name <- args[6]
 chromosome.number <- args[7]
+CHR <- args[8]
+SNP <- args[9]
+BP <- args[10]
+A1 <- args[11]
+A2 <- args[12]
+OR <- args[13]
+BETA <- args[14]
+number_of_frequency_columns <- args[15]
+
+Column_headers_to_keep <- c(CHR, SNP, BP, A1, A2, OR, BETA)
+Column_headers <- c("CHR", "SNP", "BP", "A1", "A2", "OR", "BETA")
+Column_headers_to_keep_elements <- which(Column_headers_to_keep == TRUE)
+Column_headers <- Column_headers[Column_headers_to_keep_elements]
 
  #setwd("~/Documents/testing_cross_disorder") 
  #Validation_datatable_bim_file <- "CLOZUK_GWAS_BGE_chr14.bim"
@@ -55,7 +68,7 @@ chromosome.number <- args[7]
 # add new environment#
 e <- new.env()
 
-# BETA and OR change function ###
+# BETA and OR change functions ###
 log.to.odds <- function(imported.data.table) {
   imported.dt.col.names <- colnames(imported.data.table)
   if (any("OR" == imported.dt.col.names) == F) {
@@ -65,12 +78,24 @@ log.to.odds <- function(imported.data.table) {
   }
 }
 
+Beta.to.odds <- function(imported.data.table) {
+  imported.dt.col.names <- colnames(imported.data.table)
+  if (any("BETA" == imported.dt.col.names) == F) {
+    cat("No BETA coefficient included in", deparse(substitute(imported.data.table)))
+  }else{
+    assign("PGC.OR", exp(imported.data.table$BETA), envir = e)
+  }
+}
+
 change.odds <- function (odds.ratios) {
   PGC.NEW.OR <- 1 / odds.ratios
   assign("PGC.NEW.OR", PGC.NEW.OR, envir = e)
 }
 
-
+change.beta <- function (beta.coefficients) {
+  PGC.NEW.BETA <- -(beta.coefficients)
+  assign("PGC.NEW.BETA", PGC.NEW.BETA, envir = e)
+}
 ##################################################################
 #### CHECK TO SEE IF TWO COLUMNS HAVE ALLELES SWAPPED FUNCTION ###
 ##################################################################
@@ -146,29 +171,71 @@ getwd()
 ### Adding in PGC data ###
 PGC.data.frame <- fread(Training_datatable)
 PGC.data.frame.original <- copy(PGC.data.frame)
+original_column_headers_PGC <- colnames(PGC.data.frame.original)
 
-cat("Number of SNPS in PGC Chr:",chromosome.number, "N=" ,nrow(PGC.data.frame))
+cat("Number of SNPS in ",Training_name," Chr:",chromosome.number, "N=" ,nrow(PGC.data.frame))
+
+### Remove Duplicated SNPs in Training here ###
+PGC.duplicated.removed <- which(duplicated(PGC.data.frame$SNP))
+PGC.duplicated.removed.rev <- which(duplicated(PGC.data.frame$SNP, fromLast = T))
+
+### One-line duplication check - Training ###
+length(PGC.data.frame$SNP)
+if (length(PGC.duplicated.removed) >= 1){
+  PGC_duplicate_SNPS <- PGC.data.frame$SNP[(duplicated(PGC.data.frame$SNP) | duplicated(PGC.data.frame$SNP, fromLast = TRUE)) ]
+  PGC.data.frame <- PGC.data.frame[!(duplicated(PGC.data.frame$SNP) | duplicated(PGC.data.frame$SNP, fromLast = TRUE)) ]
+}
+length(PGC.data.frame$SNP)
+
+cat("Number of SNPS in ",Training_name," after duplication check Chr:",chromosome.number, "N=" ,nrow(PGC.data.frame))
 
 ### Read in the CLOZUK data ###
 CLOZUK.data <- fread(Validation_datatable_bim_file)
 CLOZUK.original <- copy(CLOZUK.data)
 # Number of SNPs in CLOZUK data
-cat("Number of SNPs in CLOZUK Chr:",chromosome.number, "N=" ,nrow(CLOZUK.data))
+cat("Number of SNPs in", Validation_name, "Chr:",chromosome.number, "N=" ,nrow(CLOZUK.data))
 
 ### Replace the column names ###
 setnames(CLOZUK.data, c("CHR","SNP","GENEDIST","BP","A1","A2"))
+
+### Remove Duplicated SNPs in Validation here ###
+CLOZUK.duplicated.removed <- which(duplicated(CLOZUK.data$SNP))
+CLOZUK.duplicated.removed.rev <- which(duplicated(CLOZUK.data$SNP, fromLast = T))
+
+### One-line duplication check - Training ###
+length(CLOZUK.data$SNP)
+if (length(CLOZUK.duplicated.removed) >= 1){
+  CLOZUK_duplicate_SNPS <- CLOZUK.data$SNP[(duplicated(CLOZUK.data$SNP) | duplicated(CLOZUK.data$SNP, fromLast = TRUE)) ]
+  CLOZUK.data <- CLOZUK.data[!(duplicated(CLOZUK.data$SNP) | duplicated(CLOZUK.data$SNP, fromLast = TRUE)) ]
+}
+length(CLOZUK.data$SNP)
+
+cat("Number of SNPS in ",Validation_name," after duplication check Chr:",chromosome.number, "N=" ,nrow(CLOZUK.data))
 
 ### Replacing PGC values###
 PGC.integers.to.change <- PGC.data.frame[,.I[grep(paste0("^",chromosome.number,":\\d+:\\w+:\\w+"),SNP, perl = T, invert = T)]]
 PGC.divisive.names <- PGC.data.frame[PGC.integers.to.change]
 PGC.alternative <- PGC.data.frame[,SNP := paste0(CHR,":",BP)]
 PGC.data.frame <- PGC.data.frame[,SNP := paste0(CHR,":",BP)]
-PGC.alternative <- PGC.alternative[,c("CHR","SNP","BP","A1","A2","OR"),with = F]
+#PGC.alternative <- PGC.alternative[,c("CHR","SNP","BP","A1","A2","OR"),with = F]
+PGC.alternative <- PGC.alternative[, Column_headers, with = F]
 
-### Adding BETA column to data
-log.to.odds(PGC.alternative)
-PGC.alternative[,BETA := e$PGC.BETA]
-PGC.data.frame[,BETA := e$PGC.BETA]
+if(BETA == FALSE & OR == TRUE) {  
+  ### Adding BETA column to data
+  log.to.odds(PGC.alternative)
+  PGC.alternative[,BETA := e$PGC.BETA]
+  PGC.data.frame[,BETA := e$PGC.BETA]
+}
+
+if(BETA == TRUE & OR == FALSE) {
+  Beta.to.odds(PGC.alternative)
+  PGC.alternative[, OR := e$PGC.OR]
+  PGC.data.frame[, OR := e$PGC.OR]
+}
+
+if(BETA == FALSE & OR == FALSE){
+   stop("neither BETAs or Odds ratios supplied in the Training set datatable, please calculate before merging with Genotype")
+}
 
 ### Changes the CLOZUK identifiers ###
 CLOZUK.integers.to.change <- CLOZUK.data[,.I[grep(paste0("^",chromosome.number,":\\d+:\\w+:\\w+"),SNP, perl = T,invert = T)]]
@@ -185,7 +252,7 @@ combined.CLOZUK.PGC <- merge(x = PGC.alternative, y = CLOZUK.alternative, by = c
 
 ### Remove Duplicated SNPs here ###
 combined_a <- which(duplicated(combined.CLOZUK.PGC$SNP.x))
-combined_a_rev <- which(duplicated(combined.CLOZUK.PGC$SNP.x,fromLast = T))
+combined_a_rev <- which(duplicated(combined.CLOZUK.PGC$SNP.x, fromLast = T))
 combined_b <- which(duplicated(combined.CLOZUK.PGC$SNP.y))
 combined_b_rev <- which(duplicated(combined.CLOZUK.PGC$SNP.y,fromLast = T))
 
@@ -211,7 +278,7 @@ combined.CLOZUK.PGC[, (cols) := lapply(.SD, toupper), .SDcols = cols ]
 
 cat("Number of SNPs BEFORE flipping between CLOZUK and PGC Chr:", chromosome.number , "N=", nrow(combined.CLOZUK.PGC))
 
-if (nrow(combined.CLOZUK.PGC) > nrow(PGC.alternative) | nrow(CLOZUK.alternative)){
+if (nrow(combined.CLOZUK.PGC) > nrow(PGC.alternative) | nrow(combined.CLOZUK.PGC) > nrow(CLOZUK.alternative)){
   warning("combined dataset size is larger than one/both of the input datasets, check for duplicates")
 }
 
@@ -235,15 +302,20 @@ cat("CLOZUK_PGC Chr:", chromosome.number, "remove A-T, C-G Step two: N=", nrow(c
 # A1.y/A2.y are Genotype set alleles
 
 a <- which (combined.CLOZUK.PGC$A1.y == combined.CLOZUK.PGC$A2.x & combined.CLOZUK.PGC$A2.y == combined.CLOZUK.PGC$A1.x)
-combined.CLOZUK.PGC$BETA[a] <- (-combined.CLOZUK.PGC$BETA[a])
 
 # Change the values of the OR to suit Allele changes #
 if (length(a) >= 1) {
+  # combined.CLOZUK.PGC$BETA[a] <- (-combined.CLOZUK.PGC$BETA[a])
   PGC.OR <- combined.CLOZUK.PGC$OR[a]
+  PGC.BETA <- combined.CLOZUK.PGC$BETA[a]
   change.odds(PGC.OR)
+  change.beta(PGC.BETA)
   combined.CLOZUK.PGC$OR[a]<- e$PGC.NEW.OR
+  combined.CLOZUK.PGC$BETA[a] <- e$PGC.NEW.BETA
   rm(PGC.NEW.OR, envir = e)
   rm(PGC.OR)
+  rm(PGC.NEW.BETA, envir = e)
+  rm(PGC.BETA)
   combined.CLOZUK.PGC$A1.x[a] <- as.character(combined.CLOZUK.PGC$A1.y[a])
   combined.CLOZUK.PGC$A2.x[a] <- as.character(combined.CLOZUK.PGC$A2.y[a])
 }
@@ -275,13 +347,19 @@ combined.CLOZUK.PGC$A2.x[d[b4]] <-"A"
 a <- which(combined.CLOZUK.PGC$A1.y==combined.CLOZUK.PGC$A2.x & combined.CLOZUK.PGC$A2.y==combined.CLOZUK.PGC$A1.x)
 
 # Same OR change #
-if (length(a) >= 1){
-  combined.CLOZUK.PGC$BETA[a] <- (-combined.CLOZUK.PGC$BETA[a])
+if (length(a) >= 1 ){
+  # combined.CLOZUK.PGC$BETA[a] <- (-combined.CLOZUK.PGC$BETA[a])
   PGC.OR <- combined.CLOZUK.PGC$OR[a]
+  PGC.BETA <- combined.CLOZUK.PGC$BETA[a]
   change.odds(PGC.OR)
+  change.beta(PGC.BETA)
   combined.CLOZUK.PGC$OR[a]<- e$PGC.NEW.OR
+  combined.CLOZUK.PGC$BETA[a] <- e$PGC.NEW.BETA
   rm(PGC.NEW.OR, envir = e)
   rm(PGC.OR)
+  rm(PGC.NEW.BETA, envir = e)
+  rm(PGC.BETA)
+
   combined.CLOZUK.PGC$A1.x[a] <- as.character(combined.CLOZUK.PGC$A1.y[a])
   combined.CLOZUK.PGC$A2.x[a] <- as.character(combined.CLOZUK.PGC$A2.y[a])
 }
@@ -304,7 +382,7 @@ PGC.data.frame <- PGC.data.frame[PGC.final.index,A1:= PGC.A1.allele.changes]
 PGC.data.frame <- PGC.data.frame[PGC.final.index,A2:= PGC.A2.allele.changes]
 PGC.data.frame <- PGC.data.frame[PGC.final.index,OR:= PGC.OR.changes]
 PGC.data.frame <- PGC.data.frame[PGC.final.index,BETA:= PGC.BETA.changes]
-
+oldnames_training <- colnames(PGC.data.frame)
 
 ##### TODO #####
 ## Run in a job array using the job number as the chromosome number
@@ -321,26 +399,28 @@ PGC.data.frame <- PGC.data.frame[PGC.final.index,BETA:= PGC.BETA.changes]
 ############################################
 
 ### checking everything is above board ###
-Checking_allele_swapping(PGC.data.frame,PGC.data.frame.original,which.is.combined = "NONE")
-Checking_allele_swapping(CLOZUK.alternative,CLOZUK.data,which.is.combined = "NONE")
+Checking_allele_swapping(PGC.data.frame, PGC.data.frame.original, which.is.combined = "NONE")
+Checking_allele_swapping(CLOZUK.alternative, CLOZUK.data, which.is.combined = "NONE")
 
 if (length(e$CLOZUK.alternativeflipped.alleles) != 0) {
   warning("alleles have been flipped on CLOZUK")
 }
 
-checking.which.OR.do.not.equal.each.other <- which(PGC.data.frame$OR != PGC.data.frame.original$OR)
-rm(PGC.data.frame.original)
+if (OR == TRUE){
+  checking.which.OR.do.not.equal.each.other <- which(PGC.data.frame$OR != PGC.data.frame.original$OR)
+  rm(PGC.data.frame.original)
 
-problematic.SNPs <- match(e$PGC.data.frameflipped.alleles, checking.which.OR.do.not.equal.each.other)  
-problematic.SNPs <- which(is.na(problematic.SNPs))
-check1_index <- e$PGC.data.frameflipped.alleles[problematic.SNPs]
-check1 <- PGC.data.frame[check1_index]
-check2 <- PGC.data.frame[check1_index]
+  problematic.SNPs <- match(e$PGC.data.frameflipped.alleles, checking.which.OR.do.not.equal.each.other)  
+  problematic.SNPs <- which(is.na(problematic.SNPs))
+  check1_index <- e$PGC.data.frameflipped.alleles[problematic.SNPs]
+  check1 <- PGC.data.frame[check1_index]
+  check2 <- PGC.data.frame[check1_index]
 
-if (all(check1$OR == 1) & all(check2$OR == 1)){
-  cat("You have",length(check1$CHR),"flipped SNPs with OR = 1")
-} else {
-  warning("There is an uneven amount of flipped SNPs")
+  if (all(check1$OR == 1) & all(check2$OR == 1)){
+    cat("You have",length(check1$CHR),"flipped SNPs with OR = 1")
+  } else {
+    warning("There is an uneven amount of flipped SNPs")
+  }
 }
 
 ### Checking conversions of SNPs ###
@@ -352,10 +432,23 @@ if (length(checking.duplications.CZK) != 0 & length(checking.duplications.PGC) !
 }
 
 ## Altering data tables to fit previous input files ##
-PGC.data.frame <- PGC.data.frame[, OR := NULL]
+# when BETA == FALSE, no beta column is provided, so one is calculated \
+# and appended to the table.
+# The OR column is discovered in the table (as long as the OR is not at\
+# the end or at the start) and replaced by the BETA column
+
+if (BETA == FALSE){
 namesPGC <- names(PGC.data.frame)
-namesPGC <- namesPGC[c(1:8,17,9:16)]
+OR_position <- which("OR" == oldnames_training)
+BETA_position <- which("BETA" == namesPGC)
+namesPGC <- namesPGC[c(1:(OR_position-1), BETA_position, OR_position:(length(namesPGC)-1))]
 PGC.data.frame <- PGC.data.frame[, namesPGC, with = F]
+PGC.data.frame <- PGC.data.frame[, OR := NULL]
+}
+
+if (BETA == TRUE){
+  PGC.data.frame <- PGC.data.frame[, OR := NULL]
+}
 
 ## checking for combined SNPs ##
 SNPs <- match(combined.CLOZUK.PGC$SNP.x,combined.CLOZUK.PGC$SNP.y)

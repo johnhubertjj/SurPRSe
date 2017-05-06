@@ -1,15 +1,16 @@
 # Library
 library(mgcv)
 library(testit)
-
+library(data.table)
 
 # logistic regression calculation #
 sig <-c(1e-4,1e-3,1e-2,0.05,0.1,0.2,0.3,0.4,0.5)
 
 
 ## Read in covariates and fam file !may need to put fam file earlier
-covariates <- fread("/Users/JJ/Documents/PhD_clumping/Profiles/CLOZUK2.r7.select2PC.eigenvec")
-fam2 <- fread("/Users/JJ/Dropbox/PhD_clumping/Profiles/CLOZUK.r7.GWAS_IDs.fam")
+#covariates <- fread("/Users/JJ/Documents/PhD_clumping/Profiles/CLOZUK2.r7.select2PC.eigenvec")
+covariates <- fread("/Volumes/HD-PCU2/Stationary_data/CLOZUK2.r7.select2PC.eigenvec.txt")
+fam2 <- fread("/Volumes/HD-PCU2/Stationary_data/CLOZUK.r7.GWAS_IDs.fam")
 colnames(fam2) <- c("FID","IID","PID","MID","Sex","PHENO")
 
 ## Read in the file identifiers and check for duplicates
@@ -55,7 +56,14 @@ for (i in 1:length(sig)) {
     
     # read in profiles
     PRS.profiles <-fread(paste0("./CLOZUK_PGC_PRS_test/Profiles/chr22_test_", Files_to_parse$Genes[l], "_", Files_to_parse$pval[l], "_a.profile"))
+     #PRS.profiles <- fread("CLOZUK_PGC_PRS_Clumped_files/CLOZUK_PGC_FULL_GENOME_PRS.profile")
+     #PRS.profiles <- fread("CLOZUK_PGC_PRS_Clumped_files/CLOZUK_PGC_FULL_GENOME_PRS_0.05_Prthresh.profile")
+     PRS.profiles <- fread("CLOZUK_Neurot_FULL_GENOME_PRS_0.05_Prthresh.profile")
+     PRS.profiles <- fread("CLOZUK_Neurot_FULL_GENOME_PRS_1_Prthresh.profile")
      
+     PRS.profiles <- fread("CLOZUK_BIPvsSCZ_FULL_GENOME_PRS_0.05_Prthresh.profile")
+     PRS.profiles <- fread("CLOZUK_BIPvsSCZ_FULL_GENOME_PRS_1_Prthresh.profile")
+    
      if (length(which(PRS.profiles$PHENO == -9)) >= 1){
     rows_to_remove <- which(PRS.profiles$PHENO == -9)
     PRS.profiles <- PRS.profiles[!rows_to_remove]
@@ -67,8 +75,8 @@ for (i in 1:length(sig)) {
       next()
     }
     
-    PRS.Profiles.with.covariates <- merge(covariates,PRS.profiles,by.x="FID", by.y="FID", all = F)
-   #PRS.Profiles.with.covariates_new_fam <- merge(PRS.Profiles.with.covariates, fam2, by.x = "FID", by.y = "FID", all = F)
+   PRS.Profiles.with.covariates <- merge(covariates,PRS.profiles,by.x="FID", by.y="FID", all = F)
+   PRS.Profiles.with.covariates <- merge(PRS.Profiles.with.covariates, fam2, by.x = "FID", by.y = "FID", all = F)
 
     #  res$model[i]<-sig[i]
     
@@ -83,8 +91,8 @@ for (i in 1:length(sig)) {
   #             hist(PRS.profiles$NORMSCORE)
 
   # change the Phenotypes so that they will work in a binary model
-  PRS.Profiles.with.covariates$PHENO <- PRS.Profiles.with.covariates$PHENO - 1
-  model<-glm(PHENO~PRS.Profiles.with.covariates$NORMSCORE, family=binomial, data=PRS.Profiles.with.covariates)
+  PRS.Profiles.with.covariates$PHENO.y <- PRS.Profiles.with.covariates$PHENO.y - 1
+  model<-glm(PHENO.y~PRS.Profiles.with.covariates$NORMSCORE, family=binomial, data=PRS.Profiles.with.covariates)
   
   #             res$Effect[i]<-summary(model)$coefficients[2, "Estimate"]
   #             res$SE[i]<-summary(model)$coefficients[2, "Std. Error"]
@@ -98,3 +106,18 @@ for (i in 1:length(sig)){
 }
 mtext("FT4-Replication. MAF>0.1", side = 1, line = -1, outer = TRUE)
 write.table(file=fout, res, col.names=T, row.names=F, quote=F, sep="\t")
+
+
+lmp <- function (modelobject) {
+  if (class(modelobject) != "glm") stop("Not an object of class 'lm' ")
+  f <- summary(modelobject)$fstatistic
+  p <- pf(f[1],f[2],f[3],lower.tail=F)
+  attributes(p) <- NULL
+  return(p)
+}
+
+source("http://www.bioconductor.org/biocLite.R")
+biocLite("pspearman")
+library("pspearman")
+
+lmp(model)

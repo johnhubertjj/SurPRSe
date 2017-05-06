@@ -128,7 +128,7 @@ case "$FILETYPE" in
 		;;
 	"zip" )
 		if [ "$VERBOSE" == "1" ]; then
-			unzip -vj "$FILE"
+			unzip "$FILE"
 		else
 			unzip "$FILE" > /dev/null 2>&1
 		fi

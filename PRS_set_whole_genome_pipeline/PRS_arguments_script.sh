@@ -4,9 +4,7 @@ whereami=$(uname -n)
 echo "$whereami"
 
 if [[ "$whereami" == *"raven"* ]]; then
-  # assign a new variable for the PBS_ARRAY_variable
-  
-  cd $PBS_O_WORKDIR
+  # State paths to the relevant stationary folders required for the analysis
   path_to_PGC_conversion="/home/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Summary_stat_manipulation/"
   path_to_CLOZUK_conversion="/home/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Genotype_dataset_manipulation/"
   path_to_MAGMA_scripts="/home/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/MAGMA/"
@@ -18,9 +16,10 @@ if [[ "$whereami" == *"raven"* ]]; then
   
   # assign arguments here for now because there are so many
   # Datasets
-  training_set_usually_summary="bip1.scz1.ruderfer2014"
+  training_set_usually_summary="Neurot_Assoc_Biobank_table${chromosome_number}"
   validation_set_usually_genotype="CLOZUK_GWAS_BGE_chr${chromosome_number}"
-  training_set_name="PGC"
+  training_set_original_filename="Neurot_Assoc_Biobank_PCA_Imputed_91370_8cov_array_noDupl_miss0.05_info0.4_12.01.16.res"
+  training_set_name="Neurot_Assoc_Biobank"
   validation_set_name="CLOZUK"
   # MAF, INFO and SE
   MAF_summary="FALSE"
@@ -30,6 +29,7 @@ if [[ "$whereami" == *"raven"* ]]; then
   INFO_threshold=0.9
   SE_summary="FALSE"
   SE_threshold=5	
+  Raven_out_info_directory="/Users/johnhubert/Documents/John_CLOZUK_PGC_PRS/CLOZUK_PRS_clumping_log_files"
   # The number of chromosomes you wish to analyse (PRS_serial)
   Chromosomes_to_analyse=(`seq 1 22`) 
   # Clumping Arguments
@@ -49,9 +49,7 @@ if [[ "$whereami" == *"raven"* ]]; then
 
 
 elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
-  cd ~/Documents/testing_cross_disorder/
-  path_to_scripts='/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/'
-  number_of_files=($(find -E . -type f -regex '^./output/CLOZUK_GWAS_BGE_CLUMPED_chr[0-9]+.bed' -exec basename {} \;))
+
   path_to_PGC_conversion="/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Summary_stat_manipulation"
   path_to_CLOZUK_conversion="/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Genotype_dataset_manipulation"
   number_of_files=($(find -E . -type f -regex '^./output/CLOZUK_GWAS_BGE_CLUMPED_chr[0-9]+.bed' -exec basename {} \;))
@@ -60,20 +58,22 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   path_to_new_fam_file="/Users/Dropbox/whole_genome_testing/output/Stationary_data/CLOZUK.r7.GWAS_IDs.fam"
   path_to_gene_annotation_file="/Users/Dropbox/whole_genome_testing/output/Stationary_data/NCBI37.3.gene.loc"
 
-  # Arguments
-  path_to_scripts='/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/'
   chromosome_number=14
   # Datasets
-  training_set_usually_summary="bip1.scz1.ruderfer2014"
+  training_set_usually_summary="Neurot_Assoc_Biobank_table${chromosome_number}"
+  training_set_original_filename="Neurot_Assoc_Biobank_PCA_Imputed_91370_8cov_array_noDupl_miss0.05_info0.4_12.01.16.res"
   validation_set_usually_genotype="CLOZUK_GWAS_BGE_chr${chromosome_number}"
-  training_set_name="PGC"
+  training_set_name="Neurot_Assoc_Biobank"
   validation_set_name="CLOZUK"
-  # MAF and INFO
+  # MAF, INFO and SE
   MAF_summary="FALSE"
   MAF_threshold=0.01
   MAF_genotype="TRUE"
   INFO_summary="TRUE"
   INFO_threshold=0.9
+  SE_summary="FALSE"
+  SE_threshold=5
+  Raven_out_info_directory="/Users/johnhubert/Documents/John_CLOZUK_PGC_PRS/CLOZUK_PRS_clumping_log_files"
   # The number of chromosomes you wish to analyse (PRS_serial)
   Chromosomes_to_analyse=(`seq 1 22`)
   # Clumping Arguments
