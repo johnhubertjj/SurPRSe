@@ -39,7 +39,7 @@ if [[ "$whereami" == *"raven"* ]]; then
   cat ${path_to_scripts}/PRS_arguments_script.sh
 
   # Alter/add variables depending on what type of training dataset you have 
-  source ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments/for_${training_set_name}.txt  
+  source ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt  
   cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
 
 elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
@@ -54,7 +54,7 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   cat ${path_to_scripts}/PRS_arguments_script.sh
 
   # Alter/add variables depending on what type of training dataset you have 
-  source ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments/for_${training_set_name}.txt  
+  source ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt  
   cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
   chromosome_number=NA
 fi 
@@ -64,19 +64,15 @@ fi
  trap "set +x ; sleep 1h ; set -x" DEBUG
 
 # Run Rscript to find out the important information from the previous run
-Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}extracting_useful_SNP_information.R ${training_set_name} ${validation_set_name} ${Raven_out_info_directory} ${INFO_summary} ${MAF_summary} ${MAF_threshold} ${INFO_threshold} ${SE_decision} ${SE_threshold} ${Chromosomes_to_analyse[@]}
-
-   
-# Find the length of the array containing the names of the files
-# Note double-quotes to avoid extra parsing of funny characters in filenames
-echo "${number_of_files[@]}" 
-length_of_array=`echo "${#number_of_files[@]}"`
-num1=1
+Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}extracting_useful_SNP_information.R ./${training_set_name}_${validation_set_name}_extrainfo/extracting_useful_SNP_information.Rout ${training_set_name} ${validation_set_name} ${Raven_out_info_directory} ${INFO_summary} ${MAF_summary} ${MAF_threshold} ${INFO_threshold} ${SE_summary} ${SE_threshold} ${Chromosomes_to_analyse[@]}
 
 # Check for make_list_file
 if [ -f ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_${training_set_name}_FULL_GENOME_MAKE_LIST_INPUT.txt ]; then
 	rm ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_${training_set_name}_FULL_GENOME_MAKE_LIST_INPUT.txt
 fi
+
+Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}MAKE_list_file_creator.R ./${training_set_name}_${validation_set_name}_extrainfo/MAKE_list_file_creator.Rout ${validation_set_usually_genotype_serial} ${training_set_name} ${validation_set_name} ${Chromosomes_to_analyse[@]} 
+  
 
 # If running MAGMA as well
 if [ ${Perform_Magma_as_well} == TRUE ]; then
@@ -86,22 +82,12 @@ if [ ${Perform_Magma_as_well} == TRUE ]; then
 		mkdir ./${training_set_name}_${validation_set_name}_output/MAGMA_set_analysis
 	fi
 	
-	# Calculate the number of files there are in the table and print them to the screen
-	number_of_files_magma=($(find -E . -type f -regex "^./${training_set_name}_${validation_set_name}_output/MAGMA_set_analysis/${validation_set_name}_GWAS_BGE_chr[0-9]+${Magma_validation_set_name}.bed" -exec basename {} \;))	
-	length_of_array_magma=`echo "${#number_of_files_magma[@]}"`
-	echo "${number_of_files_magma[@]}"
-	length_of_array_magma=`echo "$((${length_of_array_magma} - ${num1}))"`
 
 	# Create a make-list file specifically for magma results 
 	if [ -f ./${training_set_name}_${validation_set_name}_output/MAGMA_set_analysis/${validation_set_name}_GWAS_BGE_${Magma_validation_set_name}_FULL_GENOME_MAKE_LIST_INPUT.txt ]; then
 		rm ./${training_set_name}_${validation_set_name}_output/MAGMA_set_analysis/${validation_set_name}_GWAS_BGE_${Magma_validation_set_name}_FULL_GENOME_MAKE_LIST_INPUT.txt
 	fi
 	
-	for chromosome_number in `seq 0 ${length_of_array_magma}` ;
-	do
-		current_file=$(basename ${number_of_files_magma[$chromosome_number]} .bed)
-		printf "${current_file}\n%.0s" {1} >> ./${training_set_name}_${validation_set_name}_output/MAGMA_set_analysis/${validation_set_name}_GWAS_BGE_${Magma_validation_set_name}_FULL_GENOME_MAKE_LIST_INPUT.txt
-	done
 	
 	cd ./${training_set_name}_${validation_set_name}_output/MAGMA_set_analysis/
 	plink --merge-list ./${training_set_name}_${validation_set_name}_output/MAGMA_set_analysis/${validation_set_name}_GWAS_BGE_${Magma_validation_set_name}_FULL_GENOME_MAKE_LIST_INPUT.txt --make-bed --out ./${validation_set_name}_${training_set_name}_MAGMA_FULL_GENOME
@@ -111,23 +97,10 @@ if [ ${Perform_Magma_as_well} == TRUE ]; then
 	
 fi
 	
-# Create Make-list file by repeating the name of each file on each line of the make-list text document
-# 1 line per name to prefix each .bin/.fam/.bed format
-length_of_array=`echo "$((${length_of_array} - ${num1}))"`
- 
-for chromosome_number in `seq 0 ${length_of_array}` ;
-do
-	current_file=$(basename ${number_of_files[$chromosome_number]} .bed)
-	printf "${current_file}\n%.0s" {1} >> ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_${training_set_name}_FULL_GENOME_MAKE_LIST_INPUT.txt
-done
-
-# echo "Press CTRL+C to proceed."
-# trap "pkill -f 'sleep 1h'" INT
-# trap "set +x ; sleep 1h ; set -x" DEBUG
 
 # merge all the clumped chromosomes together
 cd ./${training_set_name}_${validation_set_name}_output/
-plink --merge-list ./${validation_set_name}_${training_set_name}_FULL_GENOME_MAKE_LIST_INPUT.txt --make-bed --out ./${validation_set_name}_${training_set_name}_FULL_GENOME
+plink --merge-list ./${validation_set_name}_${training_set_name}_FULL_GENOME_CLUMPED_MAKE_LIST_INPUT.txt --make-bed --out ./${validation_set_name}_${training_set_name}_FULL_GENOME_CLUMPED
 cd ..
 
 exit 1

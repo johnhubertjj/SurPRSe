@@ -62,6 +62,7 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   training_set_usually_summary="Neurot_Assoc_Biobank_table${chromosome_number}"
   training_set_original_filename="Neurot_Assoc_Biobank_PCA_Imputed_91370_8cov_array_noDupl_miss0.05_info0.4_12.01.16.res"
   validation_set_usually_genotype="CLOZUK_GWAS_BGE_chr${chromosome_number}"
+  validation_set_usually_genotype_serial="CLOZUK_GWAS_BGE_chr"
   training_set_name="Neurot_Assoc_Biobank"
   validation_set_name="CLOZUK" 
   # MAF, INFO and SE
@@ -72,7 +73,7 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   INFO_threshold=0.9
   SE_summary="FALSE"
   SE_threshold=5
-  Raven_out_info_directory="/Volumes/PhD_storage/${validation_set_name}_${training_set_name}_clumping_log_files/"
+  Raven_out_info_directory="/Volumes/PhD_storage/${training_set_name}_${validation_set_name}_clumping_log_files/"
   # The number of chromosomes you wish to analyse (PRS_serial)
   Chromosomes_to_analyse=(`seq 1 22`)
   # Clumping Arguments
@@ -84,7 +85,7 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   Multiple_Training_set_tables="TRUE"
   Running_in_Serial="TRUE"
   sig_thresholds=(0.0001 0.001 0.01 0.05 0.1 0.2 0.3 0.4 0.5)
-  Perform_Magma_as_well="TRUE"
+  Perform_Magma_as_well="FALSE"
   Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates"
   # either "extended" "normal" or "both" : change to a numerical input in the future
   Gene_regions="both"	

@@ -9,25 +9,6 @@ library(stringr)
 library(data.table)
 library(plyr)
 
-## Check where you are ## 
-System_information <- Sys.info()
-whereami <- System_information['user']
-
-if (whereami == "johnhubert") {
-  chromosome.number <- args[7]
-  
-} else if (whereami == 'JJ') {
-  chromosome.number <- args[7]
-  
-} else if (whereami == "c1020109") {
-  
-  # Preparing to run in Job array
-  JOB_ID <- Sys.getenv("JOB_ID")
-  chromosome.number <- as.numeric(JOB_ID)
-  
-} else {
-  stop("current environment NOT at work/home or on servers, please add to script above to specify where you are and what type of analysis you want to do")
-}
 
 #######################################
 # adding in arguments from BASH script#
@@ -36,10 +17,9 @@ args <- commandArgs(trailingOnly = T)
 print(args)
 
 # specify the different input tables #
-Training_datatable <- paste0("./", Training_name, "_", Validation_name,"_output/", args[3],"_new.txt")
-Validation_datatable_bim_file <- paste0(args[4],".bim")
 Training_name <- args[3]
 Validation_name <- args[4]
+Training_datatable <- paste0("./", Training_name, "_", Validation_name,"_output/", args[3],"_new.txt")
 Rout_file_storage <- args[5]
 INFO_decision <- args[6]
 MAF_decision <- args[7]
@@ -48,7 +28,7 @@ INFO_threshold <- args[9]
 SE_decision <- args[10]
 SE_threshold <- args[11]
 chromosomes_to_parse <- as.numeric(args[c(12:length(args))])
-print(Chromosomes_to_parse)
+print(chromosomes_to_parse)
 
 #test<- function(Training_datatable, Validation_datatable_bim_file, Training_name, Validation_name, Rout_file_storage, INFO_decision, INFO_threshold, MAF_decision, MAF_threshold, SE_decision, SE_threshold, chromosomes_to_parse){
 # Deciding the first line of the csv file function
@@ -118,7 +98,6 @@ Errors_here_terminal <- list()
 
 
 for (i in chromosomes_to_parse) {
-  browser()
 # initially collect all the interesting information # 
 length_of_combined_datasets_integer <- grep("Chr\\:\\s\\d+",file_collection[[i]][,1],perl = T)
 all_parse <- grep("N=\\s\\d+", file_collection[[i]][,1],perl = T)
@@ -190,7 +169,7 @@ Final_data_frame <- data.frame(info = c(paste0("Number of SNPs in ", Training_na
                                         paste0(Validation_name,"_", Training_name, " remove A-T, C-G Step one: N="),
                                         paste0(Validation_name,"_", Training_name, " remove A-T, C-G Step two: N="),
                                         paste0("Combined all A-T,C-G remove and other mismatches: N=")),
-                               N = rep(0,12))
+                               N = rep(0,12), stringsAsFactors = F)
 
 current_sum <- rep(0,length(chromosomes_to_parse))
 
@@ -210,8 +189,8 @@ combined_data_frame <- rbindlist(informative.data.frame)
 filename_whole_genome <- paste0(Validation_name,"_",Training_name,"_dataframe_showing_number_of_SNPs_throughout_PRS_analysis_whole_genome.csv")
 filename_by_chromosome <- paste0(Validation_name,"_",Training_name,"_dataframe_showing_number_of_SNPs_throughout_PRS_analysis_by_chromosome.csv")
   
-write.table (combined_data_frame, file = filename_by_chromosome, col.names = T, append = T, row.names = F, sep = ",")
-write.table (Final_data_frame, file = filename_whole_genome, col.names = T, append = T, row.names = F, sep = ",")
+write.table (combined_data_frame, file = filename_by_chromosome, col.names = T, row.names = F, sep = ",")
+write.table (Final_data_frame, file = filename_whole_genome, col.names = T, row.names = F, sep = ",")
   
 
 # data_frames_without_original_row_length <- lapply(informative.data.frame, function(x) {which(x[1,2] == "NA")})
