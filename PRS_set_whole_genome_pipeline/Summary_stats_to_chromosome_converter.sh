@@ -29,12 +29,12 @@ if [[ "$whereami" == *"raven"* ]]; then
   path_to_scripts="/home/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/"
   
   # make directories for output and extra info
-  if [ ! -d "output" ]; then
-     mkdir output
+  if [ ! -d "${training_set_name}_${validation_set_name}_output" ]; then
+     mkdir ${training_set_name}_${validation_set_name}_output
   fi
   
-  if [ ! -d "extrainfo" ]; then
-     mkdir extrainfo
+  if [ ! -d "${training_set_name}_${validation_set_name}_extrainfo" ]; then
+     mkdir ${training_set_name}_${validation_set_name}_extrainfo
   fi
   
   # Assign the shell variables
@@ -48,12 +48,12 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   path_to_scripts='/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/'
    
   # make directories for output and extra info
-  if [ ! -d "output" ]; then
-     mkdir output
+  if [ ! -d "${training_set_name}_${validation_set_name}_output" ]; then
+     mkdir ${training_set_name}_${validation_set_name}_output
   fi
   
-  if [ ! -d "extrainfo" ]; then
-     mkdir extrainfo
+  if [ ! -d "${training_set_name}_${validation_set_name}_extrainfo" ]; then
+     mkdir ${training_set_name}_${validation_set_name}_extrainfo
   fi
   
   # Assign the shell variables
@@ -63,8 +63,8 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
 fi
 
 
-Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}Taking_in_summary_stat_data_for_chromosome_conversion.R ./extrainfo/${training_set_name}_summary_stats_for_chromosome_conversion.Rout ${training_set_original_filename} ${training_set_name} ${MAF_summary} ${INFO_summary} ${SE_summary} ${SE_threshold} ${Chromosomes_to_analyse[@]}  
+Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}Taking_in_summary_stat_data_for_chromosome_conversion.R ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_summary_stats_for_chromosome_conversion.Rout ${training_set_original_filename} ${training_set_name} ${validation_set_name} ${MAF_summary} ${INFO_summary} ${SE_summary} ${SE_threshold} ${Chromosomes_to_analyse[@]}  
 
-source ./extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
-cat ./extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt 
+source ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
+cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt 
 

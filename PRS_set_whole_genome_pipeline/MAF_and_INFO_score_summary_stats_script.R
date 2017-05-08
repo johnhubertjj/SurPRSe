@@ -40,14 +40,15 @@ print(args)
 
 # specify the different input tables #
 Training_datatable <- paste0(args[3],".txt")
-Training_datatable_output <- paste0("./output/", args[3], "_new.txt")
 Training_name <- args[4]
-MAF_decision <- args[5]
-MAF_threshold <- as.numeric(args[6])
-INFO_decision <- args[7]
-Info_threshold <- as.numeric(args[8])
-SE_decision <- args[9]
-SE_threshold <- as.numeric(args[10])
+Validation_name <- args [5]
+Training_datatable_output <- paste0("./", Training_name, "_", Validation_name,"_output/", args[3], "_new.txt")
+MAF_decision <- args[6]
+MAF_threshold <- as.numeric(args[7])
+INFO_decision <- args[8]
+Info_threshold <- as.numeric(args[9])
+SE_decision <- args[10]
+SE_threshold <- as.numeric(args[11])
 
 # Read in Training set
 PGC_table <- fread(Training_datatable)

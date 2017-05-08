@@ -8,7 +8,7 @@ if [[ "$whereami" == *"raven"* ]]; then
   path_to_PGC_conversion="/home/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Summary_stat_manipulation/"
   path_to_CLOZUK_conversion="/home/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Genotype_dataset_manipulation/"
   path_to_MAGMA_scripts="/home/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/MAGMA/"
-  number_of_files=($(find -E . -type f -regex '^./output/CLOZUK_GWAS_BGE_CLUMPED_chr[0-9]+.bed' -exec basename {} \;))
+  number_of_files=($(find -E . -type f -regex '^./${training_set_name}_${validation_set_name}_output/CLOZUK_GWAS_BGE_CLUMPED_chr[0-9]+.bed' -exec basename {} \;))
   path_to_covariate_file="/home/c1020109/NCBI37.3/CLOZUK2.r7.select2PC.eigenvec.txt" 
   path_to_chromosome_length_file="/home/c1020109/NCBI37.3/UCSC_hg19_chromeinfo_length_of_chromosomes.txt"
   path_to_new_fam_file="/home/c1020109/NCBI37.3/CLOZUK.r7.GWAS_IDs.fam"
@@ -52,7 +52,6 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
 
   path_to_PGC_conversion="/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Summary_stat_manipulation"
   path_to_CLOZUK_conversion="/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Genotype_dataset_manipulation"
-  number_of_files=($(find -E . -type f -regex '^./output/CLOZUK_GWAS_BGE_CLUMPED_chr[0-9]+.bed' -exec basename {} \;))
   path_to_covariate_file="/Users/Dropbox/whole_genome_testing/Stationary_data/CLOZUK2.r7.select2PC.eigenvec.txt"
   path_to_chromosome_length_file="/Users/Dropbox/whole_genome_testing/Stationary_data/UCSC_hg19_chromeinfo_length_of_chromosomes.txt"
   path_to_new_fam_file="/Users/Dropbox/whole_genome_testing/output/Stationary_data/CLOZUK.r7.GWAS_IDs.fam"
@@ -64,7 +63,7 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   training_set_original_filename="Neurot_Assoc_Biobank_PCA_Imputed_91370_8cov_array_noDupl_miss0.05_info0.4_12.01.16.res"
   validation_set_usually_genotype="CLOZUK_GWAS_BGE_chr${chromosome_number}"
   training_set_name="Neurot_Assoc_Biobank"
-  validation_set_name="CLOZUK"
+  validation_set_name="CLOZUK" 
   # MAF, INFO and SE
   MAF_summary="FALSE"
   MAF_threshold=0.01
@@ -73,7 +72,7 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   INFO_threshold=0.9
   SE_summary="FALSE"
   SE_threshold=5
-  Raven_out_info_directory="/Users/johnhubert/Documents/John_CLOZUK_PGC_PRS/CLOZUK_PRS_clumping_log_files"
+  Raven_out_info_directory="/Volumes/PhD_storage/${validation_set_name}_${training_set_name}_clumping_log_files/"
   # The number of chromosomes you wish to analyse (PRS_serial)
   Chromosomes_to_analyse=(`seq 1 22`)
   # Clumping Arguments

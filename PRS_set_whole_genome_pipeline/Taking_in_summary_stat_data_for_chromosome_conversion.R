@@ -18,12 +18,13 @@ print(args)
 
 Training_name_full_unseparated <- args[3]
 Training_set_name <- args[4]
-MAF_summary <- args[5]
-INFO_summary <- args[6]
-SE_summary <- args[7]
-SE_threshold <- as.numeric(args[8])
+Validation_set_name <- args[5]
+MAF_summary <- args[6]
+INFO_summary <- args[7]
+SE_summary <- args[8]
+SE_threshold <- as.numeric(args[9])
 
-Chromosomes_to_split <- as.numeric(args[c(9:length(args))])
+Chromosomes_to_split <- as.numeric(args[c(10:length(args))])
 print(Chromosomes_to_split)
 
 # Chromosomes_to_split <- args[9]
@@ -146,7 +147,7 @@ if(length(grep("\\bP\\b", Parsing_colnames)) == 1 | length(grep("\\bPVAL\\b", Pa
 }
 assign("Parsing_colnames",Parsing_colnames, envir = e)
   
-fileConn<-file(paste0("./extrainfo/new_PRS_set_arguments_for_", Training_set_name, ".txt"))
+fileConn<-file(paste0("./",Training_set_name,"_",Validation_set_name,"_extrainfo/new_PRS_set_arguments_for_", Training_set_name, ".txt"))
                
 writeLines(c(Chromosome_name, SNP_name, BP_name, A1_name, A2_name, MAF_calculation_summary, number_of_frequency_columns, INFO_name, OR_name, BETA_name, SE_name, P_name), fileConn)
 close(fileConn)
