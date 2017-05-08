@@ -324,25 +324,43 @@ if (length(a) >= 1) {
 a <- which(combined.CLOZUK.PGC$A1.y == combined.CLOZUK.PGC$A1.x & combined.CLOZUK.PGC$A2.y == combined.CLOZUK.PGC$A2.x)
 d <- seq(1:nrow(combined.CLOZUK.PGC));d <- d[-a]
 
-b1 <- which(combined.CLOZUK.PGC$A1.x[d] == "A")
-b2 <- which(combined.CLOZUK.PGC$A1.x[d] == "C")
-b3 <- which(combined.CLOZUK.PGC$A1.x[d] == "G")
-b4 <- which(combined.CLOZUK.PGC$A1.x[d] == "T")
+test1 <- which(combined.CLOZUK.PGC$A1.x[d] == "A" & combined.CLOZUK.PGC$A2.x[d] == "G" | combined.CLOZUK.PGC$A1.x[d] == "G" & combined.CLOZUK.PGC$A2.x[d] == "A")
 
-combined.CLOZUK.PGC$A1.x[d[b1]] <- "T"
-combined.CLOZUK.PGC$A1.x[d[b2]] <- "G"
-combined.CLOZUK.PGC$A1.x[d[b3]] <- "C"
-combined.CLOZUK.PGC$A1.x[d[b4]] <- "A"
+if (length(test1) > 0){
+  for (i in 1:length(test1)){
+    if(combined.CLOZUK.PGC$A1.y[d[test1[i]]] == "T" & combined.CLOZUK.PGC$A2.y[d[test1[i]]] == "C"){
+       if(combined.CLOZUK.PGC$A1.x[d[test1[i]]] == "A"){
+          combined.CLOZUK.PGC$A1.x[d[test1[i]]] <- "T"
+          combined.CLOZUK.PGC$A2.x[d[test1[i]]] <- "C"
+       }
+    }else if (combined.CLOZUK.PGC$A1.y[d[test1[i]]] == "C" & combined.CLOZUK.PGC$A2.y[d[test1[i]]] == "T"){
+              if(combined.CLOZUK.PGC$A1.x[d[test1[i]]] == "G") {
+                 combined.CLOZUK.PGC$A1.x[d[test1[i]]] <- "C"
+                 combined.CLOZUK.PGC$A2.x[d[test1[i]]] <- "T"
+      }
+    }else{
+      combined.CLOZUK.PGC[-d[test1[i]]]
+    }
+  }
+}
 
-b1 <- which(combined.CLOZUK.PGC$A2.x[d] == "A")
-b2 <- which(combined.CLOZUK.PGC$A2.x[d] == "C")
-b3 <- which(combined.CLOZUK.PGC$A2.x[d] == "G")
-b4 <- which(combined.CLOZUK.PGC$A2.x[d] == "T")
-
-combined.CLOZUK.PGC$A2.x[d[b1]] <-"T"
-combined.CLOZUK.PGC$A2.x[d[b2]] <-"G"
-combined.CLOZUK.PGC$A2.x[d[b3]] <-"C"
-combined.CLOZUK.PGC$A2.x[d[b4]] <-"A"
+test2 <- which(combined.CLOZUK.PGC$A1.x[d] == "T" & combined.CLOZUK.PGC$A2.x[d] == "C" | combined.CLOZUK.PGC$A1.x[d] == "C" & combined.CLOZUK.PGC$A2.x[d] == "T")
+if (length(test2) > 0){
+  for (i in 1:length(test2)){
+    if(combined.CLOZUK.PGC$A1.y[d[test2[i]]] != "A" & combined.CLOZUK.PGC$A2.y[d[test2[i]]] != "G" | combined.CLOZUK.PGC$A1.y[d[test2[i]]] != "G" & combined.CLOZUK.PGC$A2.y[d[test2[i]]] != "A"){
+      combined.CLOZUK.PGC[-d[test2[i]]]
+    }else{
+      if(combined.CLOZUK.PGC$A1.x[d[test2[i]]] == "T"){
+        combined.CLOZUK.PGC$A1.x[d[test2[i]]] <- "A"
+        combined.CLOZUK.PGC$A2.x[d[test2[i]]] <- "G"
+      }
+      if(combined.CLOZUK.PGC$A1.x[d[test2[i]]] == "C") {
+        combined.CLOZUK.PGC$A1.x[d[test2[i]]] <- "G"
+        combined.CLOZUK.PGC$A2.x[d[test2[i]]] <- "A"
+      }
+    }
+  }
+}
 
 a <- which(combined.CLOZUK.PGC$A1.y==combined.CLOZUK.PGC$A2.x & combined.CLOZUK.PGC$A2.y==combined.CLOZUK.PGC$A1.x)
 
