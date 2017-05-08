@@ -324,7 +324,10 @@ if (length(a) >= 1) {
 a <- which(combined.CLOZUK.PGC$A1.y == combined.CLOZUK.PGC$A1.x & combined.CLOZUK.PGC$A2.y == combined.CLOZUK.PGC$A2.x)
 d <- seq(1:nrow(combined.CLOZUK.PGC));d <- d[-a]
 
-test1 <- which(combined.CLOZUK.PGC$A1.x[d] == "A" & combined.CLOZUK.PGC$A2.x[d] == "G" | combined.CLOZUK.PGC$A1.x[d] == "G" & combined.CLOZUK.PGC$A2.x[d] == "A")
+# Specify which alleles in dataset 1 have A1 = A and A2 = G
+test1 <- which (combined.CLOZUK.PGC$A1.x[d] == "A" & combined.CLOZUK.PGC$A2.x[d] == "G")
+test1a <- which (combined.CLOZUK.PGC$A1.x[d] == "G" & combined.CLOZUK.PGC$A2.x[d] == "A")
+test1 <- unique(c(test1, test1a))
 
 if (length(test1) > 0){
   for (i in 1:length(test1)){
@@ -344,7 +347,10 @@ if (length(test1) > 0){
   }
 }
 
-test2 <- which(combined.CLOZUK.PGC$A1.x[d] == "T" & combined.CLOZUK.PGC$A2.x[d] == "C" | combined.CLOZUK.PGC$A1.x[d] == "C" & combined.CLOZUK.PGC$A2.x[d] == "T")
+test2 <- which(combined.CLOZUK.PGC$A1.x[d] == "T" & combined.CLOZUK.PGC$A2.x[d] == "C")
+test2a <- which(combined.CLOZUK.PGC$A1.x[d] == "C" & combined.CLOZUK.PGC$A2.x[d] == "T")
+test2 <- unique(c(test2, test2a))
+
 if (length(test2) > 0){
   for (i in 1:length(test2)){
     if(combined.CLOZUK.PGC$A1.y[d[test2[i]]] != "A" & combined.CLOZUK.PGC$A2.y[d[test2[i]]] != "G" | combined.CLOZUK.PGC$A1.y[d[test2[i]]] != "G" & combined.CLOZUK.PGC$A2.y[d[test2[i]]] != "A"){
