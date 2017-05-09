@@ -14,9 +14,9 @@
 whereami=$(uname -n)
 echo "$whereami"
 
- echo "Press CTRL+C to proceed."
- trap "pkill -f 'sleep 1h'" INT
- trap "set +x ; sleep 1h ; set -x" DEBUG
+ #echo "Press CTRL+C to proceed."
+ #trap "pkill -f 'sleep 1h'" INT
+ #trap "set +x ; sleep 1h ; set -x" DEBUG
 
 
 if [[ "$whereami" == *"raven"* ]]; then
@@ -103,14 +103,13 @@ cd ./${training_set_name}_${validation_set_name}_output/
 plink --merge-list ./${validation_set_name}_${training_set_name}_FULL_GENOME_CLUMPED_MAKE_LIST_INPUT.txt --make-bed --out ./${validation_set_name}_${training_set_name}_FULL_GENOME_CLUMPED
 cd ..
 
-exit 1
 
 # merge all the PGC SNPs together into one table
-Rscript ${path_to_scripts}RscriptEcho.R ${path_to_PGC_conversion}combining_summary_stats_tables_after_conversion_to_CHR_POS.R ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_conversion.Rout ${training_set_usually_name} ${Multiple_Training_set_tables} ${Chromosomes_to_analyse[@]}  
+Rscript ${path_to_scripts}RscriptEcho.R ${path_to_PGC_conversion}combining_summary_stats_tables_after_conversion_to_CHR_POS.R ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_conversion.Rout ${training_set_name} ${validation_set_name} ${Chromosomes_to_analyse[@]}  
 
 # recode genotypes for input into Python
-plink --bfile ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_${training_set_name}_FULL_GENOME --recode A --out ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_${training_set_name}_FULL_GENOME
-plink --bfile ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_${training_set_name}_FULL_GENOME --freq --out ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_${training_set_name}_FULL_GENOME
+plink --bfile ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_${training_set_name}_FULL_GENOME_CLUMPED --recode A --out ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_${training_set_name}_FULL_GENOME_CLUMPED
+plink --bfile ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_${training_set_name}_FULL_GENOME_CLUMPED --freq --out ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_${training_set_name}_FULL_GENOME_CLUMPED
 
 # Get the MAF from CLOZUK and import into the PGC_summary_stats for PRS analysis
 awk '{ $6=$7=$8=$10=$12=$13=$14=$15=$16=$17=""; print$0 }' ./${training_set_name}_${validation_set_name}_output/combined_${training_set_name}_table_with_CHR.POS_identifiers.txt > ./${training_set_name}_${validation_set_name}_output/${training_set_name}_table_for_python.txt

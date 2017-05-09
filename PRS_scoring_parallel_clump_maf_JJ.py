@@ -3,6 +3,7 @@
 # -------------- READ IN FUNCTIONS -------------- #
 
 import pandas as pd
+import argparse
 import numpy as np
 from decimal import Decimal
 from multiprocessing import Pool
@@ -11,7 +12,7 @@ import os
 import platform
 import fileinput
 import csv
-
+import statsmodels.api as sm
 
 # -------------- DECLARE VARIABLES -------------- #
 

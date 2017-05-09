@@ -1,39 +1,36 @@
-## Create a larger table ##
+### Start Timer
+ptm <- proc.time()
+
+### Library
 library(data.table)
 
-for (i in 1:22){
-  assign(paste0("PGC_table",i),fread(paste0("PGC_table",i,"_new.txt")),envir = .GlobalEnv)
+## set wd
+setwd(".")
+
+########################################
+# adding in arguments from BASH script #
+########################################
+args <- commandArgs(trailingOnly = T)
+getwd()
+print(args)
+
+## specify the different input tables #
+Training_name <- args[3]
+Validation_name <- args [4]
+Chromosomes_to_split <- as.numeric(args[c(5:length(args))])
+print(Chromosomes_to_split)
+
+## Read in the latest Summary stats tables after converting to one table
+for (i in Chromosomes_to_split){
+  assign(paste0(Training_name, "_table", i), fread(paste0("./", Training_name, "_", Validation_name,"_output/", Training_name,"_table",i,"_new.txt")),envir = .GlobalEnv)
 }
-l = list()
-for (i in 1:22) {
-  l[[i]] <- eval(parse(text = paste0("PGC_table",i)))
-}
-combined_final_table <- rbindlist(l)
-write.table (combined_final_table, file = "combined_PGC_table_with_CHR.POS_identifiers.txt", quote = F,row.names = F)
 
-library(data.table)
-
-for (i in 1:22){
-  assign(paste0("Neurot_Assoc_Biobank_table",i),fread(paste0("Neurot_Assoc_Biobank_table",i,"_new.txt")),envir = .GlobalEnv)
-}
-l = list()
-
-for (i in 1:22) {
-  l[[i]] <- eval(parse(text = paste0("Neurot_Assoc_Biobank_table",i)))
-}
-combined_final_table <- rbindlist(l)
-write.table (combined_final_table, file = "combined_Neurot_Assoc_table_with_CHR.POS_identifiers.txt", quote = F,row.names = F)
-
-
-
-for (i in 1:22){
-  assign(paste0("BIPvsSCZ_table",i),fread(paste0("BIPvsSCZ_table",i,"_new.txt")),envir = .GlobalEnv)
-}
 l = list()
 
-for (i in 1:22) {
-  l[[i]] <- eval(parse(text = paste0("BIPvsSCZ_table",i)))
+## print out to one table under a common filename
+for (i in Chromosomes_to_split) {
+  l[[i]] <- eval(parse(text = paste0(Training_name,"_table",i)))
 }
 combined_final_table <- rbindlist(l)
-write.table (combined_final_table, file = "combined_BIPvsSCZ_with_CHR.POS_identifiers.txt", quote = F,row.names = F)
+write.table (combined_final_table, file = paste0("./", Training_name, "_", Validation_name,"_output/combined_", Training_name, "_table_with_CHR.POS_identifiers.txt"), quote = F, row.names = F)
 
