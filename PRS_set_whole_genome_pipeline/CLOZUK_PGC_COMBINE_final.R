@@ -38,7 +38,7 @@ chromosome.number <- as.numeric(AI)
 
 
 # specify the different input tables #
-Training_datatable <- paste0("./output/",args[3],"_new.txt")
+Training_datatable <- paste0("./",Training_name,"_",Validation_name,"_output/",args[3],"_new.txt")
 Validation_datatable_bim_file <- paste0(args[4],".bim")
 Training_name <- args[5]
 Validation_name <- args[6]
@@ -72,7 +72,7 @@ e <- new.env()
 log.to.odds <- function(imported.data.table) {
   imported.dt.col.names <- colnames(imported.data.table)
   if (any("OR" == imported.dt.col.names) == F) {
-    cat("No Odds Ratio included in",deparse(substitute(imported.data.table)))
+    cat("No Odds Ratio included in", deparse(substitute(imported.data.table)))
   }else{
     assign("PGC.BETA", log(imported.data.table$OR), envir = e)
   }
@@ -324,7 +324,10 @@ if (length(a) >= 1) {
 a <- which(combined.CLOZUK.PGC$A1.y == combined.CLOZUK.PGC$A1.x & combined.CLOZUK.PGC$A2.y == combined.CLOZUK.PGC$A2.x)
 d <- seq(1:nrow(combined.CLOZUK.PGC));d <- d[-a]
 
-test1 <- which(combined.CLOZUK.PGC$A1.x[d] == "A" & combined.CLOZUK.PGC$A2.x[d] == "G" | combined.CLOZUK.PGC$A1.x[d] == "G" & combined.CLOZUK.PGC$A2.x[d] == "A")
+# Specify which alleles in dataset 1 have A1 = A and A2 = G
+test1 <- which (combined.CLOZUK.PGC$A1.x[d] == "A" & combined.CLOZUK.PGC$A2.x[d] == "G")
+test1a <- which (combined.CLOZUK.PGC$A1.x[d] == "G" & combined.CLOZUK.PGC$A2.x[d] == "A")
+test1 <- unique(c(test1, test1a))
 
 if (length(test1) > 0){
   for (i in 1:length(test1)){
@@ -344,7 +347,10 @@ if (length(test1) > 0){
   }
 }
 
-test2 <- which(combined.CLOZUK.PGC$A1.x[d] == "T" & combined.CLOZUK.PGC$A2.x[d] == "C" | combined.CLOZUK.PGC$A1.x[d] == "C" & combined.CLOZUK.PGC$A2.x[d] == "T")
+test2 <- which(combined.CLOZUK.PGC$A1.x[d] == "T" & combined.CLOZUK.PGC$A2.x[d] == "C")
+test2a <- which(combined.CLOZUK.PGC$A1.x[d] == "C" & combined.CLOZUK.PGC$A2.x[d] == "T")
+test2 <- unique(c(test2, test2a))
+
 if (length(test2) > 0){
   for (i in 1:length(test2)){
     if(combined.CLOZUK.PGC$A1.y[d[test2[i]]] != "A" & combined.CLOZUK.PGC$A2.y[d[test2[i]]] != "G" | combined.CLOZUK.PGC$A1.y[d[test2[i]]] != "G" & combined.CLOZUK.PGC$A2.y[d[test2[i]]] != "A"){
@@ -480,15 +486,15 @@ rm(CLOZUK.original)
 
 # Write according to destination
 if (whereami == 'johnhubert' | whereami == 'JJ'){
-  filename.CLOZUK.together <- paste0("./output/",Validation_name,"_chr", chromosome.number,"_chr.pos.txt")
-  new.PGC.table <- paste0("./output/",Training_name,"_table", chromosome.number,"_new.txt")
-  filename.common.snps <- paste0("./output/chr", chromosome.number, Training_name,"_", Validation_name,"_common_SNPs.txt")
-  filename.duplicate.snps <- paste0("./output/extracted_Duplicate_snps_",Validation_name,"_", Training_name,"_chr",chromosome.number,".txt")
+  filename.CLOZUK.together <- paste0("./",Training_name,"_",Validation_name,"_output/",Validation_name,"_chr", chromosome.number,"_chr.pos.txt")
+  new.PGC.table <- paste0("./",Training_name,"_",Validation_name,"_output/",Training_name,"_table", chromosome.number,"_new.txt")
+  filename.common.snps <- paste0("./",Training_name,"_",Validation_name,"_output/chr", chromosome.number, Training_name,"_", Validation_name,"_common_SNPs.txt")
+  filename.duplicate.snps <- paste0("./",Training_name,"_",Validation_name,"_output/extracted_Duplicate_snps_",Validation_name,"_", Training_name,"_chr",chromosome.number,".txt")
 } else {  
-  filename.CLOZUK.together <- paste0("./output/", Validation_name,"_chr", chromosome.number,"_chr.pos.txt")
-  new.PGC.table <- paste0("./output/", Training_name,"_table", chromosome.number,"_new.txt")
-  filename.common.snps <- paste0("./output/chr", chromosome.number, Training_name,"_", Validation_name,"_common_SNPs.txt")
-  filename.duplicate.snps <- paste0("./output/extracted_Duplicate_snps_",Validation_name,"_", Training_name,"_chr",chromosome.number,".txt")
+  filename.CLOZUK.together <- paste0("./",Training_name,"_",Validation_name,"_output/", Validation_name,"_chr", chromosome.number,"_chr.pos.txt")
+  new.PGC.table <- paste0("./",Training_name,"_",Validation_name,"_output/", Training_name,"_table", chromosome.number,"_new.txt")
+  filename.common.snps <- paste0("./",Training_name,"_",Validation_name,"_output/chr", chromosome.number, Training_name,"_", Validation_name,"_common_SNPs.txt")
+  filename.duplicate.snps <- paste0("./",Training_name,"_",Validation_name,"_output/extracted_Duplicate_snps_",Validation_name,"_", Training_name,"_chr",chromosome.number,".txt")
 }
 
 # Write update file for plink
