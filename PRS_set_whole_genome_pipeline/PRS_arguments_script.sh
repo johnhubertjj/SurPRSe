@@ -59,11 +59,11 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
 
   chromosome_number=14
   # Datasets
-  training_set_usually_summary="Neurot_Assoc_Biobank_table${chromosome_number}"
-  training_set_original_filename="Neurot_Assoc_Biobank_PCA_Imputed_91370_8cov_array_noDupl_miss0.05_info0.4_12.01.16.res"
+  training_set_usually_summary="PGC_MDD_table${chromosome_number}"
+  training_set_original_filename="NULL"
   validation_set_usually_genotype="CLOZUK_GWAS_BGE_chr${chromosome_number}"
   validation_set_usually_genotype_serial="CLOZUK_GWAS_BGE_chr"
-  training_set_name="Neurot_Assoc_Biobank"
+  training_set_name="PGC_MDD"
   validation_set_name="CLOZUK" 
   # MAF, INFO and SE
   MAF_summary="FALSE"

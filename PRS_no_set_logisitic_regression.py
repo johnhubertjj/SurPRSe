@@ -83,10 +83,11 @@ timer_start = time.time()
 # -------------- CREATE LOGISTIC REGRESSION FUNCTION -------------- #
 
 # Define function #
-def PRS_LOG_REG_func(Training_name, Validation_name, Covariates, Fam_names):
+def PRS_LOG_REG_func(Training_name, Validation_name, Covariates, Fam_names, sigi):
 
     # Read in relevant PRS_profile file
-    PRS_Profiles = pd.read_table("./" + str(Training_name) + "_" + )
+    PRS_Profiles = pd.read_table("./" + str(Training_name) + "_" + str(Validation_name) + "_whole_genome_significance_threshold_at_" + str(sigi) )
+
     # Create empty datasets for results #
     indiv_id = range(1, 35802)
     results = pd.DataFrame(index=indiv_id, columns=['GeneName'])

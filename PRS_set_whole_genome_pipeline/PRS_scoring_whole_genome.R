@@ -15,8 +15,8 @@ getwd()
 print(args)
 
 # Specify the different input tables #
-Training_name <- args[4]
-Validation_name <- args [5]
+Training_name <- args[3]
+Validation_name <- args [4]
 significance_thresholds <- as.numeric(args[c(5:length(args))])
 print(significance_thresholds)
 
