@@ -2,7 +2,7 @@
 
 #PBS -q serial
 #PBS -P PR54
-#PBS -l select=1:ncpus=1
+#PBS -l select=1:ncpus=1:mem=8GB
 #PBS -l walltime=1:00:00
 #PBS -j oe
 #PBS -o /home/c1020109/Summary_stats_info
@@ -28,6 +28,11 @@ if [[ "$whereami" == *"raven"* ]]; then
 
   path_to_scripts="/home/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/"
   
+  
+  # Assign the shell variables
+  source ${path_to_scripts}PRS_arguments_script.sh 
+  cat ${path_to_scripts}PRS_arguments_script.sh 
+
   # make directories for output and extra info
   if [ ! -d "${training_set_name}_${validation_set_name}_output" ]; then
      mkdir ${training_set_name}_${validation_set_name}_output
@@ -36,10 +41,6 @@ if [[ "$whereami" == *"raven"* ]]; then
   if [ ! -d "${training_set_name}_${validation_set_name}_extrainfo" ]; then
      mkdir ${training_set_name}_${validation_set_name}_extrainfo
   fi
-  
-  # Assign the shell variables
-  source ${path_to_scripts}PRS_arguments_script.sh 
-  cat ${path_to_scripts}PRS_arguments_script.sh 
 
 elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   cd ~/Documents/testing_cross_disorder/  
@@ -47,7 +48,10 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   # Arguments
   path_to_scripts='/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/'
    
-  # make directories for output and extra info
+  # Assign the shell variables
+  source ${path_to_scripts}/PRS_arguments_script.sh
+  cat ${path_to_scripts}/PRS_arguments_script.sh 
+
   if [ ! -d "${training_set_name}_${validation_set_name}_output" ]; then
      mkdir ${training_set_name}_${validation_set_name}_output
   fi
@@ -56,10 +60,7 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
      mkdir ${training_set_name}_${validation_set_name}_extrainfo
   fi
   
-  # Assign the shell variables
-  source ${path_to_scripts}/PRS_arguments_script.sh
-  cat ${path_to_scripts}/PRS_arguments_script.sh 
-
+  
 fi
 
 

@@ -81,6 +81,7 @@ if(length(grep("\\bA2\\b", Parsing_colnames)) == 1){
 }
 
 if(length(grep("\\bFRQ", Parsing_colnames)) == 1 || length(grep("\\bFRQ", Parsing_colnames)) == 2){
+  MAF_calculation_summary <- paste0("MAF_Summary=", MAF_summary)
   number_of_frequency_columns <- paste0("Number_of_frequency_columns=", grep("FRQ", Parsing_colnames))
 }else{
   MAF_calculation_summary <- "MAF_summary=FALSE"  
@@ -92,8 +93,10 @@ if(length(grep("\\bFRQ", Parsing_colnames)) == 1 || length(grep("\\bFRQ", Parsin
 }
 
 if(length(grep("\\bINFO\\b", Parsing_colnames)) == 1){
+  INFO_name <- "INFO_summary=TRUE"
   if (INFO_summary == "FALSE"){
     warning("INFO score has been supplied but will NOT be used for post-GWAS-QC, if human error, please change the argument to: INFO_Summary=TRUE")
+    INFO_name <- "INFO_summary=FALSE"
   }
 }else{
   INFO_name <- "INFO_summary=FALSE" 

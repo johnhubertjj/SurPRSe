@@ -8,7 +8,6 @@ if [[ "$whereami" == *"raven"* ]]; then
   path_to_PGC_conversion="/home/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Summary_stat_manipulation/"
   path_to_CLOZUK_conversion="/home/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Genotype_dataset_manipulation/"
   path_to_MAGMA_scripts="/home/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/MAGMA/"
-  number_of_files=($(find -E . -type f -regex '^./${training_set_name}_${validation_set_name}_output/CLOZUK_GWAS_BGE_CLUMPED_chr[0-9]+.bed' -exec basename {} \;))
   path_to_covariate_file="/home/c1020109/NCBI37.3/CLOZUK2.r7.select2PC.eigenvec.txt" 
   path_to_chromosome_length_file="/home/c1020109/NCBI37.3/UCSC_hg19_chromeinfo_length_of_chromosomes.txt"
   path_to_new_fam_file="/home/c1020109/NCBI37.3/CLOZUK.r7.GWAS_IDs.fam"
@@ -16,10 +15,10 @@ if [[ "$whereami" == *"raven"* ]]; then
   
   # assign arguments here for now because there are so many
   # Datasets
-  training_set_usually_summary="Neurot_Assoc_Biobank_table${chromosome_number}"
+  training_set_usually_summary="BIP_table${chromosome_number}"
   validation_set_usually_genotype="CLOZUK_GWAS_BGE_chr${chromosome_number}"
-  training_set_original_filename="Neurot_Assoc_Biobank_PCA_Imputed_91370_8cov_array_noDupl_miss0.05_info0.4_12.01.16.res"
-  training_set_name="Neurot_Assoc_Biobank"
+  training_set_original_filename="daner_PGC_BIP32b_mds7a"
+  training_set_name="BIP"
   validation_set_name="CLOZUK"
   # MAF, INFO and SE
   MAF_summary="FALSE"
@@ -29,7 +28,7 @@ if [[ "$whereami" == *"raven"* ]]; then
   INFO_threshold=0.9
   SE_summary="FALSE"
   SE_threshold=5	
-  Raven_out_info_directory="/Users/johnhubert/Documents/John_CLOZUK_PGC_PRS/CLOZUK_PRS_clumping_log_files"
+  Raven_out_info_directory="/home/c1020109/${training_set_name}_${validation_set_name}_clumping_log_files/"
   # The number of chromosomes you wish to analyse (PRS_serial)
   Chromosomes_to_analyse=(`seq 1 22`) 
   # Clumping Arguments
@@ -44,7 +43,7 @@ if [[ "$whereami" == *"raven"* ]]; then
   Perform_Magma_as_well="TRUE"
   Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates" 
   # either "extended" "normal" or "both" : change to a numerical input in the future
-  Gene_regions= "both"
+  Gene_regions="both"
   external_harddrive="FALSE"
 
 

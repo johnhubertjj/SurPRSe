@@ -38,11 +38,11 @@ chromosome.number <- as.numeric(AI)
 
 
 # specify the different input tables #
-Training_datatable <- paste0("./",Training_name,"_",Validation_name,"_output/",args[3],"_new.txt")
 Validation_datatable_bim_file <- paste0(args[4],".bim")
 Training_name <- args[5]
 Validation_name <- args[6]
 chromosome.number <- args[7]
+Training_datatable <- paste0("./",Training_name,"_",Validation_name,"_output/",args[3],"_new.txt")
 CHR <- args[8]
 SNP <- args[9]
 BP <- args[10]
