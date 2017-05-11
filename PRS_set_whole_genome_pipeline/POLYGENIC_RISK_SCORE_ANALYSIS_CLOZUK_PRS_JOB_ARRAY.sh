@@ -2,7 +2,7 @@
 
 #PBS -q batch_long
 #PBS -P PR54
-#PBS -l select=1:ncpus=1:mem=30GB
+#PBS -l select=1:ncpus=1:mem=45GB
 #PBS -l walltime=24:00:00
 #PBS -o /home/c1020109/
 #PBS -e /home/c1020109/
