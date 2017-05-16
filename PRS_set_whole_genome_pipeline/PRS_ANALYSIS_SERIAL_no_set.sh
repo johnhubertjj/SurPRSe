@@ -59,9 +59,9 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   chromosome_number=NA
 fi 
 
- echo "Press CTRL+C to proceed."
- trap "pkill -f 'sleep 1h'" INT
- trap "set +x ; sleep 1h ; set -x" DEBUG
+# echo "Press CTRL+C to proceed."
+# trap "pkill -f 'sleep 1h'" INT
+# trap "set +x ; sleep 1h ; set -x" DEBUG
 
 # Run Rscript to find out the important information from the previous run
 Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}extracting_useful_SNP_information.R ./${training_set_name}_${validation_set_name}_extrainfo/extracting_useful_SNP_information.Rout ${training_set_name} ${validation_set_name} ${Raven_out_info_directory} ${INFO_summary} ${MAF_summary} ${MAF_threshold} ${INFO_threshold} ${SE_summary} ${SE_threshold} ${Chromosomes_to_analyse[@]}

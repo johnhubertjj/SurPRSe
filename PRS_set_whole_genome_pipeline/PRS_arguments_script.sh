@@ -58,11 +58,11 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
 
   chromosome_number=14
   # Datasets
-  training_set_usually_summary="PGC_MDD_table${chromosome_number}"
+  training_set_usually_summary="BIPvsSCZtable${chromosome_number}"
   training_set_original_filename="NULL"
   validation_set_usually_genotype="CLOZUK_GWAS_BGE_chr${chromosome_number}"
   validation_set_usually_genotype_serial="CLOZUK_GWAS_BGE_chr"
-  training_set_name="PGC_MDD"
+  training_set_name="BIPvsSCZ"
   validation_set_name="CLOZUK" 
   # MAF, INFO and SE
   MAF_summary="FALSE"
