@@ -85,9 +85,9 @@ Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}CLOZUK_PGC_COMBINE_fin
 
 if [[ ${MAF_genotype} == "TRUE" ]]; then
    # using plink to change the names to a CHR.POS identifier and remaking the files
-  plink --bfile ${validation_set_usually_genotype} --update-name ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_chr${chromosome_number}_chr.pos.txt --maf ${MAF_threshold} --make-bed --out ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype}_2
+  plink --bfile ${validation_set_usually_genotype} --update-name ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_chr${chromosome_number}_chr.pos.txt --maf ${MAF_threshold} --geno 0.02 --mind 0.01 --make-bed  --out ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype}_2
 elif [[ ${MAF_genotype} == "FALSE" ]]; then 
-  plink --bfile ${validation_set_usually_genotype} --update-name ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_chr${chromosome_number}_chr.pos.txt --make-bed --out ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype}_2
+  plink --bfile ${validation_set_usually_genotype} --update-name ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_chr${chromosome_number}_chr.pos.txt --geno 0.02 --mind 0.01 --make-bed --out ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype}_2
 fi
 
 # re-package the original files
