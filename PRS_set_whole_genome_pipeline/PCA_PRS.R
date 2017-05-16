@@ -1,6 +1,44 @@
 
 data(iris)
 library(data.table)
+
+multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+  library(grid)
+  
+  # Make a list from the ... arguments and plotlist
+  plots <- c(list(...), plotlist)
+  
+  numPlots = length(plots)
+  
+  # If layout is NULL, then use 'cols' to determine layout
+  if (is.null(layout)) {
+    # Make the panel
+    # ncol: Number of columns of plots
+    # nrow: Number of rows needed, calculated from # of cols
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                     ncol = cols, nrow = ceiling(numPlots/cols))
+  }
+  
+  if (numPlots==1) {
+    print(plots[[1]])
+    
+  } else {
+    # Set up the page
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+    
+    # Make each plot, in the correct location
+    for (i in 1:numPlots) {
+      # Get the i,j matrix positions of the regions that contain this subplot
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+      
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
+
+
 Schizophrenia <- fread("E:/PGC_CLOZUK_output/PRS_scoring/PGC_CLOZUK_whole_genome_significance_threshold_at_0.1.profile")
 Bipolar <- fread("E:/BIP_CLOZUK_output/PRS_scoring/BIP_CLOZUK_whole_genome_significance_threshold_at_0.1.profile")
 Educational_attainment <- fread("E:/EDU_main_CLOZUK_output/PRS_scoring/EDU_main_CLOZUK_whole_genome_significance_threshold_at_0.1.profile")
@@ -39,48 +77,78 @@ merge4 <- PRS.Profiles.with.covariates
 merge5 <- PRS.Profiles.with.covariates
 merge6 <- PRS.Profiles.with.covariates
 
-PCA_matrix <- data.frame(data = merge1$FID,merge1$PHENO.y, merge1$NORMSCORE, merge2$NORMSCORE, merge3$NORMSCORE, merge4$NORMSCORE, merge5$NORMSCORE, merge6$NORMSCORE)
-library(FactoMineR)
-names(PCA_matrix) <- c("Individuals","PHENOTYPE", "Schizophrenia", "Bipolar", "Educational_attainment", "PGC_MDD", "BIPcsSCZ", "Neuroticism")
+PCA_matrix <- fread("/Volumes/PhD_storage/PRS_cross_disorder_table.csv")
 
-write.csv(PCA_matrix, file = "E:/PRS_cross_disorder_table.csv", col.names = T, row.names = F)
-testing <- prcomp(PCA_matrix[,3:8],center = T)
+Groups_of_individuals <- c("CLOZUK","COGS","CRESTAR1", "CRESTAR2", "CRESTAR3", "1958BC", "BLOOD", "GERAD", "CON_GS", "HYWEL","POBI","QIMR","T1DGC","TEDS", "TWINSUK","WTCCC")
+PCA_matrix$Colours <- "NA"
+
+for (i in 1:length(Groups_of_individuals)){
+  Current_integers <-  PCA_matrix[,.I[grep(Groups_of_individuals[i], Individuals) ]]
+  PCA_matrix$Colours[Current_integers] <- Groups_of_individuals[i]
+} 
+
+
+#PCA_matrix <- data.frame(data = merge1$FID,merge1$PHENO.y, merge1$NORMSCORE, merge2$NORMSCORE, merge3$NORMSCORE, merge4$NORMSCORE, merge5$NORMSCORE, merge6$NORMSCORE)
+library(FactoMineR)
+
+#names(PCA_matrix) <- c("Individuals","PHENOTYPE", "Schizophrenia", "Bipolar", "Educational_attainment", "PGC_MDD", "BIPvsSCZ", "Neuroticism")
+
+#write.csv(PCA_matrix, file = "E:/PRS_cross_disorder_table.csv", col.names = T, row.names = F)
+
+PCA_matrix_df <- as.data.frame(PCA_matrix)
+PCA_matrix_df_cases <- as.data.frame(PCA_matrix[PHENOTYPE==1])
+
+testing <- prcomp(PCA_matrix_df[3:8],center = T, scale. = T)
+testing2 <- prcomp(PCA_matrix_df_cases[3:8],center = T, scale. = T)
+
+rawLoadings_cases <- testing2$rotation[,1:6] %*% diag(testing2$sdev, 6, 6)
+rotatedLoadings <- varimax(rawLoadings_cases)$loadings
+invloadings <- t(pracma::pinv(rotatedLoadings))
+scores <- scale(PCA_matrix_df_cases[,3:8]) %*% invloadings
+
+colnames(scores) <-c("PCA1","PCA2","PCA3","PCA4","PCA5","PCA6")
+column_names <- colnames(scores)
+
+varimax_list <- list()
+for ( i in 1:15){
+  a <- scores[,plots_index[1,i]]
+  b <- scores[,plots_index[2,i]]
+  
+  p <- qplot(a, b, main = "PCA on PRS Cases with Varimax", xlab = column_names[plots_index[1,i]], ylab = column_names[plots_index[2,i]])
+  
+  varimax_list[[i]] <- p
+}
+
+
+multiplot(plotlist = varimax_list, cols = 3)
+
 biplot(testing)
 
-a <- cov(PCA_matrix[2:8])
+a <- cov(PCA_matrix_df[3:8])
 eigenPRS <- eigen(a)
 
-plot(testing$ind$coord[,2], testing$ind$coord[,3])
-a <- merge1$NORMSCORE 
-b <- merge2$NORMSCORE
-c <- merge3$NORMSCORE
-d <- merge4$NORMSCORE
-e <- merge5$NORMSCORE
-f <- merge6$NORMSCORE
-
-new.data.frame <- data.frame(PRS.Profiles.with.covariates$FID,a,b,c,d,e)
-
-PCA <- prcomp(new.data.frame)
-write.csv <- n
-
-new_data_frame <- 
-test_PCA <- merge(merge1,merge3,by = c("FID", "PHENO.y"), all = T)
-new_table <- test_PCA[,.(PHENO.y,NORMSCORE.x,NORMSCORE.y)]
-new_table2 <- test_PCA[PHENO.y==1,.(NORMSCORE.x,NORMSCORE.y)]
-pca2 <- prcomp(new_table2,center = T,scale. = T)
-plot(pca2)
-Phenotype <- as.factor(new_table$PHENO.y)
 
 library(devtools)
 install_github("ggbiplot", "vqv")
 
+plots_index <- combn(1:6,2)
+e <- new.env()
 library(ggbiplot)
-g <- ggbiplot(testing_wah, obs.scale = 1, var.scale = 1, ellipse = TRUE, 
-              circle = TRUE)
-g <- g + scale_color_discrete(name = '')
+
+gglist <- list()
+for ( i in 1:15){
+
+g <- ggbiplot(testing2, obs.scale = 1, var.scale = 1, ellipse = F, choices = c(plots_index[1,i],plots_index[2,i]),
+              circle = F ,alpha = 1)
+g <- g + scale_color_discrete(name="Phenotype_CLOZUK.BGE")
 g <- g + theme(legend.direction = 'horizontal', 
                legend.position = 'top')
-print(g)
+
+gglist[[i]] <- g
+}
+
+multiplot(plotlist = gglist, cols = 3)
+screeplot(testing2, main="Scree Plot", xlab="Components",ylim = c(0,1.4))
 
 
 autoplot(prcomp(new_table2), data = new_table2)
@@ -136,14 +204,15 @@ plot(pca_iris_rotated$scores)
 PCA_matrix_cases <- PCA_matrix[PCA_matrix$PHENOTYPE == 1,]
 PCA_matrix_controls <- PCA_matrix[PCA_matrix$PHENOTYPE == 0,]
 
+
 my.prc <- prcomp(PCA_matrix[,-1:-2], scale. = T, center = T)
 my.prc_cases <- prcomp(PCA_matrix_cases[,-1:-2], scale. = F, center = T) 
 my.prc_controls<- prcomp(PCA_matrix_controls[,-1:-2], scale. = T, center = T) 
 
-rawLoadings_cases <- my.prc_cases$rotation[,1:6] %*% diag(my.prc_cases$sdev, 6, 6)
+rawLoadings_cases <- my.prc_cases$rotation[,3:8] %*% diag(my.prc_cases$sdev, 6, 6)
 rotatedLoadings <- varimax(rawLoadings_cases)$loadings
 invloadings <- t(pracma::pinv(rotatedLoadings))
-scores <- scale(PCA_matrix_cases[,-1:-2]) %*% invloadings
+scores <- scale(PCA_matrix_cases[,3:8]) %*% invloadings
 
 
 iris
@@ -157,3 +226,12 @@ my.abs     <- abs(cor(PCA_matrix_controls[,-1:-2]))
 my.colors  <- dmat.color(my.abs)
 my.ordered <- order.single(cor(PCA_matrix_controls[,-1:-2]))
 cpairs(PCA_matrix_controls[,-1:-2], my.ordered, panel.colors=my.colors, gap=0.5)
+
+library(lattice)
+library(mclust)
+
+dat.em <- mclustBIC(PCA_matrix_df[,c(3:8)]) 
+splom(as.data.frame(dat.pca$x), 
+      col=summary(dat.em,data=dat)$classification, cex=2,pch='*')
+
+
