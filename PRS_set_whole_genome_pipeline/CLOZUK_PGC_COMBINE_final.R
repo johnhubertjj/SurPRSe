@@ -250,6 +250,13 @@ PGC.alternative$place <- c(1:length(PGC.alternative$CHR))
 ### Merging based on BP position ###
 combined.CLOZUK.PGC <- merge(x = PGC.alternative, y = CLOZUK.alternative, by = c('BP','CHR'), all = F, sort = F)
 
+### remove MHC regions ###
+if (chromosome.number == 6){
+  testing <- which(combined.CLOZUK.PGC$BP >= 25000000 & combined.CLOZUK.PGC$BP <= 34000000)  
+  combined.CLOZUK.PGC <- combined.CLOZUK.PGC[!testing]
+  cat("Removed MHC region from chromosome 6")
+}
+
 ### Remove Duplicated SNPs here ###
 combined_a <- which(duplicated(combined.CLOZUK.PGC$SNP.x))
 combined_a_rev <- which(duplicated(combined.CLOZUK.PGC$SNP.x, fromLast = T))
