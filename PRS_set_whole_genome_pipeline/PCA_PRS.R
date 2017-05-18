@@ -39,15 +39,15 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
 }
 
 
-Schizophrenia <- fread("E:/PGC_CLOZUK_output/PRS_scoring/PGC_CLOZUK_whole_genome_significance_threshold_at_0.1.profile")
-Bipolar <- fread("E:/BIP_CLOZUK_output/PRS_scoring/BIP_CLOZUK_whole_genome_significance_threshold_at_0.1.profile")
-Educational_attainment <- fread("E:/EDU_main_CLOZUK_output/PRS_scoring/EDU_main_CLOZUK_whole_genome_significance_threshold_at_0.1.profile")
-PGC_MDD <- fread("E:/PGC_MDD_CLOZUK_output/PRS_scoring/PGC_MDD_CLOZUK_whole_genome_significance_threshold_at_0.1.profile")
-BIPvsSCZ <- fread("E:/BIPvsSCZ_CLOZUK_output/PRS_scoring/BIPvsSCZ_CLOZUK_whole_genome_significance_threshold_at_0.1.profile")
-Neuroticism <- fread("E:/Neurot_Assoc_Biobank_CLOZUK_output/PRS_scoring/Neurot_Assoc_Biobank_CLOZUK_whole_genome_significance_threshold_at_0.1.profile")
+Schizophrenia <- fread("/Volumes/PhD_storage/PGC_CLOZUK_output/PRS_scoring/PGC_CLOZUK_whole_genome_significance_threshold_at_0.1.profile")
+Bipolar <- fread("/Volumes/PhD_storage/BIP_CLOZUK_output/PRS_scoring/BIP_CLOZUK_whole_genome_significance_threshold_at_0.4.profile")
+Educational_attainment <- fread("/Volumes/PhD_storage/EDU_main_CLOZUK_output/PRS_scoring/EDU_main_CLOZUK_whole_genome_significance_threshold_at_0.15.profile")
+PGC_MDD <- fread("/Volumes/PhD_storage/PGC_MDD_CLOZUK_output/PRS_scoring/PGC_MDD_CLOZUK_whole_genome_significance_threshold_at_0.45.profile")
+BIPvsSCZ <- fread("/Volumes/PhD_storage/BIPvsSCZ_CLOZUK_output/PRS_scoring/BIPvsSCZ_CLOZUK_whole_genome_significance_threshold_at_0.35.profile")
+Neuroticism <- fread("/Volumes/PhD_storage/Neurot_Assoc_Biobank_CLOZUK_output/PRS_scoring/Neurot_Assoc_Biobank_CLOZUK_whole_genome_significance_threshold_at_0.15.profile")
 
-covariates <- fread("F:/Stationary_data/CLOZUK2.r7.select2PC.eigenvec.txt")
-fam2 <- fread("F:/Stationary_data/CLOZUK.r7.GWAS_IDs.fam")
+covariates <- fread("/Volumes/HD-PCU2/Stationary_data/CLOZUK2.r7.select2PC.eigenvec.txt")
+fam2 <- fread("/Volumes/HD-PCU2/Stationary_data/CLOZUK.r7.GWAS_IDs.fam")
 colnames(fam2) <- c("FID","IID","PID","MID","Sex","PHENO")
 
 PRS.profiles.1 <- Neuroticism
@@ -77,13 +77,13 @@ merge4 <- PRS.Profiles.with.covariates
 merge5 <- PRS.Profiles.with.covariates
 merge6 <- PRS.Profiles.with.covariates
 
-PCA_matrix <- fread("/Volumes/PhD_storage/PRS_cross_disorder_table.csv")
+PCA_matrix <- fread("/Volumes/PhD_storage/PRS_cross_disorder_table_optimised_thresholds.csv")
 
 Groups_of_individuals <- c("CLOZUK","COGS","CRESTAR1", "CRESTAR2", "CRESTAR3", "1958BC", "BLOOD", "GERAD", "CON_GS", "HYWEL","POBI","QIMR","T1DGC","TEDS", "TWINSUK","WTCCC")
 PCA_matrix$Colours <- "NA"
 
 for (i in 1:length(Groups_of_individuals)){
-  Current_integers <-  PCA_matrix[,.I[grep(Groups_of_individuals[i], Individuals) ]]
+  Current_integers <-  PCA_matrix[,.I[grep(Groups_of_individuals[i], PCA_matrix$Individuals) ]]
   PCA_matrix$Colours[Current_integers] <- Groups_of_individuals[i]
 } 
 
@@ -91,15 +91,17 @@ for (i in 1:length(Groups_of_individuals)){
 #PCA_matrix <- data.frame(data = merge1$FID,merge1$PHENO.y, merge1$NORMSCORE, merge2$NORMSCORE, merge3$NORMSCORE, merge4$NORMSCORE, merge5$NORMSCORE, merge6$NORMSCORE)
 library(FactoMineR)
 
+
 #names(PCA_matrix) <- c("Individuals","PHENOTYPE", "Schizophrenia", "Bipolar", "Educational_attainment", "PGC_MDD", "BIPvsSCZ", "Neuroticism")
 
-#write.csv(PCA_matrix, file = "E:/PRS_cross_disorder_table.csv", col.names = T, row.names = F)
+#write.csv(PCA_matrix, file = "/Volumes/PhD_storage/PRS_cross_disorder_table_optimised_thresholds.csv", col.names = T, row.names = F)
 
 PCA_matrix_df <- as.data.frame(PCA_matrix)
 PCA_matrix_df_cases <- as.data.frame(PCA_matrix[PHENOTYPE==1])
 
-testing <- prcomp(PCA_matrix_df[3:8],center = T, scale. = T)
-testing2 <- prcomp(PCA_matrix_df_cases[3:8],center = T, scale. = T)
+testing <- prcomp(PCA_matrix_df[3:8],center = T)
+testing_experiments <- prcomp(PCA_matrix_df[c(3:4,6:8)],center = T)
+testing2 <- prcomp(PCA_matrix_df_cases[3:8],center = T)
 
 rawLoadings_cases <- testing2$rotation[,1:6] %*% diag(testing2$sdev, 6, 6)
 rotatedLoadings <- varimax(rawLoadings_cases)$loadings
@@ -138,8 +140,8 @@ library(ggbiplot)
 gglist <- list()
 for ( i in 1:15){
 
-g <- ggbiplot(testing2, obs.scale = 1, var.scale = 1, ellipse = F, choices = c(plots_index[1,i],plots_index[2,i]),
-              circle = F ,alpha = 1)
+g <- ggbiplot(testing, obs.scale = 1, var.scale = 1, ellipse = F, choices = c(plots_index[1,i],plots_index[2,i]),
+              circle = F ,groups = as.factor(PCA_matrix_df$PHENOTYPE), alpha = 1)
 g <- g + scale_color_discrete(name="Phenotype_CLOZUK.BGE")
 g <- g + theme(legend.direction = 'horizontal', 
                legend.position = 'top')
@@ -149,6 +151,80 @@ gglist[[i]] <- g
 
 multiplot(plotlist = gglist, cols = 3)
 screeplot(testing2, main="Scree Plot", xlab="Components",ylim = c(0,1.4))
+
+
+plots_index <- combn(1:5,2)
+
+gglist <- list()
+for ( i in 1:10){
+  
+  g <- ggbiplot(testing_experiments, obs.scale = 1, var.scale = 1, ellipse = F, choices = c(plots_index[1,i],plots_index[2,i]),
+                circle = F ,groups = as.factor(PCA_matrix_df$PHENOTYPE), alpha = 1)
+  g <- g + scale_color_discrete(name="Phenotype_CLOZUK.BGE")
+  g <- g + theme(legend.direction = 'horizontal', 
+                 legend.position = 'top')
+  
+  gglist[[i]] <- g
+}
+
+multiplot(plotlist = gglist, cols = 3)
+screeplot(testing_experiments, main="Scree Plot", xlab="Components",ylim = c(0,1.4))
+Testing_density_PC1 <- data.frame(data = testing_experiments$x[,1], as.factor(PCA_matrix_df$PHENOTYPE))
+names(Testing_density_PC1) <- c("PC1","Phenotype")
+ggplot(Testing_density_PC1, aes(x=PC1)) + geom_density(aes(group=Phenotype, colour = Phenotype, fill = Phenotype), alpha = 0.3)
+
+
+for ( i in 1:15){
+  
+  g <- ggbiplot(testing2, obs.scale = 1, var.scale = 1, ellipse = F, choices = c(plots_index[1,i],plots_index[2,i]),
+                circle = F , alpha = 1,varname.size = 3,groups = as.factor(PCA_matrix_df_cases$Colours))
+  g <- g + scale_color_discrete(name="Phenotype_CLOZUK.BGE")
+  g <- g + theme(legend.direction = 'horizontal', 
+                 legend.position = 'top')
+  
+  gglist[[i]] <- g
+}
+multiplot(plotlist = gglist, cols = 3)
+
+Testing_density_PC1 <- data.frame(data = testing$x[,1], as.factor(PCA_matrix_df$PHENOTYPE), as.factor(PCA_matrix_df$Colours))
+names(Testing_density_PC1) <- c("PC1","Phenotype","Sample")
+
+ggplot(Testing_density_PC1, aes(x=PC1)) + geom_density(aes(group=Phenotype, colour = Phenotype, fill = Phenotype), alpha = 0.3)
+ggplot(Testing_density_PC1, aes(x=PC1)) + geom_density(aes(group=Sample, colour = Sample, fill = Sample), alpha = 0.3)
+
+Testing_density_PC1_cases <- data.frame(data = testing2$x[,1], as.factor(PCA_matrix_df_cases$PHENOTYPE), as.factor(PCA_matrix_df_cases$Colours))
+names(Testing_density_PC1_cases) <- c("PC1","Phenotype","Sample")
+
+ggplot(Testing_density_PC1_cases, aes(x=PC1)) + geom_density(aes(group=Phenotype, colour = Phenotype, fill = Phenotype), alpha = 0.3)
+ggplot(Testing_density_PC1_cases, aes(x=PC1)) + geom_density(aes(group=Sample, colour = Sample, fill = Sample), alpha = 0.3)
+
+
+
+
+Testing_density_PC2 <- data.frame(data = testing$x[,2], as.factor(PCA_matrix_df$PHENOTYPE))
+names(Testing_density_PC2) <- c("PC2","Phenotype")
+
+ggplot(Testing_density_PC2, aes(x=PC2)) + geom_density(aes(group=Phenotype, colour = Phenotype, fill = Phenotype), alpha = 0.3)
+
+Testing_density_PC3 <- data.frame(data = testing$x[,3], as.factor(PCA_matrix_df$PHENOTYPE))
+names(Testing_density_PC3) <- c("PC3","Phenotype")
+
+ggplot(Testing_density_PC3, aes(x=PC3)) + geom_density(aes(group=Phenotype, colour = Phenotype, fill = Phenotype), alpha = 0.3)
+
+Testing_density_PC4 <- data.frame(data = testing$x[,4], as.factor(PCA_matrix_df$PHENOTYPE))
+names(Testing_density_PC4) <- c("PC4","Phenotype")
+
+ggplot(Testing_density_PC4, aes(x=PC4)) + geom_density(aes(group=Phenotype, colour = Phenotype, fill = Phenotype), alpha = 0.3)
+
+Testing_density_PC5 <- data.frame(data = testing$x[,5], as.factor(PCA_matrix_df$PHENOTYPE))
+names(Testing_density_PC5) <- c("PC5","Phenotype")
+
+ggplot(Testing_density_PC5, aes(x=PC5)) + geom_density(aes(group=Phenotype, colour = Phenotype, fill = Phenotype), alpha = 0.3)
+
+Testing_density_PC6 <- data.frame(data = testing$x[,6], as.factor(PCA_matrix_df$PHENOTYPE))
+names(Testing_density_PC6) <- c("PC6","Phenotype")
+
+ggplot(Testing_density_PC6, aes(x=PC6)) + geom_density(aes(group=Phenotype, colour = Phenotype, fill = Phenotype), alpha = 0.3)
 
 
 autoplot(prcomp(new_table2), data = new_table2)

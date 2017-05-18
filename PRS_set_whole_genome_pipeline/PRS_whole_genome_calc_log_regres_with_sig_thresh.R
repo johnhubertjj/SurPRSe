@@ -28,7 +28,7 @@ colnames(fam2) <- c("FID","IID","PID","MID","Sex","PHENO")
 
 
 ## Create list for storage of p-values from logistic regression
-residuals <- matrix(data=rep(NA,4*length(significance_thresholds)), ncol = 4, nrow = length(significance_thresholds))
+residuals <- matrix(data=rep(NA,5*length(significance_thresholds)), ncol = 5, nrow = length(significance_thresholds))
 
 ## Calculate PRS using plink file format
 for (i in 1:length(significance_thresholds)) {
@@ -51,15 +51,15 @@ for (i in 1:length(significance_thresholds)) {
     
   # change the Phenotypes so that they will work in a binary model
   PRS.Profiles.with.covariates$PHENO.y <- PRS.Profiles.with.covariates$PHENO.y - 1
-  model<-glm(PHENO.y~PRS.Profiles.with.covariates$NORMSCORE, family=binomial, data=PRS.Profiles.with.covariates)
+  model <- glm(PHENO.y~PRS.Profiles.with.covariates$NORMSCORE, family=binomial, data=PRS.Profiles.with.covariates)
     
     #             res$Effect[i]<-summary(model)$coefficients[2, "Estimate"]
     #             res$SE[i]<-summary(model)$coefficients[2, "Std. Error"]
-    residuals[i,] <- c(significance_thresholds[i], summary(model)$coefficients[2, "Pr(>|z|)"], summary(model)$coefficients[2,"z value"], summary(model)$coefficients[2,"Std. Error"])
+    residuals[i,] <- c(significance_thresholds[i], summary(model)$coefficients[2, "Pr(>|z|)"], summary(model)$coefficients[2,"z value"], summary(model)$coefficients[2,"Std. Error"], summary(model)$coefficients[2,"Estimate"])
     #             res$NSNPs[i]<-max(dat$CNT)/2
   }#i
 
-colnames(residuals) <- c("Pval_threshold", paste0(Validation_name,"_", Training_name,"_PRS_p_value"), "Z_value", "Std.Error")
+colnames(residuals) <- c("Pval_threshold", paste0(Validation_name,"_", Training_name,"_PRS_p_value"), "Z_value", "Std.Error", "BETA")
 
 write.csv(residuals, file = paste0("./",Training_name,"_",Validation_name,"_output/PRS_scoring/",Training_name,"_",Validation_name,"_PRS_residuals_using_fam_file.csv"), row.names = F)
 
