@@ -186,6 +186,7 @@ for ( i in 1:15){
 }
 multiplot(plotlist = gglist, cols = 3)
 
+# PC1 various density plots
 Testing_density_PC1 <- data.frame(data = testing$x[,1], as.factor(PCA_matrix_df$PHENOTYPE), as.factor(PCA_matrix_df$Colours))
 names(Testing_density_PC1) <- c("PC1","Phenotype","Sample")
 
@@ -200,11 +201,28 @@ ggplot(Testing_density_PC1_cases, aes(x=PC1)) + geom_density(aes(group=Sample, c
 
 
 
-
-Testing_density_PC2 <- data.frame(data = testing$x[,2], as.factor(PCA_matrix_df$PHENOTYPE))
-names(Testing_density_PC2) <- c("PC2","Phenotype")
+# PC2 Various density plots
+Testing_density_PC2 <- data.frame(data = testing$x[,2], as.factor(PCA_matrix_df$PHENOTYPE), as.factor(PCA_matrix_df$Colours))
+names(Testing_density_PC2) <- c("PC2","Phenotype", "Sample")
 
 ggplot(Testing_density_PC2, aes(x=PC2)) + geom_density(aes(group=Phenotype, colour = Phenotype, fill = Phenotype), alpha = 0.3)
+ggplot(Testing_density_PC2, aes(x=PC2)) + geom_density(aes(group=Sample, colour = Sample, fill = Sample), alpha = 0.3)
+
+# PC2 cases density plot
+Testing_density_PC2_cases <- data.frame(data = testing2$x[,2], as.factor(PCA_matrix_df_cases$PHENOTYPE), as.factor(PCA_matrix_df_cases$Colours))
+names(Testing_density_PC2_cases) <- c("PC2","Phenotype", "Sample")
+
+ggplot(Testing_density_PC2_cases, aes(x=PC2)) + geom_density(aes(group=Phenotype, colour = Phenotype, fill = Phenotype), alpha = 0.3)
+ggplot(Testing_density_PC2_cases, aes(x=PC2)) + geom_density(aes(group=Sample, colour = Sample, fill = Sample), alpha = 0.3)
+
+
+kd <- with(MASS::geyser, MASS::kde2d(duration, waiting, n = 50))
+p <- plot_ly(x = kd$x, y = kd$y, z = kd$z) %>% add_surface()
+
+# Create a shareable link to your chart
+# Set up API credentials: https://plot.ly/r/getting-started
+chart_link = plotly_POST(p, filename="surface/2")
+chart_link
 
 Testing_density_PC3 <- data.frame(data = testing$x[,3], as.factor(PCA_matrix_df$PHENOTYPE))
 names(Testing_density_PC3) <- c("PC3","Phenotype")
