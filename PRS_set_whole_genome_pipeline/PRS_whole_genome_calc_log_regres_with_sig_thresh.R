@@ -62,4 +62,3 @@ for (i in 1:length(significance_thresholds)) {
 colnames(residuals) <- c("Pval_threshold", paste0(Validation_name,"_", Training_name,"_PRS_p_value"), "Z_value", "Std.Error")
 
 write.csv(residuals, file = paste0("./",Training_name,"_",Validation_name,"_output/PRS_scoring/",Training_name,"_",Validation_name,"_PRS_residuals_using_fam_file.csv"), row.names = F)
-
