@@ -28,7 +28,7 @@ colnames(fam2) <- c("FID","IID","PID","MID","Sex","PHENO")
 
 
 ## Create list for storage of p-values from logistic regression
-residuals <- matrix(data=rep(NA,4*length(significance_thresholds)), ncol = 4, nrow = length(significance_thresholds))
+residuals <- matrix(data=rep(NA,5*length(significance_thresholds)), ncol = 5, nrow = length(significance_thresholds))
 
 ## Calculate PRS using plink file format
 for (i in 1:length(significance_thresholds)) {
@@ -55,7 +55,7 @@ for (i in 1:length(significance_thresholds)) {
     
     #             res$Effect[i]<-summary(model)$coefficients[2, "Estimate"]
     #             res$SE[i]<-summary(model)$coefficients[2, "Std. Error"]
-    residuals[i,] <- c(significance_thresholds[i], summary(model)$coefficients[2, "Pr(>|z|)"], summary(model)$coefficients[2,"z value"], summary(model)$coefficients[2,"Std. Error"])
+    residuals[i,] <- c(significance_thresholds[i], summary(model)$coefficients[2, "Pr(>|z|)"], summary(model)$coefficients[2,"z value"], summary(model)$coefficients[2,"Std. Error"], summary(model)$coefficients[2,"Estimate"])
     #             res$NSNPs[i]<-max(dat$CNT)/2
   }#i
 
