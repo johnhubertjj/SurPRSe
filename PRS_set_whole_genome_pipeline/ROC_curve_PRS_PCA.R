@@ -44,9 +44,10 @@ roc_df <- data.frame(
   labels=roc_obj$response, 
   scores=roc_obj$predictor)
 
-roc_obj2 <- roc(PCA_matrix_df$PHENOTYPE, testing$x[,1])
+
+roc_obj2 <- roc(PCA_matrix_df$PHENOTYPE, testing$x[,1], plot = T)
 roc_obj3 <- roc(PCA_matrix_df$PHENOTYPE, testing_experiments$x[,1])
-roc_obj4 <- roc(PCA_matrix_df$PHENOTYPE, PCA_matrix_df$Schizophrenia)
+roc_obj4 <- roc(PCA_matrix_df$PHENOTYPE, PCA_matrix_df$Schizophrenia, plot=T)
 auc(roc_obj2)
 auc(roc_obj3)
 auc(roc_obj4)

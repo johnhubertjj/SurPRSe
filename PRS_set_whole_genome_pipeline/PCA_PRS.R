@@ -77,8 +77,8 @@ merge4 <- PRS.Profiles.with.covariates
 merge5 <- PRS.Profiles.with.covariates
 merge6 <- PRS.Profiles.with.covariates
 
-#PCA_matrix <- fread("/Volumes/PhD_storage/PRS_cross_disorder_table_optimised_thresholds.csv")
-PCA_matrix <- fread("E:/PRS_cross_disorder_table_optimised_thresholds.csv")
+PCA_matrix <- fread("/Volumes/PhD_storage/PRS_cross_disorder_table_optimised_thresholds.csv")
+#PCA_matrix <- fread("E:/PRS_cross_disorder_table_optimised_thresholds.csv")
 
 Groups_of_individuals <- c("CLOZUK","COGS","CRESTAR1", "CRESTAR2", "CRESTAR3", "1958BC", "BLOOD", "GERAD", "CON_GS", "HYWEL","POBI","QIMR","T1DGC","TEDS", "TWINSUK","WTCCC")
 PCA_matrix$Colours <- "NA"
