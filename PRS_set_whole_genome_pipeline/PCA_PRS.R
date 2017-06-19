@@ -52,7 +52,7 @@ colnames(fam2) <- c("FID","IID","PID","MID","Sex","PHENO")
 
 PRS.profiles.1 <- Neuroticism
 
-PRS.Profiles.with.covariates <- merge(covariates,PRS.profiles.1,by.x="FID", by.y="FID", all = F)
+PRS.Profiles.with.covariates <- merge(covariates,PRS.profiles.1, by.x="FID", by.y="FID", all = F)
 PRS.Profiles.with.covariates <- merge(PRS.Profiles.with.covariates, fam2, by.x = "FID", by.y = "FID", all = F)
 
 #  res$model[i]<-sig[i]
@@ -101,9 +101,17 @@ PCA_matrix_df <- as.data.frame(PCA_matrix)
 PCA_matrix_df_cases <- as.data.frame(PCA_matrix[PHENOTYPE==1])
 
 testing <- prcomp(PCA_matrix_df[3:8],center = T)
+
+testing_wo_SCZ <- prcomp(PCA_matrix_df[4:8],center = T)
+testing_wo_BIP <- prcomp(PCA_matrix_df[c(3,5:8)],center = T)
+testing_wo_EDU <- prcomp(PCA_matrix_df[c(3:4,6:8)],center = T)
+testing_wo_MDD <- prcomp(PCA_matrix_df[c(3:5,7:8)],center = T)
+testing_wo_BIPvsSCZ <- prcomp(PCA_matrix_df[c(3:6,8)],center = T)
+testing_wo_Neurot <- prcomp(PCA_matrix_df[c(3:7)],center = T)
+
 testing_princomp <- princomp(PCA_matrix_df[3:8],center = T)
-testing_experiments <- prcomp(PCA_matrix_df[c(3:4,6:8)],center = T)
-testing2 <- prcomp(PCA_matrix_df_cases[3:8],center = T)
+testing_experiments <- prcomp(PCA_matrix_df_cases[c(3:7)],center = T)
+testing2 <- prcomp(PCA_matrix_df_cases[3:8], center = T)
 
 rawLoadings_cases <- testing2$rotation[,1:6] %*% diag(testing2$sdev, 6, 6)
 rotatedLoadings <- varimax(rawLoadings_cases)$loadings
@@ -140,7 +148,8 @@ e <- new.env()
 library(ggbiplot)
 
 gglist <- list()
-for ( i in 1:15){
+
+for (i in 1:15){
 
 g <- ggbiplot(testing, obs.scale = 1, var.scale = 1, ellipse = F, choices = c(plots_index[1,i],plots_index[2,i]),
               circle = F ,groups = as.factor(PCA_matrix_df$PHENOTYPE), alpha = 1)
@@ -271,7 +280,7 @@ print(pca_iris_rotated$scores)
 new_table$colour <- "black"
 new_table$colour[new_table$PHENO.y==1]="red"
 testing_lol <-pca_iris_rotated$scores
-plot(pca_iris_rotated$scores[,4], pca_iris_rotated$scores[,1]),col = new_table$colour)
+plot(pca_iris_rotated$scores[,4], pca_iris_rotated$scores[,1]), col = new_table$colour)
 plot(pca_iris_rotated$scores[,4], pca_iris_rotated$scores[,2])
 
 testingy <- princomp(new.data.frame.cases[2:7])
@@ -328,7 +337,7 @@ library(mclust)
 
 dat.em <- mclustBIC(PCA_matrix_df[,c(3:8)]) 
 splom(as.data.frame(dat.pca$x), 
-      col=summary(dat.em,data=dat)$classification, cex=2,pch='*')
+      col=summary(dat.em, data=dat)$classification, cex=2,pch='*')
 
 
 library(plotly)
@@ -362,3 +371,12 @@ chart_link = api_create(p, filename="surface/2")
 chart_link
 
 help(signup, package = 'plotly')
+
+
+
+# Density plots of PRS cases and controls Schiz
+
+Testing_density_PC1 <- data.frame(data = PCA_matrix_df$Schizophrenia, as.factor(PCA_matrix_df$PHENOTYPE), as.factor(PCA_matrix_df$Colours))
+names(Testing_density_PC1) <- c("SCZ","Phenotype","Sample")
+
+ggplot(Testing_density_PC1, aes(x=SCZ)) + geom_density(aes(group=Phenotype, colour = Phenotype, fill = Phenotype), alpha = 0.3)
