@@ -128,10 +128,15 @@ if [ "$#" -gt 3 ]; then
 	shopt -u nullglob
 fi
 
+# Clean up other unneeded files
+rm ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype}_2.{bim,bed,fam,log}
+rm ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_chr${chromosome_number}_chr.pos.txt
+rm ./${training_set_name}_${validation_set_name}_output/chr${chromosome_number}${training_set_name}_${validation_set_name}_common_SNPs.txt
+rm ./${training_set_name}_${validation_set_name}_output/extracted_Duplicate_snps_${validation_set_name}_${training_set_name}_chr${chromosome_number}.txt 
+rm ./${training_set_name}_${validation_set_name}_output/CLUMPED_EXTRACT_${validation_set_name}_chr${chromosome_number}.txt 
+
 if [[ "$whereami" == *"raven"* ]]; then
 # purge all modules
 module purge
 fi
-
-
 
