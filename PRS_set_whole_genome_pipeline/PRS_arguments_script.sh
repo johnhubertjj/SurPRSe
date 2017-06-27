@@ -40,7 +40,8 @@ if [[ "$whereami" == *"raven"* ]]; then
   Multiple_Training_set_tables="TRUE"
   Running_in_Serial="TRUE"
   sig_thresholds=(0.0001 0.001 0.01 0.05 0.1 0.2 0.3 0.4 0.5)
-  Perform_Magma_as_well="TRUE"
+  Extra_analyses="TRUE"
+  Name_of_extra_analysis="Pathways"
   Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates" 
   # either "extended" "normal" or "both" : change to a numerical input in the future
   Gene_regions="both"
@@ -84,7 +85,8 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   Multiple_Training_set_tables="TRUE"
   Running_in_Serial="TRUE"
   sig_thresholds=(0.01 0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5)
-  Perform_Magma_as_well="FALSE"
+  Extra_analyses="FALSE"
+  Name_of_extra_analysis="Pathways"
   Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates"
   # either "extended" "normal" or "both" : change to a numerical input in the future
   Gene_regions="both"	

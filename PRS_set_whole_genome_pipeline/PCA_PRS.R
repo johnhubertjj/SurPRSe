@@ -358,7 +358,32 @@ cases_PCA <-plot_ly(x = kd_PCA_only_cases$x, y = kd_PCA_only_cases$y, z = kd_PCA
   combined_plot <- plot_ly() %>%
   add_surface(x = kd_PCA_cases$x, y = kd_PCA_cases$y, z = kd_PCA_cases$z, opacity = 1) %>%
   add_surface(x = kd_PCA_controls$x, y = kd_PCA_controls$y, z = kd_PCA_controls$z, opacity = 1)
+  
+# Cases plot
+  theta <- seq(0,2*pi,length.out = 100)
+  circle <- data.frame(x = cos(theta), y = sin(theta))
+  p <- ggplot(circle,aes(x,y)) + geom_path()
+  
+  loadings <- data.frame(testing2$rotation, 
+                         .names = row.names(testing2$rotation))
+  p + geom_text(data=loadings, 
+                mapping=aes(x = PC1, y = PC2, label = .names, colour = .names)) +
+    coord_fixed(ratio=1) +
+    labs(x = "PC1", y = "PC2")
 
+# Controls plot
+  theta <- seq(0,2*pi,length.out = 100)
+  circle <- data.frame(x = cos(theta), y = sin(theta))
+  p <- ggplot(circle,aes(x,y)) + geom_path()
+  
+  loadings <- data.frame(testing$rotation, 
+                         .names = row.names(testing$rotation))
+  p + geom_text(data=loadings, 
+                mapping=aes(x = PC1, y = PC2, label = .names, colour = .names)) +
+    coord_fixed(ratio=1) +
+    labs(x = "PC1", y = "PC2")
+  
+  
 p_PCA <- plot_ly(x = kd_PCA$x, y = kd_PCA$y, z = kd_PCA$z) %>% add_surface(surfacecolor = Testing_density_PC1$Phenotype)
 p_PCA_cases <- plot_ly(x = kd_PCA_cases$x, y = kd_PCA_cases$y, z = kd_PCA_cases$z) %>% add_surface(surfacecolor = "red", opacity = 0.5, autocolorscale = F) %>%
 plot_ly(x = kd_PCA_controls$x, y = kd_PCA_controls$y, z = kd_PCA_controls$z) %>% add_surface(surfacecolor = "blue", opacity = 0.5, auto)
