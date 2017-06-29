@@ -61,38 +61,64 @@ if [[ ${Name_of_extra_analysis} == "Pathways" ]]; then
         	mkdir ./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis}
 	fi
  
-	Rscript ${path_to_scripts}RscriptEcho.R\
+Rscript ${path_to_scripts}RscriptEcho.R\
  ${path_to_pathway_scripts}PATHWAYS_PRS_COLLECTING_MAGMA_INFO.R\
- ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_remove_MAF_INFO${chromosome_number}.Rout\
+ ./${training_set_name}_${validation_set_name}_extrainfo/PATHWAYS_PRS_COLLECTING_MAGMA_INFO.Rout\
+ ${training_set_name}\
+ ${validation_set_name}\
+ ${valudation_set_usually_genotype_serial}\
+ ${Name_of_extra_analysis}\
+ ${Pathway_file_name}\
+ ${Gene_location_filename}\
+ ${Chromosomes_to_analyse[@]}
+ 
+ 
 
 # From the above script, identify the number of pathways you want to analyse (probably safest to write to a file, port to a variable and then delete the file)
 # Also a text-delimited file with each line specifying a pathway name to be used
 # The seperate gene_loc files belonging to previously specified analysis
 # Then use magma to create annotation files:
- 
+
+PRSACPJA_data_output="./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis}/${validation_set_usually_genotype_serial}${Chromosomes_to_analyse[@]}_consensus_with_${training_set_name}_flipped_alleles_no_duplicates"
+Pathway_output_directory="./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis}/" 
 # separate script below:
-#!/bin/bash
-while IFS='' read -r line || [[ -n "$line" ]]; do
-    echo "Text read from file: $line"
-done < "$1"
 
-chmod +x rr.sh
-./rr.sh filename.txt
+if [[ ${Gene_regions} == "Extended" ]]; then
 
-#! /bin/bash
-
-chr=(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22)
-
-pathways=("FMRP_targets" "abnormal_behavior" "abnormal_nervous_system_electrophysiology" "abnormal_learning|memory|conditioning"  "abnormal_CNS_synaptic_transmission" "Cav2_channels" "abnormal_synaptic_transmission" "5HT_2C" "abnormal_long_term_potentiation" "abnormal_motor_capabilities|coordination|movement" "abnormal_behavioral_response_to_xenobiotic" "abnormal_associative_learning" "Lek2015_LoFintolerant_90" "BGS_top2_mean" "BGS_top2_max")
-
-
-for i in `seq 0 21` ;
-do 
-	for l in `seq 0 14`;
+	while IFS='' read -r line || [[ -n "$line" ]]; 
 	do
-		magma --annotate window=35,10 --snp-loc CLOZUK_GWAS_BGE_chr${chr[i]}_magma_input.bim --gene-loc ${pathways[l]}_chromosome_${chr[i]}.gene.loc --out ${chr[i]}_CLOZUK_PGC_SNPs_${pathways[l]}pathway
-	done
-done 
+		for i in ${Chromosomes_to_analyse[@]};
+		do		    
+			magma --annotate window=35,10 --snp-loc ${PRSACPJA_data_output} --gene-loc ${Pathway_output_directory}${training_set_name}_${validation_set_name}_${line}_chromosome_${Chromosomes_to_analyse[i]}_extended_temp.gene.loc --out ${Pathway_output_directory}${Chromosomes_to_analyse[i]}_${training_set_name}_${validation_set_name}_SNPs_${line}_extended_pathway_temp
+		done
+
+	done < "$1"
+fi
+
+if [[ ${Gene_regions} == "Regular" ]]; then
+
+	while IFS='' read -r line || [[ -n "$line" ]]; 
+	do
+		for i in ${Chromosomes_to_analyse[@]};
+		do		    
+			magma --annotate --snp-loc ${PRSACPJA_data_output} --gene-loc ${Pathway_output_directory}${training_set_name}_${validation_set_name}_${line}_chromosome_${Chromosomes_to_analyse[i]}_temp.gene.loc --out ${Pathway_output_directory}${Chromosomes_to_analyse[i]}_${training_set_name}_${validation_set_name}_SNPs_${line}_pathway_temp
+		done
+
+	done < "$1"
+fi
+
+
+Rscript ${path_to_scripts}RscriptEcho.R\
+ ${path_to_pathway_scripts}Assign_SNPS_to_genes_from_pathways.R\
+ ./${training_set_name}_${validation_set_name}_extrainfo/assiging_SNPs_to_genes_from_pathways.Rout\
+ ${training_set_name}\
+ ${validation_set_name}\
+ ${valudation_set_usually_genotype_serial}\
+ ${Name_of_extra_analysis}\
+ ${Pathway_file_name}\
+ ${Gene_location_filename}\
+ ${Gene_regions}\
+ ${Chromosomes_to_analyse[@]}
 
 # magma --bfile CLOZUK_GWAS_BGE_chr22_magma_input_2 --gene-annot ${chr[i]}_CLOZUK_PGC_SNPs_pathway.genes.annot --out ${chr[i]}gene_annotation_for_CLOZUK_test
 

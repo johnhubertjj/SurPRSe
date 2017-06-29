@@ -44,7 +44,7 @@ if [[ "$whereami" == *"raven"* ]]; then
   Name_of_extra_analysis="Pathways"
   Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates" 
   # either "extended" "normal" or "both" : change to a numerical input in the future
-  Gene_regions="both"
+  Gene_regions="both" #either ( "extended" "normal" "both" )
   external_harddrive="FALSE"
 
 
@@ -65,6 +65,8 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   validation_set_usually_genotype_serial="CLOZUK_GWAS_BGE_chr"
   training_set_name="BIPvsSCZ"
   validation_set_name="CLOZUK" 
+  Pathway_filename="Pocklington2015_134sets_LoFi"
+  Gene_location_filename="NCBI37.3.gene.loc"
   # MAF, INFO and SE
   MAF_summary="FALSE"
   MAF_threshold=0.01
@@ -89,7 +91,7 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   Name_of_extra_analysis="Pathways"
   Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates"
   # either "extended" "normal" or "both" : change to a numerical input in the future
-  Gene_regions="both"	
+  Gene_regions="both" #either ( "extended" "normal" "both" )	
   external_harddrive="FALSE"
 fi
 
