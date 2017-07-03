@@ -230,8 +230,13 @@ rm ./${training_set_name}_${validation_set_name}_output/chr${chromosome_number}$
 rm ./${training_set_name}_${validation_set_name}_output/extracted_Duplicate_snps_${validation_set_name}_${training_set_name}_chr${chromosome_number}.txt 
 rm ./${training_set_name}_${validation_set_name}_output/CLUMPED_EXTRACT_${validation_set_name}_chr${chromosome_number}.txt 
 
+# Append job ID to PRS_arguments_script
+if [[ "$PBS_ARRAYID" == 1 ]]; then
+	echo "Batch_job_ID=${PBS_JOBID}" >> ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
+fi
+
+#purge all modules 
 if [[ "$whereami" == *"raven"* ]]; then
-# purge all modules
-module purge
+	module purge
 fi
 

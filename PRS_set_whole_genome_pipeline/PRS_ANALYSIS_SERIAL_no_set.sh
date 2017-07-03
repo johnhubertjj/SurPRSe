@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#PBS -q workq
+#PBS -q serial
 #PBS -P PR54
 #PBS -l select=1:ncpus=10:mem=100GB
 #PBS -l walltime=10:00:00
@@ -63,6 +63,26 @@ fi
 # trap "pkill -f 'sleep 1h'" INT
 # trap "set +x ; sleep 1h ; set -x" DEBUG
 
+if [[ "$whereami" == *"raven"* ]]; then
+
+	# move the raven.OU files to one directory
+	cd ~/$USER/
+	shopt -s nullglob #enable
+	set -- *${Batch_job_ID}*
+	if [ "$#" -gt 0 ]; then
+		if [[ ! -d "${Raven_out_info_directory}" ]]; then
+			mkdir ${Raven_out_info_directory}
+		fi
+
+		mv "$#" ${Raven_out_info_directory}
+	else
+		echo "cannot find raven output scripts, check jobid from batch run (*POLYGENIC_RISK_SCORE* script) and add to end of *new_PRS_argument* script in relevant extrainfo directory"
+		exit 1
+	fi
+cd $PBS_O_WORKDIR
+fi
+
+exit 1
 # Run Rscript to find out the important information from the previous run
 Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}extracting_useful_SNP_information.R ./${training_set_name}_${validation_set_name}_extrainfo/extracting_useful_SNP_information.Rout ${training_set_name} ${validation_set_name} ${Raven_out_info_directory} ${INFO_summary} ${MAF_summary} ${MAF_threshold} ${INFO_threshold} ${SE_summary} ${SE_threshold} ${Chromosomes_to_analyse[@]}
 
