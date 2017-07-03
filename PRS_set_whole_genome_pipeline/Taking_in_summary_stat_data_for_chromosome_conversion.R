@@ -156,6 +156,9 @@ writeLines(c(Chromosome_name, SNP_name, BP_name, A1_name, A2_name, MAF_calculati
 close(fileConn)
 }
 
+# Get wd for checking
+getwd()
+
 ## Reading in PGC data
 ## Select for CHR 22
 Training_data <- fread(Training_name_full_unseparated)

@@ -15,14 +15,20 @@ if [[ "$whereami" == *"raven"* ]]; then
   
   # assign arguments here for now because there are so many
   # Datasets
-  training_set_usually_summary="BIP_table${chromosome_number}"
-  validation_set_usually_genotype="CLOZUK_GWAS_BGE_chr${chromosome_number}"
-  training_set_original_filename="daner_PGC_BIP32b_mds7a"
-  training_set_name="BIP"
-  validation_set_name="CLOZUK"
+  training_set_usually_summary="HG19_pgc.scz.full.2012-04_table${chromosome_number}"
+  training_set_original_filename="HG19_pgc.scz.full.2012-04.txt"
+  validation_set_usually_genotype="ALSPAC_hrc_imputed_step3_mri_brain_measurements_only_chr${chromosome_number}"
+  validation_set_usually_genotype_serial="ALSPAC_hrc_imputed_step3_mri_brain_measurements_only_chr"
+  validation_set_full_name_without_chromosome="ALSPAC_hrc_imputed_step3_mri_brain_measurements_only"
+  training_set_name="HG19_pgc.scz.full.2012-04"
+  validation_set_name="ALSPAC"  
+  Pathway_filename="Pocklington2015_134sets_LoFi"
+  Gene_location_filename="NCBI37.3.gene.loc"
+  # Split_by_chromosome for genotype?
+  split_by_chromosome_required="TRUE" 
   # MAF, INFO and SE
   MAF_summary="FALSE"
-  MAF_threshold=0.01
+  MAF_threshold=0.1
   MAF_genotype="TRUE"
   INFO_summary="TRUE"
   INFO_threshold=0.9
@@ -34,16 +40,17 @@ if [[ "$whereami" == *"raven"* ]]; then
   # Clumping Arguments
   p1=0.5
   p2=0.5
-  r2=0.2
-  window=1000
+  r2=0.1
+  window=500
   # PRS_serial arguments
   Multiple_Training_set_tables="TRUE"
   Running_in_Serial="TRUE"
-  sig_thresholds=(0.0001 0.001 0.01 0.05 0.1 0.2 0.3 0.4 0.5)
-  Perform_Magma_as_well="TRUE"
+  sig_thresholds=(0.05 0.5)
+  Extra_analyses="FALSE"
+  Name_of_extra_analysis="Pathways"
   Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates" 
   # either "extended" "normal" or "both" : change to a numerical input in the future
-  Gene_regions="both"
+  Gene_regions="both" #either ( "extended" "normal" "both" )
   external_harddrive="FALSE"
 
 
@@ -56,17 +63,22 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   path_to_new_fam_file="/Users/Dropbox/whole_genome_testing/output/Stationary_data/CLOZUK.r7.GWAS_IDs.fam"
   path_to_gene_annotation_file="/Users/Dropbox/whole_genome_testing/output/Stationary_data/NCBI37.3.gene.loc"
 
-  chromosome_number=14
+  chromosome_number=NA
   # Datasets
-  training_set_usually_summary="BIPvsSCZtable${chromosome_number}"
-  training_set_original_filename="NULL"
-  validation_set_usually_genotype="CLOZUK_GWAS_BGE_chr${chromosome_number}"
-  validation_set_usually_genotype_serial="CLOZUK_GWAS_BGE_chr"
-  training_set_name="BIPvsSCZ"
-  validation_set_name="CLOZUK" 
+  training_set_usually_summary="HG19_pgc.scz.full.2012-04_table${chromosome_number}"
+  training_set_original_filename="HG19_pgc.scz.full.2012-04.txt"
+  validation_set_usually_genotype="ALSPAC_hrc_imputed_step3_mri_brain_measurements_only_chr${chromosome_number}"
+  validation_set_usually_genotype_serial="ALSPAC_hrc_imputed_step3_mri_brain_measurements_only_chr"
+  validation_set_full_name_without_chromosome="ALSPAC_hrc_imputed_step3_mri_brain_measurements_only"
+  training_set_name="HG19_pgc.scz.full.2012-04"
+  validation_set_name="ALSPAC" 
+  Pathway_filename="Pocklington2015_134sets_LoFi"
+  Gene_location_filename="NCBI37.3.gene.loc"
+  # Split_by_chromosome for genotype?
+  split_by_chromosome_required="TRUE" 
   # MAF, INFO and SE
   MAF_summary="FALSE"
-  MAF_threshold=0.01
+  MAF_threshold=0.1
   MAF_genotype="TRUE"
   INFO_summary="TRUE"
   INFO_threshold=0.9
@@ -78,16 +90,17 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   # Clumping Arguments
   p1=0.5
   p2=0.5
-  r2=0.2
-  window=1000
+  r2=0.1
+  window=500
   # Arguments for PRS_serial script
   Multiple_Training_set_tables="TRUE"
   Running_in_Serial="TRUE"
-  sig_thresholds=(0.01 0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5)
-  Perform_Magma_as_well="FALSE"
+  sig_thresholds=(0.05 0.5)
+  Extra_analyses="FALSE"
+  Name_of_extra_analysis="Pathways"
   Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates"
   # either "extended" "normal" or "both" : change to a numerical input in the future
-  Gene_regions="both"	
+  Gene_regions="both" #either ( "extended" "normal" "both" )	
   external_harddrive="FALSE"
 fi
 
