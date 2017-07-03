@@ -67,6 +67,12 @@ tar -zxvf ${validation_set_usually_genotype}.tar.gz
 shopt -u nullglob # disable
 fi
 
+if [ ${remove_IDs} == "TRUE" ]; then
+
+plink --bfile ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype} --remove CLOZUK2_IDs_remove_plink_file_chr_${chromosome_number}.txt --make-bed --out ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype}
+
+fi
+
 # make directories for output and extra info
 if [ ! -d "${training_set_name}_${Validation_set_name}_output" ]; then
    mkdir ${training_set_name}_${Validation_set_name}_output
