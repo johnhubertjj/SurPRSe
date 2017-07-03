@@ -34,16 +34,16 @@ if [[ "$whereami" == *"raven"* ]]; then
   cat ${path_to_scripts}PRS_arguments_script.sh 
 
   # make directories for output and extra info
-  if [ ! -d "${training_set_name}_${validation_set_name}_output" ]; then
+  if [[ ! -d "${training_set_name}_${validation_set_name}_output" ]]; then
      mkdir ${training_set_name}_${validation_set_name}_output
   fi
   
-  if [ ! -d "${training_set_name}_${validation_set_name}_extrainfo" ]; then
+  if [[ ! -d "${training_set_name}_${validation_set_name}_extrainfo" ]]; then
      mkdir ${training_set_name}_${validation_set_name}_extrainfo
   fi
 
-elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
-  cd ~/Documents/testing_cross_disorder/  
+elif [[ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]]; then
+  cd ~/Documents/CLOZUK_PGC2noclo.METAL/  
   
   # Arguments
   path_to_scripts='/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/'
@@ -52,20 +52,33 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   source ${path_to_scripts}/PRS_arguments_script.sh
   cat ${path_to_scripts}/PRS_arguments_script.sh 
 
-  if [ ! -d "${training_set_name}_${validation_set_name}_output" ]; then
+  if [[ ! -d "${training_set_name}_${validation_set_name}_output" ]]; then
      mkdir ${training_set_name}_${validation_set_name}_output
   fi
   
-  if [ ! -d "${training_set_name}_${validation_set_name}_extrainfo" ]; then
+  if [[ ! -d "${training_set_name}_${validation_set_name}_extrainfo" ]]; then
      mkdir ${training_set_name}_${validation_set_name}_extrainfo
   fi
-  
-  
+   
 fi
-
 
 Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}Taking_in_summary_stat_data_for_chromosome_conversion.R ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_summary_stats_for_chromosome_conversion.Rout ${training_set_original_filename} ${training_set_name} ${validation_set_name} ${MAF_summary} ${INFO_summary} ${SE_summary} ${SE_threshold} ${Chromosomes_to_analyse[@]}  
 
 source ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
 cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt 
+
+if [ "${split_by_chromosome_required}" == "TRUE" ]; then
+   for i in "${Chromosomes_to_analyse[@]}" ;
+   do
+	plink --bfile ${validation_set_full_name_without_chromosome} --chr ${i} --make-bed --out ${validation_set_usually_genotype_serial}${i}
+	tar -zcvf ${validation_set_usually_genotype_serial}${i}.tar.gz ${validation_set_usually_genotype_serial}${i}.{bim,bed,fam,log}
+	rm ${validation_set_usually_genotype_serial}${i}.{bed,bim,fam,log} 
+   done
+fi
+
+
+if [[ "$whereami" == *"raven"* ]]; then
+#Purge all modules
+module purge
+fi
 
