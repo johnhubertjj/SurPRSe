@@ -74,8 +74,8 @@ plink --bfile ./${training_set_name}_${validation_set_name}_output/${validation_
 fi
 
 # make directories for output and extra info
-if [ ! -d "${training_set_name}_${Validation_set_name}_output" ]; then
-   mkdir ${training_set_name}_${Validation_set_name}_output
+if [ ! -d "${training_set_name}_${validation_set_name}_output" ]; then
+   mkdir ${training_set_name}_${validation_set_name}_output
 fi
 
 if [ ! -d "${training_set_name}_${validation_set_name}_extrainfo" ]; then
