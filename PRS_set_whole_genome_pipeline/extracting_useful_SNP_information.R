@@ -82,7 +82,8 @@ Figuring_out_first_two_lines <- function(whoishere, INFO_threshold, MAF_threshol
 ### gain the number of files that match the chromosomes used ###
 setwd(Rout_file_storage)
 current_files <- system("ls", intern = T)
-
+getwd()
+print(current_files)
 
 ### For loop for file parsing ####
 file_collection <- list()

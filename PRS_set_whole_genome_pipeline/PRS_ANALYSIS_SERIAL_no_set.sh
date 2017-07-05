@@ -2,13 +2,13 @@
 
 #PBS -q serial
 #PBS -P PR54
-#PBS -l select=1:ncpus=10:mem=100GB
-#PBS -l walltime=10:00:00
-#PBS -o /home/c1020109/
-#PBS -e /home/c1020109/
+#PBS -l select=1:ncpus=1:mem=8GB
+#PBS -l walltime=2:00:00
 #PBS -j oe
-#PBS -J 21-22:2
-#PBS -N c1020109_job_array_whole_genome
+#PBS -o /home/c1020109/merging_datasets_PRS_information
+#PBS -N merging_datasets_and_calculating_PRS
+
+cd $PBS_O_WORKDIR
 
 # Run locally or on ARCCA
 whereami=$(uname -n)
@@ -32,7 +32,7 @@ if [[ "$whereami" == *"raven"* ]]; then
   module load magma/1.06
 
   cd $PBS_O_WORKDIR
-  path_to_scripts="~/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/"
+  path_to_scripts="/home/${USER}/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/"
   
   # Assign the shell variables
   source ${path_to_scripts}/PRS_arguments_script.sh
@@ -64,25 +64,24 @@ fi
 # trap "set +x ; sleep 1h ; set -x" DEBUG
 
 if [[ "$whereami" == *"raven"* ]]; then
-
+	echo ${Batch_job_ID}
 	# move the raven.OU files to one directory
-	cd ~/$USER/
+	cd /home/$USER/
 	shopt -s nullglob #enable
 	set -- *${Batch_job_ID}*
 	if [ "$#" -gt 0 ]; then
 		if [[ ! -d "${Raven_out_info_directory}" ]]; then
 			mkdir ${Raven_out_info_directory}
 		fi
-
-		mv "$#" ${Raven_out_info_directory}
+		cp *${Batch_job_ID}* ${Raven_out_info_directory}
 	else
 		echo "cannot find raven output scripts, check jobid from batch run (*POLYGENIC_RISK_SCORE* script) and add to end of *new_PRS_argument* script in relevant extrainfo directory"
 		exit 1
 	fi
-cd $PBS_O_WORKDIR
+	shopt -u nullglob #disable
+	cd $PBS_O_WORKDIR
 fi
 
-exit 1
 # Run Rscript to find out the important information from the previous run
 Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}extracting_useful_SNP_information.R ./${training_set_name}_${validation_set_name}_extrainfo/extracting_useful_SNP_information.Rout ${training_set_name} ${validation_set_name} ${Raven_out_info_directory} ${INFO_summary} ${MAF_summary} ${MAF_threshold} ${INFO_threshold} ${SE_summary} ${SE_threshold} ${Chromosomes_to_analyse[@]}
 
@@ -118,5 +117,5 @@ do
 	plink --bfile ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_${training_set_name}_FULL_GENOME_CLUMPED --score ${filename} --out ./${training_set_name}_${validation_set_name}_output/PRS_scoring/${training_set_name}_${validation_set_name}_whole_genome_significance_threshold_at_${i}
 done
 
-Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}PRS_whole_genome_calc_log_regres_with_sig_thresh.R ./${training_set_name}_${validation_set_name}_extrainfo/PRS_genome_calc_log_regres.Rout ${training_set_name} ${validation_set_name} ${sig_thresholds[@]}
+#Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}PRS_whole_genome_calc_log_regres_with_sig_thresh.R ./${training_set_name}_${validation_set_name}_extrainfo/PRS_genome_calc_log_regres.Rout ${training_set_name} ${validation_set_name} ${sig_thresholds[@]}
 
