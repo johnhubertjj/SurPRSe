@@ -15,17 +15,17 @@ if [[ "$whereami" == *"raven"* ]]; then
   
   # assign arguments here for now because there are so many
   # Datasets
-  training_set_usually_summary="HG19_pgc.scz.full.2012-04_table${chromosome_number}"
-  training_set_original_filename="HG19_pgc.scz.full.2012-04.txt"
+  training_set_usually_summary="CLOZUK_PGC2noclo_table${chromosome_number}"
+  training_set_original_filename="CLOZUK_PGC2noclo.METAL.assoc.dosage"
   validation_set_usually_genotype="ALSPAC_hrc_imputed_step3_mri_brain_measurements_only_chr${chromosome_number}"
   validation_set_usually_genotype_serial="ALSPAC_hrc_imputed_step3_mri_brain_measurements_only_chr"
   validation_set_full_name_without_chromosome="ALSPAC_hrc_imputed_step3_mri_brain_measurements_only"
-  training_set_name="HG19_pgc.scz.full.2012-04"
+  training_set_name="CLOZUK_PGC2noclo"
   validation_set_name="ALSPAC"  
   Pathway_filename="Pocklington2015_134sets_LoFi"
   Gene_location_filename="NCBI37.3.gene.loc"
   # Split_by_chromosome for genotype?
-  split_by_chromosome_required="TRUE" 
+  split_by_chromosome_required="FALSE" 
   # MAF, INFO and SE
   MAF_summary="FALSE"
   MAF_threshold=0.1
