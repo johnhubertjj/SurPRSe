@@ -43,7 +43,8 @@ if [[ "$whereami" == *"raven"* ]]; then
   fi
 
 elif [[ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]]; then
-  cd ~/Documents/CLOZUK_PGC2noclo.METAL/  
+  Directory_to_work_from=$1
+  cd ${Directory_to_work_from}  
   
   # Arguments
   path_to_scripts='/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/'

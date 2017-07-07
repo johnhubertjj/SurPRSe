@@ -1,6 +1,6 @@
 #!/bin/bash
 
-path_to_scripts = /home/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/"
+path_to_scripts=/home/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/"
 $1=location_of_dataset_names_to_change_in_arguments_script
 $2=type_of_analysis
 
