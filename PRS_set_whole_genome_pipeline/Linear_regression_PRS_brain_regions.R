@@ -58,16 +58,24 @@ score_list <- colnames(all_prs[,-1:-2])
 phenotypes <- colnames(DATA_pheno[,5:ncol(DATA_pheno)])
 
 
+
+DATA$kz021 <- as.factor(DATA$kz021)
+
+# Remove individuals with missing values
+#remove_ICV <- which(is.na(DATA$ICV))
+#DATA <- DATA[-remove_ICV,]
+
 # dont' change obj it makes the loop output a dataframe with the regression results
 obj <- data.frame(test=0, score=0, estimate=0, SE=0, tvalue=0, p=0, r.squared=0)
 
 # this example if for a linear regression (the phenotype of interest is a quantiative trait)
 # is using a discrete phenotype, a logistic regression needs to be run, and the code altered from 'lm' to 'glm' including the argument of 'family = binomial'
 # alterations for the calculation of R2 will also need to be made using the command highlighted above
+
 for (i in score_list) {
   for (j in phenotypes) {
-    fit <- lm(DATA[,j] ~ DATA[,i] + DATA$kz021 + DATA$age + DATA$ICV, data=DATA)
-    fit1 <- lm(DATA[,j] ~ DATA$kz021 + DATA$age + DATA$ICV, data=DATA)
+    fit <- lm(DATA[,j] ~ DATA[,i] + kz021 + age + ICV,  data=DATA)
+    fit1 <- lm(DATA[,j] ~ kz021 + age + ICV, data=DATA)
     tmp <- coef(summary(fit))
     tmp2 <- summary(fit)
     hold <- summary(fit1)
@@ -77,37 +85,40 @@ for (i in score_list) {
   }
 }
 
+
+
 # this is a clean-up step - do not change
 results <- obj[which(obj$score %in% score_list),]
 
-write.table(results, file = "PGC2_daner_file_HG19_UCSC_ALSPAC_brain_regions_association_PRS_results.txt", row.names = F, quote = F)
+# Write the file name relevant to the results you have produced
+write.table(results, file = "CLOZUK_PGC2noclo_HG19_UCSC_ALSPAC_brain_regions_association_PRS_results.txt", row.names = F, quote = F)
 
+
+### I would stop here Eleon
 results1 <- fread("PGC1_no_sweden_HG19_UCSC_ALSPAC_brain_regions_association_PRS_results.txt")
 results2 <- fread("PGC1_with_sweden_HG19_UCSC_ALSPAC_brain_regions_association_PRS_results.txt")
 results3 <- fread ("PGC2_daner_file_HG19_UCSC_ALSPAC_brain_regions_association_PRS_results.txt")
+results4 <- fread("CLOZUK_PGC2noclo_HG19_UCSC_ALSPAC_brain_regions_association_PRS_results.txt")
+brain_volume_progression <- list(results1, results2, results3, results4)
 
-brain_volume_progression <- list(results1, results2, results3)
 
-trace_0 <- rnorm(100, mean = 5)
-trace_1 <- rnorm(100, mean = 0)
-trace_2 <- rnorm(100, mean = -5)
-x <- c(1:100)
 
-newdataframe <- data.frame(brain_volume_progression[[1]]$test,brain_volume_progression[[1]]$p, brain_volume_progression[[2]]$p, brain_volume_progression[[3]]$p)
-names(newdataframe) <- c("test", "PGC1", "PGC1swe", "PGC2")
+newdataframe <- data.frame(brain_volume_progression[[1]]$test,brain_volume_progression[[1]]$p, brain_volume_progression[[2]]$p, brain_volume_progression[[3]]$p, brain_volume_progression[[4]]$p)
+names(newdataframe) <- c("test", "PGC1", "PGC1swe", "PGC2", "QCLOZUK_PGC2noclo")
 test_df <- t(newdataframe)
 colnames(test_df) <- as.character(test_df[1,])
 test_df <- test_df[-1,]
-test_df <- cbind(test_df,c("PGC1", "PGC1swe", "PGC2"))
+test_df <- cbind(test_df,c("PGC1", "PGC1swe", "PGC2", "QCLOZUK_PGC2noclo"))
 test_df <- as.data.frame(test_df)
 
 library(plotly)
 newdataframe1 <- newdataframe[1:36,]
 newdataframe2 <- newdataframe[37:72,]
 test <- stack(newdataframe1)
-test$v3 <- rep(newdataframe1$test, 3)
+names(test) <- c("P_value", "Dataset")
+test$v3 <- rep(newdataframe1$test, 4)
 
-p <- plot_ly(test,x=~ind, y = ~values, type = 'scatter')
+p <- plot_ly(test,x=~Dataset, y = ~P_value, type = 'scatter')
 
   for (i in 1:36){
     p <- add_trace(p, x = test_df$V73, y = test_df[,i], name = phenotypes[i], mode = "lines",type = 'scatter')
@@ -115,13 +126,124 @@ p <- plot_ly(test,x=~ind, y = ~values, type = 'scatter')
 p
 
 test <- stack(newdataframe2)
-test$v3 <- rep(newdataframe1$test, 3)
 
-p2 <- plot_ly(test,x=~ind, y = ~values, type = 'scatter')
+names(test) <- c("P_value", "Dataset")
+test$v3 <- rep(newdataframe2$test, 4)
+p2 <- plot_ly(test,x=~Dataset, y = ~P_value, type = 'scatter')
+
+for (i in 37:72){
+  p2 <- add_trace(p2, x = test_df$V73, y = test_df[,i], name = phenotypes[i-36], mode = "lines",type = 'scatter')
+}
+p2
+
+
+
+r2_dataframe <- data.frame(brain_volume_progression[[1]]$test,brain_volume_progression[[1]]$r.squared, brain_volume_progression[[2]]$r.squared, brain_volume_progression[[3]]$r.squared, brain_volume_progression[[4]]$r.squared)
+names(r2_dataframe) <- c("test", "PGC1", "PGC1swe", "PGC2", "QCLOZUK_PGC2noclo")
+test_df <- t(r2_dataframe)
+colnames(test_df) <- as.character(test_df[1,])
+test_df <- test_df[-1,]
+test_df <- cbind(test_df,c("PGC1", "PGC1swe", "PGC2", "QCLOZUK_PGC2noclo"))
+test_df <- as.data.frame(test_df)
+
+
+r2dataframe1 <- r2_dataframe[1:36,]
+r2dataframe2 <- r2_dataframe[37:72,]
+test <- stack(r2dataframe1)
+names(test) <- c("rsquared", "Dataset")
+test$v3 <- rep(r2dataframe1$test, 4)
+
+r2_1 <- plot_ly(test,x=~Dataset, y = ~rsquared, type = 'scatter')
 
 for (i in 1:36){
-  p2 <- add_trace(p2, x = test_df$V73, y = test_df[,i], name = phenotypes[i], mode = "lines",type = 'scatter')
+  r2_1 <- add_trace(r2_1, x = test_df$V73, y = test_df[,i], name = phenotypes[i], mode = "lines",type = 'scatter')
 }
-p
+r2_1
+
+test <- stack(r2dataframe2)
+
+names(test) <- c("rsquared", "Dataset")
+test$v3 <- rep(r2dataframe2$test, 4)
+r2_2 <- plot_ly(test,x=~Dataset, y = ~rsquared, type = 'scatter')
+
+for (i in 37:72){
+  r2_2 <- add_trace(r2_2, x = test_df$V73, y = test_df[,i], name = phenotypes[i-36], mode = "lines",type = 'scatter')
+}
+r2_2
+
+plotly_POST(p, filename = "brain_regions_PRS_pthres0.05_pvalue", sharing = "secret")
+plotly_POST(p2, filename = "brain_regions_PRS_pthres0.5_pvalue", sharing = "secret")
+
+plotly_POST(r2_1, filename = "brain_regions_PRS_pthres0.05_r2", sharing = "secret")
+plotly_POST(r2_2, filename = "brain_regions_PRS_pthres0.5_r2", sharing = "secret")
+
+newdataframe_beta <- data.frame(brain_volume_progression[[1]]$test,brain_volume_progression[[1]]$estimate, brain_volume_progression[[2]]$estimate, brain_volume_progression[[3]]$estimate, brain_volume_progression[[4]]$estimate)
+names(newdataframe_beta) <- c("test", "PGC1", "PGC1swe", "PGC2", "QCLOZUK_PGC2noclo")
+test_df <- t(newdataframe_beta)
+colnames(test_df) <- as.character(test_df[1,])
+test_df_beta <- test_df_beta[-1,]
+test_df_beta <- cbind(test_df_beta,c("PGC1", "PGC1swe", "PGC2", "QCLOZUK_PGC2noclo"))
+test_df_beta <- as.data.frame(test_df_beta)
+
+BETA_dataframe1 <- newdataframe_beta[1:36,]
+BETA_dataframe2 <- newdataframe_beta[37:72,]
+test_beta <- stack(BETA_dataframe1)
+names(test_beta) <- c("BETA", "Dataset")
+test_beta$v3 <- rep(BETA_dataframe1$test, 4)
+
+test_beta_0.5 <- stack(BETA_dataframe2)
+names(test_beta_0.5) <- c("BETA", "Dataset")
+test_beta_0.5$v3 <- rep(BETA_dataframe2$test, 4)
+
+
+newdataframe_SE <- data.frame(brain_volume_progression[[1]]$test,brain_volume_progression[[1]]$SE, brain_volume_progression[[2]]$SE, brain_volume_progression[[3]]$SE, brain_volume_progression[[4]]$SE)
+names(newdataframe_SE) <- c("test", "PGC1", "PGC1swe", "PGC2", "QCLOZUK_PGC2noclo")
+test_df_SE <- t(newdataframe_SE)
+colnames(test_df_SE) <- as.character(test_df_SE[1,])
+test_df_SE <- test_df_SE[-1,]
+test_df_SE <- cbind(test_df_SE,c("PGC1", "PGC1swe", "PGC2", "QCLOZUK_PGC2noclo"))
+test_df_SE <- as.data.frame(test_df_SE)
+
+SE_dataframe1 <- newdataframe_SE[1:36,]
+SE_dataframe2 <- newdataframe_SE[37:72,]
+test_SE <- stack(SE_dataframe1)
+names(test_SE) <- c("SE", "Dataset")
+test_SE$v3 <- rep(SE_dataframe1$test, 4)
+
+test_SE_0.5 <- stack(SE_dataframe2)
+names(test_SE_0.5) <- c("SE", "Dataset")
+test_SE_0.5$v3 <- rep(SE_dataframe2$test, 4)
+
+Beta_se_plots_0.5 <- cbind(test_beta_0.5,test_SE_0.5$SE)
+Beta_se_plots_0.5$upper <- Beta_se_plots_0.5$BETA + Beta_se_plots_0.5$`test_SE_0.5$SE`
+Beta_se_plots_0.5$lower <- Beta_se_plots_0.5$BETA - Beta_se_plots_0.5$`test_SE_0.5$SE`
+
+Beta_se_plots <- cbind(test_beta,test_SE$SE)
+Beta_se_plots$upper <- Beta_se_plots$BETA + Beta_se_plots$`test_SE$SE`
+Beta_se_plots$lower <- Beta_se_plots$BETA - Beta_se_plots$`test_SE$SE`
+
+gglist_0.05 <- list() 
+
+for (i in 1:36){
+# Plots for Betas and SE based on files #
+p <- ggplot(Beta_se_plots[c(i,i+36,i+72,i+108),], aes(Dataset, BETA, fill = v3))
+p <- p +
+  geom_col(position = "dodge") +
+  geom_errorbar(aes(ymin = upper, ymax = lower), position = "dodge", width = 0.25)
+
+gglist_0.05[[i]] <- p
+}
+
+gglist_0.5 <- list()
+for (i in 1:36){
+
+p <- ggplot(Beta_se_plots_0.5[c(i,i+36,i+72,i+108),], aes(Dataset, BETA, fill = v3))
+p <- p +
+  geom_col(position = "dodge") +
+  geom_errorbar(aes(ymin = upper, ymax = lower), position = "dodge", width = 0.25)
+gglist_0.5[[i]] <- p
+}
+
+
 
 
