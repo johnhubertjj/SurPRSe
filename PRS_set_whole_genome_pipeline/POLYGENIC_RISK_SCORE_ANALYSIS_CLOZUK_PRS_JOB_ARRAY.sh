@@ -2,13 +2,13 @@
 
 #PBS -q batch_long
 #PBS -P PR54
-#PBS -l select=1:ncpus=1:mem=45GB
+#PBS -l select=1:ncpus=1:mem=10GB
 #PBS -l walltime=24:00:00
 #PBS -o /home/c1020109/
 #PBS -e /home/c1020109/
 #PBS -j oe
 #PBS -J 1-22
-#PBS -N c1020109_job_array_whole_genome
+#PBS -N PRS_whole_genome
 
 # script requries 22 files for each validation and training set
 
