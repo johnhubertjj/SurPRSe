@@ -50,7 +50,7 @@ factorise_column_1<- as.factor(pathway_sets$Pathway)
 pathway_names <- levels(factorise_column_1)
 number_of_pathways_to_analyse <- length(pathway_names)
 
-write(pathway_names, file = paste0(output_directory,"Pathway_names_",Date))
+write(pathway_names, file = paste0(output_directory,"Pathway_names.txt"))
 # set the key to the pathway name
 setkey(pathway_sets, Pathway)
 

@@ -39,8 +39,9 @@ if [[ "$whereami" == *"raven"* ]]; then
   cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
  
 elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
-  cd ~/Documents/testing_cross_disorder/
-  
+  cd ~/Documents/ALSPAC_testing/
+ 
+   
   # Arguments
   path_to_scripts='/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/'
   
@@ -51,6 +52,7 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   # Alter/add variables depending on what type of Training dataset you have
   source ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
   cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
+  chromosome_number=$1
 fi  
 
 ## rewrite so that the file input is an argument for the script instead, this will work for now

@@ -244,6 +244,20 @@ p <- p +
 gglist_0.5[[i]] <- p
 }
 
+setwd("~/Desktop/")
+
+library(gridExtra)
+
+pdf("brain_area_plots_pthresh_0.05.pdf", onefile = TRUE)
+invisible(lapply(gglist_0.05,print))
+dev.off()
+
+pdf("brain_area_plots_pthresh_0.5.pdf", onefile = TRUE)
+invisible(lapply(gglist_0.5,print))
+dev.off()
 
 
 
+
+l <- mget(gglist_0.05)
+lapply(ggplots,function(x){ggsave(file=paste(x,"pdf",sep="."),get(x))})

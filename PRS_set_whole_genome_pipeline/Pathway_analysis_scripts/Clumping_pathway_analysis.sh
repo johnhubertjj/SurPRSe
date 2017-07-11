@@ -21,9 +21,7 @@ if [[ "$whereami" == *"raven"* ]]; then
 
   # assign a new variable for the PBS_ARRAY_variable
   chromosome_number=${PBS_ARRAY_INDEX}
-  
-  pathways=("FMRP_targets" "abnormal_behavior" "abnormal_nervous_system_electrophysiology" "abnormal_learning|memory|conditioning"  "abnormal_CNS_synaptic_transmission" "Cav2_channels" "abnormal_synaptic_transmission" "5HT_2C" "abnormal_long_term_potentiation" "abnormal_motor_capabilities|coordination|movement" "abnormal_behavioral_response_to_xenobiotic" "abnormal_associative_learning" "Lek2015_LoFintolerant_90" "BGS_top2_mean" "BGS_top2_max")
-
+ 
   num1=1
   current_pathway_output=`echo "$((${chromosome_number} - ${num1}))"`
 
@@ -35,9 +33,16 @@ if [[ "$whereami" == *"raven"* ]]; then
 elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   cd ~/Documents/testing_PRS_chromosome_22/
   path_to_scripts='/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/'
-  chromosome_number=22
 fi
 
+PRSACPJA_data_output="./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis}/${validation_set_usually_genotype_serial}${Chromosomes_to_analyse[@]}_consensus_with_    ${training_set_name}_flipped_alleles_no_duplicates"
+Pathway_output_directory="./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis}/" 
+Pathway_file_name=${Pathway_output_directory}Pathway_analysis.txt
+
+while IFS='' read -r line || [[ -n "$line" ]];
+do
+	pathways+=("$line")
+done < "$Pathway_file_name"
 
 
 plink --bfile ${pathways[${current_pathway_output}]}_Clumping_input --clump ${PATH_for_PGC}combined_PGC_table_with_CHR.POS_identifiers.txt --clump-p1 1 --clump-p2 1 --clump-r2 0.2 --clump-kb 1000 --out ${pathways[${current_pathway_output}]}_CLOZUK_PGC_pathways_r0.2_removed_AT_CG_1000kb

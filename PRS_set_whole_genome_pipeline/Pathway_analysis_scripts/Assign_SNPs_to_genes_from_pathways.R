@@ -361,7 +361,7 @@ for (i in 1:number_of_pathways_to_analyse) {
       
       write.table(e$test_data_frame, file = paste0(output_directory,pathway_names[i],"_chromosome_",l,"_",Gene_regions,"_data_table.txt"), quote = F, row.names = F)
       SNPs_for_clumping <- paste0("`","chromosome_",l,"_",pathway_names[i],"SNPs_for_clumping","`")
-      write(eval(parse(text = SNPs_for_clumping)), file = paste0(output_directory,"chromosome_",l,"_", pathway_names[i],"SNPs_for_clumping_extended_gene_regions.txt"))
+      write(eval(parse(text = SNPs_for_clumping)), file = paste0(output_directory,"chromosome_",l,"_", pathway_names[i],"_SNPs_for_clumping_extended_gene_regions.txt"))
       rm(list = paste0("chromosome_", l, "_", pathway_names[i], "SNPs_for_clumping"), envir = e)
       
     }

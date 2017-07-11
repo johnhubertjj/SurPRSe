@@ -43,7 +43,7 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   
   # Arguments
   path_to_scripts='/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/'
-  path_to_pathway_scripts="/home/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/Pathway_analysis_scripts"
+  path_to_pathway_scripts="/Users/johnhubert/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/Pathway_analysis_scripts/"
   
   # Assign the shell variables
   source ${path_to_scripts}/PRS_arguments_script.sh
@@ -66,14 +66,13 @@ Rscript ${path_to_scripts}RscriptEcho.R\
  ./${training_set_name}_${validation_set_name}_extrainfo/PATHWAYS_PRS_COLLECTING_MAGMA_INFO.Rout\
  ${training_set_name}\
  ${validation_set_name}\
- ${valudation_set_usually_genotype_serial}\
+ ${validation_set_usually_genotype_serial}\
  ${Name_of_extra_analysis}\
  ${Pathway_file_name}\
  ${Gene_location_filename}\
  ${Chromosomes_to_analyse[@]}
  
  
-
 # From the above script, identify the number of pathways you want to analyse (probably safest to write to a file, port to a variable and then delete the file)
 # Also a text-delimited file with each line specifying a pathway name to be used
 # The seperate gene_loc files belonging to previously specified analysis
@@ -81,6 +80,7 @@ Rscript ${path_to_scripts}RscriptEcho.R\
 
 PRSACPJA_data_output="./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis}/${validation_set_usually_genotype_serial}${Chromosomes_to_analyse[@]}_consensus_with_${training_set_name}_flipped_alleles_no_duplicates"
 Pathway_output_directory="./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis}/" 
+Pathway_file_name=${Pathway_output_directory}Pathway_analysis.txt
 # separate script below:
 
 if [[ ${Gene_regions} == "Extended" ]]; then
@@ -91,8 +91,8 @@ if [[ ${Gene_regions} == "Extended" ]]; then
 		do		    
 			magma --annotate window=35,10 --snp-loc ${PRSACPJA_data_output} --gene-loc ${Pathway_output_directory}${training_set_name}_${validation_set_name}_${line}_chromosome_${Chromosomes_to_analyse[i]}_extended_temp.gene.loc --out ${Pathway_output_directory}${Chromosomes_to_analyse[i]}_${training_set_name}_${validation_set_name}_SNPs_${line}_extended_pathway_temp
 		done
-
-	done < "$1"
+	pathways+=("$line")
+	done < "$Pathway_file_name"
 fi
 
 if [[ ${Gene_regions} == "Regular" ]]; then
@@ -104,7 +104,8 @@ if [[ ${Gene_regions} == "Regular" ]]; then
 			magma --annotate --snp-loc ${PRSACPJA_data_output} --gene-loc ${Pathway_output_directory}${training_set_name}_${validation_set_name}_${line}_chromosome_${Chromosomes_to_analyse[i]}_temp.gene.loc --out ${Pathway_output_directory}${Chromosomes_to_analyse[i]}_${training_set_name}_${validation_set_name}_SNPs_${line}_pathway_temp
 		done
 
-	done < "$1"
+	pathways+=("$line")
+	done < "$Pathway_file_name"
 fi
 
 
@@ -113,12 +114,22 @@ Rscript ${path_to_scripts}RscriptEcho.R\
  ./${training_set_name}_${validation_set_name}_extrainfo/assiging_SNPs_to_genes_from_pathways.Rout\
  ${training_set_name}\
  ${validation_set_name}\
- ${valudation_set_usually_genotype_serial}\
+ ${validation_set_usually_genotype_serial}\
  ${Name_of_extra_analysis}\
  ${Pathway_file_name}\
  ${Gene_location_filename}\
  ${Gene_regions}\
  ${Chromosomes_to_analyse[@]}
+
+
+if [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
+parallel ${path_to_pathway_scripts}creation_of_merge_list_file.sh ::: ${pathways[@]} ::: ${path_to_scripts}
+
+else
+	exit 1
+fi
+
+# ADD ALEX's PIPELINE SCRIPTS HERE FOR PRS ANALYSIS AND TO GET ALL THE PATHWAYS IN THE RIGHT FORMAT IN PERL (but only the collate_all_paths.pl
 
 # magma --bfile CLOZUK_GWAS_BGE_chr22_magma_input_2 --gene-annot ${chr[i]}_CLOZUK_PGC_SNPs_pathway.genes.annot --out ${chr[i]}gene_annotation_for_CLOZUK_test
 
