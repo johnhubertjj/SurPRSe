@@ -25,9 +25,21 @@ print(args)
 # Specify the different input tables #
 Training_name <- args[3]
 Validation_name <- args [4]
-significance_thresholds <- as.numeric(args[c(5:length(args))])
+Scale_phenotypes <- args [5]
+Scale_PRS <- args[6]
+significance_thresholds <- as.numeric(args[c(7:length(args))])
 print(significance_thresholds)
 
+
+Training_names <- c("HG19_pgc.scz.full.2012-04", "scz.swe.pgc1.results.v3","PGC2","CLOZUK_PGC2noclo")
+
+
+for (Training_name in Training_names){ 
+#Training_name <- "PGC2"
+#Training_name <- "CLOZUK_PGC2noclo"
+#Training_name <- "scz.swe.pgc1.results.v3"
+#Training_name <- "HG19_pgc.scz.full.2012-04"
+ 
 # Write in the phenotype files
 Pheno_brain_thickness <- fread("ALSPAC_thickness_27january2017.txt")
 Pheno_brain_volume <-fread("ALSPAC_volumes_27january2017.txt") 
@@ -42,13 +54,26 @@ for (i in 1:length(significance_thresholds)) {
   my_data[[i]] <- my_data[[i]][,c(1,2,6)]
   colnames(my_data[[i]]) <- c("FID", "IID", paste("SCORE_", significance_thresholds[i], sep=""))
 }
+
 all_prs <- join_all(my_data, by=c("FID", "IID"), type='left')
+
+if (Scale_PRS == T){
+  all_prs[,-1:-2] <- scale(all_prs[,-1:-2], center = T, scale = T)
+}
+
 
 # Join all the tables together
 setnames(Pheno_brain_volume,old = "SubjID", new = "FID")
 setnames(Pheno_brain_thickness,old = "SubjID", new = "FID")
 
 DATA_pheno <- join_all(list(Pheno_brain_thickness, Pheno_brain_volume), by=c("FID", "kz021", "age", "ICV"), type='inner')
+
+
+if (Scale_phenotypes == T){
+  DATA_pheno_scaled <- cbind(DATA_pheno[,1:4],(scale(DATA_pheno[,5:ncol(DATA_pheno)],center = T, scale = T)))
+  DATA_pheno <- DATA_pheno_scaled
+}
+
 DATA <- join_all(list(all_prs, DATA_pheno), by=c("FID"), type='inner')
 
 # create a score list
@@ -57,7 +82,7 @@ score_list <- colnames(all_prs[,-1:-2])
 # Add names of phenotypes corresponding to the table
 phenotypes <- colnames(DATA_pheno[,5:ncol(DATA_pheno)])
 
-
+DATA_pheno[,5:ncol(DATA_pheno)]
 
 DATA$kz021 <- as.factor(DATA$kz021)
 
@@ -66,7 +91,7 @@ DATA$kz021 <- as.factor(DATA$kz021)
 #DATA <- DATA[-remove_ICV,]
 
 # dont' change obj it makes the loop output a dataframe with the regression results
-obj <- data.frame(test=0, score=0, estimate=0, SE=0, tvalue=0, p=0, r.squared=0)
+obj <- data.frame(test=0, score=0, estimate=0, SE=0, tvalue=0, p=0, r.squared=0, lower=0, upper=0)
 
 # this example if for a linear regression (the phenotype of interest is a quantiative trait)
 # is using a discrete phenotype, a logistic regression needs to be run, and the code altered from 'lm' to 'glm' including the argument of 'family = binomial'
@@ -75,12 +100,13 @@ obj <- data.frame(test=0, score=0, estimate=0, SE=0, tvalue=0, p=0, r.squared=0)
 for (i in score_list) {
   for (j in phenotypes) {
     fit <- lm(DATA[,j] ~ DATA[,i] + kz021 + age + ICV,  data=DATA)
+    CI <- confint(fit)
     fit1 <- lm(DATA[,j] ~ kz021 + age + ICV, data=DATA)
     tmp <- coef(summary(fit))
     tmp2 <- summary(fit)
     hold <- summary(fit1)
     true_r2 <- tmp2$r.squared - hold$r.squared
-    tmp3 <- c(j,i,tmp[2,], true_r2)
+    tmp3 <- c(j,i,tmp[2,], true_r2, CI["DATA[, i]",1], CI["DATA[, i]",2])
     obj <- rbind(obj, tmp3)
   }
 }
@@ -89,20 +115,30 @@ for (i in score_list) {
 
 # this is a clean-up step - do not change
 results <- obj[which(obj$score %in% score_list),]
-
+assign(paste0("results_",Training_name), results)
+}
 # Write the file name relevant to the results you have produced
-write.table(results, file = "CLOZUK_PGC2noclo_HG19_UCSC_ALSPAC_brain_regions_association_PRS_results.txt", row.names = F, quote = F)
+write.table(results, file = "all_scaled_PGC1_no_sweden_HG19_UCSC_ALSPAC_brain_regions_association_PRS_results.txt", row.names = F, quote = F)
 
 
-### I would stop here Eleon
+### I would stop here Eleonora ####
 results1 <- fread("PGC1_no_sweden_HG19_UCSC_ALSPAC_brain_regions_association_PRS_results.txt")
 results2 <- fread("PGC1_with_sweden_HG19_UCSC_ALSPAC_brain_regions_association_PRS_results.txt")
 results3 <- fread ("PGC2_daner_file_HG19_UCSC_ALSPAC_brain_regions_association_PRS_results.txt")
 results4 <- fread("CLOZUK_PGC2noclo_HG19_UCSC_ALSPAC_brain_regions_association_PRS_results.txt")
-brain_volume_progression <- list(results1, results2, results3, results4)
 
 
 
+brain_volume_progression <- list(`results_HG19_pgc.scz.full.2012-04`, results_scz.swe.pgc1.results.v3, results_PGC2, results_CLOZUK_PGC2noclo)
+
+results_scaled_1 <- fread("~/Documents/CLOZUK_PGC2noclo.METAL/all_scaled_PGC1_no_sweden_HG19_UCSC_ALSPAC_brain_regions_association_PRS_results.txt")
+results_scaled_2 <- fread("~/Documents/CLOZUK_PGC2noclo.METAL/all_scaled_PGC1_with_sweden_HG19_UCSC_ALSPAC_brain_regions_association_PRS_results")
+results_scaled_3 <- fread("~/Documents/CLOZUK_PGC2noclo.METAL/all_scaled_PGC2_daner_file_HG19_UCSC_ALSPAC_brain_regions_association_PRS_results.txt")
+results_scaled_4 <- fread("~/Documents/CLOZUK_PGC2noclo.METAL/all_scaled_CLOZUK_PGC2noclo_HG19_UCSC_ALSPAC_brain_regions_association_PRS_results.txt")
+
+brain_volume_progression_scaled <- list(results_scaled_1, results_scaled_2, results_scaled_3, results_scaled_4)
+
+# Creating plots for un-scaled variables
 newdataframe <- data.frame(brain_volume_progression[[1]]$test,brain_volume_progression[[1]]$p, brain_volume_progression[[2]]$p, brain_volume_progression[[3]]$p, brain_volume_progression[[4]]$p)
 names(newdataframe) <- c("test", "PGC1", "PGC1swe", "PGC2", "QCLOZUK_PGC2noclo")
 test_df <- t(newdataframe)
@@ -177,23 +213,25 @@ plotly_POST(p2, filename = "brain_regions_PRS_pthres0.5_pvalue", sharing = "secr
 plotly_POST(r2_1, filename = "brain_regions_PRS_pthres0.05_r2", sharing = "secret")
 plotly_POST(r2_2, filename = "brain_regions_PRS_pthres0.5_r2", sharing = "secret")
 
+
+## PLOTS OF BETA AND SE (AND CI) ## 
+
 newdataframe_beta <- data.frame(brain_volume_progression[[1]]$test,brain_volume_progression[[1]]$estimate, brain_volume_progression[[2]]$estimate, brain_volume_progression[[3]]$estimate, brain_volume_progression[[4]]$estimate)
 names(newdataframe_beta) <- c("test", "PGC1", "PGC1swe", "PGC2", "QCLOZUK_PGC2noclo")
 test_df <- t(newdataframe_beta)
 colnames(test_df) <- as.character(test_df[1,])
-test_df_beta <- test_df_beta[-1,]
+test_df_beta <- test_df[-1,]
 test_df_beta <- cbind(test_df_beta,c("PGC1", "PGC1swe", "PGC2", "QCLOZUK_PGC2noclo"))
 test_df_beta <- as.data.frame(test_df_beta)
 
 BETA_dataframe1 <- newdataframe_beta[1:36,]
 BETA_dataframe2 <- newdataframe_beta[37:72,]
-test_beta <- stack(BETA_dataframe1)
-names(test_beta) <- c("BETA", "Dataset")
-test_beta$v3 <- rep(BETA_dataframe1$test, 4)
+test_beta <- melt(BETA_dataframe1, id.vars="test")
+names(test_beta) <- c("Brain_region", "Dataset","BETA")
 
-test_beta_0.5 <- stack(BETA_dataframe2)
-names(test_beta_0.5) <- c("BETA", "Dataset")
-test_beta_0.5$v3 <- rep(BETA_dataframe2$test, 4)
+test_beta_0.5 <- melt(BETA_dataframe2,id.vars="test")
+names(test_beta_0.5) <- c("Brain_region", "Dataset","BETA")
+
 
 
 newdataframe_SE <- data.frame(brain_volume_progression[[1]]$test,brain_volume_progression[[1]]$SE, brain_volume_progression[[2]]$SE, brain_volume_progression[[3]]$SE, brain_volume_progression[[4]]$SE)
@@ -206,13 +244,17 @@ test_df_SE <- as.data.frame(test_df_SE)
 
 SE_dataframe1 <- newdataframe_SE[1:36,]
 SE_dataframe2 <- newdataframe_SE[37:72,]
-test_SE <- stack(SE_dataframe1)
-names(test_SE) <- c("SE", "Dataset")
-test_SE$v3 <- rep(SE_dataframe1$test, 4)
+test_SE <- melt(SE_dataframe1, id.vars="test")
+names(test_SE) <- c("Brain_region", "Dataset","SE")
 
-test_SE_0.5 <- stack(SE_dataframe2)
-names(test_SE_0.5) <- c("SE", "Dataset")
-test_SE_0.5$v3 <- rep(SE_dataframe2$test, 4)
+
+test_SE_0.5 <- melt(SE_dataframe2, id.vars="test")
+names(test_SE_0.5) <- c("Brain_region", "Dataset","SE")
+
+test_SE_0.5$SE <- as.numeric(test_SE_0.5$SE)
+test_SE$SE <- as.numeric(test_SE$SE)
+test_beta$BETA <- as.numeric(test_beta$BETA)
+test_beta_0.5$BETA <- as.numeric(test_beta_0.5$BETA)
 
 Beta_se_plots_0.5 <- cbind(test_beta_0.5,test_SE_0.5$SE)
 Beta_se_plots_0.5$upper <- Beta_se_plots_0.5$BETA + Beta_se_plots_0.5$`test_SE_0.5$SE`
@@ -261,3 +303,94 @@ dev.off()
 
 l <- mget(gglist_0.05)
 lapply(ggplots,function(x){ggsave(file=paste(x,"pdf",sep="."),get(x))})
+
+
+# BETA AND SE PLOTS SCALED ###
+newdataframe_beta <- data.frame(brain_volume_progression_scaled[[1]]$test,brain_volume_progression_scaled[[1]]$estimate, brain_volume_progression_scaled[[2]]$estimate, brain_volume_progression_scaled[[3]]$estimate, brain_volume_progression_scaled[[4]]$estimate)
+
+names(newdataframe_beta) <- c("test", "PGC1", "PGC1swe", "PGC2", "QCLOZUK_PGC2noclo")
+test_df <- t(newdataframe_beta)
+colnames(test_df) <- as.character(test_df[1,])
+test_df_beta <- test_df[-1,]
+test_df_beta <- cbind(test_df_beta,c("PGC1", "PGC1swe", "PGC2", "QCLOZUK_PGC2noclo"))
+test_df_beta <- as.data.frame(test_df_beta)
+
+BETA_dataframe1 <- newdataframe_beta[1:36,]
+BETA_dataframe2 <- newdataframe_beta[37:72,]
+test_beta <- stack(BETA_dataframe1)
+names(test_beta) <- c("BETA", "Dataset")
+test_beta$v3 <- rep(BETA_dataframe1$test, 4)
+
+test_beta_0.5 <- stack(BETA_dataframe2)
+names(test_beta_0.5) <- c("BETA", "Dataset")
+test_beta_0.5$v3 <- rep(BETA_dataframe2$test, 4)
+
+
+newdataframe_SE <- data.frame(brain_volume_progression_scaled[[1]]$test,brain_volume_progression_scaled[[1]]$SE, brain_volume_progression_scaled[[2]]$SE, brain_volume_progression_scaled[[3]]$SE, brain_volume_progression_scaled[[4]]$SE)
+names(newdataframe_SE) <- c("test", "PGC1", "PGC1swe", "PGC2", "QCLOZUK_PGC2noclo")
+test_df_SE <- t(newdataframe_SE)
+colnames(test_df_SE) <- as.character(test_df_SE[1,])
+test_df_SE <- test_df_SE[-1,]
+test_df_SE <- cbind(test_df_SE,c("PGC1", "PGC1swe", "PGC2", "QCLOZUK_PGC2noclo"))
+test_df_SE <- as.data.frame(test_df_SE)
+
+SE_dataframe1 <- newdataframe_SE[1:36,]
+SE_dataframe2 <- newdataframe_SE[37:72,]
+test_SE <- stack(SE_dataframe1)
+names(test_SE) <- c("SE", "Dataset")
+test_SE$v3 <- rep(SE_dataframe1$test, 4)
+
+test_SE_0.5 <- stack(SE_dataframe2)
+names(test_SE_0.5) <- c("SE", "Dataset")
+test_SE_0.5$v3 <- rep(SE_dataframe2$test, 4)
+
+Beta_se_plots_0.5 <- cbind(test_beta_0.5,test_SE_0.5$SE)
+Beta_se_plots_0.5$upper <- Beta_se_plots_0.5$BETA + Beta_se_plots_0.5$`test_SE_0.5$SE`
+Beta_se_plots_0.5$lower <- Beta_se_plots_0.5$BETA - Beta_se_plots_0.5$`test_SE_0.5$SE`
+
+Beta_se_plots <- cbind(test_beta,test_SE$SE)
+Beta_se_plots$upper <- Beta_se_plots$BETA + Beta_se_plots$`test_SE$SE`
+Beta_se_plots$lower <- Beta_se_plots$BETA - Beta_se_plots$`test_SE$SE`
+
+Beta_se_plots$P_Value_threshold <- c(rep(significance_thresholds[1],144))
+Beta_se_plots_0.5$P_Value_threshold <- c(rep(significance_thresholds[2],144))
+
+names(Beta_se_plots) <- c("Brain_region", "Dataset","BETA", "SE", "upper", "lower", "Pvaluethreshold")
+names(Beta_se_plots_0.5) <- c("Brain_region", "Dataset","BETA", "SE", "upper", "lower", "Pvaluethreshold")
+
+
+all_plots <- rbind(Beta_se_plots,Beta_se_plots_0.5)
+all_plots$Pvaluethreshold <- as.factor(all_plots$Pvaluethreshold)
+gglist_0.05 <- list() 
+
+for (i in 1:36){
+  # Plots for Betas and SE based on files #
+  p <- ggplot(all_plots[c(i,i+36,i+72,i+108, i+144, i+180, i+216, i+252),], aes(Dataset, BETA, fill = Pvaluethreshold, group= Dataset))
+  
+  p <- p +
+    geom_col(position = "dodge") +
+    geom_errorbar(aes(ymin = upper, ymax = lower), position = "dodge", width = 0.25)
+  p <- p + scale_x_discrete(labels=c("PGC1" = "PGC1", "PGC1swe" = "PGC1swe", "PGC2" = "PGC2", "QCLOZUK_PGC2noclo" = "CLOZUK"))
+  p <- p + facet_grid(. ~ Pvaluethreshold) +
+            theme(strip.text.x = element_text(size = 10))
+  p <- p + scale_fill_discrete(guide=FALSE)
+  p <- p + theme(axis.text.x = element_text(size = 7))
+  p <- p + ggtitle(all_plots$Brain_region[i])
+  p <- p + theme(plot.title = element_text( face = "bold",hjust = 0.5))
+  
+  gglist_0.05[[i]] <- p
+}
+
+
+setwd("~/Desktop/")
+
+library(gridExtra)
+
+pdf("Brain_area_plots_mark_2_only_zscoring_brain_regions.pdf", onefile = TRUE)
+invisible(lapply(gglist_0.05,print))
+dev.off()
+
+#pdf("brain_area_plots_pthresh_0.5.pdf", onefile = TRUE)
+#invisible(lapply(gglist_0.5,print))
+#dev.off()
+

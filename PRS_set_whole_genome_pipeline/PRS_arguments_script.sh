@@ -22,7 +22,7 @@ if [[ "$whereami" == *"raven"* ]]; then
   validation_set_full_name_without_chromosome="ALSPAC_hrc_imputed_step3_mri_brain_measurements_only"
   training_set_name="CLOZUK_PGC2noclo"
   validation_set_name="ALSPAC"  
-  Pathway_filename="Pocklington2015_134sets_LoFi"
+  Pathway_filename="Pocklington2015_134sets_LoFi.txt"
   Gene_location_filename="NCBI37.3.gene.loc"
   # Split_by_chromosome for genotype?
   split_by_chromosome_required="FALSE" 
@@ -46,8 +46,8 @@ if [[ "$whereami" == *"raven"* ]]; then
   Multiple_Training_set_tables="TRUE"
   Running_in_Serial="TRUE"
   sig_thresholds=(0.05 0.5)
-  Extra_analyses="FALSE"
-  Name_of_extra_analysis="Pathways"
+  Extra_analyses=TRUE
+  Name_of_extra_analysis=Pathways
   Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates" 
   # either "extended" "normal" or "both" : change to a numerical input in the future
   Gene_regions="both" #either ( "extended" "normal" "both" )
@@ -61,9 +61,8 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   path_to_covariate_file="/Users/Dropbox/whole_genome_testing/Stationary_data/CLOZUK2.r7.select2PC.eigenvec.txt"
   path_to_chromosome_length_file="/Users/Dropbox/whole_genome_testing/Stationary_data/UCSC_hg19_chromeinfo_length_of_chromosomes.txt"
   path_to_new_fam_file="/Users/Dropbox/whole_genome_testing/output/Stationary_data/CLOZUK.r7.GWAS_IDs.fam"
-  path_to_gene_annotation_file="/Users/Dropbox/whole_genome_testing/output/Stationary_data/NCBI37.3.gene.loc"
-
-  chromosome_number=NA
+  path_to_stationary_data="/Users/johnhubert/Dropbox/Stationary_data/" 
+  
   # Datasets
   training_set_usually_summary="HG19_pgc.scz.full.2012-04_table${chromosome_number}"
   training_set_original_filename="HG19_pgc.scz.full.2012-04.txt"
@@ -72,10 +71,10 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   validation_set_full_name_without_chromosome="ALSPAC_hrc_imputed_step3_mri_brain_measurements_only"
   training_set_name="HG19_pgc.scz.full.2012-04"
   validation_set_name="ALSPAC" 
-  Pathway_filename="Pocklington2015_134sets_LoFi"
+  Pathway_filename="Pocklington2015_134sets_LoFi.txt"
   Gene_location_filename="NCBI37.3.gene.loc"
   # Split_by_chromosome for genotype?
-  split_by_chromosome_required="TRUE" 
+  split_by_chromosome_required="FALSE" 
   # MAF, INFO and SE
   MAF_summary="FALSE"
   MAF_threshold=0.1
@@ -96,11 +95,11 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   Multiple_Training_set_tables="TRUE"
   Running_in_Serial="TRUE"
   sig_thresholds=(0.05 0.5)
-  Extra_analyses="FALSE"
-  Name_of_extra_analysis="Pathways"
+  Extra_analyses=TRUE
+  Name_of_extra_analysis=Pathways
   Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates"
   # either "extended" "normal" or "both" : change to a numerical input in the future
-  Gene_regions="both" #either ( "extended" "normal" "both" )	
+  Gene_regions=normal #either ( "extended" "normal" "both" )	
   external_harddrive="FALSE"
 fi
 

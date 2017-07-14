@@ -18,10 +18,10 @@ print(args)
 
 System_information <- Sys.info()
 print(System_information)
-whereami <- System_information['nodename']
+whereami <- System_information['user']
 print(whereami)
 
-if (whereami == "v1711-0ab8c3db.mobile.cf.ac.uk") {
+if (whereami == "johnhubert") {
   chromosome.number <- args[7]
   
 } else if (whereami == 'JJ') {

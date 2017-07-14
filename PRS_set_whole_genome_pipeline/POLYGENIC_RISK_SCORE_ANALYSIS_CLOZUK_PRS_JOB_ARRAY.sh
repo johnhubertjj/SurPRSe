@@ -1,5 +1,6 @@
 #!/bin/bash
 
+exec &> Rtestoutclusterlogfile$1.txt
 #PBS -q batch_long
 #PBS -P PR54
 #PBS -l select=1:ncpus=1:mem=10GB
@@ -39,9 +40,13 @@ if [[ "$whereami" == *"raven"* ]]; then
   cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
  
 elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
-  cd ~/Documents/ALSPAC_testing/
+  # add directory to work from at the top of the script (just in case)
+  Directory_to_work_from=$2
+  cd ${Directory_to_work_from} 
  
-   
+  chromosome_number=$1
+  echo $chromosome_number
+  
   # Arguments
   path_to_scripts='/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/'
   
@@ -52,7 +57,7 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   # Alter/add variables depending on what type of Training dataset you have
   source ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
   cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
-  chromosome_number=$1
+  echo ${validation_set_usually_genotype}
 fi  
 
 ## rewrite so that the file input is an argument for the script instead, this will work for now
@@ -163,7 +168,7 @@ if [[ ${Extra_analyses} == "TRUE" ]]; then
 echo "Arguments script stated that this analysis is for ${Name_of_extra_analysis}\
 , therefore clumping will be not be performed for Polygenic risk scores"
 
-exit 1
+exit 0
 
 else
 	

@@ -28,9 +28,10 @@ chromosomes_to_analyse <- as.numeric(args[c(9:length(args))])
 
 # Create new variables based on input files to make things easier to read # 
 First_half_of_input_genotype_file <- paste0("./", Training_name, "_", Validation_name, "_output/", Pathway_directory, "/", Validation_full_name_serial)
-Second_half_of_input_genotype_file <- paste0("_consensus_with_", Training_name, "flipped_alleles_no_duplicates.bim")
+Second_half_of_input_genotype_file <- paste0("_consensus_with_", Training_name, "_flipped_alleles_no_duplicates.bim")
 output_directory <- paste0("./", Training_name, "_", Validation_name, "_output/", Pathway_directory, "/")
 Date <- Sys.Date()
+
 
 # Reading_in_Pathway_files
 library(data.table)
@@ -49,6 +50,8 @@ setnames(pathway_sets, c("Pathway", "Gene"))
 factorise_column_1<- as.factor(pathway_sets$Pathway)
 pathway_names <- levels(factorise_column_1)
 number_of_pathways_to_analyse <- length(pathway_names)
+
+getwd()
 
 write(pathway_names, file = paste0(output_directory,"Pathway_names.txt"))
 # set the key to the pathway name
@@ -84,7 +87,7 @@ for (i in 1:number_of_pathways_to_analyse) {
   assign(paste0("Gene_regions_all_",pathway_names[i]), current_table_name, envir = .GlobalEnv)
   
   # Now start on the chromosomes
-  for (l in chromosomes.to.analyse){
+  for (l in chromosomes_to_analyse){
     
     selecting_chromosomes <- fread(paste0(First_half_of_input_genotype_file, l, Second_half_of_input_genotype_file))
     names(selecting_chromosomes) <- c("CHR", "SNP", "GD", "BP", "A1", "A2")
