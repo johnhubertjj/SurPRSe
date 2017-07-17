@@ -54,6 +54,7 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   source ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
   cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
 fi 
+Pathway_output_directory="./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis}/" 
 
 if [[ ${Name_of_extra_analysis} == "Pathways" ]]; then
  
@@ -65,6 +66,10 @@ if [[ ${Name_of_extra_analysis} == "Pathways" ]]; then
 sudo chmod  g+rwx ${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis}
 sudo chmod  g+rwx ${training_set_name}_${validation_set_name}_output/
  
+#if [ -f "${Pathway_output_directory}Pathway_analysis_empty_pathways_info_file.txt" ]; then
+#	rm "${Pathway_output_directory}Pathway_analysis_empty_pathways_info_file.txt"
+#fi
+
 #Rscript ${path_to_scripts}RscriptEcho.R\
 # ${path_to_pathway_scripts}PATHWAYS_PRS_COLLECTING_MAGMA_INFO.R\
 # ./${training_set_name}_${validation_set_name}_extrainfo/PATHWAYS_PRS_COLLECTING_MAGMA_INFO.Rout\
@@ -82,7 +87,6 @@ sudo chmod  g+rwx ${training_set_name}_${validation_set_name}_output/
 # The seperate gene_loc files belonging to previously specified analysis
 # Then use magma to create annotation files:
 
-Pathway_output_directory="./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis}/" 
 Pathway_file_name=${Pathway_output_directory}Pathway_names.txt
 # separate script below:
 
@@ -116,9 +120,17 @@ fi
 
 while IFS='' read -r line; do pathways+=("$line"); done <$Pathway_file_name
 
+if [ -f "${Pathway_output_directory}Pathway_analysis_empty_pathways_info_file_run2.txt" ]; then
+	rm "${Pathway_output_directory}Pathway_analysis_empty_pathways_info_file_run2.txt"
+fi
+
+if [ -f "${Pathway_output_directory}MAGMA_empty_files_after_analysis.txt" ]; then
+	rm "${Pathway_output_directory}MAGMA_empty_files_after_analysis.txt"
+fi
+ 
 Rscript ${path_to_scripts}RscriptEcho.R\
  ${path_to_pathway_scripts}Assign_SNPS_to_genes_from_pathways.R\
- ./${training_set_name}_${validation_set_name}_extrainfo/assiging_SNPs_to_genes_from_pathways.Rout\
+ ./${training_set_name}_${validation_set_name}_extrainfo/${pathways}_assiging_SNPs_to_genes_from_pathways.Rout\
  ${training_set_name}\
  ${validation_set_name}\
  ${validation_set_usually_genotype_serial}\
@@ -127,10 +139,16 @@ Rscript ${path_to_scripts}RscriptEcho.R\
  ${path_to_stationary_data}${Gene_location_filename}\
  ${Gene_regions}\
  ${Chromosomes_to_analyse[@]}
-exit 1
+ exit 1
+
+# merge all the PGC SNPs together into one table
+Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}combining_summary_stats_tables_after_conversion_to_CHR_POS.R ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_conversion.Rout ${training_set_name} ${validation_set_name} ${Chromosomes_to_analyse[@]}
+
+chmod -R g+rwx ${path_to_scripts} 
+echo ${pathways[@]}
 
 if [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
-parallel ${path_to_pathway_scripts}creation_of_merge_list_file.sh ::: ${pathways[@]} ::: ${path_to_scripts}
+sudo parallel ${path_to_pathway_scripts}creation_of_merge_list_file.sh ::: ${pathways[@]} ::: ${path_to_scripts}
 
 else
 	exit 1

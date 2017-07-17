@@ -27,6 +27,18 @@ gene_loc_file_name <- args[8] # the name of the file containing gene locations (
 Gene_regions <- args[9] # whether to include/exclude the regulatory regions of a gene
 chromosomes_to_analyse <- as.numeric(args[c(10:length(args))])
 
+
+
+Training_name <- "HG19_pgc.scz.full.2012-04"
+Validation_name <- "ALSPAC"
+Validation_full_name_serial <- "ALSPAC_hrc_imputed_step3_mri_brain_measurements_only_chr"
+Pathway_directory <- "Pathways"
+Pathway_file_name <- "/Users/johnhubert/Dropbox/Stationary_data/Pocklington2015_134sets_LoFi.txt"
+gene_loc_file_name <-"/Users/johnhubert/Dropbox/Stationary_data/NCBI37.3.gene.loc"
+Gene_regions <- "normal"
+chromosomes_to_analyse <- seq(1,22) 
+setwd("~/Documents/CLOZUK_ALSPAC_PATHWAY_TESTING")
+  
 # Create new variables based on input files to make things easier to read # 
 First_half_of_input_genotype_file <- paste0("./", Training_name, "_", Validation_name, "_output/", Pathway_directory, "/", Validation_full_name_serial)
 Second_half_of_input_genotype_file <- paste0("_consensus_with_", Training_name, "_flipped_alleles_no_duplicates.bim")
@@ -219,13 +231,13 @@ for (i in 1:number_of_pathways_to_analyse) {
 } 
 
 #read in general MAGMA annotation file
-MAGMA.gene.regions <- fread(gene_loc_file_name, colClasses = c("numeric","character",rep("numeric",2),rep("character",2)))
+MAGMA.gene.regions <- fread(gene_loc_file_name, colClasses = c("numeric","character", rep("numeric",2), rep("character",2)))
 setnames(MAGMA.gene.regions, c("Gene","CHR","BP_START","BP_END","STRAND","GENE_NAME"))
 
 
 # loop through both chromosomes and pathway tables
 for (i in 1:number_of_pathways_to_analyse) {
-  tryCatch({
+  
   # merge the original MAGMA annotation file and the pathway file in order to get extra info including BP extensions for regulatory regions 
   assign(paste0("merged",pathway_names[i]), merge(eval(parse(text = paste0("`",pathway_names[i],"`"))), MAGMA.gene.regions, by = "Gene", all = F, sort = F), envir = .GlobalEnv)
   setkey(eval(parse(text = paste0("`","merged",pathway_names[i],"`"))),STRAND) 
@@ -241,10 +253,9 @@ for (i in 1:number_of_pathways_to_analyse) {
   setkey(current_table_name, CHR)
   current_table_name <- current_table_name[!"X"]
   assign(paste0("Gene_regions_all_",pathway_names[i]), current_table_name, envir = .GlobalEnv)
-  
+
   # Now start on the chromosomes
   for (l in chromosomes_to_analyse){
- 
     selecting_chromosomes <- fread(paste0(First_half_of_input_genotype_file, l, Second_half_of_input_genotype_file))
     names(selecting_chromosomes) <- c("CHR", "SNP", "GD", "BP", "A1", "A2")
     
@@ -252,11 +263,12 @@ for (i in 1:number_of_pathways_to_analyse) {
     
     # if there are no genes within that pathway, ignore it
     # Ideally want to use the input from last time to check but for now we already have a record, so will check at the end
-    if(nrow(temp_pathway_table) == 0) {
+   
+     if(nrow(temp_pathway_table) == 0) {
       message <- paste0(pathway_names[i],"\t",l)
-      write(message, file = paste0(output_directory,"Pathways_analysis_empty_pathways_info_file_run2.txt"), append = T)
+      write(message, file = paste0(output_directory,"remove_Pathways_analysis_empty_pathways_info_file_run2.txt"), append = T)
       next()
-    }
+     }
 
     selecting_chromosomes_BP <- selecting_chromosomes$BP
     
@@ -286,7 +298,7 @@ for (i in 1:number_of_pathways_to_analyse) {
     write.table(e$test_data_frame,file = paste0(output_directory,pathway_names[i],"_chromosome_",l,"_",Gene_regions,"_data_table.txt"),quote = F, row.names = F)
     SNPs_for_clumping <- paste0("`" ,"chromosome_", l, "_", pathway_names[i], "SNPs_for_clumping", "`")
     
-    write(eval(parse(text = e$SNPs_for_clumping)), file = paste0(output_directory,"chromosome_",l,"_", pathway_names[i],"_SNPs_for_clumping_regular_gene_regions.txt"))
+    #write(eval(parse(text = e$SNPs_for_clumping)), file = paste0(output_directory,"chromosome_",l,"_", pathway_names[i],"_SNPs_for_clumping_regular_gene_regions.txt"))
     rm(list = paste0("chromosome_",l,"_", pathway_names[i],"SNPs_for_clumping"), envir = e)
     
     
@@ -323,10 +335,24 @@ for (i in 1:number_of_pathways_to_analyse) {
     if (Gene_regions == "normal") {
       
       #### Regular gene regions ####
-      Assigning_genes(pathway_input = temp_pathway_table, clumped_SNPs = selecting_chromosomes, BP.clumped.SNPs = selecting_chromosomes_BP, chromosome.number = l, gene.regions = "regular")
+      Assigning_genes(pathway_input = temp_pathway_table, clumped_SNPs = selecting_chromosomes, BP.clumped.SNPs = selecting_chromosomes_BP, chromosome.number = l, gene.regions = "normal")
       
+
+      error_catching <- tryCatch({
       # read in MAGMA's input and add any genes which happen to be inside other genes or crossed over with other genes
+      # From previous analysis there will not be a file if no SNPs exist, so try and catch these errors and output to another file record
       GENES_to_snps <- scan(file = paste0(output_directory,l,"_",Training_name,"_",Validation_name,"_SNPs_",pathway_names[i],"_pathway_temp.genes.annot"), what = "", sep = "\n")
+      }, error=function(e){cat("Pathway",pathway_names[i],"on chromosome",l,"must_be_empty,check with MAGMA errors\n")
+                       message <- paste0(pathway_names[i],"\t",l)
+                       write(message, file = paste0(output_directory,"MAGMA_empty_files_after_analysis.txt"), append = T)
+                       list(next_loop = T)
+                       })
+      
+      if (!is.null(attributes(error_catching))){
+        rm("error_catching")
+        next()
+      }
+      
       y <- strsplit(GENES_to_snps, "[[:space:]]+")
       names(y) <- sapply(y, '[[', 1)
       y <- lapply(y, '[', -1)
@@ -342,9 +368,8 @@ for (i in 1:number_of_pathways_to_analyse) {
       assign("SNPs_for_clumping", unique(e$test_data_frame$SNP), envir = e)
       
       write.table(e$test_data_frame,file = paste0(output_directory,pathway_names[i],"_chromosome_",l,"_",Gene_regions,"_data_table.txt"),quote = F, row.names = F)
-      write(e$SNPs_for_clumping, file = paste0(output_directory,"chromosome_",l,"_", pathway_names[i],"_SNPs_for_clumping_regular_gene_regions.txt"))
-      rm(list = paste0("chromosome_",l,"_", pathway_names[i],"SNPs_for_clumping"), envir = e)
       
+      write(e$SNPs_for_clumping, file = paste0(output_directory,"chromosome_",l,"_", pathway_names[i],"_SNPs_for_clumping_regular_gene_regions.txt"))
     }
     
     if (Gene_regions == "extended") {
@@ -379,9 +404,9 @@ for (i in 1:number_of_pathways_to_analyse) {
     ## End of loops    
 
   }
-  }, error=function(e){cat("Pathway",pathway_names[i],"on chromosome",l,"must_be_empty,check with MAGMA errors")})
-}
 
+}
+      
 
 unread_pathways_one <- fread(paste0(output_directory,"Pathways_analysis_empty_pathways_info_file.txt"))
 unread_pathways_two <- fread(paste0(output_directory,"Pathways_analysis_empty_pathways_info_file_run2.txt"))
@@ -394,6 +419,7 @@ combined_pathways <- merge(x=unread_pathways_one,y=unread_pathways_one,by= c("pa
 if (ncol(combined_pathways) != 2){
   stop("different pathways used after magma analysis, check empty pathways file")
 }
+warnings()
 
 
 
