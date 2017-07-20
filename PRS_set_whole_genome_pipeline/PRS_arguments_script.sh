@@ -64,12 +64,12 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   path_to_stationary_data="/Users/johnhubert/Dropbox/Stationary_data/" 
   
   # Datasets
-  training_set_usually_summary="HG19_pgc.scz.full.2012-04_table${chromosome_number}"
-  training_set_original_filename="HG19_pgc.scz.full.2012-04.txt"
+  training_set_usually_summary="CLOZUK_PGC2noclo_table${chromosome_number}"
+  training_set_original_filename="CLOZUK_PGC2noclo.METAL.assoc.dosage"
   validation_set_usually_genotype="ALSPAC_hrc_imputed_step3_mri_brain_measurements_only_chr${chromosome_number}"
   validation_set_usually_genotype_serial="ALSPAC_hrc_imputed_step3_mri_brain_measurements_only_chr"
   validation_set_full_name_without_chromosome="ALSPAC_hrc_imputed_step3_mri_brain_measurements_only"
-  training_set_name="HG19_pgc.scz.full.2012-04"
+  training_set_name="CLOZUK_PGC2noclo"
   validation_set_name="ALSPAC" 
   Pathway_filename="Pocklington2015_134sets_LoFi.txt"
   Gene_location_filename="NCBI37.3.gene.loc"
@@ -83,7 +83,7 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   INFO_threshold=0.9
   SE_summary="FALSE"
   SE_threshold=5
-  Raven_out_info_directory="/Volumes/PhD_storage/${training_set_name}_${validation_set_name}_clumping_log_files/"
+  Raven_out_info_directory="${training_set_name}_${validation_set_name}_clumping_log_files/"
   # The number of chromosomes you wish to analyse (PRS_serial)
   Chromosomes_to_analyse=(`seq 1 22`)
   # Clumping Arguments
@@ -95,7 +95,7 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   Multiple_Training_set_tables="TRUE"
   Running_in_Serial="TRUE"
   sig_thresholds=(0.05 0.5)
-  Extra_analyses=TRUE
+  Extra_analyses=FALSE
   Name_of_extra_analysis=Pathways
   Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates"
   # either "extended" "normal" or "both" : change to a numerical input in the future

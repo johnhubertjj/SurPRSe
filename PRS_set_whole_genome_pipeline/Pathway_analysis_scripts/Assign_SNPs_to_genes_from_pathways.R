@@ -411,8 +411,8 @@ for (i in 1:number_of_pathways_to_analyse) {
 unread_pathways_one <- fread(paste0(output_directory,"Pathways_analysis_empty_pathways_info_file.txt"))
 unread_pathways_two <- fread(paste0(output_directory,"Pathways_analysis_empty_pathways_info_file_run2.txt"))
 
-setnames(unread_pathways_one,c("pathways,chromosome"))
-setnames(unread_pathways_two,c("pathways,chromosome"))
+setnames(unread_pathways_one,c("pathways","chromosome"))
+setnames(unread_pathways_two,c("pathways","chromosome"))
 
 combined_pathways <- merge(x=unread_pathways_one,y=unread_pathways_one,by= c("pathways, chromosome"), all = TRUE)
 

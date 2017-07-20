@@ -8,7 +8,9 @@
 #PBS -o /home/c1020109/merging_datasets_PRS_information
 #PBS -N merging_datasets_and_calculating_PRS
 
-cd $PBS_O_WORKDIR
+if [[ "$whereami" == *"raven"* ]]; then
+	cd $PBS_O_WORKDIR
+fi
 
 # Run locally or on ARCCA
 whereami=$(uname -n)
@@ -44,11 +46,14 @@ if [[ "$whereami" == *"raven"* ]]; then
 
 elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
 
-  cd /Volumes/PhD_storage/
-  
+   
   # Arguments
   path_to_scripts='/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/'
-   
+  Directory_to_work_from=$1
+  
+  #Change to correct directory (just in case)
+  cd ${Directory_to_work_from}
+
   # Assign the shell variables
   source ${path_to_scripts}/PRS_arguments_script.sh
   cat ${path_to_scripts}/PRS_arguments_script.sh
@@ -80,6 +85,22 @@ if [[ "$whereami" == *"raven"* ]]; then
 	fi
 	shopt -u nullglob #disable
 	cd $PBS_O_WORKDIR
+fi
+
+if [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
+	shopt -s nullglob
+	set -- *Rtestoutclusterlogfile*
+	if [ "$#" -gt 0 ]; then
+		if [[ ! -d ${Raven_out_info_directory} ]]; then
+			mkdir ${Raven_out_info_directory} 
+		fi
+		cp *Rtestoutclusterlogfile* ${Raven_out_info_directory}
+	else
+		  
+		echo "cannot find raven output scripts, check jobid from batch run (*POLYGENIC_RISK_SCORE* script) and add to end of *new_PRS_argument* script in relevant extrainfo directory"
+		exit 1
+	fi
+	shopt -u nullglob #disable
 fi
 
 # Run Rscript to find out the important information from the previous run

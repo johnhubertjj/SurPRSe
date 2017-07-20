@@ -38,10 +38,18 @@ setnames(unread_pathways_two, c("Pathway","chromosome"))
 unread_pathways_total <- rbind(unread_pathways_one,unread_pathways_two)
 
 items_to_remove <- unread_pathways_total[which(unread_pathways_total$Pathway == current_pathway)]
+dimensions_of_items_to_remove <- dim(items_to_remove)
 
-if (nrow(items_to_remove > 0)){
+
+if (dimensions_of_items_to_remove[1] != 0){
   chromosomes_not_involved <- as.vector(items_to_remove$chromosome)
   chromosomes_to_parse <- chromosomes_to_parse[! chromosomes_to_parse %in% chromosomes_not_involved]
+}
+
+if(length(chromosomes_to_parse) == 0){
+  cat("No SNPs found for pathway ",current_pathway," analysis will stop")
+  write(x = current_pathway, file = "Pathways_with_no_SNPs.txt",append = T)
+  stop()
 }
 
 new_data_frame <- data.frame(filenames=rep(0,length(chromosomes_to_parse)))
