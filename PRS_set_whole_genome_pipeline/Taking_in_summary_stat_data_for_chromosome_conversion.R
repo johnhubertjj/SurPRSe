@@ -37,18 +37,28 @@ print(Chromosomes_to_split)
 What_summary_columns_do_we_have <- function(Parsing_colnames){
 
 ## what type of files do we have?
-if(length(grep("\\bCHR\\b", Parsing_colnames)) == 1){
+if(length(grep("\\bCHR\\b", Parsing_colnames)) == 1 | length(grep("\\bHG19CHR\\b", Parsing_colnames)) == 1 ){
   Chromosome_name <- "CHR_name=TRUE"
+  if(length(grep("\\bHG19CHR\\b", Parsing_colnames)) == 1){
+      place.of.change.snp <- grep("\\bHG19CHR\\b", Parsing_colnames)
+      Parsing_colnames[place.of.change.snp] <- "CHR"
+  }
+
 }else{
   Chromosome_name <- "CHR_name=FALSE"  
 }
 
-if(length(grep("\\bSNP\\b", Parsing_colnames)) == 1 | length(grep("\\bMARKERNAME\\b", Parsing_colnames)) == 1){
+if(length(grep("\\bSNP\\b", Parsing_colnames)) == 1 | length(grep("\\bMARKERNAME\\b", Parsing_colnames)) == 1 | length(grep("\\bSNPID\\b", Parsing_colnames)) == 1){
   SNP_name <- "SNP_name=TRUE"
   if(length(grep("\\bMARKERNAME\\b", Parsing_colnames)) == 1){
       place.of.change.snp <- grep("\\bMARKERNAME\\b", Parsing_colnames)
       Parsing_colnames[place.of.change.snp] <- "SNP"
   }
+  if(length(grep("\\bSNPID\\b", Parsing_colnames)) == 1){
+      place.of.change.snp <- grep("\\bSNPID\\b", Parsing_colnames)
+      Parsing_colnames[place.of.change.snp] <- "SNP"
+  }
+
 }else{
   SNP_name <- "SNP_name=FALSE"  
   stop("Training dataset does NOT have a 'SNP' column essential for the pipeline to work, please add a 'SNP' column")

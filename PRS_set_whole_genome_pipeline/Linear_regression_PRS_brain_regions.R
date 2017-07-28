@@ -4,8 +4,11 @@ ptm <- proc.time()
 #Print R version
 getRversion()    
 
-devtools::install_github('hadley/ggplot2')
+# devtools::install_github('hadley/ggplot2')
+
 library(ggplot2)
+library(gridExtra)
+
 # required packages -- will only install if they are not already installed
 list.of.packages <- c("plyr", "stringr", "dplyr", "tidyr", "reshape2", "ggplot2", "scales", "data.table", "plotly")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
@@ -35,7 +38,10 @@ print(significance_thresholds)
 
 
 Training_names <- c("HG19_pgc.scz.full.2012-04", "scz.swe.pgc1.results.v3","PGC2","CLOZUK_PGC2noclo")
-
+#Validation_name <- "ALSPAC"
+#Scale_phenotypes <- F
+#Scale_PRS <- T
+#significance_thresholds <- c(0.05, 0.5)
 
 for (Training_name in Training_names){ 
 #Training_name <- "PGC2"
@@ -72,7 +78,7 @@ setnames(Pheno_brain_thickness,old = "SubjID", new = "FID")
 DATA_pheno <- join_all(list(Pheno_brain_thickness, Pheno_brain_volume), by=c("FID", "kz021", "age", "ICV"), type='inner')
 
 if (Scale_phenotypes == T){
-  DATA_pheno_scaled <- cbind(DATA_pheno[,1:3],(scale(DATA_pheno[,4:ncol(DATA_pheno)],center = T, scale = T)))
+  DATA_pheno_scaled <- cbind(DATA_pheno[,1:3],(scale(DATA_pheno[,4:ncol(DATA_pheno)], center = T, scale = T)))
   DATA_pheno <- DATA_pheno_scaled
 }
 
@@ -150,7 +156,7 @@ assign(paste0("results_ICV",Training_name), results2)
 
 
 # Write the file name relevant to the results you have produced
-write.table(results, file = "all_scaled_PGC1_no_sweden_HG19_UCSC_ALSPAC_brain_regions_association_PRS_results.txt", row.names = F, quote = F)
+#write.table(results, file = "all_scaled_PGC1_no_sweden_HG19_UCSC_ALSPAC_brain_regions_association_PRS_results.txt", row.names = F, quote = F)
 
 
 ### I would stop here Eleonora ####
@@ -160,9 +166,8 @@ write.table(results, file = "all_scaled_PGC1_no_sweden_HG19_UCSC_ALSPAC_brain_re
 #results4 <- fread("CLOZUK_PGC2noclo_HG19_UCSC_ALSPAC_brain_regions_association_PRS_results.txt")
 
 
-
+# Place the results into a list
 brain_volume_progression <- list(`results_HG19_pgc.scz.full.2012-04`, results_scz.swe.pgc1.results.v3, results_PGC2, results_CLOZUK_PGC2noclo)
-
 ICV_progression <- list(`results_ICVHG19_pgc.scz.full.2012-04`, results_ICVscz.swe.pgc1.results.v3, results_ICVPGC2, results_ICVCLOZUK_PGC2noclo)
 
 #results_scaled_1 <- fread("~/Documents/CLOZUK_PGC2noclo.METAL/all_scaled_PGC1_no_sweden_HG19_UCSC_ALSPAC_brain_regions_association_PRS_results.txt")
@@ -171,81 +176,6 @@ ICV_progression <- list(`results_ICVHG19_pgc.scz.full.2012-04`, results_ICVscz.s
 #results_scaled_4 <- fread("~/Documents/CLOZUK_PGC2noclo.METAL/all_scaled_CLOZUK_PGC2noclo_HG19_UCSC_ALSPAC_brain_regions_association_PRS_results.txt")
 
 #brain_volume_progression_scaled <- list(results_scaled_1, results_scaled_2, results_scaled_3, results_scaled_4)
-
-# Creating plots for un-scaled variables
-newdataframe <- data.frame(brain_volume_progression[[1]]$test,brain_volume_progression[[1]]$p, brain_volume_progression[[2]]$p, brain_volume_progression[[3]]$p, brain_volume_progression[[4]]$p)
-names(newdataframe) <- c("test", "PGC1", "PGC1swe", "PGC2", "QCLOZUK_PGC2noclo")
-test_df <- t(newdataframe)
-colnames(test_df) <- as.character(test_df[1,])
-test_df <- test_df[-1,]
-test_df <- cbind(test_df,c("PGC1", "PGC1swe", "PGC2", "QCLOZUK_PGC2noclo"))
-test_df <- as.data.frame(test_df)
-
-library(plotly)
-newdataframe1 <- newdataframe[1:36,]
-newdataframe2 <- newdataframe[37:72,]
-test <- stack(newdataframe1)
-names(test) <- c("P_value", "Dataset")
-test$v3 <- rep(newdataframe1$test, 4)
-
-p <- plot_ly(test,x=~Dataset, y = ~P_value, type = 'scatter')
-
-  for (i in 1:36){
-    p <- add_trace(p, x = test_df$V73, y = test_df[,i], name = phenotypes[i], mode = "lines",type = 'scatter')
-  }
-p
-
-test <- stack(newdataframe2)
-
-names(test) <- c("P_value", "Dataset")
-test$v3 <- rep(newdataframe2$test, 4)
-p2 <- plot_ly(test,x=~Dataset, y = ~P_value, type = 'scatter')
-
-for (i in 37:72){
-  p2 <- add_trace(p2, x = test_df$V73, y = test_df[,i], name = phenotypes[i-36], mode = "lines",type = 'scatter')
-}
-p2
-
-
-
-r2_dataframe <- data.frame(brain_volume_progression[[1]]$test,brain_volume_progression[[1]]$r.squared, brain_volume_progression[[2]]$r.squared, brain_volume_progression[[3]]$r.squared, brain_volume_progression[[4]]$r.squared)
-names(r2_dataframe) <- c("test", "PGC1", "PGC1swe", "PGC2", "QCLOZUK_PGC2noclo")
-test_df <- t(r2_dataframe)
-colnames(test_df) <- as.character(test_df[1,])
-test_df <- test_df[-1,]
-test_df <- cbind(test_df,c("PGC1", "PGC1swe", "PGC2", "QCLOZUK_PGC2noclo"))
-test_df <- as.data.frame(test_df)
-
-
-r2dataframe1 <- r2_dataframe[1:36,]
-r2dataframe2 <- r2_dataframe[37:72,]
-test <- stack(r2dataframe1)
-names(test) <- c("rsquared", "Dataset")
-test$v3 <- rep(r2dataframe1$test, 4)
-
-r2_1 <- plot_ly(test,x=~Dataset, y = ~rsquared, type = 'scatter')
-
-for (i in 1:36){
-  r2_1 <- add_trace(r2_1, x = test_df$V73, y = test_df[,i], name = phenotypes[i], mode = "lines",type = 'scatter')
-}
-r2_1
-
-test <- stack(r2dataframe2)
-
-names(test) <- c("rsquared", "Dataset")
-test$v3 <- rep(r2dataframe2$test, 4)
-r2_2 <- plot_ly(test,x=~Dataset, y = ~rsquared, type = 'scatter')
-
-for (i in 37:72){
-  r2_2 <- add_trace(r2_2, x = test_df$V73, y = test_df[,i], name = phenotypes[i-36], mode = "lines",type = 'scatter')
-}
-r2_2
-
-plotly_POST(p, filename = "brain_regions_PRS_pthres0.05_pvalue", sharing = "secret")
-plotly_POST(p2, filename = "brain_regions_PRS_pthres0.5_pvalue", sharing = "secret")
-
-plotly_POST(r2_1, filename = "brain_regions_PRS_pthres0.05_r2", sharing = "secret")
-plotly_POST(r2_2, filename = "brain_regions_PRS_pthres0.5_r2", sharing = "secret")
 
 
 ## PLOTS OF BETA AND SE (AND CI) ## 
@@ -257,15 +187,10 @@ test_df_beta <- test_df[-1,]
 test_df_beta <- cbind(test_df_beta,c("PGC1", "PGC1swe", "PGC2", "QCLOZUK_PGC2noclo"))
 test_df_beta <- as.data.frame(test_df_beta)
 
-BETA_dataframe1 <- newdataframe_beta[1:44,]
-BETA_dataframe2 <- newdataframe_beta[45:88,]
-test_beta <- melt(BETA_dataframe1, id.vars="test")
-names(test_beta) <- c("Brain_region", "Dataset","BETA")
-
-test_beta_0.5 <- melt(BETA_dataframe2,id.vars="test")
-names(test_beta_0.5) <- c("Brain_region", "Dataset","BETA")
 
 
+number_of_phenotypes <- length(phenotypes)
+number_of_thresholds <- length(significance_thresholds)
 
 newdataframe_SE <- data.frame(brain_volume_progression[[1]]$test,brain_volume_progression[[1]]$SE, brain_volume_progression[[2]]$SE, brain_volume_progression[[3]]$SE, brain_volume_progression[[4]]$SE)
 names(newdataframe_SE) <- c("test", "PGC1", "PGC1swe", "PGC2", "QCLOZUK_PGC2noclo")
@@ -275,42 +200,91 @@ test_df_SE <- test_df_SE[-1,]
 test_df_SE <- cbind(test_df_SE,c("PGC1", "PGC1swe", "PGC2", "QCLOZUK_PGC2noclo"))
 test_df_SE <- as.data.frame(test_df_SE)
 
-SE_dataframe1 <- newdataframe_SE[1:44,]
-SE_dataframe2 <- newdataframe_SE[45:88,]
-test_SE <- melt(SE_dataframe1, id.vars="test")
+# create the first dataset for one significance threshold
+if(length(number_of_thresholds) > 1){
+BETA_dataframe_current <- newdataframe_beta[1:number_of_phenotypes,]
+test_beta <- melt(BETA_dataframe_current, id.vars="test")
+names(test_beta) <- c("Brain_region", "Dataset","BETA")
+
+SE_dataframe_current <- newdataframe_SE[1:number_of_phenotypes,]
+test_SE <- melt(SE_dataframe_current, id.vars="test")
 names(test_SE) <- c("Brain_region", "Dataset","SE")
-
-
-test_SE_0.5 <- melt(SE_dataframe2, id.vars="test")
-names(test_SE_0.5) <- c("Brain_region", "Dataset","SE")
-
-test_SE_0.5$SE <- as.numeric(test_SE_0.5$SE)
 test_SE$SE <- as.numeric(test_SE$SE)
 test_beta$BETA <- as.numeric(test_beta$BETA)
-test_beta_0.5$BETA <- as.numeric(test_beta_0.5$BETA)
-
-Beta_se_plots_0.5 <- cbind(test_beta_0.5,test_SE_0.5$SE)
-Beta_se_plots_0.5$upper <- Beta_se_plots_0.5$BETA + Beta_se_plots_0.5$`test_SE_0.5$SE`
-Beta_se_plots_0.5$lower <- Beta_se_plots_0.5$BETA - Beta_se_plots_0.5$`test_SE_0.5$SE`
-
 Beta_se_plots <- cbind(test_beta,test_SE$SE)
 Beta_se_plots$upper <- Beta_se_plots$BETA + Beta_se_plots$`test_SE$SE`
 Beta_se_plots$lower <- Beta_se_plots$BETA - Beta_se_plots$`test_SE$SE`
-
-Beta_se_plots$P_Value_threshold <- c(rep(significance_thresholds[1],144))
-Beta_se_plots_0.5$P_Value_threshold <- c(rep(significance_thresholds[2],144))
-
+number_of_datasets <- nrow(test_df_beta)
+Beta_se_plots$P_Value_threshold <- c(rep(significance_thresholds[1],number_of_phenotypes*number_of_datasets))  
 names(Beta_se_plots) <- c("Brain_region", "Dataset","BETA", "SE", "upper", "lower", "Pvaluethreshold")
-names(Beta_se_plots_0.5) <- c("Brain_region", "Dataset","BETA", "SE", "upper", "lower", "Pvaluethreshold")
+all_plots <- Beta_se_plots
+
+# Loop through the rest based on the number of significance thresholds you have
 
 
-all_plots <- rbind(Beta_se_plots,Beta_se_plots_0.5)
+for (i in 2:number_of_thresholds){
+  # This looks complicated but all i am essentially saying is this:
+  # for my current dataframe, find out the number of phenotypes (in this case 44)
+  # multiply that by the significance threshold we are currently on (because we are going to have 44 rows of that significance threshold) eg 44 * 1  + 1(because we have 2 signifance thresholds)
+  # That row (row 45) is the row which starts with a new significance threshold of 0.5
+  # then take all the rows up to the last phenotype (44*2) = 88 (in this case our last row)
+  # now do the same as above on this subsection of data...
+  
+  BETA_dataframe_current <- newdataframe_beta[(((number_of_phenotypes)*(i-1)) + 1):number_of_phenotypes*i,]
+  test_beta_to_add <- melt(BETA_dataframe_current, id.vars="test")
+  names(test_beta_to_add) <- c("Brain_region", "Dataset","BETA")
+  
+  SE_dataframe_current <- newdataframe_SE[1:number_of_phenotypes,]
+  test_SE_to_add <- melt(SE_dataframe_current, id.vars="test")
+  names(test_SE_to_add) <- c("Brain_region", "Dataset","SE")
+  test_SE_to_add$SE <- as.numeric(test_SE_to_add$SE)
+  test_beta_to_add$BETA <- as.numeric(test_beta_to_add$BETA)
+  Beta_se_plots_to_add <- cbind(test_beta_to_add,test_SE_to_add$SE)
+  Beta_se_plots_to_add$upper <- Beta_se_plots_to_add$BETA + Beta_se_plots_to_add$`test_SE$SE`
+  Beta_se_plots_to_add$lower <- Beta_se_plots_to_add$BETA - Beta_se_plots_to_add$`test_SE$SE`
+  # repeat the same significance threshold over and over again
+  Beta_se_plots_to_add$P_Value_threshold <- c(rep(significance_thresholds[i],number_of_phenotypes*number_of_datasets))  
+  names(Beta_se_plots_to_add) <- c("Brain_region", "Dataset","BETA", "SE", "upper", "lower", "Pvaluethreshold")
+  
+  all_plots <- rbind(all_plots,Beta_se_plots_to_add)
+}
+}
+
 all_plots$Pvaluethreshold <- as.factor(all_plots$Pvaluethreshold)
 gglist_0.05 <- list() 
 
+## Scatter Plots with SE error bars ##
+for (i in 1:number_of_phenotypes){
+  # Plots for Betas and SE based on files #
+  p <- ggplot(all_plots[c(i,i+number_of_phenotypes,i+(number_of_phenotypes*2),i+(number_of_phenotypes*3), i+(number_of_phenotypes*4), i+(number_of_phenotypes*5), i+(number_of_phenotypes*6), i+(number_of_phenotypes*7)),], aes(x=Dataset, y=BETA, fill = Pvaluethreshold, group=Dataset))
+  
+  p <- p +
+    geom_errorbar(aes(ymin = upper, ymax = lower), position = "dodge", width = 0.25) +
+    geom_point()
+  
+  p <- p + scale_x_discrete(labels=c("PGC1" = "PGC1", "PGC1swe" = "PGC1swe", "PGC2" = "PGC2", "QCLOZUK_PGC2noclo" = "CLOZUK"))
+  p <- p + facet_grid(. ~ Pvaluethreshold) +
+    theme(strip.text.x = element_text(size = 10))
+  p <- p + scale_fill_discrete(guide=FALSE)
+  p <- p + theme(axis.text.x = element_text(size = 7))
+  p <- p + ggtitle(all_plots$Brain_region[i])
+  p <- p + theme(plot.title = element_text( face = "bold",hjust = 0.5))
+  
+  gglist_0.05[[i]] <- p
+}
+
+setwd("~/Desktop/")
+
+
+pdf("Brain_area_plots_mark_3_only_zscoring_brain_regions_including_averaged_hemispheres_for_subcortical_avrg_after_standardising.pdf", onefile = TRUE)
+invisible(lapply(gglist_0.05,print))
+dev.off()
+
+
+
 for (i in 1:44){
   # Plots for Betas and SE based on files #
-  p <- ggplot(all_plots[c(i,i+44,i+88,i+132, i+176, i+220, i+264, i+308),], aes(Dataset, BETA, fill = Pvaluethreshold, group= Dataset))
+  p <- ggplot(all_plots[c(i,i+44,i+88,i+132, i+176, i+220, i+264, i+308),], aes(x=Dataset, y=BETA, fill = Pvaluethreshold, group=Dataset))
   
   p <- p +
     geom_col(position = "dodge") +
@@ -327,13 +301,8 @@ for (i in 1:44){
 }
 
 
-setwd("~/Desktop/")
 
-library(gridExtra)
 
-pdf("Brain_area_plots_mark_3_only_zscoring_brain_regions_including_averaged_hemispheres_for_subcortical_avrg_after_standardising.pdf", onefile = TRUE)
-invisible(lapply(gglist_0.05,print))
-dev.off()
 
 
 
@@ -464,3 +433,5 @@ gglist_0.05 <- list()
   
   p
 }
+
+

@@ -17,6 +17,8 @@ print(args)
 # Specify the different input tables #
 Training_name <- args[3]
 Validation_name <- args [4]
+
+# This will be a problem, write in a script that defines what the arguments are (probably have to be linked with the arguments script however...stop unneeded analysis)
 significance_thresholds <- as.numeric(args[c(5:length(args))])
 print(significance_thresholds)
 

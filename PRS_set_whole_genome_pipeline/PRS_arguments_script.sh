@@ -38,14 +38,14 @@ if [[ "$whereami" == *"raven"* ]]; then
   # The number of chromosomes you wish to analyse (PRS_serial)
   Chromosomes_to_analyse=(`seq 1 22`) 
   # Clumping Arguments
-  p1=0.5
-  p2=0.5
+  p1=1
+  p2=1
   r2=0.1
   window=500
   # PRS_serial arguments
   Multiple_Training_set_tables="TRUE"
   Running_in_Serial="TRUE"
-  sig_thresholds=(0.05 0.5)
+  sig_thresholds=(5e-08 1e-06 1e-04 0.01 0.05 0.1 0.2 0.5 1)
   Extra_analyses=TRUE
   Name_of_extra_analysis=Pathways
   Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates" 
@@ -64,12 +64,12 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   path_to_stationary_data="/Users/johnhubert/Dropbox/Stationary_data/" 
   
   # Datasets
-  training_set_usually_summary="CLOZUK_PGC2noclo_table${chromosome_number}"
+  training_set_usually_summary="CLOZUK_PGC2noclo_more_sig_thresh_table${chromosome_number}"
   training_set_original_filename="CLOZUK_PGC2noclo.METAL.assoc.dosage"
   validation_set_usually_genotype="ALSPAC_hrc_imputed_step3_mri_brain_measurements_only_chr${chromosome_number}"
   validation_set_usually_genotype_serial="ALSPAC_hrc_imputed_step3_mri_brain_measurements_only_chr"
   validation_set_full_name_without_chromosome="ALSPAC_hrc_imputed_step3_mri_brain_measurements_only"
-  training_set_name="CLOZUK_PGC2noclo"
+  training_set_name="CLOZUK_PGC2noclo_more_sig_thresh"
   validation_set_name="ALSPAC" 
   Pathway_filename="Pocklington2015_134sets_LoFi.txt"
   Gene_location_filename="NCBI37.3.gene.loc"
@@ -87,14 +87,14 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   # The number of chromosomes you wish to analyse (PRS_serial)
   Chromosomes_to_analyse=(`seq 1 22`)
   # Clumping Arguments
-  p1=0.5
-  p2=0.5
+  p1=1
+  p2=1
   r2=0.1
   window=500
   # Arguments for PRS_serial script
   Multiple_Training_set_tables="TRUE"
   Running_in_Serial="TRUE"
-  sig_thresholds=(0.05 0.5)
+  sig_thresholds=(5e-08 1e-06 1e-04 0.01 0.05 0.1 0.2 0.5 1)
   Extra_analyses=FALSE
   Name_of_extra_analysis=Pathways
   Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates"

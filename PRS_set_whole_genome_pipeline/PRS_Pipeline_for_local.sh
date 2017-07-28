@@ -21,7 +21,7 @@ if [ "${Extra_analyses[1]}" = "TRUE" ]; then
 	fi
 else
 	# calculate polygenic scores for the whole genome across different chromosomes	
-#	sudo parallel ${path_to_scripts}POLYGENIC_RISK_SCORE_ANALYSIS_CLOZUK_PRS_JOB_ARRAY.sh ::: ${chromosomes[@]} ::: ${Directory_to_work_from}
+	sudo parallel ${path_to_scripts}POLYGENIC_RISK_SCORE_ANALYSIS_CLOZUK_PRS_JOB_ARRAY.sh ::: ${chromosomes[@]} ::: ${Directory_to_work_from}
 	
 	# Need an alternative to Raven's log files to extract locally on the computer probably output important information to one file
 	sh ${path_to_scripts}PRS_ANALYSIS_SERIAL_no_set.sh ${Directory_to_work_from}
