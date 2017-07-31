@@ -48,3 +48,4 @@ printf "%s\n\n" "$(tail -n +2 ${Pathway_output_directory}/${pathways}/CLUMPED_EX
 # Create clumped plink files
 plink --bfile ${Pathway_output_directory}/${pathways}/${pathways}_Clumping_input --extract ${Pathway_output_directory}/${pathways}/CLUMPED_EXTRACT_${validation_set_name}_${pathways}.txt --make-bed --out ${Pathway_output_directory}/${pathways}/${validation_set_name}_${training_set_name}_${pathways}_Clumped_whole_genome_final
 
+chmod -R a+rwx ${Pathway_output_directory}/${pathways} 

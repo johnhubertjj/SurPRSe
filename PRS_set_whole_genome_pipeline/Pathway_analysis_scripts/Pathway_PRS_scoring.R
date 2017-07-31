@@ -1,54 +1,100 @@
 #####################################
 ###########PRS PER PATHWAY###########
 #####################################
+### Start Timer
+ptm <- proc.time()
+
+### Library
+library(data.table)
+library(parallel)
+library(base)
+
+### environment for functions
+e <- new.env()
+
+## set wd
+setwd(".")
+
+########################################
+# adding in arguments from BASH script #
+########################################
+args <- commandArgs(trailingOnly = T)
+getwd()
+print(args)
+
+# Specify the different input tables #
+Training_name <- args[3]
+Validation_name <- args [4]
+Pathway_directory <- args[5]
+Pathway_file_name <- args[6] # the name of the file to be accessed (must be in stationary directory)
+
+# This will be a problem, write in a script that defines what the arguments are (probably have to be linked with the arguments script however...stop un-needed analysis)
+significance_thresholds <- as.numeric(args[c(7:length(args))])
+print(significance_thresholds)
+
+#Training_name <- "HG19_pgc.scz.full.2012-04"
+#Validation_name <- "ALSPAC"
+#Pathway_directory <- paste0("./", Training_name, "_", Validation_name,"_output/Pathways/")
+#Pathway_file_name <- "/Users/johnhubert/Dropbox/Stationary_data/Pocklington2015_134sets_LoFi.txt"
+#significance_thresholds <- c(0.05, 0.5)
 
 
+##### read in pathway sets and standardise column names
+pathway_sets <- fread(Pathway_file_name)
+setnames(pathway_sets, c("Pathway", "Gene"))
 
-library("data.table")
+#extract names of each pathway
+factorise_column_1<- as.factor(pathway_sets$Pathway)
+pathway_names <- levels(factorise_column_1)
+number_of_pathways_to_analyse <- length(pathway_names)
 
-#SCORING#
-Useful_pathways <- c("FMRP_targets", "abnormal_behavior", "abnormal_nervous_system_electrophysiology", "abnormal_learning_memory_conditioning", "abnormal_CNS_synaptic_transmission", "Cav2_channels", "abnormal_synaptic_transmission", "5HT_2C", "abnormal_long_term_potentiation", "abnormal_motor_capabilities_coordination_movement", "abnormal_behavioral_response_to_xenobiotic", "abnormal_associative_learning", "Lek2015_LoFintolerant_90", "BGS_top2_mean", "BGS_top2_max")
-PGC_final <- fread("combined_PGC_table_with_CHR.POS_identifiers.txt")
-p.value.thresholds <- c(0.0001, 0.001, 0.01, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.8, 1)
+#pathway_names <- pathway_names[1:3]
+#number_of_pathways_to_analyse <- 3
 
-for (i in 1:length(Useful_pathways)) {
-  Maindir <- paste0("~/Documents/testing_PRS_chromosome_22/test_chr5/output/", Useful_pathways[i])
-  scoredir <- "score"
-  profiledir <- "Profile"
-  if (file.exists(scoredir) == FALSE){
-    dir.create(file.path(Maindir, scoredir))
-  }
-  if (file.exists(profiledir) == FALSE){
-    dir.create(file.path(Maindir, profiledir))
-  }
+# Read in summary_stats_data
+Summary_stats_full_dataset <- fread(paste0("./", Training_name, "_", Validation_name,"_output/combined_", Training_name, "_table_with_CHR.POS_identifiers.txt"))
+
+calculating_scores <- function(i,Summary_stats_full_dataset, Validation_name, Training_name, Pathway_directory, pathway_names){
   
-  scoring_output_file <- paste0(Useful_pathways[i],"/scoring_PGC_CLOZUK_pathway", Useful_pathways[i])
-  Current_pathway <- fread(paste0(Useful_pathways[i],"/pathways_CLOZUK_GWAS_BGE_CLUMPED_",Useful_pathways[i],".bim")) 
-  path_to_pathway_plink_file <- paste0(Useful_pathways[i],"/pathways_CLOZUK_GWAS_BGE_CLUMPED_",Useful_pathways[i])                         
-  setnames(Current_pathway,c("CHR","SNP","GD","BP","A1","A2"))                        
-  combined.CLOZUK.PGC.clumped.Genomic.SNPs <- merge(Current_pathway, PGC_final, by.x="SNP", by.y="SNP", all=F, sort=F)
-  combined.CLOZUK.PGC.clumped.Genomic.SNPs$A1.y <- toupper(combined.CLOZUK.PGC.clumped.Genomic.SNPs$A1.y)
-  combined.CLOZUK.PGC.clumped.Genomic.SNPs$A2.y <- toupper(combined.CLOZUK.PGC.clumped.Genomic.SNPs$A2.y)
+# Read in pathway_bim_file
+test_pathway <- fread(paste0(Pathway_directory, pathway_names[i],"/",Validation_name,"_",Training_name,"_",pathway_names[i],"_Clumped_whole_genome_final.bim"))
+
+                      
+#for (i in 1:length(Useful_pathways)) {
+#  Maindir <- paste0("~/Documents/testing_PRS_chromosome_22/test_chr5/output/", Useful_pathways[i])
+#  scoredir <- "score"
+#  profiledir <- "Profile"
+#  if (file.exists(scoredir) == FALSE){
+#    dir.create(file.path(Maindir, scoredir))
+#  }
+#  if (file.exists(profiledir) == FALSE){
+#    dir.create(file.path(Maindir, profiledir))
+#  }
+#}
+
+  scoring_output_file <- paste0(Pathway_directory,pathway_names[i],"/scoring_",Training_name,"_",Validation_name,"_pathway_",pathway_names[i])
+
+  #path_to_pathway_plink_file <- paste0(Useful_pathways[i],"/pathways_CLOZUK_GWAS_BGE_CLUMPED_",Useful_pathways[i])                         
   
-  ## Change so that the SNPs with SE >= 5 are removed
-  SNPs_removed <- combined.CLOZUK.PGC.clumped.Genomic.SNPs [SE >= 5]
-  combined.CLOZUK.PGC.clumped.Genomic.SNPs <- combined.CLOZUK.PGC.clumped.Genomic.SNPs[!SE >= 5]
+  setnames(test_pathway,c("CHR","SNP","GD","BP","A1","A2"))  
+  
+  combined.test.training.clumped.Genomic.SNPs <- merge(test_pathway, Summary_stats_full_dataset, by.x="SNP", by.y="SNP", all=F, sort=F)
+  combined.test.training.clumped.Genomic.SNPs$A1.y <- toupper(combined.test.training.clumped.Genomic.SNPs$A1.y)
+  combined.test.training.clumped.Genomic.SNPs$A2.y <- toupper(combined.test.training.clumped.Genomic.SNPs$A2.y)
   
   ## check that it is merging properly here (after analysis is run)
-  
-  for (w in 1:length(p.value.thresholds)) {
+
+  for (w in 1:length(significance_thresholds)) {
     
-    a <- copy(combined.CLOZUK.PGC.clumped.Genomic.SNPs)    
-    SNPs <- a[, .I[which(P <= p.value.thresholds[w])]]
+    a <- copy(combined.test.training.clumped.Genomic.SNPs)    
+    SNPs <- a[, .I[which(P <= significance_thresholds[w])]]
     
     if (length(SNPs) != 0){
-      a <- a[SNPs, .(SNP,A1.y,BETA)]
+      a <- a[SNPs, .(SNP, A1.y, BETA)]
       
-      filename <- paste0(Useful_pathways[i],'/score/', Useful_pathways[i],'_with_', p.value.thresholds[w],"_removing_SE_equaltoandmorethan_five.score")
-      filename_SNPs_removed <- paste0(Useful_pathways[i],'/score/', Useful_pathways[i],'_with_', p.value.thresholds[w],"_removing_SE_equaltoandmorethan_five_SNPS_in_question.txt")
-      
+      filename <- paste0(scoring_output_file,'_with_', significance_thresholds[w],".score")
+
       write.table(file = filename, a, row.names = F, col.names = F, quote = F, sep="\t")
-      write.table(file = filename_SNPs_removed, SNPs_removed, row.names = F, col.names = F, quote = F, sep="\t")
       
       #      if (Useful_pathways[i] == "abnormal_learning|memory|conditioning" | Useful_pathways[i] == "abnormal_motor_capabilities|coordination|movement") {
       #        Useful_pathways[i] <- "abnormal_learning\\|memory\\|conditioning"
@@ -63,32 +109,25 @@ for (i in 1:length(Useful_pathways)) {
       #        
       #      }
       
-      command <- paste0('/Users/johnhubert/Documents/plink_mac//plink --bfile ',path_to_pathway_plink_file, ' --score ', filename, " --out ", path_to_pathway_plink_file, "_", p.value.thresholds[w], "_removing_SE_equaltoandmorethan_five")
-      system(command)
-      rm(a)
+      
     }else{
+      cat("No SNPs found for pathway ",pathway_names[i]," no score file produced")
+      write(x = pathway_names[i], file = paste0(Pathway_directory,"Pathways_with_no_SNPs_for_scoring.txt"), append = T)
       next()
     }
   }
 }
 
-write.table(Genes_used, file = "Index_of_genes_and_pval_1.txt", quote = F, col.names = T, row.names = F)
-#score
+# Calculate the number of cores
+no_cores <- detectCores() - 1
 
-for (i in 1:(length(p.value.thresholds)))
-{
-  # format the p.values so that exponential notation is NOT used, could result in confusion in BASH scripting
-  scoring.output.filename <- paste0(scoring_output_file, "_", format(p.value.thresholds[i], scientific =  F), ".score")
-  SNPs.lower.than.threshold <- which(combined.CLOZUK.PGC.clumped.Genomic.SNPs$P.x <= p.value.thresholds[i]) 
-  
-  if (length(SNPs.lower.than.threshold ) > 0) {
-    tmp <- combined.CLOZUK.PGC.clumped.Genomic.SNPs[SNPs.lower.than.threshold, ]
-    final.output <- tmp[, c("SNP","A1","BETA"), with = F]
-  }
-  
-  if (nrow(out)>0) {
-    write.table(file = scoring.output.filename, final.output, row.names = F, col.names = F, quote = F, sep="\t")
-  }
-}
+# Initiate cluster
+cl <- makeCluster(no_cores, type = "FORK")
+
+# Export the environment to the cluster
+clusterExport(cl, "e")
+parLapply(cl, 1:number_of_pathways_to_analyse, calculating_scores, Summary_stats_full_dataset, Validation_name, Training_name, Pathway_directory, pathway_names)
+stopCluster(cl)
+
 ## END script!
 #######################################

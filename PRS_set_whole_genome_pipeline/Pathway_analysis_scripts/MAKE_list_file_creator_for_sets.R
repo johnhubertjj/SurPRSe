@@ -16,7 +16,6 @@ library(plyr)
 args <- commandArgs(trailingOnly = T)
 print(args)
 
-
 # specify the different input tables #
 Validation_datatable_bed_file <- args[3]
 Training_name <- args[4]
@@ -39,7 +38,6 @@ unread_pathways_total <- rbind(unread_pathways_one,unread_pathways_two)
 
 items_to_remove <- unread_pathways_total[which(unread_pathways_total$Pathway == current_pathway)]
 dimensions_of_items_to_remove <- dim(items_to_remove)
-
 
 if (dimensions_of_items_to_remove[1] != 0){
   chromosomes_not_involved <- as.vector(items_to_remove$chromosome)

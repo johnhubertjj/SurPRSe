@@ -150,6 +150,12 @@ echo ${pathways[@]}
 if [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
 sudo parallel ${path_to_pathway_scripts}creation_of_merge_list_file.sh ::: ${pathways[@]} ::: ${path_to_scripts}
 
+Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}Pathway_PRS_scoring.R ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_${validation_set_name}_Pathway_PRS_scoring.Rout ${training_set_name} ${validation_set_name} ${Pathway_output_directory} ${path_to_stationary_data}${Pathway_filename} ${sig_thresholds[@]}
+
+
+sudo parallel ${path_to_pathway_scripts}PRS_scoring_plink_pathways.sh ::: ${pathways[@]} ::: ${path_to_scripts}
+
+# now just require the collate all paths script here... (can do at home)
 else
 	exit 1
 fi
