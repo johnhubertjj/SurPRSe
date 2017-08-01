@@ -27,17 +27,17 @@ gene_loc_file_name <- args[8] # the name of the file containing gene locations (
 Gene_regions <- args[9] # whether to include/exclude the regulatory regions of a gene
 chromosomes_to_analyse <- as.numeric(args[c(10:length(args))])
 
+setwd(".")
 
-
-Training_name <- "HG19_pgc.scz.full.2012-04"
-Validation_name <- "ALSPAC"
-Validation_full_name_serial <- "ALSPAC_hrc_imputed_step3_mri_brain_measurements_only_chr"
-Pathway_directory <- "Pathways"
-Pathway_file_name <- "/Users/johnhubert/Dropbox/Stationary_data/Pocklington2015_134sets_LoFi.txt"
-gene_loc_file_name <-"/Users/johnhubert/Dropbox/Stationary_data/NCBI37.3.gene.loc"
-Gene_regions <- "normal"
-chromosomes_to_analyse <- seq(1,22) 
-setwd("~/Documents/CLOZUK_ALSPAC_PATHWAY_TESTING")
+#Training_name <- "HG19_pgc.scz.full.2012-04"
+#Validation_name <- "ALSPAC"
+#Validation_full_name_serial <- "ALSPAC_hrc_imputed_step3_mri_brain_measurements_only_chr"
+#Pathway_directory <- "Pathways"
+#Pathway_file_name <- "/Users/johnhubert/Dropbox/Stationary_data/Pocklington2015_134sets_LoFi.txt"
+#gene_loc_file_name <-"/Users/johnhubert/Dropbox/Stationary_data/NCBI37.3.gene.loc"
+#Gene_regions <- "normal"
+#chromosomes_to_analyse <- seq(1,22) 
+#setwd("~/Documents/CLOZUK_ALSPAC_PATHWAY_TESTING")
   
 # Create new variables based on input files to make things easier to read # 
 First_half_of_input_genotype_file <- paste0("./", Training_name, "_", Validation_name, "_output/", Pathway_directory, "/", Validation_full_name_serial)
@@ -335,8 +335,11 @@ for (i in 1:number_of_pathways_to_analyse) {
     if (Gene_regions == "normal") {
       
       #### Regular gene regions ####
-      Assigning_genes(pathway_input = temp_pathway_table, clumped_SNPs = selecting_chromosomes, BP.clumped.SNPs = selecting_chromosomes_BP, chromosome.number = l, gene.regions = "normal")
       
+####READ ME#####      
+      #I"VE IGNORED THE ASSIGNING GENES FUNCTION FOR NOW, NEED TO REWRITE FOR PURPOSES
+      #Assigning_genes(pathway_input = temp_pathway_table, clumped_SNPs = selecting_chromosomes, BP.clumped.SNPs = selecting_chromosomes_BP, chromosome.number = l, gene.regions = "normal")
+#####################      
 
       error_catching <- tryCatch({
       # read in MAGMA's input and add any genes which happen to be inside other genes or crossed over with other genes

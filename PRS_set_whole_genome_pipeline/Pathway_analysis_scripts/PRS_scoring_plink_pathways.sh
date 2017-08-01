@@ -18,7 +18,7 @@ Pathway_output_directory="./${training_set_name}_${validation_set_name}_output/$
 for i in "${sig_thresholds[@]}" ;
 do
 	filename="${Pathway_output_directory}/${pathways}/scoring_${training_set_name}_${validation_set_name}_pathway_${pathways}_with_${i}"
-	plink --bfile${Pathway_output_directory}/${pathways}/${validation_set_name}_${training_set_name}_${pathways}_Clumped_whole_genome_final --score ${filename}.score --out ${filename}
+	plink --bfile ${Pathway_output_directory}/${pathways}/${validation_set_name}_${training_set_name}_${pathways}_Clumped_whole_genome_final --score ${filename}.score --out ${filename}
 done
 
 chmod -R a+rwx ${Pathway_output_directory}/${pathways} 
