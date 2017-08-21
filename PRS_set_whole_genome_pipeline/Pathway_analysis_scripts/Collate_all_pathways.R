@@ -38,6 +38,14 @@ Pathway_file_name <- args[6] # the name of the file to be accessed (must be in s
 significance_thresholds <- as.numeric(args[c(7:length(args))])
 print(significance_thresholds)
 
+Training_name <- "CLOZUK_PGC2noclo"
+Validation_name <- "ALSPAC"
+Pathway_directory <- paste0(Training_name,"_",Validation_name,"_output/Pathways/")
+Pathway_file_name <- "/Users/johnhubert/Dropbox/Stationary_data/Pocklington2015_134sets_LoFi.txt"
+significance_thresholds <- c(0.05,0.5)
+
+
+
 ##### read in pathway sets and standardise column names
 pathway_sets <- fread(Pathway_file_name)
 setnames(pathway_sets, c("Pathway", "Gene"))
@@ -53,7 +61,7 @@ order_of_output_for_sig_thresh <- NULL
 for (i in significance_thresholds){
 scoring_output_file <- paste0(Pathway_directory,pathway_names,"/scoring_",Training_name,"_",Validation_name,"_pathway_",pathway_names,"_with_",i,".profile")
 final_scoring_output_file <- c(final_scoring_output_file,scoring_output_file)
-order_of_output_for_sig_thresh <- c(order_of_output_for_sig_thresh, paste0(pathway_names," ",rep(i,length(scoring_output_file))))
+order_of_output_for_sig_thresh <- c(order_of_output_for_sig_thresh, paste0(pathway_names,"_",rep(i,length(scoring_output_file))))
 }
 
 my_data <- lapply(final_scoring_output_file, read.table, header=TRUE) 
@@ -68,4 +76,4 @@ for (i in 1:length(final_scoring_output_file)) {
 
 all_prs <- join_all(my_data, by=c("FID", "IID"), type='left')
 
-write.table(all_prs,file = paste0("FINAL_PATHWAY_RESULTS_PRS_PROFILES",Training_name,"_",Validation_name,".txt"),quote = F,row.names = F)
+write.table(all_prs,file = paste0("FINAL_PATHWAY_RESULTS_PRS_PROFILES",Training_name,"_",Validation_name, "_", Pathway_file_name, ".txt"),quote = F,row.names = F)

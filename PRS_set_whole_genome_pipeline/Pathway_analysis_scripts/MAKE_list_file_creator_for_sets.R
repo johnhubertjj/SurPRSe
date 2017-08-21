@@ -29,6 +29,11 @@ output_directory <- paste0("./", Training_name, "_", Validation_name, "_output/"
 
 unread_pathways_one <- read.delim(paste0(Pathway_directory,"/MAGMA_empty_files_after_analysis.txt"), header = F, stringsAsFactors = F)
 unread_pathways_two <- fread(paste0(Pathway_directory,"/Pathways_analysis_empty_pathways_info_file.txt"), header = F, stringsAsFactors = F)
+
+if (nrow(unread_pathways_one) == 1 & nrow(unread_pathways_two) == 1){
+  
+}
+
 unread_pathways_one <- as.data.table(unread_pathways_one)
 unread_pathways_two <- as.data.table(unread_pathways_two)
 

@@ -210,6 +210,9 @@ adding_unread_genes <- function(Gene_clumped_SNPs, MAGMA.gene.regions.for.chromo
 }
 
 getwd()
+
+write("This file contains MAGMA errors", file = paste0(output_directory,"MAGMA_empty_files_after_analysis.txt"))
+
 ##### read in pathway sets and standardise column names
 pathway_sets <- fread(Pathway_file_name,header = F)
 setnames(pathway_sets, c("Pathway", "Gene"))

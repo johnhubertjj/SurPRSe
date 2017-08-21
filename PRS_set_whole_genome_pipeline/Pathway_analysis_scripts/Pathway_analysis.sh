@@ -70,16 +70,16 @@ if [ -e "${Pathway_output_directory}Pathway_analysis_empty_pathways_info_file.tx
 	rm "${Pathway_output_directory}Pathway_analysis_empty_pathways_info_file.txt"
 fi
 
-#Rscript ${path_to_scripts}RscriptEcho.R\
-# ${path_to_pathway_scripts}PATHWAYS_PRS_COLLECTING_MAGMA_INFO.R\
-# ./${training_set_name}_${validation_set_name}_extrainfo/PATHWAYS_PRS_COLLECTING_MAGMA_INFO.Rout\
-# ${training_set_name}\
-# ${validation_set_name}\
-# ${validation_set_usually_genotype_serial}\
-# ${Name_of_extra_analysis}\
-# ${path_to_stationary_data}${Pathway_filename}\
-# ${path_to_stationary_data}${Gene_location_filename}\
-# ${Chromosomes_to_analyse[@]}
+Rscript ${path_to_scripts}RscriptEcho.R\
+ ${path_to_pathway_scripts}PATHWAYS_PRS_COLLECTING_MAGMA_INFO.R\
+ ./${training_set_name}_${validation_set_name}_extrainfo/PATHWAYS_PRS_COLLECTING_MAGMA_INFO.Rout\
+ ${training_set_name}\
+ ${validation_set_name}\
+ ${validation_set_usually_genotype_serial}\
+ ${Name_of_extra_analysis}\
+ ${path_to_stationary_data}${Pathway_filename}\
+ ${path_to_stationary_data}${Gene_location_filename}\
+ ${Chromosomes_to_analyse[@]}
  
  
 # From the above script, identify the number of pathways you want to analyse (probably safest to write to a file, port to a variable and then delete the file)
@@ -104,19 +104,19 @@ if [[ ${Gene_regions} == "Extended" ]]; then
 	done < "$Pathway_file_name"
 fi
 
-#if [[ "${Gene_regions}" == "normal" ]]; then
-#echo normal gene regions
-#echo ${Pathway_file_name}
-#	while IFS='' read -r line || [[ -n "$line" ]]; 
-#	do
-#		for i in ${Chromosomes_to_analyse[@]};
-#		do		    
-#			PRSACPJA_data_output="./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis}/${validation_set_usually_genotype_serial}${i}_consensus_with_${training_set_name}_flipped_alleles_no_duplicates.bim"
-#			magma --annotate --snp-loc ${PRSACPJA_data_output} --gene-loc ${Pathway_output_directory}${training_set_name}_${validation_set_name}_${line}_chromosome_${i}_temp.gene.loc --out ${Pathway_output_directory}${i}_${training_set_name}_${validation_set_name}_SNPs_${line}_pathway_temp
-#		done
-#
-#	done <"$Pathway_file_name"
-#fi
+if [[ "${Gene_regions}" == "normal" ]]; then
+echo normal gene regions
+echo ${Pathway_file_name}
+	while IFS='' read -r line || [[ -n "$line" ]]; 
+	do
+		for i in ${Chromosomes_to_analyse[@]};
+		do		    
+			PRSACPJA_data_output="./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis}/${validation_set_usually_genotype_serial}${i}_consensus_with_${training_set_name}_flipped_alleles_no_duplicates.bim"
+			magma --annotate --snp-loc ${PRSACPJA_data_output} --gene-loc ${Pathway_output_directory}${training_set_name}_${validation_set_name}_${line}_chromosome_${i}_temp.gene.loc --out ${Pathway_output_directory}${i}_${training_set_name}_${validation_set_name}_SNPs_${line}_pathway_temp
+		done
+
+	done <"$Pathway_file_name"
+fi
 
 while IFS='' read -r line; do pathways+=("$line"); done <$Pathway_file_name
 
