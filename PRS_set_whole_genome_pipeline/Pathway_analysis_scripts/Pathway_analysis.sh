@@ -66,8 +66,8 @@ if [[ ${Name_of_extra_analysis} == "Pathways" ]]; then
 sudo chmod  g+rwx ${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis}
 sudo chmod  g+rwx ${training_set_name}_${validation_set_name}_output/
  
-if [ -e "${Pathway_output_directory}Pathway_analysis_empty_pathways_info_file.txt" ]; then
-	rm "${Pathway_output_directory}Pathway_analysis_empty_pathways_info_file.txt"
+if [ -e "${Pathway_output_directory}Pathways_analysis_empty_pathways_info_file.txt" ]; then
+	rm "${Pathway_output_directory}Pathways_analysis_empty_pathways_info_file.txt"
 fi
 
 Rscript ${path_to_scripts}RscriptEcho.R\
@@ -120,8 +120,8 @@ fi
 
 while IFS='' read -r line; do pathways+=("$line"); done <$Pathway_file_name
 
-if [ -e "${Pathway_output_directory}Pathway_analysis_empty_pathways_info_file_run2.txt" ]; then
-	rm "${Pathway_output_directory}Pathway_analysis_empty_pathways_info_file_run2.txt"
+if [ -e "${Pathway_output_directory}Pathways_analysis_empty_pathways_info_file_run2.txt" ]; then
+	rm "${Pathway_output_directory}Pathways_analysis_empty_pathways_info_file_run2.txt"
 fi
 
 if [ -e "${Pathway_output_directory}MAGMA_empty_files_after_analysis.txt" ]; then
@@ -163,7 +163,7 @@ Rscript ${path_to_scripts}RscriptEcho.R\
 sudo parallel ${path_to_pathway_scripts}PRS_scoring_plink_pathways.sh ::: ${pathways[@]} ::: ${path_to_scripts}
 
 Rscript ${path_to_scripts}RscriptEcho.R\
- ${path_to_scripts}Collate_all_pathways.R\
+ ${path_to_pathway_scripts}Collate_all_pathways.R\
  ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_${validation_set_name}_Collate_all_pathways.Rout\ 
  ${training_set_name}\
  ${validation_set_name}\
