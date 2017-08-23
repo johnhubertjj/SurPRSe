@@ -16,6 +16,8 @@ fi
 whereami=$(uname -n)
 echo "$whereami"
 
+system=$3
+
  #echo "Press CTRL+C to proceed."
  #trap "pkill -f 'sleep 1h'" INT
  #trap "set +x ; sleep 1h ; set -x" DEBUG
@@ -43,13 +45,14 @@ if [[ "$whereami" == *"raven"* ]]; then
   # Alter/add variables depending on what type of training dataset you have 
   source ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt  
   cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
+fi
 
-elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
+if [ "$system" == "MAC" || "$system" == "LINUX" ]; then
 
    
   # Arguments
-  path_to_scripts='/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/'
   Directory_to_work_from=$1
+  path_to_scripts=$2
   
   #Change to correct directory (just in case)
   cd ${Directory_to_work_from}
@@ -87,7 +90,7 @@ if [[ "$whereami" == *"raven"* ]]; then
 	cd $PBS_O_WORKDIR
 fi
 
-if [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
+if [ "$system" == "MAC" || "$system" == "LINUX" ]; then
 	shopt -s nullglob
 	set -- *Rtestoutclusterlogfile*
 	if [ "$#" -gt 0 ]; then

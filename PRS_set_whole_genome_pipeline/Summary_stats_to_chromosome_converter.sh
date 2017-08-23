@@ -16,6 +16,8 @@ echo "I'm running"
 whereami=$(uname -n)
 echo "$whereami"
 
+system=$3
+
 if [[ "$whereami" == *"raven"* ]]; then
   # assign a new variable for the PBS_ARRAY_variable
   
@@ -41,13 +43,14 @@ if [[ "$whereami" == *"raven"* ]]; then
   if [[ ! -d "${training_set_name}_${validation_set_name}_extrainfo" ]]; then
      mkdir ${training_set_name}_${validation_set_name}_extrainfo
   fi
+fi
 
-elif [[ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]]; then
+if [[ "$system" == "MAC" || "$system" == "LINUX"]]; then
   Directory_to_work_from=$1
   cd ${Directory_to_work_from}  
   
   # Arguments
-  path_to_scripts='/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/'
+  path_to_scripts=$2
    
   # Assign the shell variables
   source ${path_to_scripts}/PRS_arguments_script.sh

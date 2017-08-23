@@ -16,6 +16,7 @@ exec &> Rtestoutclusterlogfile$1.txt
 # Run locally or on ARCCA
 whereami=$(uname -n)
 echo "$whereami"
+system=$4
 
 if [[ "$whereami" == *"raven"* ]]; then
   # assign a new variable for the PBS_ARRAY_variable
@@ -38,17 +39,19 @@ if [[ "$whereami" == *"raven"* ]]; then
   # Alter/add variables depending on what type of Training dataset you have
   source ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
   cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
+fi
  
-elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
+if [ "$system" == "MAC" || "$system" == "LINUX" ]; then
   # add directory to work from at the top of the script (just in case)
   Directory_to_work_from=$2
   cd ${Directory_to_work_from} 
- 
+  
+  #add the chromosome this copy of the script will analyse
   chromosome_number=$1
   echo $chromosome_number
   
-  # Arguments
-  path_to_scripts='/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/'
+  # path to where the scripts are located
+  path_to_scripts=$3
   
   # Assign the shell variables
   source ${path_to_scripts}/PRS_arguments_script.sh
