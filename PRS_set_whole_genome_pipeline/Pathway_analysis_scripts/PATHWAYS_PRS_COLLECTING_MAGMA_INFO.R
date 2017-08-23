@@ -43,7 +43,7 @@ e <- new.env()
 pathway_sets <- fread(Pathway_file_name)
 setnames(pathway_sets, c("Pathway", "Gene"))
 
-write("This file contains pathways with no SNPs", file = paste0(output_directory,"MAGMA_empty_files_after_analysis.txt"))
+write(paste0("This_file_contains_pathways_with_no_SNPs\t",0), file = paste0(output_directory,"Pathways_analysis_empty_pathways_info_file.txt"))
 
 # input the name of the pathways from the orignal file
 #useful_pathways <- c("FMRP_targets", "abnormal_behavior", "abnormal_nervous_system_electrophysiology", "abnormal_learning|memory|conditioning", "abnormal_CNS_synaptic_transmission", "Cav2_channels", "abnormal_synaptic_transmission", "5HT_2C", "abnormal_long_term_potentiation", "abnormal_motor_capabilities|coordination|movement", "abnormal_behavioral_response_to_xenobiotic", "abnormal_associative_learning", "Lek2015_LoFintolerant_90", "BGS_top2_mean", "BGS_top2_max")
@@ -56,6 +56,7 @@ number_of_pathways_to_analyse <- length(pathway_names)
 getwd()
 
 write(pathway_names, file = paste0(output_directory,"Pathway_names.txt"))
+
 # set the key to the pathway name
 setkey(pathway_sets, Pathway)
 

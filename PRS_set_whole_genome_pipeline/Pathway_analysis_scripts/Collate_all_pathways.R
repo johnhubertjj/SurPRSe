@@ -11,7 +11,7 @@ library(gridExtra)
 library(data.table)
 
 # required packages -- will only install if they are not already installed
-list.of.packages <- c("plyr", "stringr", "dplyr", "tidyr", "reshape2", "ggplot2", "scales", "data.table", "plotly")
+list.of.packages <- c("plyr", "stringr", "dplyr", "tidyr", "reshape2", "ggplot2", "scales", "data.table", "plotly","tools")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 
@@ -41,7 +41,8 @@ print(significance_thresholds)
 Training_name <- "CLOZUK_PGC2noclo"
 Validation_name <- "ALSPAC"
 Pathway_directory <- paste0(Training_name,"_",Validation_name,"_output/Pathways/")
-Pathway_file_name <- "/Users/johnhubert/Dropbox/Stationary_data/Pocklington2015_134sets_LoFi.txt"
+Pathway_file_name <- "/Users/johnhubert/Dropbox/Stationary_data/Pocklington2015_134sets_LoFi_2sets_morphology_notmorphology_deduplicated.txt"
+Pathways_used <- file_path_sans_ext(basename(Pathway_file_name))
 significance_thresholds <- c(0.05,0.5)
 
 
@@ -76,4 +77,4 @@ for (i in 1:length(final_scoring_output_file)) {
 
 all_prs <- join_all(my_data, by=c("FID", "IID"), type='left')
 
-write.table(all_prs,file = paste0("FINAL_PATHWAY_RESULTS_PRS_PROFILES",Training_name,"_",Validation_name, "_", Pathway_file_name, ".txt"),quote = F,row.names = F)
+write.table(all_prs,file = paste0("FINAL_PATHWAY_RESULTS_PRS_PROFILES",Training_name,"_",Validation_name, "_", Pathways_used, ".txt"),quote = F,row.names = F)
