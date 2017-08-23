@@ -55,13 +55,19 @@ if [[ "$whereami" == *"raven"* ]]; then
 
 
 elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
+home_OS="/Users"
+elif [ "$whereami" == 'johnhubert-ThinkPad-P50' ]; then
+home_OS="/home"
+fi
 
-  path_to_PGC_conversion="/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Summary_stat_manipulation"
-  path_to_CLOZUK_conversion="/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Genotype_dataset_manipulation"
-  path_to_covariate_file="/Users/Dropbox/whole_genome_testing/Stationary_data/CLOZUK2.r7.select2PC.eigenvec.txt"
-  path_to_chromosome_length_file="/Users/Dropbox/whole_genome_testing/Stationary_data/UCSC_hg19_chromeinfo_length_of_chromosomes.txt"
-  path_to_new_fam_file="/Users/Dropbox/whole_genome_testing/output/Stationary_data/CLOZUK.r7.GWAS_IDs.fam"
-  path_to_stationary_data="/Users/johnhubert/Dropbox/Stationary_data/" 
+if [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" == 'johnhubert-ThinkPad-P50' ]; then
+
+  path_to_PGC_conversion="$home_OS/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Summary_stat_manipulation"
+  path_to_CLOZUK_conversion="$home_OS/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Genotype_dataset_manipulation"
+  path_to_covariate_file="$home_OS/Dropbox/whole_genome_testing/Stationary_data/CLOZUK2.r7.select2PC.eigenvec.txt"
+  path_to_chromosome_length_file="$home_OS/Dropbox/whole_genome_testing/Stationary_data/UCSC_hg19_chromeinfo_length_of_chromosomes.txt"
+  path_to_new_fam_file="$home_OS/Dropbox/whole_genome_testing/output/Stationary_data/CLOZUK.r7.GWAS_IDs.fam"
+  path_to_stationary_data="$home_OS/johnhubert/Dropbox/Stationary_data/" 
   
   # Datasets
   training_set_usually_summary="CLOZUK_PGC2noclo_table${chromosome_number}"
