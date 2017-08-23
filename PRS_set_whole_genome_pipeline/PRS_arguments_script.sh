@@ -71,10 +71,10 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   validation_set_full_name_without_chromosome="ALSPAC_hrc_imputed_step3_mri_brain_measurements_only"
   training_set_name="CLOZUK_PGC2noclo"
   validation_set_name="ALSPAC" 
-  Pathway_filename="Pocklington2015_134sets_LoFi_morphology_only_deduplicated.txt"
+  Pathway_filename="Pocklington2015_134sets_LoFi_2sets_morphology_notmorphology_deduplicated.txt"
   Gene_location_filename="NCBI37.3.gene.loc"
   # Split_by_chromosome for genotype?
-  split_by_chromosome_required="TRUE" 
+  split_by_chromosome_required="FALSE" 
   # MAF, INFO and SE
   MAF_summary="FALSE"
   MAF_threshold=0.1
