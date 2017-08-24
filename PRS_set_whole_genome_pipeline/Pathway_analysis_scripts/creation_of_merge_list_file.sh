@@ -2,7 +2,7 @@
 
 pathways=$1
 path_to_scripts=$2
-path_to_pathway_scripts="${path_to_scripts}Pathway_analysis_scripts/"
+path_to_pathway_scripts=$3
 
 # Assign the shell variables
 source ${path_to_scripts}/PRS_arguments_script.sh
@@ -49,3 +49,4 @@ printf "%s\n\n" "$(tail -n +2 ${Pathway_output_directory}/${pathways}/CLUMPED_EX
 plink --bfile ${Pathway_output_directory}/${pathways}/${pathways}_Clumping_input --extract ${Pathway_output_directory}/${pathways}/CLUMPED_EXTRACT_${validation_set_name}_${pathways}.txt --make-bed --out ${Pathway_output_directory}/${pathways}/${validation_set_name}_${training_set_name}_${pathways}_Clumped_whole_genome_final
 
 chmod -R a+rwx ${Pathway_output_directory}/${pathways} 
+

@@ -16,6 +16,9 @@
 whereami=$(uname -n)
 echo "$whereami"
 
+#Am I Local or on a server? 
+system=$3
+
 if [[ "$whereami" == *"raven"* ]]; then
   # assign a new variable for the PBS_ARRAY_variable
   chromosome_number=${PBS_ARRAY_INDEX}
@@ -37,14 +40,16 @@ if [[ "$whereami" == *"raven"* ]]; then
   # Alter/add variables depending on what type of Training dataset you have
   source ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
   cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
+fi
  
-elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
+if [ "$system" == "MAC" || "$system" == "LINUX" ]; then
+  
   Directory_to_work_from=$1
   cd ${Directory_to_work_from}
   
   # Arguments
-  path_to_scripts='/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/'
-  path_to_pathway_scripts="/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/Pathway_analysis_scripts/"
+  path_to_scripts=$2
+  path_to_pathway_scripts=$4
   
   # Assign the shell variables
   source ${path_to_scripts}/PRS_arguments_script.sh
@@ -54,6 +59,7 @@ elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   source ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
   cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
 fi 
+
 Pathway_output_directory="./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis}/" 
 
 if [[ ${Name_of_extra_analysis} == "Pathways" ]]; then
@@ -89,6 +95,11 @@ Rscript ${path_to_scripts}RscriptEcho.R\
 
 Pathway_file_name=${Pathway_output_directory}Pathway_names.txt
 # separate script below:
+
+# Annotate using MAGMA here, separate out between extended and normal gene regions.
+# Essentially, this will read an input file with the unique pathway names created previously and the gene-loc file\
+# as an input from PATHWAYS_PRS_COLLECTING_MAGMA_INFO.R to annotate.
+# The pathways used will then be read into an array variable so that we don't have to keep reading this file and it is within the BASH environment 
 
 if [[ ${Gene_regions} == "Extended" ]]; then
 
@@ -147,9 +158,9 @@ Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}combining_summary_stat
 chmod -R g+rwx ${path_to_scripts} 
 echo ${pathways[@]}
 
-if [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
+if [ "$system" == "MAC" || "$system" == "LINUX" ]; then
 
-sudo parallel ${path_to_pathway_scripts}creation_of_merge_list_file.sh ::: ${pathways[@]} ::: ${path_to_scripts}
+sudo parallel ${path_to_pathway_scripts}creation_of_merge_list_file.sh ::: ${pathways[@]} ::: ${path_to_scripts} ::: ${path_to_pathway_scripts} ::: ${system}
 
 Rscript ${path_to_scripts}RscriptEcho.R\
  ${path_to_pathway_scripts}Pathway_PRS_scoring.R\
@@ -160,7 +171,7 @@ Rscript ${path_to_scripts}RscriptEcho.R\
  ${path_to_stationary_data}${Pathway_filename}\
  ${sig_thresholds[@]}
 
-sudo parallel ${path_to_pathway_scripts}PRS_scoring_plink_pathways.sh ::: ${pathways[@]} ::: ${path_to_scripts}
+sudo parallel ${path_to_pathway_scripts}PRS_scoring_plink_pathways.sh ::: ${pathways[@]} ::: ${path_to_scripts} ::: ${path_to_pathway_scripts} ::: ${system}
 
 Rscript ${path_to_scripts}RscriptEcho.R\
  ${path_to_pathway_scripts}Collate_all_pathways.R\

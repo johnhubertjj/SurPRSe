@@ -5,11 +5,11 @@ whereami=$(uname -n)
 echo "$whereami"
 
 
-if [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
+if [ "$whereami" = "v1711-0ab8c3db.mobile.cf.ac.uk" ]; then
 home_OS="/Users"
 system=MAC
 
-elif [ "$whereami" == 'johnhubert-ThinkPad-P50' ]; then
+elif [ "$whereami" = "johnhubert-ThinkPad-P50" ]; then
 home_OS="/home"
 system=LINUX #oh god programmers are going to hate me for using this argument
 fi
@@ -32,9 +32,9 @@ Name_of_extra_analysis=(`sed -n 's/Name_of_extra_analysis\=//p' ${path_to_script
 
 if [ "${Extra_analyses[1]}" = "TRUE" ]; then
 	echo hi
-	if [[ "${Name_of_extra_analysis[1]}" == "Pathways" ]]; then
+	if [[ "${Name_of_extra_analysis[1]}" = "Pathways" ]]; then
 		echo hi
-		sh ${path_to_pathway_scripts}Pathway_analysis.sh ${Directory_to_work_from} 
+		sh ${path_to_pathway_scripts}Pathway_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_pathway_scripts} 
 	fi
 else
 	

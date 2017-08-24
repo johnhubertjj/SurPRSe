@@ -62,21 +62,21 @@ fi
 
 if [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" == 'johnhubert-ThinkPad-P50' ]; then
 
-  path_to_PGC_conversion="$home_OS/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Summary_stat_manipulation"
-  path_to_CLOZUK_conversion="$home_OS/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Genotype_dataset_manipulation"
-  path_to_covariate_file="$home_OS/Dropbox/whole_genome_testing/Stationary_data/CLOZUK2.r7.select2PC.eigenvec.txt"
-  path_to_chromosome_length_file="$home_OS/Dropbox/whole_genome_testing/Stationary_data/UCSC_hg19_chromeinfo_length_of_chromosomes.txt"
-  path_to_new_fam_file="$home_OS/Dropbox/whole_genome_testing/output/Stationary_data/CLOZUK.r7.GWAS_IDs.fam"
+  path_to_PGC_conversion="Summary_stat_manipulation"
+  path_to_CLOZUK_conversion="Genotype_dataset_manipulation"
+  path_to_covariate_file="$home_OS/johnhubert/Dropbox/whole_genome_testing/Stationary_data/CLOZUK2.r7.select2PC.eigenvec.txt"
+  path_to_chromosome_length_file="$home_OS/johnhubert/Dropbox/whole_genome_testing/Stationary_data/UCSC_hg19_chromeinfo_length_of_chromosomes.txt"
+  path_to_new_fam_file="$home_OS/johnhubert/Dropbox/whole_genome_testing/output/Stationary_data/CLOZUK.r7.GWAS_IDs.fam"
   path_to_stationary_data="$home_OS/johnhubert/Dropbox/Stationary_data/" 
   
   # Datasets
   training_set_usually_summary="CLOZUK_PGC2noclo_table${chromosome_number}"
   training_set_original_filename="CLOZUK_PGC2noclo.METAL.assoc.dosage"
-  validation_set_usually_genotype="ALSPAC_hrc_imputed_step3_mri_brain_measurements_only_chr${chromosome_number}"
-  validation_set_usually_genotype_serial="ALSPAC_hrc_imputed_step3_mri_brain_measurements_only_chr"
-  validation_set_full_name_without_chromosome="ALSPAC_hrc_imputed_step3_mri_brain_measurements_only"
+  validation_set_usually_genotype="ALSPAC_hrc_imputed_step3_chr${chromosome_number}"
+  validation_set_usually_genotype_serial="ALSPAC_hrc_imputed_step3_chr"
+  validation_set_full_name_without_chromosome="ALSPAC_hrc_imputed_step3"
   training_set_name="CLOZUK_PGC2noclo"
-  validation_set_name="ALSPAC" 
+  validation_set_name="ALSPAC_original" 
   Pathway_filename="Pocklington2015_134sets_LoFi_2sets_morphology_notmorphology_deduplicated.txt"
   Gene_location_filename="NCBI37.3.gene.loc"
   # Split_by_chromosome for genotype?
@@ -101,7 +101,7 @@ if [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" == 'johnhube
   Multiple_Training_set_tables="TRUE"
   Running_in_Serial="TRUE"
   sig_thresholds=(0.05 0.5)
-  Extra_analyses=TRUE
+  Extra_analyses=FALSE
   Name_of_extra_analysis=Pathways
   Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates"
   # either "extended" "normal" or "both" : change to a numerical input in the future
