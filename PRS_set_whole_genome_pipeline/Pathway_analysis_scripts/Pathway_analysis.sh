@@ -19,7 +19,7 @@ echo "$whereami"
 #Am I Local or on a server? 
 system=$3
 
-if [[ "$whereami" == *"raven"* ]]; then
+if [[ "$whereami" = *"raven"* ]]; then
   # assign a new variable for the PBS_ARRAY_variable
   chromosome_number=${PBS_ARRAY_INDEX}
   
@@ -42,7 +42,7 @@ if [[ "$whereami" == *"raven"* ]]; then
   cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
 fi
  
-if [ "$system" == "MAC" || "$system" == "LINUX" ]; then
+if [ "$system" = "MAC" || "$system" = "LINUX" ]; then
   
   Directory_to_work_from=$1
   cd ${Directory_to_work_from}
@@ -62,7 +62,7 @@ fi
 
 Pathway_output_directory="./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis}/" 
 
-if [[ ${Name_of_extra_analysis} == "Pathways" ]]; then
+if [[ ${Name_of_extra_analysis} = "Pathways" ]]; then
  
 # Create output directory for Extra_analysis results
 	if [ ! -d "./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis}" ]; then
@@ -101,7 +101,7 @@ Pathway_file_name=${Pathway_output_directory}Pathway_names.txt
 # as an input from PATHWAYS_PRS_COLLECTING_MAGMA_INFO.R to annotate.
 # The pathways used will then be read into an array variable so that we don't have to keep reading this file and it is within the BASH environment 
 
-if [[ ${Gene_regions} == "Extended" ]]; then
+if [[ ${Gene_regions} = "Extended" ]]; then
 
 	while IFS='' read -r line || [[ -n "$line" ]]; 
 	do
@@ -115,7 +115,7 @@ if [[ ${Gene_regions} == "Extended" ]]; then
 	done < "$Pathway_file_name"
 fi
 
-if [[ "${Gene_regions}" == "normal" ]]; then
+if [[ "${Gene_regions}" = "normal" ]]; then
 echo normal gene regions
 echo ${Pathway_file_name}
 	while IFS='' read -r line || [[ -n "$line" ]]; 
@@ -158,7 +158,7 @@ Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}combining_summary_stat
 chmod -R g+rwx ${path_to_scripts} 
 echo ${pathways[@]}
 
-if [ "$system" == "MAC" || "$system" == "LINUX" ]; then
+if [ "$system" = "MAC" || "$system" = "LINUX" ]; then
 
 sudo parallel ${path_to_pathway_scripts}creation_of_merge_list_file.sh ::: ${pathways[@]} ::: ${path_to_scripts} ::: ${path_to_pathway_scripts} ::: ${system}
 

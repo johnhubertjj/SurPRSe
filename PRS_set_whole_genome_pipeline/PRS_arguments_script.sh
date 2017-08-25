@@ -3,7 +3,7 @@
 whereami=$(uname -n)
 echo "$whereami"
 
-if [[ "$whereami" == *"raven"* ]]; then
+if [[ "$whereami" = *"raven"* ]]; then
   # State paths to the relevant stationary folders required for the analysis
   path_to_PGC_conversion="/home/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Summary_stat_manipulation/"
   path_to_CLOZUK_conversion="/home/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/Genotype_dataset_manipulation/"
@@ -54,13 +54,13 @@ if [[ "$whereami" == *"raven"* ]]; then
   external_harddrive="FALSE"
 
 
-elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
+elif [ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
 home_OS="/Users"
-elif [ "$whereami" == 'johnhubert-ThinkPad-P50' ]; then
+elif [ "$whereami" = 'johnhubert-ThinkPad-P50' ]; then
 home_OS="/home"
 fi
 
-if [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" == 'johnhubert-ThinkPad-P50' ]; then
+if [ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" = 'johnhubert-ThinkPad-P50' ]; then
 
   path_to_PGC_conversion="Summary_stat_manipulation"
   path_to_CLOZUK_conversion="Genotype_dataset_manipulation"
@@ -109,7 +109,7 @@ if [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" == 'johnhube
   external_harddrive="FALSE"
 fi
 
-if [ "$external_harddrive" == "TRUE" ]; then
+if [ "$external_harddrive" = "TRUE" ]; then
   path_to_harddrive=/Volumes/HD-PCU2
   cp $path_to_harddrive/CLOZUK_data/${validation_set_usually_genotype}.tar.gz .
   cp $path_to_harddrive/PGC_noCLOZUK_data/${training_set_usually_summary}.txt .

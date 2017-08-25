@@ -18,7 +18,7 @@ echo "$whereami"
 
 system=$3
 
-if [[ "$whereami" == *"raven"* ]]; then
+if [[ "$whereami" = *"raven"* ]]; then
   # assign a new variable for the PBS_ARRAY_variable
   
   # Load both Plink and R
@@ -45,7 +45,7 @@ if [[ "$whereami" == *"raven"* ]]; then
   fi
 fi
 
-if [[ "$system" == "MAC" || "$system" == "LINUX"]]; then
+if [[ "$system" = "MAC" || "$system" = "LINUX"]]; then
   Directory_to_work_from=$1
   cd ${Directory_to_work_from}  
   
@@ -71,7 +71,7 @@ Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}Taking_in_summary_stat
 source ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
 cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt 
 
-if [ "${split_by_chromosome_required}" == "TRUE" ]; then
+if [ "${split_by_chromosome_required}" = "TRUE" ]; then
    for i in "${Chromosomes_to_analyse[@]}" ;
    do
 	plink --bfile ${validation_set_full_name_without_chromosome} --chr ${i} --make-bed --out ${validation_set_usually_genotype_serial}${i}
@@ -81,7 +81,7 @@ if [ "${split_by_chromosome_required}" == "TRUE" ]; then
 fi
 
 
-if [[ "$whereami" == *"raven"* ]]; then
+if [[ "$whereami" = *"raven"* ]]; then
 #Purge all modules
 module purge
 fi

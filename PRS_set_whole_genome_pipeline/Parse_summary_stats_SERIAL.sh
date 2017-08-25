@@ -14,7 +14,7 @@
 whereami=$(uname -n)
 echo "$whereami"
 
-if [[ "$whereami" == *"raven"* ]]; then
+if [[ "$whereami" = *"raven"* ]]; then
   # assign a new variable for the PBS_ARRAY_variable
   chromosome_number=${PBS_ARRAY_INDEX}
   
@@ -32,7 +32,7 @@ if [[ "$whereami" == *"raven"* ]]; then
   source ${path_to_scripts}PRS_arguments_script.sh 
   cat ${path_to_scripts}PRS_arguments_script.sh 
 
-elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
+elif [ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   cd ~/Documents/testing_cross_disorder/
   
   # Arguments
@@ -53,17 +53,17 @@ shopt -s nullglob #enable
 set -- *${training_set_usually_summary}*
 if [ "$#" -eq 1 ]; then
 	file_extension=$(for f in *${training_set_usually_summary}*; do printf "%s\n" "${f##*.}"; done | sort -u) 
-	if [[ ${file_extension} == "txt" ]]; then
+	if [[ ${file_extension} = "txt" ]]; then
 		training_set_full_path=`echo *${training_set_usually_summary}*`
 		echo "input file is .txt file"
 	elif [[ ${file_extension} != "txt" ]]; then
 		summary_input_files=$(file *${training_set_usually_summary}* | cut -f2 -d' ')
-		if [[ ${summary_input_files} == "ASCII" ]]; then
+		if [[ ${summary_input_files} = "ASCII" ]]; then
 			training_set_full_path=`echo *${training_set_usually_summary}*`
 			echo "input file is ASCII file"
 		elif [[ ${summary_input_files} != "ACSII" ]]; then
 			summary_input_files2=$(file *${training_set_usually_summary}* | cut -f3 -d' ')
-			if [[ ${summary_input_files2} == "compressed" || ${summary_input_files2} == "archive" ]]; then
+			if [[ ${summary_input_files2} = "compressed" || ${summary_input_files2} = "archive" ]]; then
 			        training_set_full_path=`echo *${training_set_usually_summary}*`
 				${path_to_scripts}unarc ${training_set_full_path}
 			        echo "hi"

@@ -13,7 +13,7 @@
 # Run locally or on ARCCA
 whereami=$(uname -n)
 echo "$whereami"
-if [[ "$whereami" == *"raven"* ]]; then
+if [[ "$whereami" = *"raven"* ]]; then
   path_to_scripts='/home/c1020109/PRS_scripts/'
   # Load both Plink and R
   module purge
@@ -30,7 +30,7 @@ if [[ "$whereami" == *"raven"* ]]; then
   
   cd $WDPATH
 
-elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
+elif [ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   cd ~/Documents/testing_PRS_chromosome_22/
   path_to_scripts='/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/'
 fi

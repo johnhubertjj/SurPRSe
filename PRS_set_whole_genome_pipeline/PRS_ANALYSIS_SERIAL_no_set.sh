@@ -8,7 +8,7 @@
 #PBS -o /home/c1020109/merging_datasets_PRS_information
 #PBS -N merging_datasets_and_calculating_PRS
 
-if [[ "$whereami" == *"raven"* ]]; then
+if [[ "$whereami" = *"raven"* ]]; then
 	cd $PBS_O_WORKDIR
 fi
 
@@ -23,7 +23,7 @@ system=$3
  #trap "set +x ; sleep 1h ; set -x" DEBUG
 
 
-if [[ "$whereami" == *"raven"* ]]; then
+if [[ "$whereami" = *"raven"* ]]; then
   
   # assign a new variable for the PBS_ARRAY_variable
   chromosome_number=NA
@@ -47,7 +47,7 @@ if [[ "$whereami" == *"raven"* ]]; then
   cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
 fi
 
-if [ "$system" == "MAC" || "$system" == "LINUX" ]; then
+if [ "$system" = "MAC" || "$system" = "LINUX" ]; then
 
    
   # Arguments
@@ -71,7 +71,7 @@ fi
 # trap "pkill -f 'sleep 1h'" INT
 # trap "set +x ; sleep 1h ; set -x" DEBUG
 
-if [[ "$whereami" == *"raven"* ]]; then
+if [[ "$whereami" = *"raven"* ]]; then
 	echo ${Batch_job_ID}
 	# move the raven.OU files to one directory
 	cd /home/$USER/
@@ -90,7 +90,7 @@ if [[ "$whereami" == *"raven"* ]]; then
 	cd $PBS_O_WORKDIR
 fi
 
-if [ "$system" == "MAC" || "$system" == "LINUX" ]; then
+if [ "$system" = "MAC" || "$system" = "LINUX" ]; then
 	shopt -s nullglob
 	set -- *Rtestoutclusterlogfile*
 	if [ "$#" -gt 0 ]; then

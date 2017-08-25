@@ -5,7 +5,7 @@ $1=location_of_dataset_names_to_change_in_arguments_script
 $2=type_of_analysis
 
 
-if [[ ${type_of_analysis} == "Whole_genome" ]] then;
+if [[ ${type_of_analysis} = "Whole_genome" ]] then;
 # Need to figure out how to list the different names to loop through various job scripts
 PREAMBLE = ${qsub ...}
 
@@ -23,11 +23,11 @@ testing_jobs=$(qstat -u c1020109)
 
 a=0
 
-while $a == 0: 
+while $a = 0: 
 do
 	echo "Waiting for job 1 to finish"
 	sleep 30
-		if [[ testing_jobs == #empty ]] 
+		if [[ testing_jobs = #empty ]] 
 			a=1     
 		fi
 done
@@ -42,7 +42,7 @@ echo $THIRD
 done
 
 
-if [[ ${type_of_analysis} == "Pathways" ]] then;
+if [[ ${type_of_analysis} = "Pathways" ]] then;
 
 # different type of pipeline
 
