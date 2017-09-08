@@ -22,8 +22,8 @@ print(significance_thresholds)
 
 ## Read in covariates and fam file !may need to put fam file earlier
 #covariates <- fread("/Users/JJ/Documents/PhD_clumping/Profiles/CLOZUK2.r7.select2PC.eigenvec")
-covariates <- fread("/Volumes/HD-PCU2/Stationary_data/CLOZUK2.r7.select2PC.eigenvec.txt")
-fam2 <- fread("/Volumes/HD-PCU2/Stationary_data/CLOZUK.r7.GWAS_IDs.fam")
+covariates <- fread("~/Dropbox/Stationary_data/CLOZUK2.r7.select2PC.eigenvec.txt")
+fam2 <- fread("~/Dropbox/Stationary_data/CLOZUK.r7.GWAS_IDs.fam")
 colnames(fam2) <- c("FID","IID","PID","MID","Sex","PHENO")
 
 
@@ -32,8 +32,9 @@ residuals <- matrix(data=rep(NA,5*length(significance_thresholds)), ncol = 5, nr
 
 ## Calculate PRS using plink file format
 for (i in 1:length(significance_thresholds)) {
-  PRS.profiles <- fread(paste0("./",Training_name,"_",Validation_name,"_output/PRS_scoring/",Training_name,"_",Validation_name,"_whole_genome_significance_threshold_at_",significance_thresholds[i],".profile"))
-    
+  #PRS.profiles <- fread(paste0("./",Training_name,"_",Validation_name,"_output/PRS_scoring/",Training_name,"_",Validation_name,"_whole_genome_significance_threshold_at_",significance_thresholds[i],".profile"))
+  PRS.profiles <- fread(paste0("PRS_scoring/",Training_name,"_",Validation_name,"_whole_genome_significance_threshold_at_",significance_thresholds[i],".profile"))
+  
   PRS.Profiles.with.covariates <- merge(covariates,PRS.profiles,by.x="FID", by.y="FID", all = F)
   PRS.Profiles.with.covariates <- merge(PRS.Profiles.with.covariates, fam2, by.x = "FID", by.y = "FID", all = F)
     
@@ -59,6 +60,7 @@ for (i in 1:length(significance_thresholds)) {
     #             res$NSNPs[i]<-max(dat$CNT)/2
   }#i
 
-colnames(residuals) <- c("Pval_threshold", paste0(Validation_name,"_", Training_name,"_PRS_p_value"), "Z_value", "Std.Error")
+colnames(residuals) <- c("Pval_threshold", paste0(Validation_name,"_", Training_name,"_PRS_p_value"), "Z_value", "Std.Error", "Estimate")
 
 write.csv(residuals, file = paste0("./",Training_name,"_",Validation_name,"_output/PRS_scoring/",Training_name,"_",Validation_name,"_PRS_residuals_using_fam_file.csv"), row.names = F)
+write.csv(residuals, file = paste0("PRS_scoring/",Training_name,"_",Validation_name,"_PRS_residuals_using_fam_file.csv"), row.names = F)

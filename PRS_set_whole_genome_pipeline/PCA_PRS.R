@@ -39,18 +39,39 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
 }
 
 
-Schizophrenia <- fread("/Volumes/PhD_storage/PGC_CLOZUK_output/PRS_scoring/PGC_CLOZUK_whole_genome_significance_threshold_at_0.1.profile")
-Bipolar <- fread("/Volumes/PhD_storage/BIP_CLOZUK_output/PRS_scoring/BIP_CLOZUK_whole_genome_significance_threshold_at_0.4.profile")
-Educational_attainment <- fread("/Volumes/PhD_storage/EDU_main_CLOZUK_output/PRS_scoring/EDU_main_CLOZUK_whole_genome_significance_threshold_at_0.15.profile")
-PGC_MDD <- fread("/Volumes/PhD_storage/PGC_MDD_CLOZUK_output/PRS_scoring/PGC_MDD_CLOZUK_whole_genome_significance_threshold_at_0.45.profile")
-BIPvsSCZ <- fread("/Volumes/PhD_storage/BIPvsSCZ_CLOZUK_output/PRS_scoring/BIPvsSCZ_CLOZUK_whole_genome_significance_threshold_at_0.35.profile")
-Neuroticism <- fread("/Volumes/PhD_storage/Neurot_Assoc_Biobank_CLOZUK_output/PRS_scoring/Neurot_Assoc_Biobank_CLOZUK_whole_genome_significance_threshold_at_0.15.profile")
+#Schizophrenia <- fread("/Volumes/PhD_storage/PGC_CLOZUK_output/PRS_scoring/PGC_CLOZUK_whole_genome_significance_threshold_at_0.1.profile")
+Schizophrenia <- fread("~/Dropbox/PRS_scores_different_summary_stats_datasets/PGC_CLOZUK_whole_genome_significance_threshold_at_0.1.profile")
+#Bipolar <- fread("/Volumes/PhD_storage/BIP_CLOZUK_output/PRS_scoring/BIP_CLOZUK_whole_genome_significance_threshold_at_0.4.profile")
+Bipolar <- fread("~/Dropbox/PRS_scores_different_summary_stats_datasets/BIP_CLOZUK_whole_genome_significance_threshold_at_0.4.profile")
+#Educational_attainment <- fread("/Volumes/PhD_storage/EDU_main_CLOZUK_output/PRS_scoring/EDU_main_CLOZUK_whole_genome_significance_threshold_at_0.15.profile")
+Educational_attainment <- fread("~/Dropbox/PRS_scores_different_summary_stats_datasets/EDU_main_CLOZUK_whole_genome_significance_threshold_at_0.15.profile")
+#PGC_MDD <- fread("/Volumes/PhD_storage/PGC_MDD_CLOZUK_output/PRS_scoring/PGC_MDD_CLOZUK_whole_genome_significance_threshold_at_0.45.profile")
+PGC_MDD <- fread("~/Dropbox/PRS_scores_different_summary_stats_datasets/PGC_MDD_CLOZUK_whole_genome_significance_threshold_at_0.45.profile")
+#BIPvsSCZ <- fread("/Volumes/PhD_storage/BIPvsSCZ_CLOZUK_output/PRS_scoring/BIPvsSCZ_CLOZUK_whole_genome_significance_threshold_at_0.35.profile")
+BIPvsSCZ <- fread("~/Dropbox/PRS_scores_different_summary_stats_datasets/BIPvsSCZ_CLOZUK_whole_genome_significance_threshold_at_0.35.profile")
+#Neuroticism <- fread("/Volumes/PhD_storage/Neurot_Assoc_Biobank_CLOZUK_output/PRS_scoring/Neurot_Assoc_Biobank_CLOZUK_whole_genome_significance_threshold_at_0.15.profile")
+Neuroticism <- fread("~/Dropbox/PRS_scores_different_summary_stats_datasets/Neurot_Assoc_Biobank_CLOZUK_whole_genome_significance_threshold_at_0.15.profile")
+IQ <- fread("~/Dropbox/IQ_2017_PROFILES/PRS_scoring/IQ_GWAS_2017_CLOZUK_whole_genome_significance_threshold_at_0.2.profile")
 
-covariates <- fread("/Volumes/HD-PCU2/Stationary_data/CLOZUK2.r7.select2PC.eigenvec.txt")
-fam2 <- fread("/Volumes/HD-PCU2/Stationary_data/CLOZUK.r7.GWAS_IDs.fam")
+Neuropsychiatric_datasets <- list(Schizophrenia,Bipolar,Educational_attainment, PGC_MDD, BIPvsSCZ, Neuroticism, IQ)
+
+#Neuropsychiatric_datasets <- list(Schizophrenia,Bipolar,Educational_attainment, PGC_MDD, BIPvsSCZ, Neuroticism)
+
+covariates <- fread("~/Dropbox/Stationary_data/CLOZUK2.r7.select2PC.eigenvec.txt")
+fam2 <- fread("~/Dropbox/Stationary_data/CLOZUK.r7.GWAS_IDs.fam")
 colnames(fam2) <- c("FID","IID","PID","MID","Sex","PHENO")
 
-PRS.profiles.1 <- Neuroticism
+Groups_to_keep <- c("CLOZUK","COGS","CRESTAR1", "CRESTAR2", "CRESTAR3","POBI","T1DGC")
+#Groups_to_keep <- c("CLOZUK","COGS","CRESTAR1", "CRESTAR2", "CRESTAR3","TWINSUK","1958BC")
+
+for (i in 1:7){
+setkey(Neuropsychiatric_datasets[[i]],FID)
+ #Neuropsychiatric_datasets[[i]] <- Neuropsychiatric_datasets[[i]][grep(paste(Groups_to_keep,collapse="|"), 
+                      #Neuropsychiatric_datasets[[i]]$FID, value=TRUE)]
+ 
+
+
+PRS.profiles.1 <- Neuropsychiatric_datasets[[i]]
 
 PRS.Profiles.with.covariates <- merge(covariates,PRS.profiles.1, by.x="FID", by.y="FID", all = F)
 PRS.Profiles.with.covariates <- merge(PRS.Profiles.with.covariates, fam2, by.x = "FID", by.y = "FID", all = F)
@@ -70,6 +91,51 @@ PRS.Profiles.with.covariates$NORMSCORE<-(residuals(model0)-m1)/sd1
 # change the Phenotypes so that they will work in a binary model
 PRS.Profiles.with.covariates$PHENO.y <- PRS.Profiles.with.covariates$PHENO.y - 1
 
+Neuropsychiatric_datasets[[i]] <- PRS.Profiles.with.covariates
+
+#Neuropsychiatric_datasets[[i]] <- Neuropsychiatric_datasets[[i]][grep(paste(Groups_to_keep,collapse="|"), 
+#Neuropsychiatric_datasets[[i]]$FID, value=TRUE)]
+}
+
+for (i in 1:6){
+  setkey(Neuropsychiatric_datasets[[i]],FID)
+  # Neuropsychiatric_datasets[[i]] <- Neuropsychiatric_datasets[[i]][grep(paste(Groups_to_keep,collapse="|"), 
+  #                      Neuropsychiatric_datasets[[i]]$FID, value=TRUE)]
+  
+  
+  
+  PRS.profiles.1 <- Neuropsychiatric_datasets[[i]]
+  
+  PRS.Profiles.with.covariates <- merge(covariates,PRS.profiles.1, by.x="FID", by.y="FID", all = F)
+  PRS.Profiles.with.covariates <- merge(PRS.Profiles.with.covariates, fam2, by.x = "FID", by.y = "FID", all = F)
+  
+  #  res$model[i]<-sig[i]
+  
+  # Calculate model including covariates against the polygenic risk score
+  model0<-glm(SCORE~PC1+PC2+PC3+PC4+PC5+PC6+PC9+PC11+PC12+PC13+PC19, family = gaussian, data = PRS.Profiles.with.covariates)
+  m1<-mean(residuals(model0))
+  sd1<-sd(residuals(model0))
+  
+  # Calculate the Normalised score
+  PRS.Profiles.with.covariates$NORMSCORE<-(residuals(model0)-m1)/sd1
+  
+  #             hist(PRS.profiles$NORMSCORE)
+  
+  # change the Phenotypes so that they will work in a binary model
+  PRS.Profiles.with.covariates$PHENO.y <- PRS.Profiles.with.covariates$PHENO.y - 1
+  
+  Neuropsychiatric_datasets[[i]] <- PRS.Profiles.with.covariates
+  
+  Neuropsychiatric_datasets[[i]] <- Neuropsychiatric_datasets[[i]][grep(paste(Groups_to_keep,collapse="|"), 
+                                                                        Neuropsychiatric_datasets[[i]]$FID, value=TRUE)]
+}
+
+PCA_matrix_2 <- data_frame(Neuropsychiatric_datasets[[1]]$FID,Neuropsychiatric_datasets[[1]]$PHENO.y,Neuropsychiatric_datasets[[1]]$NORMSCORE, Neuropsychiatric_datasets[[2]]$NORMSCORE,Neuropsychiatric_datasets[[3]]$NORMSCORE, Neuropsychiatric_datasets[[4]]$NORMSCORE,Neuropsychiatric_datasets[[5]]$NORMSCORE, Neuropsychiatric_datasets[[6]]$NORMSCORE, Neuropsychiatric_datasets[[7]]$NORMSCORE)
+PCA_matrix_2 <- data_frame(Neuropsychiatric_datasets[[1]]$FID,Neuropsychiatric_datasets[[1]]$PHENO.y,Neuropsychiatric_datasets[[1]]$NORMSCORE, Neuropsychiatric_datasets[[2]]$NORMSCORE,Neuropsychiatric_datasets[[3]]$NORMSCORE, Neuropsychiatric_datasets[[4]]$NORMSCORE,Neuropsychiatric_datasets[[5]]$NORMSCORE, Neuropsychiatric_datasets[[6]]$NORMSCORE)
+
+test <- colnames(PCA_matrix)
+colnames(PCA_matrix_2) <- test
+
 merge1 <- PRS.Profiles.with.covariates
 merge2 <- PRS.Profiles.with.covariates
 merge3 <- PRS.Profiles.with.covariates
@@ -80,7 +146,8 @@ merge6 <- PRS.Profiles.with.covariates
 PCA_matrix <- fread("/Volumes/PhD_storage/PRS_cross_disorder_table_optimised_thresholds.csv")
 #PCA_matrix <- fread("E:/PRS_cross_disorder_table_optimised_thresholds.csv")
 
-Groups_of_individuals <- c("CLOZUK","COGS","CRESTAR1", "CRESTAR2", "CRESTAR3", "1958BC", "BLOOD", "GERAD", "CON_GS", "HYWEL","POBI","QIMR","T1DGC","TEDS", "TWINSUK","WTCCC")
+Groups_of_individuals <- c("CLOZUK","COGS","CRESTAR1", "CRESTAR2", "CRESTAR3", "1958BC", "BLOOD", "GERAD", "CON_GS", "HYWEL","POBI","QIMR","T1DGC","TEDS","TWINSUK","WTCCC")
+
 PCA_matrix$Colours <- "NA"
 
 for (i in 1:length(Groups_of_individuals)){
@@ -93,7 +160,7 @@ for (i in 1:length(Groups_of_individuals)){
 library(FactoMineR)
 
 
-#names(PCA_matrix) <- c("Individuals","PHENOTYPE", "Schizophrenia", "Bipolar", "Educational_attainment", "PGC_MDD", "BIPvsSCZ", "Neuroticism")
+names(PCA_matrix_2) <- c("Individuals","PHENOTYPE", "Schizophrenia", "Bipolar", "Educational_attainment", "PGC_MDD", "BIPvsSCZ", "Neuroticism", "IQ")
 
 #write.csv(PCA_matrix, file = "/Volumes/PhD_storage/PRS_cross_disorder_table_optimised_thresholds.csv", col.names = T, row.names = F)
 
@@ -101,6 +168,8 @@ PCA_matrix_df <- as.data.frame(PCA_matrix)
 PCA_matrix_df_cases <- as.data.frame(PCA_matrix[PHENOTYPE==1])
 
 testing <- prcomp(PCA_matrix_df[3:8],center = T)
+testing_reduce_controls <- prcomp(PCA_matrix_2[3:8],center = T)
+testing_reduce_controls <- prcomp(PCA_matrix_2[3:9],center = T)
 
 testing_wo_SCZ <- prcomp(PCA_matrix_df[4:8],center = T)
 testing_wo_BIP <- prcomp(PCA_matrix_df[c(3,5:8)],center = T)
@@ -160,7 +229,29 @@ g <- g + theme(legend.direction = 'horizontal',
 gglist[[i]] <- g
 }
 
-multiplot(plotlist = gglist, cols = 3)
+# Testing_with_different_controls
+
+library(devtools)
+install_github("ggbiplot", "vqv")
+
+plots_index <- combn(1:7,2)
+e <- new.env()
+library(ggbiplot)
+
+gglist <- list()
+
+for (i in 1:20){
+  
+  g <- ggbiplot(testing_reduce_controls, obs.scale = 1, var.scale = 1, ellipse = F, choices = c(plots_index[1,i],plots_index[2,i]),
+                circle = F ,groups = as.factor(PCA_matrix_2$PHENOTYPE), alpha = 1)
+  g <- g + scale_color_discrete(name="Phenotype_CLOZUK.BGE")
+  g <- g + theme(legend.direction = 'horizontal', 
+                 legend.position = 'top')
+  
+  gglist[[i]] <- g
+}
+
+multiplot(plotlist = gglist, cols = 4)
 screeplot(testing2, main="Scree Plot", xlab="Components",ylim = c(0,1.4))
 
 

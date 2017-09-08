@@ -46,12 +46,23 @@ roc_df <- data.frame(
 
 testing <- prcomp(PCA_matrix_df[c(3:7)],center = T)
 
+
 roc_obj1 <- roc(PCA_matrix_df$PHENOTYPE, testing$x[,1], plot = T, ci = T)
 roc_obj2 <- roc(PCA_matrix_df$PHENOTYPE, testing$x[,2], plot = T, ci = T)
 roc_obj3 <- roc(PCA_matrix_df$PHENOTYPE, testing$x[,3], plot = T, ci = T)
 roc_obj4 <- roc(PCA_matrix_df$PHENOTYPE, testing$x[,4], plot = T, ci = T)
 roc_obj5 <- roc(PCA_matrix_df$PHENOTYPE, testing$x[,5], plot = T, ci = T)
 roc_obj6 <- roc(PCA_matrix_df$PHENOTYPE, testing$x[,6], plot = T, ci = T)
+
+
+roc_obj1 <- roc(PCA_matrix_2$PHENOTYPE, testing_reduce_controls$x[,1], plot = T, ci = T)
+roc_obj2 <- roc(PCA_matrix_2$PHENOTYPE, testing_reduce_controls$x[,2], plot = T, ci = T)
+roc_obj3 <- roc(PCA_matrix_2$PHENOTYPE, testing_reduce_controls$x[,3], plot = T, ci = T)
+roc_obj4 <- roc(PCA_matrix_2$PHENOTYPE, testing_reduce_controls$x[,4], plot = T, ci = T)
+roc_obj5 <- roc(PCA_matrix_2$PHENOTYPE, testing_reduce_controls$x[,5], plot = T, ci = T)
+roc_obj6 <- roc(PCA_matrix_2$PHENOTYPE, testing_reduce_controls$x[,6], plot = T, ci = T)
+
+roc_obj_SCZ <- roc(PCA_matrix_2$PHENOTYPE, PCA_matrix_2$Schizophrenia, plot = T, ci = T)
 
 roc_obj_SCZ <- roc(PCA_matrix_df$PHENOTYPE, PCA_matrix_df$Schizophrenia, plot = T, ci = T)
 roc_obj_BIP <- roc(PCA_matrix_df$PHENOTYPE, PCA_matrix_df$Bipolar, plot = T, ci = T)

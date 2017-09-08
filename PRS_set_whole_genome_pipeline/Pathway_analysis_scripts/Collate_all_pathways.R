@@ -38,14 +38,15 @@ Pathway_file_name <- args[6] # the name of the file to be accessed (must be in s
 significance_thresholds <- as.numeric(args[c(7:length(args))])
 print(significance_thresholds)
 
-Training_name <- "CLOZUK_PGC2noclo"
-Validation_name <- "ALSPAC"
-Pathway_directory <- paste0(Training_name,"_",Validation_name,"_output/Pathways/")
-Pathway_file_name <- "/Users/johnhubert/Dropbox/Stationary_data/Pocklington2015_134sets_LoFi_2sets_morphology_notmorphology_deduplicated.txt"
+
+
+#Training_name <- "CLOZUK_PGC2noclo"
+#Validation_name <- "ALSPAC"
+#Pathway_directory <- paste0(Training_name,"_",Validation_name,"_output/Pathways/")
+#Pathway_file_name <- "/Users/johnhubert/Dropbox/Stationary_data/Pocklington2015_134sets_LoFi_2sets_morphology_notmorphology_deduplicated.txt"
+#significance_thresholds <- c(0.05,0.5)
+
 Pathways_used <- file_path_sans_ext(basename(Pathway_file_name))
-significance_thresholds <- c(0.05,0.5)
-
-
 
 ##### read in pathway sets and standardise column names
 pathway_sets <- fread(Pathway_file_name)
