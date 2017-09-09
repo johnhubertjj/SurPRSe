@@ -49,6 +49,11 @@ significance_thresholds <- c(5e-08, 1e-06, 1e-04, 0.01, 0.05, 0.1, 0.2, 0.5, 1)
 
 #ALL_PRS_DATA <- read.table("FINAL_PATHWAY_RESULTS_PRS_PROFILESHG19_pgc.scz.full.2012-04_ALSPAC.txt",header = T)
 ALL_PRS_DATA <- all_prs
+ALL_PRS_DATA <- test_CLOZUK_results
+
+ALL_PRS_DATA <- read.table("FINAL_PATHWAY_RESULTS_PRS_PROFILESCLOZUK_PGC2noclo_ALSPAC_Pocklington2015_134sets_LoFi_morphology_only_deduplicated.txt",header = T)
+ALL_PRS_DATA <- read.table("FINAL_PATHWAY_RESULTS_PRS_PROFILESCLOZUK_PGC2noclo_ALSPAC_Pocklington2015_134sets_LoFi_2sets_morphology_notmorphology_deduplicated.txt",header = T)
+
 
 for (Training_name in Training_names){ 
   #Training_name <- "PGC2"
@@ -154,6 +159,10 @@ write.table(`results_ICVHG19_pgc.scz.full.2012-04`,file = "PGC1_pathway_specific
 write.table(`results_HG19_pgc.scz.full.2012-04`,file = "CLOZUK_PGC2noclo_pathway_specific_pathway_scores.txt", row.names = F, quote = F)
 write.table(`results_HG19_pgc.scz.full.2012-04`,file = "CLOZUK_PGC2noclo_pathway_specific_pathway_scores.txt", row.names = F, quote = F)
 
+write.table(results_CLOZUK_PGC2noclo, file="CLOZUK_PGC2noclo_morphology_andnotmorphology_pathway_specific_scores.txt", row.names = F, quote = F)
+write.table(results_ICVCLOZUK_PGC2noclo, file="CLOZUK_PGC2noclo_morphology_andnotmorphology_pathway_specific_scores_for_ICV_regression.txt", row.names = F, quote = F)
+
+write.table(results_CLOZUK_PGC2noclo, file="CLOZUK_PGC2noclo_all_pocklington_inclu_LoF_specific_scores.txt", row.names = F, quote = F)
 
 # Write the file name relevant to the results you have produced
 #write.table(results, file = "all_scaled_PGC1_no_sweden_HG19_UCSC_ALSPAC_brain_regions_association_PRS_results.txt", row.names = F, quote = F)
