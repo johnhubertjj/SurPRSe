@@ -16,18 +16,17 @@ print(args)
 # Checking location for serial or batch analysis #
 ##################################################
 
+system <- args[15]
+
 System_information <- Sys.info()
 print(System_information)
 whereami <- System_information['nodename']
 print(whereami)
 
-if (whereami == "v1711-0ab8c3db.mobile.cf.ac.uk") {
+if (system == "MAC" | system == "LINUX") {
   chromosome.number <- args[7]
   
-} else if (whereami == 'JJ') {
-  chromosome.number <- args[7]
-  
-} else if (whereami == "c1020109") {
+}else if (whereami == "c1020109") {
 
 # Preparing to run in Job array
 AI <- Sys.getenv("PBS_ARRAY_INDEX")
@@ -36,8 +35,6 @@ chromosome.number <- as.numeric(AI)
 } else {
   stop("current environment NOT at work/home or on servers, please add to script above to specify where you are and what type of analysis you want to do")
 }
-
-
 
 # specify the different input tables #
 Validation_datatable_bim_file <- paste0(args[4],".bim")
@@ -52,7 +49,7 @@ A1 <- args[11]
 A2 <- args[12]
 OR <- args[13]
 BETA <- args[14]
-number_of_frequency_columns <- args[15]
+number_of_frequency_columns <- args[16]
 
 Column_headers_to_keep <- c(CHR, SNP, BP, A1, A2, OR, BETA)
 Column_headers <- c("CHR", "SNP", "BP", "A1", "A2", "OR", "BETA")

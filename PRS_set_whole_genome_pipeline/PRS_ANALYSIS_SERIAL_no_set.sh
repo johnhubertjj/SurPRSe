@@ -47,7 +47,7 @@ if [[ "$whereami" = *"raven"* ]]; then
   cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
 fi
 
-if [ "$system" = "MAC" || "$system" = "LINUX" ]; then
+if [[ "$system" = "MAC" || "$system" = "LINUX" ]]; then
 
    
   # Arguments
@@ -90,7 +90,7 @@ if [[ "$whereami" = *"raven"* ]]; then
 	cd $PBS_O_WORKDIR
 fi
 
-if [ "$system" = "MAC" || "$system" = "LINUX" ]; then
+if [[ "$system" = "MAC" || "$system" = "LINUX" ]]; then
 	shopt -s nullglob
 	set -- *Rtestoutclusterlogfile*
 	if [ "$#" -gt 0 ]; then

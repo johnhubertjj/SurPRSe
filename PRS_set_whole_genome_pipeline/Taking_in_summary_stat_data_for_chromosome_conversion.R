@@ -37,18 +37,22 @@ print(Chromosomes_to_split)
 What_summary_columns_do_we_have <- function(Parsing_colnames){
 
 ## what type of files do we have?
-if(length(grep("\\bCHR\\b", Parsing_colnames)) == 1 | length(grep("\\bHG19CHR\\b", Parsing_colnames)) == 1 ){
+if(length(grep("\\bCHR\\b", Parsing_colnames)) == 1 | length(grep("\\bHG19CHR\\b", Parsing_colnames)) == 1 | length(grep("\\bCHROMOSOME\\b", Parsing_colnames)) == 1 ){
   Chromosome_name <- "CHR_name=TRUE"
   if(length(grep("\\bHG19CHR\\b", Parsing_colnames)) == 1){
       place.of.change.snp <- grep("\\bHG19CHR\\b", Parsing_colnames)
       Parsing_colnames[place.of.change.snp] <- "CHR"
   }
-
+  if(length(grep("\\bCHROMOSOME\\b", Parsing_colnames)) == 1){
+    place.of.change.snp <- grep("\\bCHROMOSOME\\b", Parsing_colnames)
+    Parsing_colnames[place.of.change.snp] <- "CHR"
+  }
+  
 }else{
   Chromosome_name <- "CHR_name=FALSE"  
 }
 
-if(length(grep("\\bSNP\\b", Parsing_colnames)) == 1 | length(grep("\\bMARKERNAME\\b", Parsing_colnames)) == 1 | length(grep("\\bSNPID\\b", Parsing_colnames)) == 1){
+if(length(grep("\\bSNP\\b", Parsing_colnames)) == 1 | length(grep("\\bMARKERNAME\\b", Parsing_colnames)) == 1 | length(grep("\\bSNPID\\b", Parsing_colnames)) == 1 | length(grep("\\bRSID\\b", Parsing_colnames)) == 1 ) {
   SNP_name <- "SNP_name=TRUE"
   if(length(grep("\\bMARKERNAME\\b", Parsing_colnames)) == 1){
       place.of.change.snp <- grep("\\bMARKERNAME\\b", Parsing_colnames)
@@ -58,6 +62,10 @@ if(length(grep("\\bSNP\\b", Parsing_colnames)) == 1 | length(grep("\\bMARKERNAME
       place.of.change.snp <- grep("\\bSNPID\\b", Parsing_colnames)
       Parsing_colnames[place.of.change.snp] <- "SNP"
   }
+  if(length(grep("\\bRSID\\b", Parsing_colnames)) == 1){
+    place.of.change.snp <- grep("\\bRSID\\b", Parsing_colnames)
+    Parsing_colnames[place.of.change.snp] <- "SNP"
+  }
 
 }else{
   SNP_name <- "SNP_name=FALSE"  
@@ -65,31 +73,23 @@ if(length(grep("\\bSNP\\b", Parsing_colnames)) == 1 | length(grep("\\bMARKERNAME
   
 }
 
-if(length(grep("\\bBP\\b", Parsing_colnames)) == 1 | length(grep("\\bPOS\\b", Parsing_colnames)) == 1){
+if(length(grep("\\bBP\\b", Parsing_colnames)) == 1 | length(grep("\\bPOS\\b", Parsing_colnames)) == 1 | length(grep("\\bPOSITION\\b", Parsing_colnames)) == 1){
   BP_name <- "BP_name=TRUE"
   if(length(grep("\\bPOS\\b", Parsing_colnames)) == 1){
     place.of.change.bp <- grep("\\bPOS\\b", Parsing_colnames)
     Parsing_colnames[place.of.change.bp] <- "BP"
   }
+  
+  if(length(grep("\\bPOSITION\\b", Parsing_colnames)) == 1){
+    place.of.change.bp <- grep("\\bPOSITION\\b", Parsing_colnames)
+    Parsing_colnames[place.of.change.bp] <- "BP"
+  }
+  
 }else{
   BP_name <- "BP_name=FALSE"  
   stop("Training dataset does NOT have a 'BP' column essential for the pipeline to work, please add a 'BP' column")
 }
-
-if(length(grep("\\bA1\\b", Parsing_colnames)) == 1){
-  A1_name <- "A1_name=TRUE"
-}else{
-  A1_name <- "A1_name=FALSE"
-  stop("Minor Allele is not present in the Training dataset or is not named \"A1\", please change column headers or add a column with Minor allele")
-}
-
-if(length(grep("\\bA2\\b", Parsing_colnames)) == 1){
-  A2_name <- "A2_name=TRUE"
-}else{
-  A2_name <- "A2_name=FALSE"  
-  warning("Major Allele is not present in the Training dataset or is not named \"A2\", please change column headers or add a column with Major allele")
-}
-
+  
 if(length(grep("\\bFRQ", Parsing_colnames)) == 1 || length(grep("\\bFRQ", Parsing_colnames)) == 2){
   MAF_calculation_summary <- paste0("MAF_Summary=", MAF_summary)
   number_of_frequency_columns <- paste0("Number_of_frequency_columns=", grep("FRQ", Parsing_colnames))
@@ -101,6 +101,33 @@ if(length(grep("\\bFRQ", Parsing_colnames)) == 1 || length(grep("\\bFRQ", Parsin
     warning("MAF_summary input argument has been changed from TRUE to FALSE due to constraints warned above")
   }
 }
+  
+if(length(grep("\\bA1\\b", Parsing_colnames)) == 1 | length(grep("\\bALT\\b", Parsing_colnames)) == 1 ){
+  A1_name <- "A1_name=TRUE"
+  if(length(grep("\\bALT\\b", Parsing_colnames)) == 1){
+    place.of.change.bp <- grep("\\bALT\\b", Parsing_colnames)
+    Parsing_colnames[place.of.change.bp] <- "A1"
+    warning("ALT allele heading found, converting to A1 heading and inferring that it is the alternative allele. IF NOT alternative allele, please change file to appropriate heading, for safety, MAF will not be calculated using training set")
+    MAF_calculation_summary <- "MAF_summary=FALSE"  
+  }
+}else{
+  A1_name <- "A1_name=FALSE"
+  stop("Alternative Allele is not present in the Training dataset or is not named \"A1\", please change column headers or add a column with Alternative allele")
+}
+
+if(length(grep("\\bA2\\b", Parsing_colnames)) == 1| length(grep("\\bREF\\b", Parsing_colnames)) == 1 ){
+  A2_name <- "A2_name=TRUE"
+  if(length(grep("\\bREF\\b", Parsing_colnames)) == 1){
+    place.of.change.bp <- grep("\\bREF\\b", Parsing_colnames)
+    Parsing_colnames[place.of.change.bp] <- "A2"
+    warning("REF allele heading found, converting to A2 heading and inferring that it is the reference allele. IF NOT reference allele, please change file to appropriate heading, for safety, MAF will not be calculated using this training set")
+    MAF_calculation_summary <- "MAF_summary=FALSE"  
+  }
+}else{
+  A2_name <- "A2_name=FALSE"  
+  warning("Reference allele is not present in the Training dataset or is not named \"A2\", please change column headers or add a column with Reference allele")
+}
+
 
 if(length(grep("\\bINFO\\b", Parsing_colnames)) == 1){
   INFO_name <- "INFO_summary=TRUE"
@@ -148,10 +175,14 @@ if(length(grep("\\bSE\\b", Parsing_colnames)) == 1 & INFO_name == "INFO_summary=
   }
 }
 
-if(length(grep("\\bP\\b", Parsing_colnames)) == 1 | length(grep("\\bPVAL\\b", Parsing_colnames))){
+if(length(grep("\\bP\\b", Parsing_colnames)) == 1 | length(grep("\\bPVAL\\b", Parsing_colnames)) == 1 | length(grep("\\bP_VALUE\\b", Parsing_colnames)) == 1){
   P_name <- "P_value_name=TRUE"
   if(length(grep("\\bPVAL\\b", Parsing_colnames)) == 1){
     place.of.change.P <- grep("\\bPVAL\\b", Parsing_colnames)
+    Parsing_colnames[place.of.change.P] <- "P"
+  }
+  if(length(grep("\\bP_VALUE\\b", Parsing_colnames)) == 1){
+    place.of.change.P <- grep("\\bP_VALUE\\b", Parsing_colnames)
     Parsing_colnames[place.of.change.P] <- "P"
   }
 }else{

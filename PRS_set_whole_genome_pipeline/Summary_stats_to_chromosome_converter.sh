@@ -45,7 +45,7 @@ if [[ "$whereami" = *"raven"* ]]; then
   fi
 fi
 
-if [[ "$system" = "MAC" || "$system" = "LINUX"]]; then
+if [[ "$system" = "MAC" || "$system" = "LINUX" ]]; then
   Directory_to_work_from=$1
   cd ${Directory_to_work_from}  
   

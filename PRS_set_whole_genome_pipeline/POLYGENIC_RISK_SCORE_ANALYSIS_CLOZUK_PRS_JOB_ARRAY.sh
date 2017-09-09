@@ -41,7 +41,7 @@ if [[ "$whereami" = *"raven"* ]]; then
   cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
 fi
  
-if [ "$system" = "MAC" || "$system" = "LINUX" ]; then
+if [[ "$system" = "MAC" || "$system" = "LINUX" ]]; then
   # add directory to work from at the top of the script (just in case)
   Directory_to_work_from=$2
   cd ${Directory_to_work_from} 
@@ -77,7 +77,7 @@ tar -zxvf ${validation_set_usually_genotype}.tar.gz
 shopt -u nullglob # disable
 fi
 
-if [ ${remove_IDs} = "TRUE" ]; then
+if [[ ${remove_IDs} = "TRUE" ]]; then
 
 plink --bfile ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype} --remove CLOZUK2_IDs_remove_plink_file_chr_${chromosome_number}.txt --make-bed --out ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype}
 
@@ -124,27 +124,49 @@ Rscript ${path_to_scripts}RscriptEcho.R\
  ${A2_name}\
  ${OR_name}\
  ${BETA_name}\
+ ${system}\
  ${Number_of_frequency_columns}  
 
 if [[ ${MAF_genotype} = "TRUE" ]]; then
+if [[ ${Missing_geno} = "TRUE" ]]; then
+     	# using plink to change the names to a CHR.POS identifier and remaking the files
+  plink \
+--bfile ${validation_set_usually_genotype} \
+--update-name ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_chr${chromosome_number}_chr.pos.txt \
+--maf ${MAF_threshold} \
+--geno ${genotype_missingness_check} \
+--make-bed  \
+--out ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype}_2
+else 
+
    # using plink to change the names to a CHR.POS identifier and remaking the files
   plink \
 --bfile ${validation_set_usually_genotype} \
 --update-name ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_chr${chromosome_number}_chr.pos.txt \
 --maf ${MAF_threshold} \
---geno 0.02 \
---mind 0.01 \
 --make-bed  \
 --out ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype}_2
+fi
 
 elif [[ ${MAF_genotype} = "FALSE" ]]; then 
+if [[ ${Missing_geno} = "TRUE" ]]; then
+
+plink \
+--bfile ${validation_set_usually_genotype} \
+--update-name ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_chr${chromosome_number}_chr.pos.txt \
+--geno ${genotype_missingness_check} \
+--make-bed \
+--out ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype}_2
+
+else
+
+   # using plink to change the names to a CHR.POS identifier and remaking the files
   plink \
 --bfile ${validation_set_usually_genotype} \
 --update-name ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_chr${chromosome_number}_chr.pos.txt \
---geno 0.02 \
---mind 0.01 \
---make-bed \
+--make-bed  \
 --out ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype}_2
+fi
 fi
 
 # re-package the original files
