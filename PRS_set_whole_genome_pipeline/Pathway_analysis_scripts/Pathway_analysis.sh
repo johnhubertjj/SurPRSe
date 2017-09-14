@@ -42,7 +42,7 @@ if [[ "$whereami" = *"raven"* ]]; then
   cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
 fi
  
-if [ "$system" = "MAC" || "$system" = "LINUX" ]; then
+if [[ "$system" = "MAC" || "$system" = "LINUX" ]]; then
   
   Directory_to_work_from=$1
   cd ${Directory_to_work_from}
@@ -138,9 +138,10 @@ fi
 if [ -e "${Pathway_output_directory}MAGMA_empty_files_after_analysis.txt" ]; then
 	rm "${Pathway_output_directory}MAGMA_empty_files_after_analysis.txt"
 fi
- 
+
+
 Rscript ${path_to_scripts}RscriptEcho.R\
- ${path_to_pathway_scripts}Assign_SNPS_to_genes_from_pathways.R\
+ ${path_to_pathway_scripts}Assign_SNPs_to_genes_from_pathways.R\
  ./${training_set_name}_${validation_set_name}_extrainfo/${pathways}_assiging_SNPs_to_genes_from_pathways.Rout\
  ${training_set_name}\
  ${validation_set_name}\
@@ -158,7 +159,7 @@ Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}combining_summary_stat
 chmod -R g+rwx ${path_to_scripts} 
 echo ${pathways[@]}
 
-if [ "$system" = "MAC" || "$system" = "LINUX" ]; then
+if [[ "$system" = "MAC" || "$system" = "LINUX" ]]; then
 
 sudo parallel ${path_to_pathway_scripts}creation_of_merge_list_file.sh ::: ${pathways[@]} ::: ${path_to_scripts} ::: ${path_to_pathway_scripts} ::: ${system}
 

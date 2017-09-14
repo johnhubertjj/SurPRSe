@@ -102,12 +102,12 @@ if(length(grep("\\bFRQ", Parsing_colnames)) == 1 || length(grep("\\bFRQ", Parsin
   }
 }
   
-if(length(grep("\\bA1\\b", Parsing_colnames)) == 1 | length(grep("\\bALT\\b", Parsing_colnames)) == 1 ){
+if(length(grep("\\bA1\\b", Parsing_colnames)) == 1 | length(grep("\\bREF\\b", Parsing_colnames)) == 1 ){
   A1_name <- "A1_name=TRUE"
-  if(length(grep("\\bALT\\b", Parsing_colnames)) == 1){
-    place.of.change.bp <- grep("\\bALT\\b", Parsing_colnames)
+  if(length(grep("\\bREF\\b", Parsing_colnames)) == 1){
+    place.of.change.bp <- grep("\\bREF\\b", Parsing_colnames)
     Parsing_colnames[place.of.change.bp] <- "A1"
-    warning("ALT allele heading found, converting to A1 heading and inferring that it is the alternative allele. IF NOT alternative allele, please change file to appropriate heading, for safety, MAF will not be calculated using training set")
+    warning("REF allele heading found, converting to A1 heading and inferring that it is the reference allele to which the OR and/or BETA values are based on. IF NOT reference allele, please change file to appropriate heading, for safety, MAF will not be calculated using training set")
     MAF_calculation_summary <- "MAF_summary=FALSE"  
   }
 }else{
@@ -115,12 +115,12 @@ if(length(grep("\\bA1\\b", Parsing_colnames)) == 1 | length(grep("\\bALT\\b", Pa
   stop("Alternative Allele is not present in the Training dataset or is not named \"A1\", please change column headers or add a column with Alternative allele")
 }
 
-if(length(grep("\\bA2\\b", Parsing_colnames)) == 1| length(grep("\\bREF\\b", Parsing_colnames)) == 1 ){
+if(length(grep("\\bA2\\b", Parsing_colnames)) == 1| length(grep("\\bALT\\b", Parsing_colnames)) == 1 ){
   A2_name <- "A2_name=TRUE"
-  if(length(grep("\\bREF\\b", Parsing_colnames)) == 1){
-    place.of.change.bp <- grep("\\bREF\\b", Parsing_colnames)
+  if(length(grep("\\bALT\\b", Parsing_colnames)) == 1){
+    place.of.change.bp <- grep("\\bALT\\b", Parsing_colnames)
     Parsing_colnames[place.of.change.bp] <- "A2"
-    warning("REF allele heading found, converting to A2 heading and inferring that it is the reference allele. IF NOT reference allele, please change file to appropriate heading, for safety, MAF will not be calculated using this training set")
+    warning("ALT allele heading found, converting to A2 heading and inferring that it is the alternative allele which WILL NOT match the BETA/OR column for this allele. IF NOT alternative allele, please change file to appropriate heading, for safety, MAF will not be calculated using this training set")
     MAF_calculation_summary <- "MAF_summary=FALSE"  
   }
 }else{
