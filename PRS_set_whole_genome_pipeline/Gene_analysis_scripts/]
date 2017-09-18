@@ -61,9 +61,9 @@ if [[ "$system" = "MAC" || "$system" = "LINUX" ]]; then
 fi 
 ##########################################################################################################################
 ###################                  ###############                                 ###############                     #
-################### PATHWAY ANALYSIS ###############      PATHWAY ANALYSIS           ############### PATHWAY ANALYSIS    #
+################### GENE ANALYSIS    ###############      GENE ANALYSIS              ############### GENE    ANALYSIS    #
 ##########################################################################################################################
-if [[ ${Name_of_extra_analysis} = "Pathways" ]]; then
+if [[ ${Name_of_extra_analysis} = "Genes" ]]; then
  
 Pathway_output_directory="./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis}/" 
 

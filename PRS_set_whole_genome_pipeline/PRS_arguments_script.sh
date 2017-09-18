@@ -110,7 +110,7 @@ if [[ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" = 'johnhuber
   Running_in_Serial="TRUE"
   sig_thresholds=(0.05 0.5)
   Extra_analyses=TRUE
-  Name_of_extra_analysis=Pathways
+  Name_of_extra_analysis=Genes Pathways
   Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates"
   # either "extended" "normal" or "both" : change to a numerical input in the future
   Gene_regions=normal #either ( "extended" "normal" "both" )	

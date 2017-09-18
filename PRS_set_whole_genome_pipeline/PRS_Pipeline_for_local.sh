@@ -7,15 +7,18 @@ echo "$whereami"
 
 if [ "$whereami" = "v1711-0ab8c3db.mobile.cf.ac.uk" ]; then
 home_OS="/Users"
+extra_path="/johnhubert/Documents/PhD_scripts"
 system=MAC
 
 elif [ "$whereami" = "johnhubert-ThinkPad-P50" ]; then
 home_OS="/home"
+extra_path="/johnhubert/Documents"
 system=LINUX #oh god programmers are going to hate me for using this argument
 fi
 
-path_to_scripts="${home_OS}/johnhubert/Documents/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/"
-path_to_pathway_scripts="${home_OS}/johnhubert/Documents/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/Pathway_analysis_scripts/"
+path_to_scripts="${home_OS}${extra_path}/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/"
+path_to_pathway_scripts="${home_OS}${extra_path}/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/Pathway_analysis_scripts/"
+path_to_gene_scripts="${home_OS}${extra_path}/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/Gene_analysis_scripts/"
 
 Directory_to_work_from=`pwd`
 chromosomes=(`seq 1 22`)
@@ -35,9 +38,19 @@ Name_of_extra_analysis=(`sed -n 's/Name_of_extra_analysis\=//p' ${path_to_script
 
 if [ "${Extra_analyses[1]}" = "TRUE" ]; then
 	echo hi
-	if [[ "${Name_of_extra_analysis[1]}" = "Pathways" ]]; then
-		echo hi
+length_of_extra_analysis_array=`echo ${#Name_of_extra_analysis[@]}`
+	if [ "${length_of_extra_analysis_array}" -gt  "2" ]; then
+		echo hi all
 		 ${path_to_pathway_scripts}Pathway_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_pathway_scripts} 
+		 ${path_to_gene_scripts}Gene_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_gene_scripts}
+	
+	elif  [[ "${Name_of_extra_analysis[1]}" = "Pathways" ]]; then
+		echo hi Pat
+		 ${path_to_pathway_scripts}Pathway_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_pathway_scripts} 
+	
+	elif [[ "${Name_of_extra_analysis[1]}" = "Genes" ]]; then
+		echo hi Gene
+		 ${path_to_gene_scripts}Gene_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_gene_scripts}
 	fi
 else
 	
