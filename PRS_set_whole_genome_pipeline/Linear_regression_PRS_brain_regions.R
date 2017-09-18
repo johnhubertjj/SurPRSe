@@ -41,7 +41,7 @@ print(significance_thresholds)
 #Training_names <- c("HG19_pgc.scz.full.2012-04", "scz.swe.pgc1.results.v3","PGC2","CLOZUK_PGC2noclo")
 Training_names <- c("PGC1_only_more_sig_thresh", "PGC1_plussweden_more_sig_thresh", "PGC2_more_sig_thresh", "CLOZUK_PGC2noclo_more_sig_thresh")
 Validation_name <- "ALSPAC"
-Scale_phenotypes <- F
+Scale_phenotypes <- T
 Scale_PRS <- T
 significance_thresholds <- c(5e-08, 1e-06, 1e-04, 0.01, 0.05, 0.1, 0.2, 0.5, 1)
 
@@ -290,7 +290,7 @@ for (i in 1:number_of_phenotypes){
 setwd("~/Desktop/")
 
 
-pdf("ALSPAC_PGC_all_brain_regions_all_sig_thresh.pdf", onefile = TRUE,paper = "A4")
+pdf("ALSPAC_PGC_all_brain_regions_all_sig_thresh_all_scaled.pdf", onefile = TRUE,paper = "A4")
 invisible(lapply(gglist_0.05,print))
 dev.off()
 
