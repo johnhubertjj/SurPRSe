@@ -13,7 +13,7 @@
 # Run locally or on ARCCA
 whereami=$(uname -n)
 echo "$whereami"
-if [[ "$whereami" == *"raven"* ]]; then
+if [[ "$whereami" = *"raven"* ]]; then
  
   training_set_usually_summary="PGC_table"${chromosome_number}
   validation_set_usually_genotype="CLOZUK_GWAS_BGE_chr"${chromosome_number}
@@ -36,7 +36,7 @@ if [[ "$whereami" == *"raven"* ]]; then
 
   # assign a new variable for the PBS_ARRAY_variable
   chromosome_number=${PBS_ARRAY_INDEX}
-elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
+elif [ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
   cd ~/Documents/testing_PRS_chromosome_22/
   path_to_scripts='/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/'
   chromosome_number=22
@@ -71,7 +71,7 @@ if [ ! -d "extrainfo" ]; then
    mkdir extrainfo
 fi
 
-if [[ ${split_genotype_dataset_into_chromosomes} == "YES" ]]; then
+if [[ ${split_genotype_dataset_into_chromosomes} = "YES" ]]; then
    Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}splitting_Genotype_datasets.R ./extrainfo/splitting_${Validation_set_name}_genotype_dataset.Rout
 
 # Run R script that removes SNPs based on INFO score and MAF
@@ -81,10 +81,10 @@ Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}MAF_and_INFO_score_sum
 # Output is in PGC_CLOZUK_SNP_table.txt
 Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}CLOZUK_PGC_COMBINE_final.R ./extrainfo/CLOZUK_PGC_COMBINE_chr${chromosome_number}.Rout ${training_set_usually_summary} ${validation_set_usually_genotype}
 
-if [[ ${MAF_genotype} == "YES" ]]; then
+if [[ ${MAF_genotype} = "YES" ]]; then
 # using plink to change the names to a CHR.POS identifier and remaking the files
   plink --bfile CLOZUK_GWAS_BGE_chr${chromosome_number} --update-name ./output/CLOZUK_chr${chromosome_number}_chr.pos.txt --maf 0.01 --make-bed --out ./output/CLOZUK_GWAS_BGE_chr${chromosome_number}_2
-elif [[ ${MAF_genotype} == "NO" ]]; then 
+elif [[ ${MAF_genotype} = "NO" ]]; then 
   plink --bfile CLOZUK_GWAS_BGE_chr${chromosome_number} --update-name ./output/CLOZUK_chr${chromosome_number}_chr.pos.txt --make-bed --out ./output/CLOZUK_GWAS_BGE_chr${chromosome_number}_2
 fi
 

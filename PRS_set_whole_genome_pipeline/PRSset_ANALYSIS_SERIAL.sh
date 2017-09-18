@@ -19,7 +19,7 @@ echo "$whereami"
  #trap "set +x ; sleep 1h ; set -x" DEBUG
 
 
-if [[ "$whereami" == *"raven"* ]]; then
+if [[ "$whereami" = *"raven"* ]]; then
   
   # assign a new variable for the PBS_ARRAY_variable
   chromosome_number=NA
@@ -42,7 +42,7 @@ if [[ "$whereami" == *"raven"* ]]; then
   source ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt  
   cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
 
-elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
+elif [ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
 
   cd /Volumes/PhD_storage/
   
@@ -75,7 +75,7 @@ Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}MAKE_list_file_creator
   
 
 # If running MAGMA as well
-if [ ${Perform_Magma_as_well} == TRUE ]; then
+if [ ${Perform_Magma_as_well} = TRUE ]; then
 
 	# Create output directory for MAGMA results
 	if [ ! -d "./${training_set_name}_${validation_set_name}_output/MAGMA_set_analysis" ]; then
@@ -129,7 +129,7 @@ fi
 #### MAGMA ANALYSIS #####
 #########################
 
-if [ ${Perform_Magma_as_well} == "TRUE" ]; then
+if [ ${Perform_Magma_as_well} = "TRUE" ]; then
 	# Create the pvalue reference file which matching SNPs to genes depending on the pvalue threshold
 	Rscript ${path_to_MAGMA_scripts}RscriptEcho.R ${path_to_scripts}Creation_of_filter_file_for_magma_gene.R ./${training_set_name}_${validation_set_name}_extrainfo/Creation_of_filter_file_for_magma_gene.R ${training_set_name} ${validation_set_name} ${sig_thresholds[@]} ${validation_set_name_MAGMA}.bim ${Perform_Magma_as_well} ${INFO_summary} ${INFO_threshold}
         # Run MAGMA gene-set analysis for the whole genome
@@ -159,7 +159,7 @@ fi
 # Calculate the Polygenic score using plink within an R script (for now)
 Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}PRS_scoring_whole_genome.R ./${training_set_name}_${validation_set_name}_extrainfo/PRS_scoring_whole_genome.Rout ${training_set_name} ${validation_set_name} ${Gene_regions} ${sig_thresholds[@]} 
 
-if [ "$whereami" == "raven13" ]; then
+if [ "$whereami" = "raven13" ]; then
    	python ${path_to_scripts}PRS_scoring_parallel_clump_maf_JJ.py
 else
    	python ${path_to_scripts}PRS_scoring_parallel_clump_maf_JJ.py

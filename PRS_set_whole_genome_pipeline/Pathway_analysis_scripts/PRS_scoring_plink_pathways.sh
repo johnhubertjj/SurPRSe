@@ -2,7 +2,7 @@
 
 pathways=$1
 path_to_scripts=$2
-path_to_pathway_scripts="${path_to_scripts}Pathway_analysis_scripts/"
+path_to_pathway_scripts=$3
 
 # Assign the shell variables
 source ${path_to_scripts}/PRS_arguments_script.sh

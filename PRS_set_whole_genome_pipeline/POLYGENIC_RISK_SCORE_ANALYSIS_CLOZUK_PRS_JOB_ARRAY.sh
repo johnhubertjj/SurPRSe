@@ -16,8 +16,9 @@ exec &> Rtestoutclusterlogfile$1.txt
 # Run locally or on ARCCA
 whereami=$(uname -n)
 echo "$whereami"
+system=$4
 
-if [[ "$whereami" == *"raven"* ]]; then
+if [[ "$whereami" = *"raven"* ]]; then
   # assign a new variable for the PBS_ARRAY_variable
   chromosome_number=${PBS_ARRAY_INDEX}
   
@@ -38,17 +39,19 @@ if [[ "$whereami" == *"raven"* ]]; then
   # Alter/add variables depending on what type of Training dataset you have
   source ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
   cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
+fi
  
-elif [ "$whereami" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
+if [[ "$system" = "MAC" || "$system" = "LINUX" ]]; then
   # add directory to work from at the top of the script (just in case)
   Directory_to_work_from=$2
   cd ${Directory_to_work_from} 
- 
+  
+  #add the chromosome this copy of the script will analyse
   chromosome_number=$1
   echo $chromosome_number
   
-  # Arguments
-  path_to_scripts='/Users/johnhubert/Documents/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/'
+  # path to where the scripts are located
+  path_to_scripts=$3
   
   # Assign the shell variables
   source ${path_to_scripts}/PRS_arguments_script.sh
@@ -74,7 +77,7 @@ tar -zxvf ${validation_set_usually_genotype}.tar.gz
 shopt -u nullglob # disable
 fi
 
-if [ ${remove_IDs} == "TRUE" ]; then
+if [[ ${remove_IDs} = "TRUE" ]]; then
 
 plink --bfile ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype} --remove CLOZUK2_IDs_remove_plink_file_chr_${chromosome_number}.txt --make-bed --out ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype}
 
@@ -121,27 +124,49 @@ Rscript ${path_to_scripts}RscriptEcho.R\
  ${A2_name}\
  ${OR_name}\
  ${BETA_name}\
+ ${system}\
  ${Number_of_frequency_columns}  
 
-if [[ ${MAF_genotype} == "TRUE" ]]; then
+if [[ ${MAF_genotype} = "TRUE" ]]; then
+if [[ ${Missing_geno} = "TRUE" ]]; then
+     	# using plink to change the names to a CHR.POS identifier and remaking the files
+  plink \
+--bfile ${validation_set_usually_genotype} \
+--update-name ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_chr${chromosome_number}_chr.pos.txt \
+--maf ${MAF_threshold} \
+--geno ${genotype_missingness_check} \
+--make-bed  \
+--out ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype}_2
+else 
+
    # using plink to change the names to a CHR.POS identifier and remaking the files
   plink \
 --bfile ${validation_set_usually_genotype} \
 --update-name ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_chr${chromosome_number}_chr.pos.txt \
 --maf ${MAF_threshold} \
---geno 0.02 \
---mind 0.01 \
 --make-bed  \
 --out ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype}_2
+fi
 
-elif [[ ${MAF_genotype} == "FALSE" ]]; then 
+elif [[ ${MAF_genotype} = "FALSE" ]]; then 
+if [[ ${Missing_geno} = "TRUE" ]]; then
+
+plink \
+--bfile ${validation_set_usually_genotype} \
+--update-name ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_chr${chromosome_number}_chr.pos.txt \
+--geno ${genotype_missingness_check} \
+--make-bed \
+--out ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype}_2
+
+else
+
+   # using plink to change the names to a CHR.POS identifier and remaking the files
   plink \
 --bfile ${validation_set_usually_genotype} \
 --update-name ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_chr${chromosome_number}_chr.pos.txt \
---geno 0.02 \
---mind 0.01 \
---make-bed \
+--make-bed  \
 --out ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype}_2
+fi
 fi
 
 # re-package the original files
@@ -150,7 +175,7 @@ fi
 # CLOZUK_GWAS_BGE_chr${chromosome_number}.bim\
 # CLOZUK_GWAS_BGE_chr${chromosome_number}.fam
 
-if [[ ${Extra_analyses} == "TRUE" ]]; then
+if [[ ${Extra_analyses} = "TRUE" ]]; then
 
 # Create output directory for Extra_analysis results
 	if [ ! -d "./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis}" ]; then
@@ -238,12 +263,12 @@ rm ./${training_set_name}_${validation_set_name}_output/extracted_Duplicate_snps
 rm ./${training_set_name}_${validation_set_name}_output/CLUMPED_EXTRACT_${validation_set_name}_chr${chromosome_number}.txt 
 
 # Append job ID to PRS_arguments_script
-if [[ "$PBS_ARRAYID" == 1 ]]; then
+if [[ "$PBS_ARRAYID" = 1 ]]; then
 	echo "Batch_job_ID=${PBS_JOBID}" >> ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
 fi
 
 #purge all modules 
-if [[ "$whereami" == *"raven"* ]]; then
+if [[ "$whereami" = *"raven"* ]]; then
 	module purge
 fi
 

@@ -4,12 +4,12 @@
 whereami=$(uname -n)
 echo "$whereami"
 
-if [[ "$whereami" == *"raven"* ]]; then
+if [[ "$whereami" = *"raven"* ]]; then
 #Load Magma
 module load magma/1.06
 fi
 
-if [[ "${whereami}" == 'v1711-0ab8c3db.mobile.cf.ac.uk' ]]; then
+if [[ "${whereami}" = 'v1711-0ab8c3db.mobile.cf.ac.uk' ]]; then
 cd ~/Dropbox/whole_genome_testing/output/
 echo pwd
 echo "i'm here"
@@ -55,9 +55,9 @@ echo ${length_of_thresholds}
 
 # Whether you wish to include regulatory regions or not
 
-if [[ ${Gene_regions} == normal || ${Gene_regions} == both ]]; then
+if [[ ${Gene_regions} = normal || ${Gene_regions} = both ]]; then
 echo "works"
-	if [ ${Perform_magma_analysis} == TRUE ]; then
+	if [ ${Perform_magma_analysis} = TRUE ]; then
 echo "works2"
 		for i in `seq 0 ${length_of_thresholds}` ;
 		do 
@@ -73,9 +73,9 @@ echo "works2"
 	fi	
 fi
  
-if [[ ${Gene_regions} == "extended" || ${Gene_regions} == "both" ]]; then
+if [[ ${Gene_regions} = "extended" || ${Gene_regions} = "both" ]]; then
 
-	if [[ ${Perform_magma_analysis} == "TRUE" ]]; then
+	if [[ ${Perform_magma_analysis} = "TRUE" ]]; then
 
 		for i in `seq 0 ${length_of_thresholds}` ;
 		do 
