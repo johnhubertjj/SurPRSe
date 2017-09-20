@@ -41,8 +41,9 @@ if [ "${Extra_analyses[1]}" = "TRUE" ]; then
 length_of_extra_analysis_array=`echo ${#Name_of_extra_analysis[@]}`
 	if [ "${length_of_extra_analysis_array}" -gt  "2" ]; then
 		echo hi all
-		 ${path_to_pathway_scripts}Pathway_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_pathway_scripts} 
-		 ${path_to_gene_scripts}Gene_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_gene_scripts}
+		Name_of_extra_analysis_specific=(Genes Pathways)
+		 ${path_to_pathway_scripts}Pathway_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_pathway_scripts} ${Name_of_extra_analysis_specific[1]} 
+		 ${path_to_gene_scripts}Gene_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_gene_scripts} ${Name_of_extra_analysis_specific[0]}
 	
 	elif  [[ "${Name_of_extra_analysis[1]}" = "Pathways" ]]; then
 		echo hi Pat

@@ -49,7 +49,7 @@ if [[ "$system" = "MAC" || "$system" = "LINUX" ]]; then
   
   # Arguments
   path_to_scripts=$2
-  path_to_pathway_scripts=$4
+  path_to_gene_scripts=$4
   
   # Assign the shell variables
   source ${path_to_scripts}/PRS_arguments_script.sh
@@ -59,13 +59,19 @@ if [[ "$system" = "MAC" || "$system" = "LINUX" ]]; then
   source ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
   cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
 fi 
+
 ##########################################################################################################################
 ###################                  ###############                                 ###############                     #
 ################### GENE ANALYSIS    ###############      GENE ANALYSIS              ############### GENE    ANALYSIS    #
 ##########################################################################################################################
+
+# Read in arguments to check what type of analysis you will need to do #
+Name_of_extra_analysis=$5
+
+# Check that the analysis is indeed for Genes
 if [[ ${Name_of_extra_analysis} = "Genes" ]]; then
  
-Pathway_output_directory="./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis}/" 
+Gene_output_directory="./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis}/" 
 
 # Create output directory for Extra_analysis results
 	if [ ! -d "./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis}" ]; then
@@ -80,7 +86,7 @@ if [ -e "${Pathway_output_directory}Pathways_analysis_empty_pathways_info_file.t
 fi
 
 Rscript ${path_to_scripts}RscriptEcho.R\
- ${path_to_pathway_scripts}PATHWAYS_PRS_COLLECTING_MAGMA_INFO.R\
+ ${path_to_gene_scripts}PATHWAYS_PRS_COLLECTING_MAGMA_INFO.R\
  ./${training_set_name}_${validation_set_name}_extrainfo/PATHWAYS_PRS_COLLECTING_MAGMA_INFO.Rout\
  ${training_set_name}\
  ${validation_set_name}\
@@ -90,7 +96,7 @@ Rscript ${path_to_scripts}RscriptEcho.R\
  ${path_to_stationary_data}${Gene_location_filename}\
  ${Chromosomes_to_analyse[@]}
  
- 
+sudo parallel ${path_to_gene_scripts}Genes_MAGMA_annotation_script.sh ::: ${Chromosomes_to_analyse[@]} ::: ${Directory_to_work_from} ::: ${path_to_scripts} ::: ${path_to_gene_scripts} ::: ${system} 
 # From the above script, identify the number of pathways you want to analyse (probably safest to write to a file, port to a variable and then delete the file)
 # Also a text-delimited file with each line specifying a pathway name to be used
 # The seperate gene_loc files belonging to previously specified analysis
@@ -186,8 +192,12 @@ Rscript ${path_to_scripts}RscriptEcho.R\
  ${path_to_stationary_data}${Pathway_filename}\
  ${sig_thresholds}
 
-# now just require the collate all paths script here... (can do at home)
+# Run Magma Gene-set analysis for comparison to PRS if required
+ 
+# magma --bfile ~/Desktop/ALSPAC_hrc_imputed_step3_mri_brain_measurements_only_chr20_consensus_with_CLOZUK_PGC2noclo_more_sig_thresh_flipped_alleles_no_duplicates --gene-annot ~/Desktop/test.genes.annot --out ~/Desktop/testing_magma_output
+
 else
+
 	exit 1
 fi
 fi

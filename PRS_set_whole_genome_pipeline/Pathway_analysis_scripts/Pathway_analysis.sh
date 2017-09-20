@@ -58,7 +58,9 @@ if [[ "$system" = "MAC" || "$system" = "LINUX" ]]; then
   # Alter/add variables depending on what type of Training dataset you have
   source ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
   cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
-fi 
+fi
+
+Name_of_extra_analysis=$5 
 ##########################################################################################################################
 ###################                  ###############                                 ###############                     #
 ################### PATHWAY ANALYSIS ###############      PATHWAY ANALYSIS           ############### PATHWAY ANALYSIS    #
@@ -78,6 +80,7 @@ sudo chmod  g+rwx ${training_set_name}_${validation_set_name}_output/
 if [ -e "${Pathway_output_directory}Pathways_analysis_empty_pathways_info_file.txt" ]; then
 	rm "${Pathway_output_directory}Pathways_analysis_empty_pathways_info_file.txt"
 fi
+
 
 Rscript ${path_to_scripts}RscriptEcho.R\
  ${path_to_pathway_scripts}PATHWAYS_PRS_COLLECTING_MAGMA_INFO.R\
@@ -164,7 +167,7 @@ echo ${pathways[@]}
 
 if [[ "$system" = "MAC" || "$system" = "LINUX" ]]; then
 
-sudo parallel ${path_to_pathway_scripts}creation_of_merge_list_file.sh ::: ${pathways[@]} ::: ${path_to_scripts} ::: ${path_to_pathway_scripts} ::: ${system}
+sudo parallel ${path_to_pathway_scripts}creation_of_merge_list_file.sh ::: ${pathways[@]} ::: ${path_to_scripts} ::: ${path_to_pathway_scripts} ::: ${system} ::: ${Name_of_extra_analysis}
 
 Rscript ${path_to_scripts}RscriptEcho.R\
  ${path_to_pathway_scripts}Pathway_PRS_scoring.R\
@@ -175,7 +178,7 @@ Rscript ${path_to_scripts}RscriptEcho.R\
  ${path_to_stationary_data}${Pathway_filename}\
  ${sig_thresholds[@]}
 
-sudo parallel ${path_to_pathway_scripts}PRS_scoring_plink_pathways.sh ::: ${pathways[@]} ::: ${path_to_scripts} ::: ${path_to_pathway_scripts} ::: ${system}
+sudo parallel ${path_to_pathway_scripts}PRS_scoring_plink_pathways.sh ::: ${pathways[@]} ::: ${path_to_scripts} ::: ${path_to_pathway_scripts} ::: ${system} ::: ${Name_of_extra_analysis}
 
 Rscript ${path_to_scripts}RscriptEcho.R\
  ${path_to_pathway_scripts}Collate_all_pathways.R\
@@ -190,6 +193,7 @@ Rscript ${path_to_scripts}RscriptEcho.R\
 else
 	exit 1
 fi
+
 fi
 # ADD ALEX's PIPELINE SCRIPTS HERE FOR PRS ANALYSIS AND TO GET ALL THE PATHWAYS IN THE RIGHT FORMAT IN PERL (but only the collate_all_paths.pl)
 
