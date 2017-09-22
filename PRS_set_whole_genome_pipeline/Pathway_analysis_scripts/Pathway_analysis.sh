@@ -107,7 +107,7 @@ Pathway_file_name=${Pathway_output_directory}Pathway_names.txt
 # as an input from PATHWAYS_PRS_COLLECTING_MAGMA_INFO.R to annotate.
 # The pathways used will then be read into an array variable so that we don't have to keep reading this file and it is within the BASH environment 
 
-if [[ ${Gene_regions} = "Extended" ]]; then
+if [[ ${Gene_regions} = "extended" || ${Gene_regions} = "both" ]]; then
 
 	while IFS='' read -r line || [[ -n "$line" ]]; 
 	do
@@ -115,13 +115,12 @@ if [[ ${Gene_regions} = "Extended" ]]; then
 		do		    
 			
 			PRSACPJA_data_output="./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis}/${validation_set_usually_genotype_serial}${i}_consensus_with_${training_set_name}_flipped_alleles_no_duplicates.bim"
-			magma --annotate window=35,10 --snp-loc ${PRSACPJA_data_output} --gene-loc ${Pathway_output_directory}${training_set_name}_${validation_set_name}_${line}_chromosome_${Chromosomes_to_analyse[i]}_extended_temp.gene.loc --out ${Pathway_output_directory}${Chromosomes_to_analyse[i]}_${training_set_name}_${validation_set_name}_SNPs_${line}_extended_pathway_temp
+			magma --annotate window=35,10 --snp-loc ${PRSACPJA_data_output} --gene-loc ${Pathway_output_directory}${training_set_name}_${validation_set_name}_${line}_chromosome_${i}_temp.gene.loc --out ${Pathway_output_directory}${i}_${training_set_name}_${validation_set_name}_SNPs_${line}_extended_pathway_temp
 		done
-	pathways+=("$line")
-	done < "$Pathway_file_name"
+	done <"$Pathway_file_name"
 fi
 
-if [[ "${Gene_regions}" = "normal" ]]; then
+if [[ "${Gene_regions}" = "normal" || ${Gene_regions} = "both" ]]; then
 echo normal gene regions
 echo ${Pathway_file_name}
 	while IFS='' read -r line || [[ -n "$line" ]]; 
@@ -141,10 +140,19 @@ if [ -e "${Pathway_output_directory}Pathways_analysis_empty_pathways_info_file_r
 	rm "${Pathway_output_directory}Pathways_analysis_empty_pathways_info_file_run2.txt"
 fi
 
-if [ -e "${Pathway_output_directory}MAGMA_empty_files_after_analysis.txt" ]; then
-	rm "${Pathway_output_directory}MAGMA_empty_files_after_analysis.txt"
+if [[ "${Gene_regions}" = "normal" || ${Gene_regions} = "both" ]]; then
+
+	if [ -e "${Pathway_output_directory}MAGMA_empty_files_after_analysis_normal.txt" ]; then
+		rm "${Pathway_output_directory}MAGMA_empty_files_after_analysis_normal.txt"
+	fi
 fi
 
+if [[ "${Gene_regions}" = "extended" || ${Gene_regions} = "both" ]]; then
+
+	if [ -e "${Pathway_output_directory}MAGMA_empty_files_after_analysis_extended.txt" ]; then
+		rm "${Pathway_output_directory}MAGMA_empty_files_after_analysis_extended.txt"
+	fi
+fi
 
 Rscript ${path_to_scripts}RscriptEcho.R\
  ${path_to_pathway_scripts}Assign_SNPs_to_genes_from_pathways.R\

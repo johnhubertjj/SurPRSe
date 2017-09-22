@@ -110,7 +110,7 @@ Pathway_file_name=${Pathway_output_directory}Pathway_names.txt
 # as an input from PATHWAYS_PRS_COLLECTING_MAGMA_INFO.R to annotate.
 # The pathways used will then be read into an array variable so that we don't have to keep reading this file and it is within the BASH environment 
 
-if [[ ${Gene_regions} = "Extended" ]]; then
+if [[ ${Gene_regions} = "extended" ]]; then
 
 	while IFS='' read -r line || [[ -n "$line" ]]; 
 	do
