@@ -148,7 +148,7 @@ PCA_matrix <- fread("/Volumes/PhD_storage/PRS_cross_disorder_table_optimised_thr
 
 Groups_of_individuals <- c("CLOZUK","COGS","CRESTAR1", "CRESTAR2", "CRESTAR3", "1958BC", "BLOOD", "GERAD", "CON_GS", "HYWEL","POBI","QIMR","T1DGC","TEDS","TWINSUK","WTCCC")
 
-PCA_matrix$Colours <- "NA"
+PCA_matrix_2$Colours <- "NA"
 
 for (i in 1:length(Groups_of_individuals)){
   Current_integers <-  PCA_matrix[,.I[grep(Groups_of_individuals[i], PCA_matrix$Individuals) ]]
@@ -160,7 +160,7 @@ for (i in 1:length(Groups_of_individuals)){
 library(FactoMineR)
 
 
-names(PCA_matrix_2) <- c("Individuals","PHENOTYPE", "Schizophrenia", "Bipolar", "Educational_attainment", "PGC_MDD", "BIPvsSCZ", "Neuroticism", "IQ")
+names(PCA_matrix_2) <- c("Individuals","PHENOTYPE", "Schizophrenia", "Bipolar", "Edu attain", "MDD", "BIPvsSCZ", "Neuroticism", "IQ")
 
 #write.csv(PCA_matrix, file = "/Volumes/PhD_storage/PRS_cross_disorder_table_optimised_thresholds.csv", col.names = T, row.names = F)
 
@@ -235,7 +235,7 @@ gglist[[i]] <- g
 
 library(devtools)
 install_github("ggbiplot", "vqv")
-
+library(RColorBrewer)
 plots_index <- combn(1:7,2)
 e <- new.env()
 library(ggbiplot)
@@ -246,15 +246,54 @@ for (i in 1:20){
   
   g <- ggbiplot(testing_reduce_controls, obs.scale = 1, var.scale = 1, ellipse = F, choices = c(plots_index[1,i],plots_index[2,i]),
                 circle = F ,groups = as.factor(PCA_matrix_2$PHENOTYPE), alpha = 1)
-  g <- g + scale_color_discrete(name="Phenotype_CLOZUK.BGE")
+  g <- g + scale_color_manual(name="CLOZUK Phenotype",label = c("Controls","Cases"), values = c("#E87D72","#4EA8EC")) 
+  ##4EA8EC
+  #g <- g + scale_colour_brewer(palette = "Set3")
   g <- g + theme(legend.direction = 'horizontal', 
-                 legend.position = 'top')
-  
+                 legend.position = 'top',
+                 legend.box.background = element_blank(),
+                 legend.background = element_blank(),
+                 legend.key = element_blank(),
+                 axis.line = element_line(colour = "black"),
+                 panel.background = element_blank(),
+                 legend.title = element_text(face = "bold"))
   gglist[[i]] <- g
 }
 
-multiplot(plotlist = gglist, cols = 4)
-screeplot(testing2, main="Scree Plot", xlab="Components",ylim = c(0,1.4))
+#multiplot(plotlist = gglist, cols = 4)
+#screeplot(testing2, main="Scree Plot", xlab="Components",ylim = c(0,1.4))
+
+# Two plots side by side
+par(mfrow=c(1,2))
+
+gglist[[1]]
+
+# PC1 various density plots
+Testing_density_PC1 <- data.frame(data = testing_reduce_controls$x[,1], as.factor(PCA_matrix_2$PHENOTYPE), as.factor(PCA_matrix_2$Colours))
+Testing_density_wo_EDU <- data.frame(data = testing_wo_EDU$x[,1], as.factor(PCA_matrix_2$PHENOTYPE), as.factor(PCA_matrix_2$Colours))
+
+names(Testing_density_PC1) <- c("PC1","Phenotype","Sample")
+names(Testing_density_wo_EDU) <- c("PC1","Phenotype","Sample")
+
+ga <- ggplot(Testing_density_PC1, aes(x=PC1)) + geom_density(aes(group=Phenotype, fill = Phenotype), alpha = 0.3)
+ga <- ga + scale_fill_manual(name="CLOZUK Phenotype",label = c("Controls","Cases"), values = c("#E87D72","#4EA8EC")) 
+#ga <- ga + scale_color_manual(name="CLOZUK Phenotype",label = c("Controls","Cases"), values = c("#E87D72","#4EA8EC")) 
+ga <- ga + theme(legend.direction = 'horizontal', 
+               legend.position = 'top',
+               legend.box.background = element_blank(),
+               legend.background = element_blank(),
+               legend.key = element_blank(),
+               axis.line = element_line(colour = "black"),
+               panel.background = element_blank(),
+               legend.title = element_text(face = "bold"))
+
+# Two plots side by side
+library(gridExtra)
+plot_list <- list(gglist[[1]], ga)
+grid.arrange(gglist[[1]], ga,ncol = 2)
+multiplot(plotlist = plot_list,cols=2)
+
+
 
 plots_index <- combn(1:6,2)
 e <- new.env()
@@ -312,10 +351,17 @@ for ( i in 1:15){
 multiplot(plotlist = gglist, cols = 3)
 
 # PC1 various density plots
-Testing_density_PC1 <- data.frame(data = testing$x[,1], as.factor(PCA_matrix_df$PHENOTYPE), as.factor(PCA_matrix_df$Colours))
+Testing_density_PC1 <- data.frame(data = testing_reduce_controls$x[,1], as.factor(PCA_matrix_2$PHENOTYPE), as.factor(PCA_matrix_2$Colours))
+Testing_density_wo_EDU <- data.frame(data = testing_wo_EDU$x[,1], as.factor(PCA_matrix_2$PHENOTYPE), as.factor(PCA_matrix_2$Colours))
+
 names(Testing_density_PC1) <- c("PC1","Phenotype","Sample")
+names(Testing_density_wo_EDU) <- c("PC1","Phenotype","Sample")
 
 ggplot(Testing_density_PC1, aes(x=PC1)) + geom_density(aes(group=Phenotype, colour = Phenotype, fill = Phenotype), alpha = 0.3)
+ggplot(Testing_density_wo_EDU, aes(x=PC1)) + geom_density(aes(group=Phenotype, colour = Phenotype, fill = Phenotype), alpha = 0.3)
+
+
+
 ggplot(Testing_density_PC1, aes(x=PC1)) + geom_density(aes(group=Sample, colour = Sample, fill = Sample), alpha = 0.3)
 
 Testing_density_PC1_cases <- data.frame(data = testing2$x[,1], as.factor(PCA_matrix_df_cases$PHENOTYPE), as.factor(PCA_matrix_df_cases$Colours))
