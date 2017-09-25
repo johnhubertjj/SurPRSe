@@ -70,13 +70,13 @@ if [[ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" = 'johnhuber
   path_to_stationary_data="$home_OS/johnhubert/Dropbox/Stationary_data/" 
   
   # Datasets
-  training_set_usually_summary="CLOZUK_PGC2noclo_table${chromosome_number}"
-  training_set_original_filename="CLOZUK_PGC2noclo.METAL.assoc.dosage"
-  validation_set_usually_genotype="ALSPAC_hrc_imputed_step3_chr${chromosome_number}"
-  validation_set_usually_genotype_serial="ALSPAC_hrc_imputed_step3_chr"
-  validation_set_full_name_without_chromosome="ALSPAC_hrc_imputed_step3"
-  training_set_name="CLOZUK_PGC2noclo"
-  validation_set_name="ALSPAC_original" 
+  training_set_usually_summary="IQ_GWAS_2017_table${chromosome_number}"
+  training_set_original_filename="IQ_GWAS_2017_why_have_you_used_stupid_headings_sniekersetal.txt"
+  validation_set_usually_genotype="CLOZUK_GWAS_BGE_chr${chromosome_number}"
+  validation_set_usually_genotype_serial="CLOZUK_GWAS_BGE_chr"
+  validation_set_full_name_without_chromosome="CLOZUK_GWAS_BGE"
+  training_set_name="IQ_GWAS_2017"
+  validation_set_name="CLOZUK" 
   
   # Pathway datasets
   Pathway_filename="Selected_Pocklington_plus_GO_pathways_SCHIZ.txt"
@@ -89,7 +89,7 @@ if [[ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" = 'johnhuber
   genotype_missingness_check=FALSE
   # MAF, INFO and SE
   MAF_summary="FALSE"
-  MAF_threshold=0.1
+  MAF_threshold=0.01
   MAF_genotype=TRUE
   INFO_summary="TRUE"
   INFO_threshold=0.9
@@ -100,16 +100,16 @@ if [[ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" = 'johnhuber
   Chromosomes_to_analyse=(`seq 1 22`)
   
   # Clumping Arguments
-  p1=1
-  p2=1
-  r2=0.1
-  window=500
+  p1=0.5
+  p2=0.5
+  r2=0.2
+  window=1000
   
   # Arguments for PRS_serial script
   Multiple_Training_set_tables="TRUE"
   Running_in_Serial="TRUE"
-  sig_thresholds=(0.05 0.5)
-  Extra_analyses=TRUE
+  sig_thresholds=(1e-04 0.001 0.01 0.05 0.1 0.2 0.3 0.4 0.5)
+  Extra_analyses=FALSE
   Name_of_extra_analysis=Pathways
   Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates"
   # either "extended" "normal" or "both" : change to a numerical input in the future

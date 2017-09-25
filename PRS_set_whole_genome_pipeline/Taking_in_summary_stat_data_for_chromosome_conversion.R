@@ -125,7 +125,7 @@ if(length(grep("\\bA2\\b", Parsing_colnames)) == 1| length(grep("\\bALT\\b", Par
   }
 }else{
   A2_name <- "A2_name=FALSE"  
-  warning("Reference allele is not present in the Training dataset or is not named \"A2\", please change column headers or add a column with Reference allele")
+  warning("Reference allele is not present in the Training dataset or is not named \"A2\", please change column headers or add a column with reference allele")
 }
 
 

@@ -43,8 +43,8 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
 Schizophrenia <- fread("~/Dropbox/PRS_scores_different_summary_stats_datasets/PGC_CLOZUK_whole_genome_significance_threshold_at_0.1.profile")
 #Bipolar <- fread("/Volumes/PhD_storage/BIP_CLOZUK_output/PRS_scoring/BIP_CLOZUK_whole_genome_significance_threshold_at_0.4.profile")
 Bipolar <- fread("~/Dropbox/PRS_scores_different_summary_stats_datasets/BIP_CLOZUK_whole_genome_significance_threshold_at_0.4.profile")
-#Educational_attainment <- fread("/Volumes/PhD_storage/EDU_main_CLOZUK_output/PRS_scoring/EDU_main_CLOZUK_whole_genome_significance_threshold_at_0.15.profile")
-Educational_attainment <- fread("~/Dropbox/PRS_scores_different_summary_stats_datasets/EDU_main_CLOZUK_whole_genome_significance_threshold_at_0.15.profile")
+#Educational_attainment <- fread("/Volumes/PhD_storage/EDU_main_CLOZUK_output/PRS_scoring/EDU_main_CLOZUK_whole_genome_significance_threshold_at_0.3.profile")
+Educational_attainment <- fread("~/Dropbox/PRS_scores_different_summary_stats_datasets/EDU_main_CLOZUK_whole_genome_significance_threshold_at_0.3.profile")
 #PGC_MDD <- fread("/Volumes/PhD_storage/PGC_MDD_CLOZUK_output/PRS_scoring/PGC_MDD_CLOZUK_whole_genome_significance_threshold_at_0.45.profile")
 PGC_MDD <- fread("~/Dropbox/PRS_scores_different_summary_stats_datasets/PGC_MDD_CLOZUK_whole_genome_significance_threshold_at_0.45.profile")
 #BIPvsSCZ <- fread("/Volumes/PhD_storage/BIPvsSCZ_CLOZUK_output/PRS_scoring/BIPvsSCZ_CLOZUK_whole_genome_significance_threshold_at_0.35.profile")
@@ -130,8 +130,8 @@ for (i in 1:6){
                                                                         Neuropsychiatric_datasets[[i]]$FID, value=TRUE)]
 }
 
-PCA_matrix_2 <- data_frame(Neuropsychiatric_datasets[[1]]$FID,Neuropsychiatric_datasets[[1]]$PHENO.y,Neuropsychiatric_datasets[[1]]$NORMSCORE, Neuropsychiatric_datasets[[2]]$NORMSCORE,Neuropsychiatric_datasets[[3]]$NORMSCORE, Neuropsychiatric_datasets[[4]]$NORMSCORE,Neuropsychiatric_datasets[[5]]$NORMSCORE, Neuropsychiatric_datasets[[6]]$NORMSCORE, Neuropsychiatric_datasets[[7]]$NORMSCORE)
-PCA_matrix_2 <- data_frame(Neuropsychiatric_datasets[[1]]$FID,Neuropsychiatric_datasets[[1]]$PHENO.y,Neuropsychiatric_datasets[[1]]$NORMSCORE, Neuropsychiatric_datasets[[2]]$NORMSCORE,Neuropsychiatric_datasets[[3]]$NORMSCORE, Neuropsychiatric_datasets[[4]]$NORMSCORE,Neuropsychiatric_datasets[[5]]$NORMSCORE, Neuropsychiatric_datasets[[6]]$NORMSCORE)
+PCA_matrix_2 <- data.frame(Neuropsychiatric_datasets[[1]]$FID,Neuropsychiatric_datasets[[1]]$PHENO.y,Neuropsychiatric_datasets[[1]]$NORMSCORE, Neuropsychiatric_datasets[[2]]$NORMSCORE,Neuropsychiatric_datasets[[3]]$NORMSCORE, Neuropsychiatric_datasets[[4]]$NORMSCORE,Neuropsychiatric_datasets[[5]]$NORMSCORE, Neuropsychiatric_datasets[[6]]$NORMSCORE, Neuropsychiatric_datasets[[7]]$NORMSCORE)
+PCA_matrix_2 <- data.frame(Neuropsychiatric_datasets[[1]]$FID,Neuropsychiatric_datasets[[1]]$PHENO.y,Neuropsychiatric_datasets[[1]]$NORMSCORE, Neuropsychiatric_datasets[[2]]$NORMSCORE,Neuropsychiatric_datasets[[3]]$NORMSCORE, Neuropsychiatric_datasets[[4]]$NORMSCORE,Neuropsychiatric_datasets[[5]]$NORMSCORE, Neuropsychiatric_datasets[[6]]$NORMSCORE)
 
 test <- colnames(PCA_matrix)
 colnames(PCA_matrix_2) <- test
@@ -167,16 +167,18 @@ names(PCA_matrix_2) <- c("Individuals","PHENOTYPE", "Schizophrenia", "Bipolar", 
 PCA_matrix_df <- as.data.frame(PCA_matrix)
 PCA_matrix_df_cases <- as.data.frame(PCA_matrix[PHENOTYPE==1])
 
-testing <- prcomp(PCA_matrix_df[3:8],center = T)
+testing <- prcomp(PCA_matrix_2[3:8],center = T)
 testing_reduce_controls <- prcomp(PCA_matrix_2[3:8],center = T)
 testing_reduce_controls <- prcomp(PCA_matrix_2[3:9],center = T)
 
-testing_wo_SCZ <- prcomp(PCA_matrix_df[4:8],center = T)
-testing_wo_BIP <- prcomp(PCA_matrix_df[c(3,5:8)],center = T)
-testing_wo_EDU <- prcomp(PCA_matrix_df[c(3:4,6:8)],center = T)
-testing_wo_MDD <- prcomp(PCA_matrix_df[c(3:5,7:8)],center = T)
-testing_wo_BIPvsSCZ <- prcomp(PCA_matrix_df[c(3:6,8)],center = T)
-testing_wo_Neurot <- prcomp(PCA_matrix_df[c(3:7)],center = T)
+testing_wo_SCZ <- prcomp(PCA_matrix_2[4:9],center = T)
+testing_wo_BIP <- prcomp(PCA_matrix_2[c(3,5:9)],center = T)
+testing_wo_EDU <- prcomp(PCA_matrix_2[c(3:4,6:9)],center = T)
+testing_wo_MDD <- prcomp(PCA_matrix_2[c(3:5,7:9)],center = T)
+testing_wo_BIPvsSCZ <- prcomp(PCA_matrix_2[c(3:6,8:9)],center = T)
+testing_wo_Neurot <- prcomp(PCA_matrix_2[c(3:7,9)],center = T)
+testing_wo_IQ <- prcomp(PCA_matrix_2[c(3:8)], center = T)
+testing_wo_intelligence <- prcomp(PCA_matrix_2[c(3:4,6:8)], center = T)
 
 testing_princomp <- princomp(PCA_matrix_df[3:8],center = T)
 testing_experiments <- prcomp(PCA_matrix_df_cases[c(3:7)],center = T)
@@ -252,6 +254,27 @@ for (i in 1:20){
 }
 
 multiplot(plotlist = gglist, cols = 4)
+screeplot(testing2, main="Scree Plot", xlab="Components",ylim = c(0,1.4))
+
+plots_index <- combn(1:6,2)
+e <- new.env()
+library(ggbiplot)
+
+gglist <- list()
+
+# graphs without Educational attainment
+for (i in 1:15){
+  
+  g <- ggbiplot(testing_wo_EDU, obs.scale = 1, var.scale = 1, ellipse = F, choices = c(plots_index[1,i],plots_index[2,i]),
+                circle = F ,groups = as.factor(PCA_matrix_2$PHENOTYPE), alpha = 1)
+  g <- g + scale_color_discrete(name="Phenotype_CLOZUK.BGE")
+  g <- g + theme(legend.direction = 'horizontal', 
+                 legend.position = 'top')
+  
+  gglist[[i]] <- g
+}
+
+multiplot(plotlist = gglist, cols = 3)
 screeplot(testing2, main="Scree Plot", xlab="Components",ylim = c(0,1.4))
 
 

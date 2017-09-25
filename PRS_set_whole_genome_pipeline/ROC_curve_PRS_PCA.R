@@ -64,19 +64,23 @@ roc_obj6 <- roc(PCA_matrix_2$PHENOTYPE, testing_reduce_controls$x[,6], plot = T,
 
 roc_obj_SCZ <- roc(PCA_matrix_2$PHENOTYPE, PCA_matrix_2$Schizophrenia, plot = T, ci = T)
 
-roc_obj_SCZ <- roc(PCA_matrix_df$PHENOTYPE, PCA_matrix_df$Schizophrenia, plot = T, ci = T)
-roc_obj_BIP <- roc(PCA_matrix_df$PHENOTYPE, PCA_matrix_df$Bipolar, plot = T, ci = T)
-roc_obj_EDU <- roc(PCA_matrix_df$PHENOTYPE, PCA_matrix_df$Educational_attainment, plot = T, ci = T)
-roc_obj_NEU <- roc(PCA_matrix_df$PHENOTYPE, PCA_matrix_df$Neuroticism, plot = T, ci = T)
-roc_obj_BIPvsSCZ <- roc(PCA_matrix_df$PHENOTYPE, PCA_matrix_df$BIPvsSCZ, plot = T, ci = T)
-roc_obj_MDD <- roc(PCA_matrix_df$PHENOTYPE, PCA_matrix_df$PGC_MDD, plot = T, ci = T)
+roc_obj_SCZ <- roc(PCA_matrix_2$PHENOTYPE, PCA_matrix_2$Schizophrenia, plot = T, ci = T)
+roc_obj_BIP <- roc(PCA_matrix_2$PHENOTYPE, PCA_matrix_2$Bipolar, plot = T, ci = T)
+roc_obj_EDU <- roc(PCA_matrix_2$PHENOTYPE, PCA_matrix_2$Educational_attainment, plot = T, ci = T)
+roc_obj_NEU <- roc(PCA_matrix_2$PHENOTYPE, PCA_matrix_2$Neuroticism, plot = T, ci = T)
+roc_obj_BIPvsSCZ <- roc(PCA_matrix_2$PHENOTYPE, PCA_matrix_2$BIPvsSCZ, plot = T, ci = T)
+roc_obj_MDD <- roc(PCA_matrix_2$PHENOTYPE, PCA_matrix_2$PGC_MDD, plot = T, ci = T)
+roc_obj_IQ <- roc(PCA_matrix_2$PHENOTYPE, PCA_matrix_2$IQ, plot = T, ci = T)
 
-roc_obj_wo_SCZ <- roc(PCA_matrix_df$PHENOTYPE, testing_wo_SCZ$x[,1], plot = T, ci = T)
-roc_obj_wo_BIP <- roc(PCA_matrix_df$PHENOTYPE, testing_wo_BIP$x[,1], plot = T, ci = T)
-roc_obj_wo_EDU <- roc(PCA_matrix_df$PHENOTYPE, testing_wo_EDU$x[,1], plot = T, ci = T)
-roc_obj_wo_MDD <- roc(PCA_matrix_df$PHENOTYPE, testing_wo_MDD$x[,1], plot = T, ci = T)
-roc_obj_wo_BIPvsSCZ <- roc(PCA_matrix_df$PHENOTYPE, testing_wo_BIPvsSCZ$x[,1], plot = T, ci = T)
-roc_obj_wo_Neurot <- roc(PCA_matrix_df$PHENOTYPE, testing_wo_Neurot$x[,1], plot = T, ci = T)
+
+roc_obj_wo_SCZ <- roc(PCA_matrix_2$PHENOTYPE, testing_wo_SCZ$x[,1], plot = T, ci = T)
+roc_obj_wo_BIP <- roc(PCA_matrix_2$PHENOTYPE, testing_wo_BIP$x[,1], plot = T, ci = T)
+roc_obj_wo_EDU <- roc(PCA_matrix_2$PHENOTYPE, testing_wo_EDU$x[,1], plot = T, ci = T)
+roc_obj_wo_MDD <- roc(PCA_matrix_2$PHENOTYPE, testing_wo_MDD$x[,1], plot = T, ci = T)
+roc_obj_wo_BIPvsSCZ <- roc(PCA_matrix_2$PHENOTYPE, testing_wo_BIPvsSCZ$x[,1], plot = T, ci = T)
+roc_obj_wo_Neurot <- roc(PCA_matrix_2$PHENOTYPE, testing_wo_Neurot$x[,1], plot = T, ci = T)
+roc_obj_wo_IQ <- roc(PCA_matrix_2$PHENOTYPE, testing_wo_IQ$x[,1], plot = T, ci = T)
+roc_obj_wo_Intell <- roc(PCA_matrix_2$PHENOTYPE, testing_wo_intelligence$x[,1], plot = T, ci = T)
 
 auc(roc_obj_wo_SCZ)
 roc_obj_wo_SCZ$ci
