@@ -1,3 +1,4 @@
+# Linear regression for pathways #
 ### Start Timer
 ptm <- proc.time()
 
@@ -39,123 +40,129 @@ print(significance_thresholds)
 
 
 #Training_names <- c("HG19_pgc.scz.full.2012-04", "scz.swe.pgc1.results.v3","PGC2","CLOZUK_PGC2noclo")
-Training_names <- c("PGC1_only_more_sig_thresh", "PGC1_plussweden_more_sig_thresh", "PGC2_more_sig_thresh", "CLOZUK_PGC2noclo_more_sig_thresh")
+
+Training_names <- "CLOZUK_PGC2noclo"
 Validation_name <- "ALSPAC"
-Scale_phenotypes <- T
+Scale_phenotypes <- F
 Scale_PRS <- T
 significance_thresholds <- c(5e-08, 1e-06, 1e-04, 0.01, 0.05, 0.1, 0.2, 0.5, 1)
 
+#ALL_PRS_DATA <- read.table("FINAL_PATHWAY_RESULTS_PRS_PROFILESHG19_pgc.scz.full.2012-04_ALSPAC.txt",header = T)
+ALL_PRS_DATA <- all_prs
+ALL_PRS_DATA <- test_CLOZUK_results
+
+ALL_PRS_DATA <- read.table("FINAL_PATHWAY_RESULTS_PRS_PROFILESCLOZUK_PGC2noclo_ALSPAC_Pocklington2015_134sets_LoFi_morphology_only_deduplicated.txt",header = T)
+ALL_PRS_DATA <- read.table("FINAL_PATHWAY_RESULTS_PRS_PROFILESCLOZUK_PGC2noclo_ALSPAC_Pocklington2015_134sets_LoFi_2sets_morphology_notmorphology_deduplicated.txt",header = T)
+
+
 for (Training_name in Training_names){ 
-#Training_name <- "PGC2"
-#Training_name <- "CLOZUK_PGC2noclo"
-#Training_name <- "scz.swe.pgc1.results.v3"
-#Training_name <- "HG19_pgc.scz.full.2012-04"
- 
-# Write in the phenotype files
-Pheno_brain_thickness <- fread("ALSPAC_thickness_27january2017.txt")
-Pheno_brain_volume <-fread("ALSPAC_volumes_27january2017.txt") 
+  #Training_name <- "PGC2"
+  #Training_name <- "CLOZUK_PGC2noclo"
+  #Training_name <- "scz.swe.pgc1.results.v3"
+  #Training_name <- "HG19_pgc.scz.full.2012-04"
+  
+  # Write in the phenotype files
+  Pheno_brain_thickness <- fread("/Users/johnhubert/Documents/CLOZUK_PGC2noclo.METAL/ALSPAC_thickness_27january2017.txt")
+  Pheno_brain_volume <-fread("/Users/johnhubert/Documents/CLOZUK_PGC2noclo.METAL/ALSPAC_volumes_27january2017.txt") 
+  
 
-# Collate all the scores together into one table
-my_files <- paste0(Training_name, "_", Validation_name,"_output/PRS_scoring/", Training_name, "_", Validation_name, "_whole_genome_significance_threshold_at_", significance_thresholds, ".profile")
-my_data <- lapply(my_files, read.table, header=TRUE) 
-names(my_data) <- str_replace(my_files, pattern = ".profile", replacement = "")
-
-# iterate through significance thresholds 
-for (i in 1:length(significance_thresholds)) {
-  my_data[[i]] <- my_data[[i]][,c(1,2,6)]
-  colnames(my_data[[i]]) <- c("FID", "IID", paste("SCORE_", significance_thresholds[i], sep=""))
-}
-
-all_prs <- join_all(my_data, by=c("FID", "IID"), type='left')
-
-if (Scale_PRS == T){
-  all_prs[,-1:-2] <- scale(all_prs[,-1:-2], center = T, scale = T)
-}
-
-
-# Join all the tables together
-setnames(Pheno_brain_volume,old = "SubjID", new = "FID")
-setnames(Pheno_brain_thickness,old = "SubjID", new = "FID")
-
-DATA_pheno <- join_all(list(Pheno_brain_thickness, Pheno_brain_volume), by=c("FID", "kz021", "age", "ICV"), type='inner')
-
-if (Scale_phenotypes == T){
-  DATA_pheno_scaled <- cbind(DATA_pheno[,1:3],(scale(DATA_pheno[,4:ncol(DATA_pheno)], center = T, scale = T)))
-  DATA_pheno <- DATA_pheno_scaled
-}
-
-# Add names of phenotypes corresponding to the table
-phenotypes <- colnames(DATA_pheno[,5:ncol(DATA_pheno)])
-subcortical <-colnames(DATA_pheno[,c(25:40)])
-subcortical_left <- subcortical[c(T,F)]
-subcortical_right <- subcortical[c(F,T)]
-subcortical_names <- c("avrg_LR_LatVent","avrg_LR_thal","avrg_LR_caud","avrg_LR_put","avrg_LR_pal","avrg_LR_hippo","avrg_LR_amyg","avrg_LR_accumb")
-
-for (i in 1:length(subcortical_left)){
-  names <- subcortical_names[i]
-  new_df <- data.frame(DATA_pheno[[subcortical_left[i]]],DATA_pheno[[subcortical_right[i]]])
-  current_column <- rowMeans(new_df,na.rm = T)
-  DATA_pheno[[names]] <- current_column
-} 
-
-
-
-DATA <- join_all(list(all_prs, DATA_pheno), by=c("FID"), type='inner')
-
-# create a score list
-score_list <- colnames(all_prs[,-1:-2])
-phenotypes <- colnames(DATA_pheno[,5:ncol(DATA_pheno)])
-DATA$kz021 <- as.factor(DATA$kz021)
-
-# Remove individuals with missing values
-#remove_ICV <- which(is.na(DATA$ICV))
-#DATA <- DATA[-remove_ICV,]
-
-# dont' change obj it makes the loop output a dataframe with the regression results
-obj <- data.frame(test=0, score=0, estimate=0, SE=0, tvalue=0, p=0, r.squared=0, lower = 0, upper = 0)
-obj_ICV <- data.frame(test=0, score=0, estimate=0, SE=0, tvalue=0, p=0, r.squared=0, lower = 0, upper = 0)
-
-# this example if for a linear regression (the phenotype of interest is a quantiative trait)
-# is using a discrete phenotype, a logistic regression needs to be run, and the code altered from 'lm' to 'glm' including the argument of 'family = binomial'
-# alterations for the calculation of R2 will also need to be made using the command highlighted above
-
-for (i in score_list) {
-  for (j in phenotypes) {
-    fit <- lm(DATA[,j] ~ DATA[,i] + kz021 + age + ICV,  data=DATA)
-    fit1 <- lm(DATA[,j] ~ kz021 + age + ICV, data=DATA)
+  if (Scale_PRS == T){
+    ALL_PRS_DATA[-1:-2] <- scale(ALL_PRS_DATA[,-1:-2], center = T, scale = T)
+  }
+  
+  
+  # Join all the tables together
+  setnames(Pheno_brain_volume,old = "SubjID", new = "FID")
+  setnames(Pheno_brain_thickness,old = "SubjID", new = "FID")
+  
+  DATA_pheno <- join_all(list(Pheno_brain_thickness, Pheno_brain_volume), by=c("FID", "kz021", "age", "ICV"), type='inner')
+  
+  if (Scale_phenotypes == T){
+    DATA_pheno_scaled <- cbind(DATA_pheno[,1:3],(scale(DATA_pheno[,4:ncol(DATA_pheno)], center = T, scale = T)))
+    DATA_pheno <- DATA_pheno_scaled
+  }
+  
+  # Add names of phenotypes corresponding to the table
+  phenotypes <- colnames(DATA_pheno[,5:ncol(DATA_pheno)])
+  subcortical <-colnames(DATA_pheno[,c(25:40)])
+  subcortical_left <- subcortical[c(T,F)]
+  subcortical_right <- subcortical[c(F,T)]
+  subcortical_names <- c("avrg_LR_LatVent","avrg_LR_thal","avrg_LR_caud","avrg_LR_put","avrg_LR_pal","avrg_LR_hippo","avrg_LR_amyg","avrg_LR_accumb")
+  
+  for (i in 1:length(subcortical_left)){
+    names <- subcortical_names[i]
+    new_df <- data.frame(DATA_pheno[[subcortical_left[i]]],DATA_pheno[[subcortical_right[i]]])
+    current_column <- rowMeans(new_df,na.rm = T)
+    DATA_pheno[[names]] <- current_column
+  } 
+  
+  
+  
+  DATA <- join_all(list(ALL_PRS_DATA, DATA_pheno), by=c("FID"), type='inner')
+  
+  # create a score list
+  score_list <- colnames(ALL_PRS_DATA[,-1:-2])
+  phenotypes <- colnames(DATA_pheno[,5:ncol(DATA_pheno)])
+  DATA$kz021 <- as.factor(DATA$kz021)
+  
+  # Remove individuals with missing values
+  #remove_ICV <- which(is.na(DATA$ICV))
+  #DATA <- DATA[-remove_ICV,]
+  
+  # dont' change obj it makes the loop output a dataframe with the regression results
+  obj <- data.frame(test=0, score=0, estimate=0, SE=0, tvalue=0, p=0, r.squared=0, lower = 0, upper = 0)
+  obj_ICV <- data.frame(test=0, score=0, estimate=0, SE=0, tvalue=0, p=0, r.squared=0, lower = 0, upper = 0)
+  
+  # this example if for a linear regression (the phenotype of interest is a quantiative trait)
+  # is using a discrete phenotype, a logistic regression needs to be run, and the code altered from 'lm' to 'glm' including the argument of 'family = binomial'
+  # alterations for the calculation of R2 will also need to be made using the command highlighted above
+  
+  for (i in score_list) {
+    for (j in phenotypes) {
+      fit <- lm(DATA[,j] ~ DATA[,i] + kz021 + age + ICV,  data=DATA)
+      fit1 <- lm(DATA[,j] ~ kz021 + age + ICV, data=DATA)
+      tmp <- coef(summary(fit))
+      tmp2 <- summary(fit)
+      hold <- summary(fit1)
+      true_r2 <- tmp2$r.squared - hold$r.squared
+      CI <- confint(fit, level=0.95)
+      CI <- CI[2,]
+      tmp3 <- c(j,i,tmp[2,], true_r2, CI)
+      obj <- rbind(obj, tmp3)
+    }
+  }
+  
+  for (i in score_list){
+    fit <- lm(ICV ~ DATA[,i] + kz021 + age,  data=DATA)
+    fit1 <- lm(ICV ~ kz021 + age, data=DATA)
     tmp <- coef(summary(fit))
     tmp2 <- summary(fit)
     hold <- summary(fit1)
     true_r2 <- tmp2$r.squared - hold$r.squared
     CI <- confint(fit, level=0.95)
     CI <- CI[2,]
-    tmp3 <- c(j,i,tmp[2,], true_r2, CI)
-    obj <- rbind(obj, tmp3)
+    tmp3 <- c("ICV",i,tmp[2,], true_r2, CI)
+    obj_ICV <- rbind(obj_ICV, tmp3)
   }
+  
+  # this is a clean-up step - do not change
+  results <- obj[which(obj$score %in% score_list),]
+  results2 <- obj_ICV[which(obj_ICV$score %in% score_list),]
+  
+  assign(paste0("results_",Training_name), results)
+  assign(paste0("results_ICV",Training_name), results2)
 }
 
-for (i in score_list){
-  fit <- lm(ICV ~ DATA[,i] + kz021 + age,  data=DATA)
-  fit1 <- lm(ICV ~ kz021 + age, data=DATA)
-  tmp <- coef(summary(fit))
-  tmp2 <- summary(fit)
-  hold <- summary(fit1)
-  true_r2 <- tmp2$r.squared - hold$r.squared
-  CI <- confint(fit, level=0.95)
-  CI <- CI[2,]
-  tmp3 <- c("ICV",i,tmp[2,], true_r2, CI)
-  obj_ICV <- rbind(obj_ICV, tmp3)
-}
+write.table(`results_HG19_pgc.scz.full.2012-04`,file = "PGC1_pathway_specific_pathway_scores.txt", row.names = F, quote = F)
+write.table(`results_ICVHG19_pgc.scz.full.2012-04`,file = "PGC1_pathway_specific_pathway_scores_with_ICV.txt", row.names = F, quote = F)
 
-# this is a clean-up step - do not change
-results <- obj[which(obj$score %in% score_list),]
-results2 <- obj_ICV[which(obj_ICV$score %in% score_list),]
+write.table(`results_HG19_pgc.scz.full.2012-04`,file = "CLOZUK_PGC2noclo_pathway_specific_pathway_scores.txt", row.names = F, quote = F)
+write.table(`results_HG19_pgc.scz.full.2012-04`,file = "CLOZUK_PGC2noclo_pathway_specific_pathway_scores.txt", row.names = F, quote = F)
 
-assign(paste0("results_",Training_name), results)
-assign(paste0("results_ICV",Training_name), results2)
-}
+write.table(results_CLOZUK_PGC2noclo, file="CLOZUK_PGC2noclo_morphology_andnotmorphology_pathway_specific_scores.txt", row.names = F, quote = F)
+write.table(results_ICVCLOZUK_PGC2noclo, file="CLOZUK_PGC2noclo_morphology_andnotmorphology_pathway_specific_scores_for_ICV_regression.txt", row.names = F, quote = F)
 
-
+write.table(results_CLOZUK_PGC2noclo, file="CLOZUK_PGC2noclo_all_pocklington_inclu_LoF_specific_scores.txt", row.names = F, quote = F)
 
 # Write the file name relevant to the results you have produced
 #write.table(results, file = "all_scaled_PGC1_no_sweden_HG19_UCSC_ALSPAC_brain_regions_association_PRS_results.txt", row.names = F, quote = F)
@@ -205,54 +212,54 @@ test_df_SE <- as.data.frame(test_df_SE)
 
 # create the first dataset for one significance threshold
 if(number_of_thresholds > 1){
-BETA_dataframe_current <- newdataframe_beta[1:number_of_phenotypes,]
-test_beta <- melt(BETA_dataframe_current, id.vars="test")
-names(test_beta) <- c("Brain_region", "Dataset","BETA")
-
-SE_dataframe_current <- newdataframe_SE[1:number_of_phenotypes,]
-test_SE <- melt(SE_dataframe_current, id.vars="test")
-names(test_SE) <- c("Brain_region", "Dataset","SE")
-test_SE$SE <- as.numeric(test_SE$SE)
-test_beta$BETA <- as.numeric(test_beta$BETA)
-Beta_se_plots <- cbind(test_beta,test_SE$SE)
-Beta_se_plots$upper <- Beta_se_plots$BETA + Beta_se_plots$`test_SE$SE`
-Beta_se_plots$lower <- Beta_se_plots$BETA - Beta_se_plots$`test_SE$SE`
-number_of_datasets <- nrow(test_df_beta)
-Beta_se_plots$P_Value_threshold <- c(rep(significance_thresholds[1],number_of_phenotypes*number_of_datasets))  
-names(Beta_se_plots) <- c("Brain_region", "Dataset","BETA", "SE", "upper", "lower", "Pvaluethreshold")
-all_plots <- Beta_se_plots
-
-# Loop through the rest based on the number of significance thresholds you have
-
-
-for (i in 2:number_of_thresholds){
-  # This looks complicated but all i am essentially saying is this:
-  # for my current dataframe, find out the number of phenotypes (in this case 44)
-  # multiply that by the significance threshold we are currently on (because we are going to have 44 rows of that significance threshold) eg 44 * 1  + 1(because we have 2 signifance thresholds)
-  # That row (row 45) is the row which starts with a new significance threshold of 0.5
-  # then take all the rows up to the last phenotype (44*2) = 88 (in this case our last row)
-  # now do the same as above on this subsection of data...
-  indexone <- (((number_of_phenotypes)*(i-1)) + 1)
-  indextwo <- (number_of_phenotypes*i)
-  BETA_dataframe_current <- newdataframe_beta[indexone:indextwo,]
-  test_beta_to_add <- melt(BETA_dataframe_current, id.vars="test")
-  names(test_beta_to_add) <- c("Brain_region", "Dataset","BETA")
+  BETA_dataframe_current <- newdataframe_beta[1:number_of_phenotypes,]
+  test_beta <- melt(BETA_dataframe_current, id.vars="test")
+  names(test_beta) <- c("Brain_region", "Dataset","BETA")
   
-  SE_dataframe_current <- newdataframe_SE[indexone:indextwo,]
-  test_SE_to_add <- melt(SE_dataframe_current, id.vars="test")
-  names(test_SE_to_add) <- c("Brain_region", "Dataset","SE")
-  test_SE_to_add$SE <- as.numeric(test_SE_to_add$SE)
-  test_beta_to_add$BETA <- as.numeric(test_beta_to_add$BETA)
-  Beta_se_plots_to_add <- cbind(test_beta_to_add,test_SE_to_add$SE)
+  SE_dataframe_current <- newdataframe_SE[1:number_of_phenotypes,]
+  test_SE <- melt(SE_dataframe_current, id.vars="test")
+  names(test_SE) <- c("Brain_region", "Dataset","SE")
+  test_SE$SE <- as.numeric(test_SE$SE)
+  test_beta$BETA <- as.numeric(test_beta$BETA)
+  Beta_se_plots <- cbind(test_beta,test_SE$SE)
+  Beta_se_plots$upper <- Beta_se_plots$BETA + Beta_se_plots$`test_SE$SE`
+  Beta_se_plots$lower <- Beta_se_plots$BETA - Beta_se_plots$`test_SE$SE`
+  number_of_datasets <- nrow(test_df_beta)
+  Beta_se_plots$P_Value_threshold <- c(rep(significance_thresholds[1],number_of_phenotypes*number_of_datasets))  
+  names(Beta_se_plots) <- c("Brain_region", "Dataset","BETA", "SE", "upper", "lower", "Pvaluethreshold")
+  all_plots <- Beta_se_plots
   
-  Beta_se_plots_to_add$upper <- Beta_se_plots_to_add$BETA + Beta_se_plots_to_add$`test_SE_to_add$SE`
-  Beta_se_plots_to_add$lower <- Beta_se_plots_to_add$BETA - Beta_se_plots_to_add$`test_SE_to_add$SE`
-  # repeat the same significance threshold over and over again
-  Beta_se_plots_to_add$P_Value_threshold <- c(rep(significance_thresholds[i],number_of_phenotypes*number_of_datasets))  
-  names(Beta_se_plots_to_add) <- c("Brain_region", "Dataset","BETA", "SE", "upper", "lower", "Pvaluethreshold")
+  # Loop through the rest based on the number of significance thresholds you have
   
-  all_plots <- rbind(all_plots,Beta_se_plots_to_add)
-}
+  
+  for (i in 2:number_of_thresholds){
+    # This looks complicated but all i am essentially saying is this:
+    # for my current dataframe, find out the number of phenotypes (in this case 44)
+    # multiply that by the significance threshold we are currently on (because we are going to have 44 rows of that significance threshold) eg 44 * 1  + 1(because we have 2 signifance thresholds)
+    # That row (row 45) is the row which starts with a new significance threshold of 0.5
+    # then take all the rows up to the last phenotype (44*2) = 88 (in this case our last row)
+    # now do the same as above on this subsection of data...
+    indexone <- (((number_of_phenotypes)*(i-1)) + 1)
+    indextwo <- (number_of_phenotypes*i)
+    BETA_dataframe_current <- newdataframe_beta[indexone:indextwo,]
+    test_beta_to_add <- melt(BETA_dataframe_current, id.vars="test")
+    names(test_beta_to_add) <- c("Brain_region", "Dataset","BETA")
+    
+    SE_dataframe_current <- newdataframe_SE[indexone:indextwo,]
+    test_SE_to_add <- melt(SE_dataframe_current, id.vars="test")
+    names(test_SE_to_add) <- c("Brain_region", "Dataset","SE")
+    test_SE_to_add$SE <- as.numeric(test_SE_to_add$SE)
+    test_beta_to_add$BETA <- as.numeric(test_beta_to_add$BETA)
+    Beta_se_plots_to_add <- cbind(test_beta_to_add,test_SE_to_add$SE)
+    
+    Beta_se_plots_to_add$upper <- Beta_se_plots_to_add$BETA + Beta_se_plots_to_add$`test_SE_to_add$SE`
+    Beta_se_plots_to_add$lower <- Beta_se_plots_to_add$BETA - Beta_se_plots_to_add$`test_SE_to_add$SE`
+    # repeat the same significance threshold over and over again
+    Beta_se_plots_to_add$P_Value_threshold <- c(rep(significance_thresholds[i],number_of_phenotypes*number_of_datasets))  
+    names(Beta_se_plots_to_add) <- c("Brain_region", "Dataset","BETA", "SE", "upper", "lower", "Pvaluethreshold")
+    
+    all_plots <- rbind(all_plots,Beta_se_plots_to_add)
+  }
 }
 
 all_plots$Pvaluethreshold <- as.factor(all_plots$Pvaluethreshold)
@@ -290,7 +297,7 @@ for (i in 1:number_of_phenotypes){
 setwd("~/Desktop/")
 
 
-pdf("ALSPAC_PGC_all_brain_regions_all_sig_thresh_all_scaled.pdf", onefile = TRUE,paper = "A4")
+pdf("ALSPAC_PGC_all_brain_regions_all_sig_thresh.pdf", onefile = TRUE,paper = "A4")
 invisible(lapply(gglist_0.05,print))
 dev.off()
 
@@ -431,21 +438,33 @@ all_plots <- rbind(Beta_se_plots,Beta_se_plots_0.5)
 all_plots$Pvaluethreshold <- as.factor(all_plots$Pvaluethreshold)
 gglist_0.05 <- list() 
 
-  # Plots for Betas and SE based on files #
-  p <- ggplot(all_plots, aes(Dataset, BETA, fill = Pvaluethreshold, group= Dataset))
-  
-  p <- p +
-    geom_col(position = "dodge") +
-    geom_errorbar(aes(ymin = upper, ymax = lower), position = "dodge", width = 0.25)
-  p <- p + scale_x_discrete(labels=c("PGC1" = "PGC1", "PGC1swe" = "PGC1swe", "PGC2" = "PGC2", "QCLOZUK_PGC2noclo" = "CLOZUK"))
-  p <- p + facet_grid(. ~ Pvaluethreshold) +
-    theme(strip.text.x = element_text(size = 10))
-  p <- p + scale_fill_discrete(guide=FALSE)
-  p <- p + theme(axis.text.x = element_text(size = 7))
-  p <- p + ggtitle(all_plots$Brain_region)
-  p <- p + theme(plot.title = element_text( face = "bold",hjust = 0.5))
-  
-  p
+# Plots for Betas and SE based on files #
+p <- ggplot(all_plots, aes(Dataset, BETA, fill = Pvaluethreshold, group= Dataset))
+
+p <- p +
+  geom_col(position = "dodge") +
+  geom_errorbar(aes(ymin = upper, ymax = lower), position = "dodge", width = 0.25)
+p <- p + scale_x_discrete(labels=c("PGC1" = "PGC1", "PGC1swe" = "PGC1swe", "PGC2" = "PGC2", "QCLOZUK_PGC2noclo" = "CLOZUK"))
+p <- p + facet_grid(. ~ Pvaluethreshold) +
+  theme(strip.text.x = element_text(size = 10))
+p <- p + scale_fill_discrete(guide=FALSE)
+p <- p + theme(axis.text.x = element_text(size = 7))
+p <- p + ggtitle(all_plots$Brain_region)
+p <- p + theme(plot.title = element_text( face = "bold",hjust = 0.5))
+
+p
 }
 
 
+
+
+
+
+final_scoring_output_file <- NULL
+order_of_output_for_sig_thresh <- NULL
+
+for (i in significance_thresholds){
+  scoring_output_file <- paste0(Pathway_directory,pathway_names,"/scoring_",Training_name,"_",Validation_name,"_pathway_",pathway_names,"_with_",i,".profile")
+  final_scoring_output_file <- c(final_scoring_output_file,scoring_output_file)
+  order_of_output_for_sig_thresh <- c(order_of_output_for_sig_thresh, paste0(pathway_names," ",rep(i,length(scoring_output_file))))
+}
