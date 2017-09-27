@@ -217,12 +217,6 @@ write("This file contains genes with no SNPs", file = paste0(output_directory,"r
 # input the name of the pathways from the orignal file
 #useful_pathways <- c("FMRP_targets", "abnormal_behavior", "abnormal_nervous_system_electrophysiology", "abnormal_learning|memory|conditioning", "abnormal_CNS_synaptic_transmission", "Cav2_channels", "abnormal_synaptic_transmission", "5HT_2C", "abnormal_long_term_potentiation", "abnormal_motor_capabilities|coordination|movement", "abnormal_behavioral_response_to_xenobiotic", "abnormal_associative_learning", "Lek2015_LoFintolerant_90", "BGS_top2_mean", "BGS_top2_max")
 
-
-# assign an individual table for each pathway
-for (i in 1:number_of_pathways_to_analyse) {
-  assign(pathway_names[i], subset(pathway_sets, Pathway == pathway_names[i]), envir = .GlobalEnv)
-} 
-
 #read in general MAGMA annotation file
 MAGMA.gene.regions <- fread(gene_loc_file_name, colClasses = c("numeric","character", rep("numeric",2), rep("character",2)))
 setnames(MAGMA.gene.regions, c("Gene","CHR","BP_START","BP_END","STRAND","GENE_NAME"))
@@ -239,11 +233,10 @@ setnames(MAGMA.gene.regions, c("Gene","CHR","BP_START","BP_END","STRAND","GENE_N
   # setkey to the chromosome and remove all SNPs in the X chromosome to save time
   setkey(current_table_name, CHR)
   current_table_name <- current_table_name[!"X"]
-  assign(paste0("Gene_regions_all_",pathway_names[i]), current_table_name, envir = .GlobalEnv)
 
 
-    selecting_chromosomes <- fread(Gene_file_name)
-    names(selecting_chromosomes) <- c("CHR", "SNP", "GD", "BP", "A1", "A2")
+  selecting_chromosomes <- fread(Gene_file_name)
+  names(selecting_chromosomes) <- c("CHR", "SNP", "GD", "BP", "A1", "A2")
     
 
     # if there are no genes within that pathway, ignore it
@@ -263,7 +256,7 @@ setnames(MAGMA.gene.regions, c("Gene","CHR","BP_START","BP_END","STRAND","GENE_N
     Assigning_genes(pathway_input = temp_pathway_table, clumped_SNPs = selecting_chromosomes, BP.clumped.SNPs = selecting_chromosomes_BP, chromosome.number = l, gene.regions = "regular")
     
     # read in MAGMA's input and add any genes which happen to be inside other genes or crossed over with other genes
-    GENES_to_snps <- scan(file = paste0(output_directory,l,"_",Training_name,"_",Validation_name,"_SNPs_",pathway_names[i],"_pathway_temp.genes.annot"), what = "", sep = "\n")
+    GENES_to_snps <- scan(file = paste0(output_directory,chromosomes_to_analyse,"_",Training_name, "_", Validation_name, "_SNPs_genes_temp.genes.annot"), what = "", sep = "\n")
     y <- strsplit(GENES_to_snps, "[[:space:]]+")
     names(y) <- sapply(y, '[[', 1)
     y <- lapply(y, '[', -1)
@@ -329,7 +322,7 @@ setnames(MAGMA.gene.regions, c("Gene","CHR","BP_START","BP_END","STRAND","GENE_N
       error_catching <- tryCatch({
       # read in MAGMA's input and add any genes which happen to be inside other genes or crossed over with other genes
       # From previous analysis there will not be a file if no SNPs exist, so try and catch these errors and output to another file record
-      GENES_to_snps <- scan(file = paste0(output_directory,l,"_",Training_name,"_",Validation_name,"_SNPs_",pathway_names[i],"_pathway_temp.genes.annot"), what = "", sep = "\n")
+      GENES_to_snps <- scan(file = paste0(output_directory,chromosomes_to_analyse,"_",Training_name, "_", Validation_name, "_SNPs_genes_temp.genes.annot"), what = "", sep = "\n")
       }, error=function(e){cat("Pathway",pathway_names[i],"on chromosome",l,"must_be_empty,check with MAGMA errors\n")
                        message <- paste0(pathway_names[i],"\t",l)
                        write(message, file = paste0(output_directory,"MAGMA_empty_files_after_analysis.txt"), append = T)
@@ -368,7 +361,7 @@ setnames(MAGMA.gene.regions, c("Gene","CHR","BP_START","BP_END","STRAND","GENE_N
       Assigning_genes(pathway_input = temp_pathway_table, clumped_SNPs = selecting_chromosomes, BP.clumped.SNPs = selecting_chromosomes_BP, chromosome.number = l, gene.regions = "extended")
       
       # read in MAGMA's input and add any genes which happen to be inside other genes or crossed over with other genes
-      GENES_to_snps <- scan(file = paste0(output_directory,l,"_",Training_name, "_", Validation_name, "_SNPs_", pathway_names[i], "_extended_pathway_temp.genes.annot"), what = "", sep = "\n")
+      GENES_to_snps <- scan(file = paste0(output_directory,chromosomes_to_analyse,"_",Training_name, "_", Validation_name, "_SNPs_extended_genes_temp.genes.annot"), what = "", sep = "\n")
       y <- strsplit(GENES_to_snps, "[[:space:]]+")
       names(y) <- sapply(y, '[[', 1)
       y <- lapply(y, '[', -1)

@@ -95,7 +95,8 @@ Rscript ${path_to_scripts}RscriptEcho.R\
  ${path_to_stationary_data}${Pathway_filename}\
  ${path_to_stationary_data}${Gene_location_filename}\
  ${Chromosomes_to_analyse[@]}
- 
+
+exit 0 
 sudo parallel ${path_to_gene_scripts}Genes_MAGMA_annotation_script.sh ::: ${Chromosomes_to_analyse[@]} ::: ${Directory_to_work_from} ::: ${path_to_scripts} ::: ${path_to_gene_scripts} ::: ${system} 
 # From the above script, identify the number of pathways you want to analyse (probably safest to write to a file, port to a variable and then delete the file)
 # Also a text-delimited file with each line specifying a pathway name to be used
