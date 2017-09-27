@@ -108,15 +108,9 @@ if [[ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" = 'johnhuber
   # Arguments for PRS_serial script
   Multiple_Training_set_tables="TRUE"
   Running_in_Serial="TRUE"
-<<<<<<< HEAD
   sig_thresholds=(1e-04 0.001 0.01 0.05 0.1 0.2 0.3 0.4 0.5)
   Extra_analyses=FALSE
-  Name_of_extra_analysis=Pathways
-=======
-  sig_thresholds=(0.05 0.5)
-  Extra_analyses=TRUE
   Name_of_extra_analysis=Genes Pathways
->>>>>>> 6fd9eddbec8dc8b85c468493b2e8c9704d72709e
   Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates"
   # either "extended" "normal" or "both" : change to a numerical input in the future
   Gene_regions=normal #either ( "extended" "normal" "both" )	
