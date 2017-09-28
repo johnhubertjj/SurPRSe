@@ -27,7 +27,7 @@ ${path_to_scripts}Summary_stats_to_chromosome_converter.sh ${Directory_to_work_f
 
 # calculate polygenic scores for the whole genome across different chromosomes	
 
-sudo parallel ${path_to_scripts}POLYGENIC_RISK_SCORE_ANALYSIS_CLOZUK_PRS_JOB_ARRAY.sh ::: ${chromosomes[@]} ::: ${Directory_to_work_from} ::: ${path_to_scripts} ::: ${system}
+#sudo parallel ${path_to_scripts}POLYGENIC_RISK_SCORE_ANALYSIS_CLOZUK_PRS_JOB_ARRAY.sh ::: ${chromosomes[@]} ::: ${Directory_to_work_from} ::: ${path_to_scripts} ::: ${system}
 
 #exit 0
 
@@ -42,7 +42,7 @@ length_of_extra_analysis_array=`echo ${#Name_of_extra_analysis[@]}`
 	if [ "${length_of_extra_analysis_array}" -gt  "2" ]; then
 		echo hi all
 		Name_of_extra_analysis_specific=(Genes Pathways)
-		 ${path_to_pathway_scripts}Pathway_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_pathway_scripts} ${Name_of_extra_analysis_specific[1]} 
+		#${path_to_pathway_scripts}Pathway_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_pathway_scripts} ${Name_of_extra_analysis_specific[1]} 
 		 ${path_to_gene_scripts}Gene_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_gene_scripts} ${Name_of_extra_analysis_specific[0]}
 	
 	elif  [[ "${Name_of_extra_analysis[1]}" = "Pathways" ]]; then
