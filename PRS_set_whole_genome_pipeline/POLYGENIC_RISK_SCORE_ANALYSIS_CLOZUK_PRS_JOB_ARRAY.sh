@@ -160,7 +160,7 @@ plink \
 
 else
 
-   # using plink to change the names to a CHR.POS identifier and remaking the files
+# using plink to change the names to a CHR.POS identifier and remaking the files
   plink \
 --bfile ${validation_set_usually_genotype} \
 --update-name ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_chr${chromosome_number}_chr.pos.txt \

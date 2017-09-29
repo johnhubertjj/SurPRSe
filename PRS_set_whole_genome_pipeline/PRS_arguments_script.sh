@@ -70,16 +70,16 @@ if [[ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" = 'johnhuber
   path_to_stationary_data="$home_OS/johnhubert/Dropbox/Stationary_data/" 
   
   # Datasets
-  training_set_usually_summary="IQ_GWAS_2017_table${chromosome_number}"
-  training_set_original_filename="IQ_GWAS_2017_why_have_you_used_stupid_headings_sniekersetal.txt"
+  training_set_usually_summary="PGC_noCLOZUK_table${chromosome_number}"
+  training_set_original_filename="daner_PGC_SCZ52_0513a.resultfiles_PGC_SCZ52_0513.sh2_noclo.txt"
   validation_set_usually_genotype="CLOZUK_GWAS_BGE_chr${chromosome_number}"
   validation_set_usually_genotype_serial="CLOZUK_GWAS_BGE_chr"
   validation_set_full_name_without_chromosome="CLOZUK_GWAS_BGE"
-  training_set_name="IQ_GWAS_2017"
+  training_set_name="PGC_noCLOZUK"
   validation_set_name="CLOZUK" 
   
   # Pathway datasets
-  Pathway_filename="Selected_Pocklington_plus_GO_pathways_SCHIZ.txt"
+  Pathway_filename="Pocklington2015_134sets_LoFi.txt"
   Gene_location_filename="NCBI37.3.gene.loc"
   
   # Split_by_chromosome for genotype?
@@ -109,7 +109,7 @@ if [[ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" = 'johnhuber
   Multiple_Training_set_tables="TRUE"
   Running_in_Serial="TRUE"
   sig_thresholds=(1e-04 0.001 0.01 0.05 0.1 0.2 0.3 0.4 0.5)
-  Extra_analyses=FALSE
+  Extra_analyses=TRUE
   Name_of_extra_analysis=Genes Pathways
   Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates"
   # either "extended" "normal" or "both" : change to a numerical input in the future
