@@ -85,19 +85,11 @@ if [ -e "${Pathway_output_directory}Pathways_analysis_empty_pathways_info_file.t
 	rm "${Pathway_output_directory}Pathways_analysis_empty_pathways_info_file.txt"
 fi
 
-Rscript ${path_to_scripts}RscriptEcho.R\
- ${path_to_gene_scripts}PATHWAYS_PRS_COLLECTING_MAGMA_INFO.R\
- ./${training_set_name}_${validation_set_name}_extrainfo/PATHWAYS_PRS_COLLECTING_MAGMA_INFO.Rout\
- ${training_set_name}\
- ${validation_set_name}\
- ${validation_set_usually_genotype_serial}\
- ${Name_of_extra_analysis}\
- ${path_to_stationary_data}${Pathway_filename}\
- ${path_to_stationary_data}${Gene_location_filename}\
- ${Chromosomes_to_analyse[@]}
 
-exit 0 
 sudo parallel ${path_to_gene_scripts}Genes_MAGMA_annotation_script.sh ::: ${Chromosomes_to_analyse[@]} ::: ${Directory_to_work_from} ::: ${path_to_scripts} ::: ${path_to_gene_scripts} ::: ${system} 
+
+exit 0
+
 # From the above script, identify the number of pathways you want to analyse (probably safest to write to a file, port to a variable and then delete the file)
 # Also a text-delimited file with each line specifying a pathway name to be used
 # The seperate gene_loc files belonging to previously specified analysis
