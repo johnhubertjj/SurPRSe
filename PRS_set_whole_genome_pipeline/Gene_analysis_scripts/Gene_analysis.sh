@@ -86,7 +86,6 @@ if [ -e "${Pathway_output_directory}Pathways_analysis_empty_pathways_info_file.t
 fi
 
 
-
 sudo parallel ${path_to_gene_scripts}Genes_MAGMA_annotation_script.sh ::: ${Chromosomes_to_analyse[@]} ::: ${Directory_to_work_from} ::: ${path_to_scripts} ::: ${path_to_gene_scripts} ::: ${system} 
 
 exit 0
