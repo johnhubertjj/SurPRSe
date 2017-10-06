@@ -521,11 +521,13 @@ if (Gene_regions == "normal" | Gene_regions == "both"){
   parLapply(cl, 1:length(e$p.value.thresholds), calculating_scores)
   stopCluster(cl)
   
-  Genes_index_for_plink <- fread("./output/Index_of_genes_and_pval_1.txt")
+  Genes_index_for_plink <- fread(paste0(e$Genes_PRS_output_dir,"Index_of_genes_and_pval_1_normal_gene_regions_",e$Training_name, "_", e$Validation_name,".txt"))
   setnames(Genes_index_for_plink,c("Genes", "pval"))
   setkey(Genes_index_for_plink,pval)
-  
-  for (i in 1:length(p.value.thresholds)) {
+  Gene_file_name_minus_bim <- gsub(".bim","",Gene_file_name, perl = T)
+
+# Need to write this outside of R...
+  for (i in 1:length(e$p.value.thresholds)) {
     Genes_index_for_plink_p_val_thresh <- Genes_index_for_plink[pval == e$p.value.thresholds[i]]
     Genes_index_for_plink_p_val_thresh <- Genes_index_for_plink_p_val_thresh$Genes
     
@@ -534,8 +536,8 @@ if (Gene_regions == "normal" | Gene_regions == "both"){
       
     }else{
       for (l in 1:length(Genes_index_for_plink_p_val_thresh)) {
-        filename <- paste0('./output/PRS_Scoring/score/whole_Genome_test_', Genes_index_for_plink_p_val_thresh[l],'_', e$p.value.thresholds[i],".score")
-        command <- paste0('plink --bfile ./output/CLOZUK_PGC_FULL_GENOME_without_erroneous_SNPS --score ', filename, " --out /output/PRS_scoring/Profiles/whole_Genome_test_", Genes_index_for_plink_p_val_thresh[l],'_', e$p.value.thresholds[i], "_a")
+        filename <- paste0(paste0(e$Genes_PRS_output_dir, "Gene_", Genes_index_for_plink_p_val_thresh[l], "_", e$p.value.thresholds[i], ".score"))
+        command <- paste0("plink --bfile ", Gene_file_name_minus_bim," --score ", filename, " --out ", e$Genes_PRS_output_dir, Genes_index_for_plink_p_val_thresh[l],"_", e$p.value.thresholds[i], "_a")
         system(command)
       } 
     } 
