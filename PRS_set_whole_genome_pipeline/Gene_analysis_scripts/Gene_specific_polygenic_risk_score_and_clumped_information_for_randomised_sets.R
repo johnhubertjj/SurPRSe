@@ -26,7 +26,7 @@ Gene_file_name <- args[6] # the name of the file to be accessed (must be in stat
 Gene_directory <- args[7]
 gene_loc_file_name <- args[8] # the name of the file containing gene locations (magma's version)
 Gene_regions <- args[9] # whether to include/exclude the regulatory regions of a gene
-chromosomes_to_analyse <- args[10]
+significance_thresholds <- as.numeric(args[c(10:length(args))])
 
 
 setwd(".")
@@ -38,20 +38,24 @@ Gene_file_name <- "~/Documents/ALSPAC_gene_pathway_pipeline_test/CLOZUK_PGC2nocl
 Gene_directory <- "Genes"
 gene_loc_file_name <-"/Users/johnhubert/Dropbox/Stationary_data/NCBI37.3.gene.loc"
 Gene_regions <- "both"
-chromosomes_to_analyse <- 22
-
+significance_thresholds <- c(0.05,0.5)
 #setwd("~/Documents/CLOZUK_ALSPAC_PATHWAY_TESTING")
+
+### environment for functions
+e <- new.env()
 
 # Create new variables based on input files to make things easier to read # 
 output_directory <- paste0("./", Training_name, "_", Validation_name, "_output/", Gene_directory, "/")
 Date <- Sys.Date()
+Training_set <- paste0("./", Training_name, "_", Validation_name,"_output/combined_", Training_name, "_table_with_CHR.POS_identifiers.txt")
+assign("Genes_PRS_output_dir",paste0(output_directory,"Genes_PRS/"),envir = e)
+assign("p.value.thresholds", significance_thresholds, envir = e)
 
 # Reading_in_Pathway_files
 library(data.table)
 library(reshape2)
 
-### environment for functions
-e <- new.env()
+
 
 ### Function which assigns genes to the SNP data ####
 ### Currently designed for the input from bim files ###
@@ -393,26 +397,217 @@ if (Gene_regions == "extended") {
   write.table(Markers_per_MB_non_independent_genes_wo_SNPS_extended, file = paste0(output_directory, Validation_name, "_", Training_name, "_Extended_Genes_without_SNPs_annotated_to_them_full_genome_after_clumping.txt"), quote = F,row.names = F,col.names = F)
 }
 
-## End of loops, now onto producing gene_specific_polygenic risk scores...    
+##End of loops, now onto producing gene_specific_polygenic risk scores...    
 
+# running the scoring in parallel function
+calculating_scores <- function(i) {
+  # Each parallel process represents a p-value threshold
+  # So for pval threshold you will have a list of SNPs within the specified gene region (both within the gene and regulatory gene regions)
+  
+  # This function finds the SNPs within any i gene and writes to a score file containing the SNP Identifier (CHR.POS),
+  # the Minor allele and the BETA score as previously computed earlier in the pipeline from an OR
+  
+  # The parallel process then closes and plink is run in serial to calculate each individual profile
+  for (l in 1:length(e$Genes_index)){
+    a <- copy(e$combined.CLOZUK.PGC.clumped.Genomic.SNPs)    
+    SNPs <- a[, .I[which(GENE_NUMBER == e$Genes_index[l] & P <= e$p.value.thresholds[i])]]
+    
+    if (length(SNPs) != 0){
+      a <- a[SNPs, .(SNP,A1,BETA)]
+      
+      filename <- paste0(e$Genes_PRS_output_dir, "Gene_", e$Genes_index[l], "_", e$p.value.thresholds[i], ".score")
+      filename_extended <- paste0(e$Genes_PRS_output_dir, "Gene_",e$Genes_index[l],'_', e$p.value.thresholds[i],"_extended.score")
+      
+      if(length(a$SNP) == 1){
+        one_SNP_file <- paste0(e$Genes_PRS_output_dir, e$p.value.thresholds[i],"_one_SNP_only_dictionary.txt")
+        one_SNP_file_extended <- paste0(e$Genes_PRS_output_dir, e$p.value.thresholds[i],"_one_SNP_only_dictionary_extended.txt")
+        genes_and_pvalue_one_SNP <- data.frame(e$Genes_index[l], e$p.value.thresholds[i])
+        
+        if(e$Gene_regions == "normal"){
+          write.table(genes_and_pvalue_one_SNP, file = one_SNP_file, quote = F, append = T, col.names = F, row.names = F)
+          
+        }else if (e$Gene_regions == "extended"){
+          write.table(genes_and_pvalue_one_SNP, file = one_SNP_file_extended, quote = F, append = T, col.names = F, row.names = F)
+          
+        }
+      }
+      
+      if(e$Gene_regions == "normal"){
+        write.table(file = filename, a, row.names = F, col.names = F, quote = F, sep="\t")
+        genes_and_pvalue <- data.frame(e$Genes_index[l], e$p.value.thresholds[i])
+        write.table(genes_and_pvalue, file = paste0(e$Genes_PRS_output_dir,"Index_of_genes_and_pval_1_normal_gene_regions_",e$Training_name, "_", e$Validation_name,".txt"), quote = F, col.names = F, row.names = F, append = T)
+        
+      }else if (e$Gene_regions == "extended"){
+        write.table(file = filename_extended, a, row.names = F, col.names = F, quote = F, sep="\t")        
+        genes_and_pvalue <- data.frame(e$Genes_index[l], e$p.value.thresholds[i])
+        write.table(genes_and_pvalue, file = e$Genes_PRS_output_dir,"Index_of_genes_and_pval_1_extended_gene_regions_",e$Training_name, "_", e$Validation_name,".txt", quote = F, col.names = F, row.names = F, append = T)
+      }
+      
+      rm(a)
+      
+    }else{
+      next()
+    }
+  }
+}
+
+### Library
+library(data.table)
+library(parallel)
+library(base)
+
+assign("Validation_name", Validation_name, envir = e)
+assign("Training_name", Validation_name, envir = e)
+
+### Only if you have specified that you want the normal gene regions in the analysis ###
+if (Gene_regions == "normal" | Gene_regions == "both"){
+  
+  # Calculate the number of cores
+  no_cores <- detectCores() - 1
+  
+  # Initiate cluster
+  cl <- makeCluster(no_cores, type = "FORK")
+  
+  ### set working directory
+  setwd(".")
+  
+  ## Read in PGC.data and input data
+  Training_dataframe <- fread(Training_set,stringsAsFactors = F)
+  #e$Gene_regions_annotation_normal <- fread("./output/MAGMA_Gene_regions_for_python_script.txt")
+  #setnames(e$Gene_regions_annotation_normal, c("CHR", "SNP", "BP", "Gene_ID", "BP_1", "BP_2"))
+  
+  
+  
+  ## Excess info if required ##
+  #############################
+  ## Plink --gene-report tmp1.txt Chromosome_MAGMA_GENE_REGIONS_NCBI37.3.txt
+  ##       --out CLOZUK_BGE_GENE_REGIONS
+  
+  # Plink --bfile CLOZUK_GWAS_BGE_chr22
+  #       --make-set Chromosome_22_MAGMA_GENE_REGIONS_NCBI37.3.txt
+  #       --out testlol
+  #       --write-set
+  #############################
+  
+  # Ideas for getting scores and keeping them within the R environment
+  
+  # 1 use MAGMA and create the gene.annot file: read as a list into R 
+  # then create a Data.table with repeated SNP's for each gene in the format SNP, A1, BETA, GENE
+  # Then parse through each row using the data table notation to create a score and profile wihtin an index
+  # Problem here will be the output to plink
+  # Can maybe put into a list of data tables for the scoring? Find out if it is possible...if not then just input, print and delete
+  # 
+  
+  # Scoring per gene: rough and undescriptive at the moment
+  
+  # SCORING 
+  # sig <- c(0.0001, 0.001, 0.01, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5)  
+
+  
+  ## check that it is merging properly here (after analysis is run)
+  combined.CLOZUK.PGC.clumped.Genomic.SNPs <- merge(e$Gene_regions_annotation_table_normal, Training_dataframe, by= c("SNP","A1","A2"), all=F,sort=F)
+  combined.CLOZUK.PGC.clumped.Genomic.SNPs$A1 <- toupper(combined.CLOZUK.PGC.clumped.Genomic.SNPs$A1)
+  combined.CLOZUK.PGC.clumped.Genomic.SNPs$A2 <- toupper(combined.CLOZUK.PGC.clumped.Genomic.SNPs$A2)
+  Genes_index <- unique(combined.CLOZUK.PGC.clumped.Genomic.SNPs$GENE_NUMBER)
+  
+  assign("Genes_index", Genes_index, envir = e)
+  assign("Gene_regions", "normal", envir = e)
+
+  
+  Genes_used <- matrix(ncol = 2)
+  assign("combined.CLOZUK.PGC.clumped.Genomic.SNPs", combined.CLOZUK.PGC.clumped.Genomic.SNPs, envir = e)
+  
+  clusterExport(cl, "e")
+  parLapply(cl, 1:length(e$p.value.thresholds), calculating_scores)
+  stopCluster(cl)
+  
+  Genes_index_for_plink <- fread("./output/Index_of_genes_and_pval_1.txt")
+  setnames(Genes_index_for_plink,c("Genes", "pval"))
+  setkey(Genes_index_for_plink,pval)
+  
+  for (i in 1:length(p.value.thresholds)) {
+    Genes_index_for_plink_p_val_thresh <- Genes_index_for_plink[pval == e$p.value.thresholds[i]]
+    Genes_index_for_plink_p_val_thresh <- Genes_index_for_plink_p_val_thresh$Genes
+    
+    if(length(Genes_index_for_plink_p_val_thresh == 0)){
+      next()
+      
+    }else{
+      for (l in 1:length(Genes_index_for_plink_p_val_thresh)) {
+        filename <- paste0('./output/PRS_Scoring/score/whole_Genome_test_', Genes_index_for_plink_p_val_thresh[l],'_', e$p.value.thresholds[i],".score")
+        command <- paste0('plink --bfile ./output/CLOZUK_PGC_FULL_GENOME_without_erroneous_SNPS --score ', filename, " --out /output/PRS_scoring/Profiles/whole_Genome_test_", Genes_index_for_plink_p_val_thresh[l],'_', e$p.value.thresholds[i], "_a")
+        system(command)
+      } 
+    } 
+  }
+}
+
+### Only if you wish to include the regulatory regions within the analysis as well ###
+if(Gene_regions == "extended" | Gene_regions == "both"){
+  
+  # Calculate the number of cores
+  no_cores <- detectCores() - 1
+  
+  # Initiate cluster
+  cl <- makeCluster(no_cores, type = "FORK")
+  
+  ### set working directory
+  setwd(".")
+  
+  ## Read in PGC.data and input data
+  Training_dataframe <- fread(Training_set)
+  e$Gene_regions_annotation_extended <- fread(paste0("./output/MAGMA_Gene_regions_for_", Validation_name, "_", Training_name,"_extended.txt"))
+  #e$Gene_regions_annotation_extended <- fread("./output/MAGMA_Gene_regions_for_python_script.txt")
+  #setnames(e$Gene_regions_annotation_extended, c("CHR", "SNP", "BP", "Gene_ID", "BP_1", "BP_2"))
+  
+  ##set new environment
+  e <- new.env()
+  
+  # SCORING 
+  # sig <- c(0.0001, 0.001,0.01, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5)  
+  
+  assign("Gene_regions", "normal", envir = e)
+  
+  ## check that it is merging properly here (after analysis is run)
+  combined.CLOZUK.PGC.clumped.Genomic.SNPs <- merge(e$Gene_regions_annotation_extended, Training_dataframe, by.x="SNP", by.y="SNP", all=F, sort=F)
+  combined.CLOZUK.PGC.clumped.Genomic.SNPs$A1 <- toupper(combined.CLOZUK.PGC.clumped.Genomic.SNPs$A1)
+  combined.CLOZUK.PGC.clumped.Genomic.SNPs$A2 <- toupper(combined.CLOZUK.PGC.clumped.Genomic.SNPs$A2)
+  Genes_index <- unique(combined.CLOZUK.PGC.clumped.Genomic.SNPs$GENE_NUMBER)
+  
+  assign("Genes_index", Genes_index, envir = e)
+  
+  Genes_used <- matrix(ncol = 2)
+  assign("combined.CLOZUK.PGC.clumped.Genomic.SNPs", combined.CLOZUK.PGC.clumped.Genomic.SNPs, envir = e)
+  
+  clusterExport(cl, "e")
+  parLapply(cl, 1:length(e$p.value.thresholds), calculating_scores)
+  stopCluster(cl)
+  
+  Genes_index_for_plink <- fread("./output/Index_of_genes_and_pval_1_extended.txt")
+  setnames(Genes_index_for_plink,c("Genes", "pval"))
+  setkey(Genes_index_for_plink,pval)
+  
+  for (i in 1:length(e$p.value.thresholds)) {
+    Genes_index_for_plink_p_val_thresh <- Genes_index_for_plink[pval == e$p.value.thresholds[i]]
+    Genes_index_for_plink_p_val_thresh <- Genes_index_for_plink_p_val_thresh$Genes
+    
+    if(length(Genes_index_for_plink_p_val_thresh == 0)){
+      next()
+      filename <- paste0('./output/PRS_Scoring/score/whole_Genome_test_', e$Genes_index[l],'_', e$p.value.thresholds[i],".score")
+      filename_extended <- paste0('./output/PRS_Scoring/score/whole_Genome_test_', e$Genes_index[l],'_', e$p.value.thresholds[i],"_extended.score")
+    }else{
+      for (l in 1:length(Genes_index_for_plink_p_val_thresh)) {
+        filename_extended <- paste0('./output/PRS_Scoring/score/whole_Genome_test_', Genes_index_for_plink_p_val_thresh[l],'_', e$p.value.thresholds[i],"_extended.score")
+        
+        command <- paste0('plink --bfile ./output/CLOZUK_PGC_FULL_GENOME_without_erroneous_SNPS --score ', filename_extended, " --out /whole_genome_testing/output/PRS_scoring/Profiles/whole_Genome_test_", Genes_index_for_plink_p_val_thresh[l],'_', e$p.value.thresholds[i], "_a_extended")
+        system(command)
+      } 
+    } 
+  }
+  
+}
+
+
+# Gene specific Polygenic risk score
 #End Timer
 proc.time() - ptm
-
-quit()
-
-# Currently Defunct code
-unread_pathways_one <- fread(paste0(output_directory,"Pathways_analysis_empty_pathways_info_file.txt"))
-unread_pathways_two <- fread(paste0(output_directory,"Pathways_analysis_empty_pathways_info_file_run2.txt"))
-
-setnames(unread_pathways_one,c("pathways","chromosome"))
-setnames(unread_pathways_two,c("pathways","chromosome"))
-
-combined_pathways <- merge(x=unread_pathways_one,y=unread_pathways_one,by= c("pathways, chromosome"), all = TRUE)
-
-if (ncol(combined_pathways) != 2){
-  stop("different pathways used after magma analysis, check empty pathways file")
-}
-warnings()
-
-
-

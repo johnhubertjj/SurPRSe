@@ -139,6 +139,7 @@ elif [[ ${Gene_regions} = "normal" ]]; then
 
 fi
 
+mkdir ${Gene_output_directory}Genes_PRS/ 
 exit 0 
 
 Rscript ${path_to_scripts}RscriptEcho.R\
@@ -166,7 +167,6 @@ Rscript ${path_to_scripts}RscriptEcho.R\
 # magma --bfile ~/Desktop/ALSPAC_hrc_imputed_step3_mri_brain_measurements_only_chr20_consensus_with_CLOZUK_PGC2noclo_more_sig_thresh_flipped_alleles_no_duplicates --gene-annot ~/Desktop/test.genes.annot --out ~/Desktop/testing_magma_output
 
 else
-
 	exit 1
 fi
 fi
@@ -175,6 +175,3 @@ fi
 # magma --bfile CLOZUK_GWAS_BGE_chr22_magma_input_2 --gene-annot ${chr[i]}_CLOZUK_PGC_SNPs_pathway.genes.annot --out ${chr[i]}gene_annotation_for_CLOZUK_test
 
 # Then write a new R script with previous details and finish, NOTE MAKE IT EASY TO DELETE USELESS FILES 
-
-
-
