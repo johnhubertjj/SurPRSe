@@ -230,6 +230,29 @@ setnames(MAGMA.gene.regions, c("Gene","CHR","BP_START","BP_END","STRAND","GENE_N
     
     adding_unread_genes(MAGMA.gene.regions.for.chromosome = current_table_name, clumped_SNPs = selecting_chromosomes, y = y, chromosome.number = chromosomes_to_analyse)  
     
+    setkey(e$test_data_frame, GENE_NUMBER)
+    
+    Markers_per_MB_non_independent_normal <- matrix('NA', nrow = nrow(current_table_name[CHR == chromosomes_to_analyse]), ncol = 6)
+    Markers_per_MB_non_independent_normal <- as.data.table(Markers_per_MB_non_independent_normal)
+    #Markers_per_MB_non_independent_normal[, names(Markers_per_MB_non_independent_normal) := lapply(.SD, as.character)]
+    Genes_to_sort_through_normal <- unlist(current_table_name[CHR == chromosomes_to_analyse,.(Gene)])
+    
+    for (k in 1:length(Genes_to_sort_through_normal)){
+      rows <- nrow(e$test_data_frame[.(Genes_to_sort_through_normal[k])])
+      Length_of_gene <- e$test_data_frame[.(Genes_to_sort_through_normal[k]),.(BP_START,BP_END, BP_start_extended, BP_end_extended)][1]
+      #Markers_per_MB_non_independent_normal[k,] <- c(k,rows,Length_of_gene)
+      testing_2 <- as.matrix(Length_of_gene[1,])
+      test <- unlist(c(Genes_to_sort_through_normal[k],rows,Length_of_gene[1,]))
+      test <- as.character(test)
+      for (j in seq_len(ncol(Markers_per_MB_non_independent_normal))){
+        set(Markers_per_MB_non_independent_normal,k,j,test[j])
+      }
+    }
+    
+    names(Markers_per_MB_non_independent_normal) <- c("Gene","Nmarkers_in_Gene","BP_START","BP_END","BP_start_extended","BP_end_extended") 
+    Markers_per_MB_non_independent_genes_wo_SNPS_normal <- Markers_per_MB_non_independent_normal[is.na(BP_START),.(Gene)]
+    Markers_per_MB_non_independent_normal <- Markers_per_MB_non_independent_normal[!is.na(Markers_per_MB_non_independent_normal$BP_START)]
+    
     e$test_data_frame[,c("BP_start_extended","BP_end_extended") := NULL]
     which(duplicated(e$test_data_frame$SNP,fromLast = T))
     
@@ -262,6 +285,29 @@ setnames(MAGMA.gene.regions, c("Gene","CHR","BP_START","BP_END","STRAND","GENE_N
     
     adding_unread_genes(MAGMA.gene.regions.for.chromosome = current_table_name, clumped_SNPs = selecting_chromosomes, y = y, chromosome.number = chromosomes_to_analyse)  
     
+    setkey(e$test_data_frame, GENE_NUMBER)
+    
+    Markers_per_MB_non_independent_extended <- matrix('NA', nrow = nrow(current_table_name[CHR == chromosomes_to_analyse]), ncol = 6)
+    Markers_per_MB_non_independent_extended <- as.data.table(Markers_per_MB_non_independent_extended)
+    #Markers_per_MB_non_independent_extended[, names(Markers_per_MB_non_independent_extended) := lapply(.SD, as.character)]
+    Genes_to_sort_through_extended <- unlist(current_table_name[CHR == chromosomes_to_analyse,.(Gene)])
+    
+    for (k in 1:length(Genes_to_sort_through_extended)){
+      rows <- nrow(e$test_data_frame[.(Genes_to_sort_through_extended[k])])
+      Length_of_gene <- e$test_data_frame[.(Genes_to_sort_through_extended[k]),.(BP_START,BP_END, BP_start_extended, BP_end_extended)][1]
+      #Markers_per_MB_non_independent_extended[k,] <- c(k,rows,Length_of_gene)
+      testing_2 <- as.matrix(Length_of_gene[1,])
+      test <- unlist(c(Genes_to_sort_through_extended[k],rows,Length_of_gene[1,]))
+      test <- as.character(test)
+      for (j in seq_len(ncol(Markers_per_MB_non_independent_extended))){
+        set(Markers_per_MB_non_independent_extended,k,j,test[j])
+      }
+    }
+    
+    names(Markers_per_MB_non_independent_extended) <- c("Gene","Nmarkers_in_Gene","BP_START","BP_END","BP_start_extended","BP_end_extended") 
+    Markers_per_MB_non_independent_genes_wo_SNPS_extended <- Markers_per_MB_non_independent_extended[is.na(BP_start_extended),.(Gene)]
+    Markers_per_MB_non_independent_extended <- Markers_per_MB_non_independent_extended[!is.na(Markers_per_MB_non_independent_extended$BP_start_extended)]
+    
     e$test_data_frame[,c("BP_START","BP_END") := NULL]
     setnames(e$test_data_frame,old = c("BP_start_extended","BP_end_extended"), new = c("BP_START","BP_END"))
     
@@ -270,11 +316,19 @@ setnames(MAGMA.gene.regions, c("Gene","CHR","BP_START","BP_END","STRAND","GENE_N
     assign("SNPs_for_clumping_extended", unique(e$test_data_frame$SNP), envir = e)
     assign("Gene_regions_annotation_table_extended", e$test_data_frame, envir = e)
     
+    print("all_okay!")
+    print(Markers_per_MB_non_independent_normal)
+    print(Markers_per_MB_non_independent_genes_wo_SNPS_normal)
     
-    write.table(e$Gene_regions_annotation_table_normal, file = paste0(output_directory,Validation_name,"_",Training_name,"_chromosome_", chromosomes_to_analyse, "_normal_gene_regions_data_table.txt"), quote = F, row.names = F)
-    write.table(e$Gene_regions_annotation_table_extended, file = paste0(output_directory,Validation_name,"_",Training_name,"_chromosome_", chromosomes_to_analyse, "_extended_gene_regions_data_table.txt"), quote = F, row.names = F)
-    write(e$SNPs_for_clumping_normal, file = paste0(output_directory,"chromosome_",chromosomes_to_analyse,"_SNPs_for_clumping_normal_gene_regions.txt"))
+    write.table(e$Gene_regions_annotation_table_normal, file = paste0(output_directory, Validation_name, "_", Training_name, "_chromosome_", chromosomes_to_analyse, "_normal_gene_regions_data_table.txt"), quote = F, row.names = F)
+    write(e$SNPs_for_clumping_normal, file = paste0(output_directory, "chromosome_", chromosomes_to_analyse, "_SNPs_for_clumping_normal_gene_regions.txt"))
+    write.table(Markers_per_MB_non_independent_normal, file = paste0(output_directory, Validation_name, "_", Training_name, "_chromosome_", chromosomes_to_analyse, "_normal_gene_region_information_for_randomisation_tests.txt"), quote = F, row.names = F)
+    write.table(Markers_per_MB_non_independent_genes_wo_SNPS_normal, file = paste0(output_directory, "chromosome_", chromosomes_to_analyse, "_Normal_Genes_without_SNPs_annotated_to_them.txt"), quote = F,row.names = F,col.names = F)
+    
+    write.table(e$Gene_regions_annotation_table_extended, file = paste0(output_directory, Validation_name, "_", Training_name, "_chromosome_", chromosomes_to_analyse, "_extended_gene_regions_data_table.txt"), quote = F, row.names = F)
     write(e$SNPs_for_clumping_extended, file = paste0(output_directory,"chromosome_",chromosomes_to_analyse,"_SNPs_for_clumping_extended_gene_regions.txt"))
+    write.table(Markers_per_MB_non_independent_extended, file = paste0(output_directory, Validation_name, "_", Training_name, "_chromosome_", chromosomes_to_analyse, "_extended_gene_region_information_for_randomisation_tests.txt"), quote = F, row.names = F)
+    write.table(Markers_per_MB_non_independent_genes_wo_SNPS_extended, file = paste0(output_directory, "chromosome_", chromosomes_to_analyse, "_Extended_Genes_without_SNPs_annotated_to_them.txt"),quote = F,row.names = F,col.names = F)
     }
   
  
@@ -302,14 +356,41 @@ setnames(MAGMA.gene.regions, c("Gene","CHR","BP_START","BP_END","STRAND","GENE_N
       
       adding_unread_genes(MAGMA.gene.regions.for.chromosome = current_table_name, clumped_SNPs = selecting_chromosomes, y = y, chromosome.number = chromosomes_to_analyse)  
       
+      setkey(e$test_data_frame, GENE_NUMBER)
+      
+      Markers_per_MB_non_independent_normal <- matrix('NA', nrow = nrow(current_table_name[CHR == chromosomes_to_analyse]), ncol = 6)
+      Markers_per_MB_non_independent_normal <- as.data.table(Markers_per_MB_non_independent_normal)
+      #Markers_per_MB_non_independent_normal[, names(Markers_per_MB_non_independent_normal) := lapply(.SD, as.character)]
+      Genes_to_sort_through_normal <- unlist(current_table_name[CHR == chromosomes_to_analyse,.(Gene)])
+      
+      for (k in 1:length(Genes_to_sort_through_normal)){
+        rows <- nrow(e$test_data_frame[.(Genes_to_sort_through_normal[k])])
+        Length_of_gene <- e$test_data_frame[.(Genes_to_sort_through_normal[k]),.(BP_START,BP_END, BP_start_extended, BP_end_extended)][1]
+        #Markers_per_MB_non_independent_normal[k,] <- c(k,rows,Length_of_gene)
+        testing_2 <- as.matrix(Length_of_gene[1,])
+        test <- unlist(c(Genes_to_sort_through_normal[k],rows,Length_of_gene[1,]))
+        test <- as.character(test)
+        for (j in seq_len(ncol(Markers_per_MB_non_independent_normal))){
+          set(Markers_per_MB_non_independent_normal,k,j,test[j])
+        }
+      }
+      
+      names(Markers_per_MB_non_independent_normal) <- c("Gene","Nmarkers_in_Gene","BP_START","BP_END","BP_start_extended","BP_end_extended") 
+      Markers_per_MB_non_independent_genes_wo_SNPS_normal <- Markers_per_MB_non_independent_normal[is.na(BP_START),.(Gene)]
+      Markers_per_MB_non_independent_normal <- Markers_per_MB_non_independent_normal[!is.na(Markers_per_MB_non_independent_normal$BP_START)]
+      
+      
       e$test_data_frame[,c("BP_start_extended","BP_end_extended") := NULL]
       which(duplicated(e$test_data_frame$SNP,fromLast = T))
       
       assign("SNPs_for_clumping_normal", unique(e$test_data_frame$SNP), envir = e)
       assign("Gene_regions_annotation_table_normal", e$test_data_frame, envir = e)
+      print("all_okay!")
       
-      write.table(e$Gene_regions_annotation_table_normal, file = paste0(output_directory,Validation_name,"_",Training_name,"_chromosome_", chromosomes_to_analyse, "_normal_gene_regions_data_table.txt"), quote = F, row.names = F)
-      write(e$SNPs_for_clumping_normal, file = paste0(output_directory,"chromosome_",chromosomes_to_analyse,"_SNPs_for_clumping_normal_gene_regions.txt"))
+      write.table(e$Gene_regions_annotation_table_normal, file = paste0(output_directory, Validation_name, "_", Training_name, "_chromosome_", chromosomes_to_analyse, "_normal_gene_regions_data_table.txt"), quote = F, row.names = F)
+      write(e$SNPs_for_clumping_normal, file = paste0(output_directory, "chromosome_", chromosomes_to_analyse, "_SNPs_for_clumping_normal_gene_regions.txt"))
+      write.table(Markers_per_MB_non_independent_normal, file = paste0(output_directory, Validation_name, "_", Training_name, "_chromosome_", chromosomes_to_analyse, "_normal_gene_region_information_for_randomisation_tests.txt"), quote = F, row.names = F)
+      write.table(Markers_per_MB_non_independent_genes_wo_SNPS_normal, file = paste0(output_directory, "chromosome_", chromosomes_to_analyse, "_Normal_Genes_without_SNPs_annotated_to_them.txt"), quote = F,row.names = F,col.names = F)
     } 
     
     if (Gene_regions == "extended") {
@@ -337,6 +418,30 @@ setnames(MAGMA.gene.regions, c("Gene","CHR","BP_START","BP_END","STRAND","GENE_N
       
       adding_unread_genes(MAGMA.gene.regions.for.chromosome = current_table_name, clumped_SNPs = selecting_chromosomes, y = y, chromosome.number = chromosomes_to_analyse)  
       
+      # Getting NSNPs information in relation to MAGMA's calculation...
+      setkey(e$test_data_frame, GENE_NUMBER)
+      
+      Markers_per_MB_non_independent_extended <- matrix('NA', nrow = nrow(current_table_name[CHR == chromosomes_to_analyse]), ncol = 6)
+      Markers_per_MB_non_independent_extended <- as.data.table(Markers_per_MB_non_independent_extended)
+      #Markers_per_MB_non_independent_extended[, names(Markers_per_MB_non_independent_extended) := lapply(.SD, as.character)]
+      Genes_to_sort_through_extended <- unlist(current_table_name[CHR == chromosomes_to_analyse,.(Gene)])
+      
+      for (k in 1:length(Genes_to_sort_through_extended)){
+        rows <- nrow(e$test_data_frame[.(Genes_to_sort_through_extended[k])])
+        Length_of_gene <- e$test_data_frame[.(Genes_to_sort_through_extended[k]),.(BP_START,BP_END, BP_start_extended, BP_end_extended)][1]
+        #Markers_per_MB_non_independent_extended[k,] <- c(k,rows,Length_of_gene)
+        testing_2 <- as.matrix(Length_of_gene[1,])
+        test <- unlist(c(Genes_to_sort_through_extended[k],rows,Length_of_gene[1,]))
+        test <- as.character(test)
+        for (j in seq_len(ncol(Markers_per_MB_non_independent_extended))){
+          set(Markers_per_MB_non_independent_extended,k,j,test[j])
+        }
+      }
+      
+      names(Markers_per_MB_non_independent_extended) <- c("Gene","Nmarkers_in_Gene","BP_START","BP_END","BP_start_extended","BP_end_extended") 
+      Markers_per_MB_non_independent_extended_genes_wo_SNPS_extended <- Markers_per_MB_non_independent_extended[is.na(BP_start_extended),.(Gene)]
+      Markers_per_MB_non_independent_extended <- Markers_per_MB_non_independent_extended[!is.na(Markers_per_MB_non_independent_extended$BP_start_extended)]
+      
       e$test_data_frame[,c("BP_START","BP_END") := NULL]
       setnames(e$test_data_frame,old = c("BP_start_extended","BP_end_extended"), new = c("BP_START","BP_END"))
       
@@ -347,6 +452,8 @@ setnames(MAGMA.gene.regions, c("Gene","CHR","BP_START","BP_END","STRAND","GENE_N
 
       write.table(e$Gene_regions_annotation_table_extended, file = paste0(output_directory,Validation_name,"_",Training_name,"_chromosome_", chromosomes_to_analyse, "_extended_gene_regions_data_table.txt"), quote = F, row.names = F)
       write(e$SNPs_for_clumping_extended, file = paste0(output_directory,"chromosome_",chromosomes_to_analyse,"_SNPs_for_clumping_extended_gene_regions.txt"))
+      write.table(Markers_per_MB_non_independent_extended, file = paste0(output_directory, Validation_name, "_", Training_name, "_chromosome_", chromosomes_to_analyse, "_extended_gene_region_information_for_randomisation_tests.txt"), quote = F, row.names = F)
+      write.table(Markers_per_MB_non_independent_genes_wo_SNPS_extended, file = paste0(output_directory, "chromosome_", chromosomes_to_analyse, "_Extended_Genes_without_SNPs_annotated_to_them.txt"),quote = F,row.names = F,col.names = F)
     }
     ## End of loops    
 

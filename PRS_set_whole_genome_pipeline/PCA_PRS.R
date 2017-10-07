@@ -66,7 +66,7 @@ Groups_to_keep <- c("CLOZUK","COGS","CRESTAR1", "CRESTAR2", "CRESTAR3","POBI","T
 
 for (i in 1:7){
 setkey(Neuropsychiatric_datasets[[i]],FID)
- #Neuropsychiatric_datasets[[i]] <- Neuropsychiatric_datasets[[i]][grep(paste(Groups_to_keep,collapse="|"), 
+# Neuropsychiatric_datasets[[i]] <- Neuropsychiatric_datasets[[i]][grep(paste(Groups_to_keep,collapse="|"), 
                       #Neuropsychiatric_datasets[[i]]$FID, value=TRUE)]
  
 
@@ -165,11 +165,18 @@ names(PCA_matrix_2) <- c("Individuals","PHENOTYPE", "Schizophrenia", "Bipolar", 
 #write.csv(PCA_matrix, file = "/Volumes/PhD_storage/PRS_cross_disorder_table_optimised_thresholds.csv", col.names = T, row.names = F)
 
 PCA_matrix_df <- as.data.frame(PCA_matrix)
-PCA_matrix_df_cases <- as.data.frame(PCA_matrix[PHENOTYPE==1])
+PCA_matrix_df_cases <- as.data.table(PCA_matrix_2)
+PCA_matrix_df_cases <- PCA_matrix_df_cases [PHENOTYPE == 1]
+PCA_matrix_df_cases <- as.data.frame(PCA_matrix_df_cases)
 
 testing <- prcomp(PCA_matrix_2[3:8],center = T)
 testing_reduce_controls <- prcomp(PCA_matrix_2[3:8],center = T)
 testing_reduce_controls <- prcomp(PCA_matrix_2[3:9],center = T)
+
+testing_cases_only <- prcomp(PCA_matrix_df_cases[3:9], center = T)
+testing_cases_only_wo_EDU <- prcomp(PCA_matrix_df_cases[c(3:4,6:9)], center = T)
+testing_cases_only_wo_IQ <- prcomp(PCA_matrix_df_cases[c(3:8)], center = T)
+testing_cases_only_wo_intellingence <- prcomp(PCA_matrix_df_cases[c(3:4,6:8)], center = T)
 
 testing_wo_SCZ <- prcomp(PCA_matrix_2[4:9],center = T)
 testing_wo_BIP <- prcomp(PCA_matrix_2[c(3,5:9)],center = T)
@@ -260,6 +267,47 @@ for (i in 1:20){
   gglist[[i]] <- g
 }
 
+
+# Cases only
+gglist_cases <- list()
+for (i in 1:20){
+  
+  g <- ggbiplot(testing_cases_only, obs.scale = 1, var.scale = 1, ellipse = F, choices = c(plots_index[1,i],plots_index[2,i]),
+                circle = F, alpha = 1)
+  #g <- g + scale_color_manual(name="CLOZUK Phenotype",label = c("Controls","Cases"), values = c("#E87D72","#4EA8EC")) 
+  ##4EA8EC
+  #g <- g + scale_colour_brewer(palette = "Set3")
+  g <- g + theme(legend.direction = 'horizontal', 
+                 legend.position = 'top',
+                 legend.box.background = element_blank(),
+                 legend.background = element_blank(),
+                 legend.key = element_blank(),
+                 axis.line = element_line(colour = "black"),
+                 panel.background = element_blank(),
+                 legend.title = element_text(face = "bold"))
+  gglist_cases[[i]] <- g
+}
+
+# Cases w/o EDU
+gglist_cases_wo_EDU <- list()
+for (i in 1:20){
+  
+  g <- ggbiplot(testing_cases_only_wo_EDU, obs.scale = 1, var.scale = 1, ellipse = F, choices = c(plots_index[1,i],plots_index[2,i]),
+                circle = F, alpha = 1)
+  #g <- g + scale_color_manual(name="CLOZUK Phenotype",label = c("Controls","Cases"), values = c("#E87D72","#4EA8EC")) 
+  ##4EA8EC
+  #g <- g + scale_colour_brewer(palette = "Set3")
+  g <- g + theme(legend.direction = 'horizontal', 
+                 legend.position = 'top',
+                 legend.box.background = element_blank(),
+                 legend.background = element_blank(),
+                 legend.key = element_blank(),
+                 axis.line = element_line(colour = "black"),
+                 panel.background = element_blank(),
+                 legend.title = element_text(face = "bold"))
+  gglist_cases_wo_EDU[[i]] <- g
+}
+
 #multiplot(plotlist = gglist, cols = 4)
 #screeplot(testing2, main="Scree Plot", xlab="Components",ylim = c(0,1.4))
 
@@ -287,13 +335,25 @@ ga <- ga + theme(legend.direction = 'horizontal',
                panel.background = element_blank(),
                legend.title = element_text(face = "bold"))
 
+gc <- ggplot(Testing_density_wo_EDU, aes(x=-PC1)) + geom_density(aes(group=Phenotype, fill = Phenotype), alpha = 0.3)
+gc <- gc + scale_fill_manual(name="CLOZUK Phenotype",label = c("Controls","Cases"), values = c("#E87D72","#4EA8EC")) 
+#ga <- ga + scale_color_manual(name="CLOZUK Phenotype",label = c("Controls","Cases"), values = c("#E87D72","#4EA8EC")) 
+gc <- gc + theme(legend.direction = 'horizontal', 
+                 legend.position = 'top',
+                 legend.box.background = element_blank(),
+                 legend.background = element_blank(),
+                 legend.key = element_blank(),
+                 axis.line = element_line(colour = "black"),
+                 panel.background = element_blank(),
+                 legend.title = element_text(face = "bold"))
+
 # Two plots side by side
 library(gridExtra)
-plot_list <- list(gglist[[1]], ga)
-grid.arrange(gglist[[1]], ga,ncol = 2)
-multiplot(plotlist = plot_list,cols=2)
+require(cowplot)
 
+plot_grid(gglist[[1]],ga,label=c("(i)","(ii)"),align = 'h',nrow = 1)
 
+grid.arrange(gglist[[1]], ga, nrow = 1)
 
 plots_index <- combn(1:6,2)
 e <- new.env()

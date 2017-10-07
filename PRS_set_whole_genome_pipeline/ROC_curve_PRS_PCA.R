@@ -56,6 +56,7 @@ roc_obj6 <- roc(PCA_matrix_df$PHENOTYPE, testing$x[,6], plot = T, ci = T)
 
 
 roc_obj1 <- roc(PCA_matrix_2$PHENOTYPE, testing_reduce_controls$x[,1], plot = T, ci = T)
+roc_obj_limited_controls <- roc(PCA_matrix_2$PHENOTYPE, testing_reduce_controls$x[,1], plot = T, ci = T)
 roc_obj2 <- roc(PCA_matrix_2$PHENOTYPE, testing_reduce_controls$x[,2], plot = T, ci = T)
 roc_obj3 <- roc(PCA_matrix_2$PHENOTYPE, testing_reduce_controls$x[,3], plot = T, ci = T)
 roc_obj4 <- roc(PCA_matrix_2$PHENOTYPE, testing_reduce_controls$x[,4], plot = T, ci = T)
