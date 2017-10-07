@@ -29,14 +29,14 @@ chromosomes_to_analyse <- as.numeric(args[c(10:length(args))])
 
 setwd(".")
 
-#Training_name <- "HG19_pgc.scz.full.2012-04"
-#Validation_name <- "ALSPAC"
-#Validation_full_name_serial <- "ALSPAC_hrc_imputed_step3_mri_brain_measurements_only_chr"
-#Pathway_directory <- "Pathways"
-#Pathway_file_name <- "/Users/johnhubert/Dropbox/Stationary_data/Pocklington2015_134sets_LoFi.txt"
-#gene_loc_file_name <-"/Users/johnhubert/Dropbox/Stationary_data/NCBI37.3.gene.loc"
-#Gene_regions <- "normal"
-#chromosomes_to_analyse <- seq(1,22) 
+Training_name <- "CLOZUK_PGC2noclo"
+Validation_name <- "ALSPAC"
+Validation_full_name_serial <- "ALSPAC_hrc_imputed_step3_mri_brain_measurements_only_chr"
+Pathway_directory <- "Pathways"
+Pathway_file_name <- "/Users/johnhubert/Dropbox/Stationary_data/Pocklington2015_134sets_LoFi.txt"
+gene_loc_file_name <-"/Users/johnhubert/Dropbox/Stationary_data/NCBI37.3.gene.loc"
+Gene_regions <- "normal"
+chromosomes_to_analyse <- seq(1,22) 
 #setwd("~/Documents/CLOZUK_ALSPAC_PATHWAY_TESTING")
   
 # Create new variables based on input files to make things easier to read # 
@@ -148,71 +148,39 @@ Assigning_genes <- function(pathway_input, BP.clumped.SNPs, clumped_SNPs, output
 ### Function which adds duplicate SNPs which happen to be inside other genes
 ### Currently designed for extended gene regions ONLY
 ### requires the run of gene.out R script to obtain the specific gene.annot file for each pathway and chromosome
-adding_unread_genes <- function(Gene_clumped_SNPs, MAGMA.gene.regions.for.chromosome, clumped_SNPs, y, chromosome.number, pathway){
-  # y is the input gene list from MAGMA
-  # Gene_clumped_SNPs is the updated bim table from the initial assignment of SNPs
-  for (i in 1:length(y)) {
-    # check whether the gene exists in the updated Gene_clumped_SNPs file
-    # If it does not, this means that there is a gene inside a gene or the SNPs were only found inside one of the genes 
-    index_of_gene <- which(Gene_clumped_SNPs$Gene == names(y[i]))
-    if (length(index_of_gene) == 0){
-      gene.to.include <- names(y[i])
-      # the first elemnt of y[[i]] is the bp start and end so need to take it into account when finding the SNP in question
-      SNPs.to.include <- y[[i]][2:length(y[[i]])]
-      
-      Gene.names.for.table <- which(gene.to.include == MAGMA.gene.regions.for.chromosome$Gene)
-      for (f in 1:length(SNPs.to.include)) {
-        # clumped_SNPS is the original unaltered Bim file for each chromosome and pathway
-        Base.pairs.index <- which(clumped_SNPs$SNP == SNPs.to.include[f])
-        # add a new row corresponding to the Gene_clumped_SNPs format
-        new.row <- list(chromosome.number, 
-                        SNPs.to.include[f], 
-                        clumped_SNPs$GD[Base.pairs.index],
-                        clumped_SNPs$BP[Base.pairs.index],
-                        clumped_SNPs$A1[Base.pairs.index],
-                        clumped_SNPs$A2[Base.pairs.index],
-                        MAGMA.gene.regions.for.chromosome$GENE_NAME[Gene.names.for.table],
-                        gene.to.include,
-                        MAGMA.gene.regions.for.chromosome$BP_start_extended[Gene.names.for.table],
-                        MAGMA.gene.regions.for.chromosome$BP_end_extended[Gene.names.for.table])
-        Gene_clumped_SNPs <- rbindlist(list(Gene_clumped_SNPs,new.row))
-      }
-    }else{
-      # check if some SNPs are missing
-      gene.names.in.y <- Gene_clumped_SNPs[index_of_gene]
-      unrecorded_SNPs <- which(!y[[i]][2:length(y[[i]])] %in% gene.names.in.y$SNP)
-      # if they are, identify them and do the same for if the gene was missing
-      if (length(unrecorded_SNPs) != 0 ) {
-        
-        gene.to.include <- names(y[i])
-        Gene.names.for.table <- which(gene.to.include == MAGMA.gene.regions.for.chromosome$Gene)
-        SNPs.to.include <- y[[i]][2:length(y[[i]])]
-        
-        for (f in 1:length(unrecorded_SNPs)) {
-          Base.pairs.index <- which(clumped_SNPs$SNP == SNPs.to.include[unrecorded_SNPs[f]])
-          new.row <- list(chromosome.number, 
-                          SNPs.to.include[unrecorded_SNPs[f]],
-                          clumped_SNPs$GD[Base.pairs.index],
-                          clumped_SNPs$BP[Base.pairs.index],
-                          clumped_SNPs$A1[Base.pairs.index],
-                          clumped_SNPs$A2[Base.pairs.index],
-                          MAGMA.gene.regions.for.chromosome$GENE_NAME[Gene.names.for.table],
-                          gene.to.include,
-                          MAGMA.gene.regions.for.chromosome$BP_start_extended[Gene.names.for.table],
-                          MAGMA.gene.regions.for.chromosome$BP_end_extended[Gene.names.for.table]
-          )
-          Gene_clumped_SNPs <- rbindlist(list(Gene_clumped_SNPs,new.row))
-        }
-      } #name of gene not in list then add row of SNPs with gene identifier to the table()
-    }
-  }
+adding_unread_genes <- function(MAGMA.gene.regions.for.chromosome, clumped_SNPs, y, chromosome.number){
+  
+  Melted_MAGMA_list <- melt(y)
+  names(Melted_MAGMA_list) <- c("SNP", "Gene")
+  Melted_MAGMA_list$SNP <- as.character(Melted_MAGMA_list$SNP) 
+  clumped_SNPs$SNP <- as.character(clumped_SNPs$SNP)
+  merged_table_one <- merge(clumped_SNPs,Melted_MAGMA_list,by = "SNP", all = F)
+  merged_table_one$Gene <- as.numeric(merged_table_one$Gene)
+  Gene_clumped_SNPs <- merge(MAGMA.gene.regions,merged_table_one, by = "Gene",all.y = T)
+  Gene_clumped_SNPs[,"CHR.y" :=NULL]  # remove extra_column
+  setcolorder(Gene_clumped_SNPs, c("CHR.x","SNP", "GD", "BP", "A1","A2","GENE_NAME","Gene", "BP_START", "BP_END","STRAND"))
+  setnames(Gene_clumped_SNPs, c("CHR.x","Gene"), c("CHR","GENE_NUMBER"))
   assign("test_data_frame", Gene_clumped_SNPs, envir = e)
+  
 }
 
 getwd()
-
-write( paste0("This_file_contains_MAGMA_errors\t",0), file = paste0(output_directory,"MAGMA_empty_files_after_analysis.txt"))
 write("This file contains pathways with no SNPs", file = paste0(output_directory,"Pathways_analysis_empty_pathways_info_file_run2.txt"))
+
+if (Gene_regions == "both") {
+write( paste0("This_file_contains_MAGMA_errors\t",0), file = paste0(output_directory,"MAGMA_empty_files_after_analysis_normal.txt"))
+#write("This file contains pathways with no SNPs", file = paste0(output_directory,"Pathways_analysis_empty_pathways_info_file_run2_normal.txt"))
+write( paste0("This_file_contains_MAGMA_errors\t",0), file = paste0(output_directory,"MAGMA_empty_files_after_analysis_extended.txt"))
+#write("This file contains pathways with no SNPs", file = paste0(output_directory,"Pathways_analysis_empty_pathways_info_file_run2_extended.txt"))
+
+} else if (Gene_regions == "normal") {
+  write( paste0("This_file_contains_MAGMA_errors\t",0), file = paste0(output_directory,"MAGMA_empty_files_after_analysis_normal.txt"))
+  #write("This file contains pathways with no SNPs", file = paste0(output_directory,"Pathways_analysis_empty_pathways_info_file_run2_normal.txt"))
+
+} else if (Gene_regions == "extended") {
+  write( paste0("This_file_contains_MAGMA_errors\t",0), file = paste0(output_directory,"MAGMA_empty_files_after_analysis_extended.txt"))
+  #write("This file contains pathways with no SNPs", file = paste0(output_directory,"Pathways_analysis_empty_pathways_info_file_run2_extended.txt"))
+}
 
 ##### read in pathway sets and standardise column names
 pathway_sets <- fread(Pathway_file_name,header = F)
@@ -318,7 +286,7 @@ for (i in 1:number_of_pathways_to_analyse) {
     y[[1]] <- NULL
     y[[1]] <- NULL
     
-    adding_unread_genes(Gene_clumped_SNPs = e$extended_Gene_clumped_SNPs, MAGMA.gene.regions.for.chromosome = temp_pathway_table, clumped_SNPs = selecting_chromosomes, y = y, chromosome.number = l, pathway = pathway_names[i])  
+    adding_unread_genes(MAGMA.gene.regions.for.chromosome = temp_pathway_table, clumped_SNPs = selecting_chromosomes, y = y)  
     
     names(e$test_data_frame) <- c("CHR" ,"SNP", "BP", "P", "Gene_name","BP_START","BP_END","GENE")
     setcolorder(e$test_data_frame, c("CHR","SNP","BP","GENE","BP_START","BP_END","P","Gene_name"))
@@ -351,7 +319,7 @@ for (i in 1:number_of_pathways_to_analyse) {
       GENES_to_snps <- scan(file = paste0(output_directory,l,"_",Training_name,"_",Validation_name,"_SNPs_",pathway_names[i],"_pathway_temp.genes.annot"), what = "", sep = "\n")
       }, error=function(e){cat("Pathway",pathway_names[i],"on chromosome",l,"must_be_empty,check with MAGMA errors\n")
                        message <- paste0(pathway_names[i],"\t",l)
-                       write(message, file = paste0(output_directory,"MAGMA_empty_files_after_analysis.txt"), append = T)
+                       write(message, file = paste0(output_directory,"MAGMA_empty_files_after_analysis_normal.txt"), append = T)
                        list(next_loop = T)
                        })
       
@@ -369,14 +337,14 @@ for (i in 1:number_of_pathways_to_analyse) {
       
       adding_unread_genes(Gene_clumped_SNPs = e$Gene_clumped_SNPs, MAGMA.gene.regions.for.chromosome = temp_pathway_table, clumped_SNPs = selecting_chromosomes, y = y, chromosome.number = l, pathway = pathway_names[i])  
       
-      names(e$test_data_frame) <- c("CHR" ,"SNP", "GD", "BP", "A1","A2","GENE_NAME","GENE_NUMBER", "BP_START", "BP_END")
+      names(e$test_data_frame) <- c("CHR" ,"SNP", "GD", "BP", "A1","A2","GENE_NAME","GENE_NUMBER", "BP_START", "BP_END","STRAND")
       which(duplicated(e$test_data_frame$SNP,fromLast = T))
       
       assign("SNPs_for_clumping", unique(e$test_data_frame$SNP), envir = e)
       
-      write.table(e$test_data_frame,file = paste0(output_directory,pathway_names[i],"_chromosome_",l,"_",Gene_regions,"_data_table.txt"),quote = F, row.names = F)
+      write.table(e$test_data_frame,file = paste0(output_directory,pathway_names[i],"_chromosome_",l,"_",Gene_regions,"_data_table_normal.txt"),quote = F, row.names = F)
       
-      write(e$SNPs_for_clumping, file = paste0(output_directory,"chromosome_",l,"_", pathway_names[i],"_SNPs_for_clumping_regular_gene_regions.txt"))
+      write(e$SNPs_for_clumping, file = paste0(output_directory,"chromosome_",l,"_", pathway_names[i],"_SNPs_for_clumping_normal_gene_regions.txt"))
     }
     
     if (Gene_regions == "extended") {
@@ -384,8 +352,21 @@ for (i in 1:number_of_pathways_to_analyse) {
        #### Extended gene regions ####
       Assigning_genes(pathway_input = temp_pathway_table, clumped_SNPs = selecting_chromosomes, BP.clumped.SNPs = selecting_chromosomes_BP, chromosome.number = l, gene.regions = "extended")
       
-      # read in MAGMA's input and add any genes which happen to be inside other genes or crossed over with other genes
-      GENES_to_snps <- scan(file = paste0(output_directory,l,"_",Training_name, "_", Validation_name, "_SNPs_", pathway_names[i], "_extended_pathway_temp.genes.annot"), what = "", sep = "\n")
+      error_catching <- tryCatch({
+        # read in MAGMA's input and add any genes which happen to be inside other genes or crossed over with other genes
+        # From previous analysis there will not be a file if no SNPs exist, so try and catch these errors and output to another file record
+        GENES_to_snps <- scan(file = paste0(output_directory,l,"_",Training_name,"_",Validation_name,"_SNPs_",pathway_names[i],"_extended_pathway_temp.genes.annot"), what = "", sep = "\n")
+      }, error=function(e){cat("Pathway",pathway_names[i],"on chromosome",l,"must_be_empty,check with MAGMA errors\n")
+        message <- paste0(pathway_names[i],"\t",l)
+        write(message, file = paste0(output_directory,"MAGMA_empty_files_after_analysis_extended.txt"), append = T)
+        list(next_loop = T)
+      })
+      
+      if (!is.null(attributes(error_catching))){
+        rm("error_catching")
+        next()
+      }
+
       y <- strsplit(GENES_to_snps, "[[:space:]]+")
       names(y) <- sapply(y, '[[', 1)
       y <- lapply(y, '[', -1)

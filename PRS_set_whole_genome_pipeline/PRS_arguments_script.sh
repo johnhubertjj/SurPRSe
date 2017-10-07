@@ -79,7 +79,7 @@ if [[ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" = 'johnhuber
   validation_set_name="ALSPAC" 
   
   # Pathway datasets
-  Pathway_filename="Pocklington2015_134sets_LoFi.txt"
+  Pathway_filename="5HT_2C_random_sets.txt"
   Gene_location_filename="NCBI37.3.gene.loc"
   
   # Split_by_chromosome for genotype?
@@ -108,12 +108,12 @@ if [[ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" = 'johnhuber
   # Arguments for PRS_serial script
   Multiple_Training_set_tables="TRUE"
   Running_in_Serial="TRUE"
-  sig_thresholds=(5e-08 1e-06 1e-04 0.01 0.05 0.1 0.2 0.5 1)
+  sig_thresholds=(0.05 0.5)
   Extra_analyses=TRUE
-  Name_of_extra_analysis=Genes Pathways
+  Name_of_extra_analysis=Pathways
   Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates"
   # either "extended" "normal" or "both" : change to a numerical input in the future
-  Gene_regions=both #either ( "extended" "normal" "both" )	
+  Gene_regions=normal #either ( "extended" "normal" "both" )	
   external_harddrive="FALSE"
 fi
 
