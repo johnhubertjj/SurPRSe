@@ -79,7 +79,7 @@ if [[ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" = 'johnhuber
   validation_set_name="ALSPAC" 
   
   # Pathway datasets
-  Pathway_filename="5HT_2C_random_sets.txt"
+  Pathway_filename="Selected_Pocklington_plus_GO_pathways_SCHIZ.txt"
   Gene_location_filename="NCBI37.3.gene.loc"
   
   # Split_by_chromosome for genotype?
