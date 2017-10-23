@@ -1,5 +1,6 @@
 # Arguments to be read into each analysis
 # Run locally or on ARCCA
+
 whereami=$(uname -n)
 echo "$whereami"
 
@@ -68,8 +69,17 @@ if [[ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" = 'johnhuber
   path_to_chromosome_length_file="$home_OS/johnhubert/Dropbox/whole_genome_testing/Stationary_data/UCSC_hg19_chromeinfo_length_of_chromosomes.txt"
   path_to_new_fam_file="$home_OS/johnhubert/Dropbox/whole_genome_testing/output/Stationary_data/CLOZUK.r7.GWAS_IDs.fam"
   path_to_stationary_data="$home_OS/johnhubert/Dropbox/Stationary_data/" 
-  
+ 
+   
   # Datasets
+
+  # Dataset naming is unnessarily confusing here, essentially:\
+  # - training set name and validation set name are the names that THE USER wants \
+  # to call each dataset, they DO NOT need to match the file names
+  # - the beginning (before '_table') of training_set_usually_summary needs to match to training_set_name
+  # - all other arguments in dataset arguments need to match file names with relevant add on to names, ONLY change these parts of the argument
+  # - eventually, I will just have four arguments of dataset names and file names only (I'm sorry for this Katherine!)
+ 
   training_set_usually_summary="CLOZUK_PGC2noclo_table${chromosome_number}"
   training_set_original_filename="CLOZUK_PGC2noclo.METAL.assoc.dosage"
   validation_set_usually_genotype="ALSPAC_hrc_imputed_step3_mri_brain_measurements_only_chr${chromosome_number}"
@@ -82,6 +92,10 @@ if [[ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" = 'johnhuber
   Pathway_filename="Selected_Pocklington_plus_GO_pathways_SCHIZ.txt"
   Gene_location_filename="NCBI37.3.gene.loc"
   
+  # These arguments below change from being in quotes to not, essentially, DON'T use quotes because they are not recognised in some POSIX style bash scripts.\
+  # However, some arguments are read by R and I haven't tested whether ALL arguments can be without quotes yet
+  # Again I don't like it but was short on time!
+
   # Split_by_chromosome for genotype?
   split_by_chromosome_required="FALSE" 
   # Do a missingness check? 
@@ -117,6 +131,7 @@ if [[ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" = 'johnhuber
   external_harddrive="FALSE"
 fi
 
+# This is defunct code as far as I'm aware, but I need to check back #
 if [ "$external_harddrive" = "TRUE" ]; then
   path_to_harddrive=/Volumes/HD-PCU2
   cp $path_to_harddrive/CLOZUK_data/${validation_set_usually_genotype}.tar.gz .
