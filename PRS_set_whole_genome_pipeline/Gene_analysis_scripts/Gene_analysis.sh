@@ -101,7 +101,6 @@ fi
 # as an input from PATHWAYS_PRS_COLLECTING_MAGMA_INFO.R to annotate.
 # The pathways used will then be read into an array variable so that we don't have to keep reading this file and it is within the BASH environment 
 
-
 # merge all the PGC SNPs together into one table
 Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}combining_summary_stats_tables_after_conversion_to_CHR_POS.R ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_conversion.Rout ${training_set_name} ${validation_set_name} ${Chromosomes_to_analyse[@]}
 
@@ -140,10 +139,11 @@ elif [[ ${Gene_regions} = "normal" ]]; then
 fi
 
 mkdir ${Gene_output_directory}Genes_PRS/ 
-exit 0 
+
+
 
 Rscript ${path_to_scripts}RscriptEcho.R\
- ${path_to_pathway_scripts}Pathway_PRS_scoring.R\
+ ${path_to_Gene_scripts}Gene_specific_polygenic_risk_score_and_clumped_information_for_randomised_sets.R\
  ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_${validation_set_name}_Pathway_PRS_scoring.Rout\
  ${training_set_name}\
  ${validation_set_name}\
