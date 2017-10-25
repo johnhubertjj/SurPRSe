@@ -4,7 +4,15 @@
 ###################################################################################################
 library (data.table)
 e <- new.env()
-adding_unread_genes <- function(MAGMA.gene.regions.for.chromosome, clumped_SNPs, y, chromosome.number){
+
+## specify the different input tables #
+Training_name <- "CLOZUK_PGC2noclo"
+Validation_name <- "ALSPAC"
+Chromosomes_to_split <- seq(1:22)
+print(Chromosomes_to_split)
+gene_loc_file_name <- "~/Dropbox/Stationary_data/NCBI37.3.gene.loc"
+
+adding_unread_genes <- function(MAGMA.gene.regions, clumped_SNPs, y, chromosome.number){
   
   Melted_MAGMA_list <- melt(y)
   names(Melted_MAGMA_list) <- c("SNP", "Gene")
@@ -12,11 +20,11 @@ adding_unread_genes <- function(MAGMA.gene.regions.for.chromosome, clumped_SNPs,
   clumped_SNPs$SNP <- as.character(clumped_SNPs$SNP)
   merged_table_one <- merge(clumped_SNPs,Melted_MAGMA_list,by = "SNP", all = F)
   merged_table_one$Gene <- as.numeric(merged_table_one$Gene)
-  Gene_clumped_SNPs <- merge(MAGMA.gene.regions,merged_table_one, by = "Gene",all.y = T)
+  Gene_clumped_SNPs <- merge(MAGMA.gene.regions,merged_table_one, by = "Gene", all.y = T)
   Gene_clumped_SNPs[,"CHR.y" :=NULL]  # remove extra_column
   setcolorder(Gene_clumped_SNPs, c("CHR.x","SNP", "GD", "BP", "A1","A2","GENE_NAME","Gene", "BP_START", "BP_END","BP_start_extended","BP_end_extended","STRAND"))
   setnames(Gene_clumped_SNPs, c("CHR.x","Gene"), c("CHR","GENE_NUMBER"))
-  assign("test_data_frame", Gene_clumped_SNPs, envir = e)
+  assign("Gene_clumped_SNPs", Gene_clumped_SNPs, envir = e)
   
 }
 
@@ -27,23 +35,44 @@ y <- lapply(y, '[', -1)
 
 y[[1]] <- NULL
 y[[1]] <- NULL
-adding_unread_genes(MAGMA.gene.regions.for.chromosome = MAGMA.gene.regions)
 
-setnames(Gene_clumped_SNPs,old = "CHR.x", new = "CHR")
-Indep_snp_n <- fread("~/Documents/ALSPAC_gene_pathway_pipeline_test/CLOZUK_PGC2noclo_ALSPAC_output/Genes/ALSPAC_CLOZUK_PGC2noclo_normal_gene_region_information_for_randomisation_tests_ater_clumping.txt")
-merged1 <- merge(Indep_snp_n,Gene_clumped_SNPs,by = c("Gene","BP_START","BP_END","BP_start_extended","BP_end_extended"))
-#Indep_snp_n <- Markers_per_MB_non_independent_normal
-#Indep_snp_n <- Indep_snp_n[, lapply(.SD, as.integer)]
-setnames(Indep_snp_n, old = "Nmarkers_in_Gene", new="Nmarkers_in_Gene_independent")
+MAGMA.gene.regions <- fread(gene_loc_file_name, colClasses = c("numeric","character", rep("numeric",2), rep("character",2)))
+setnames(MAGMA.gene.regions, c("Gene","CHR","BP_START","BP_END","STRAND","GENE_NAME"))
+current_table_name <- MAGMA.gene.regions
+setkey(current_table_name,STRAND) 
+
+# equivalent to MAGMAs window option without ignoring strand
+current_table_name <- current_table_name[STRAND == "+",BP_start_extended := BP_START - 35000]
+current_table_name <- current_table_name[STRAND == "+",BP_end_extended := BP_END + 10000]
+current_table_name <- current_table_name[STRAND == "-",BP_start_extended := BP_START - 10000]
+current_table_name <- current_table_name[STRAND == "-",BP_end_extended := BP_END + 35000]
+
+# setkey to the chromosome and remove all SNPs in the X chromosome to save time
+setkey(current_table_name, CHR)
+current_table_name <- current_table_name[!"X"]
+MAF_counts <- fread("~/Documents/ALSPAC_gene_pathway_pipeline_test/CLOZUK_PGC2noclo_ALSPAC_output/Genes/ALSPAC_CLOZUK_PGC2noclo_normal_gene_regions_Clumped_whole_genome_final.frq", colClasses = c(rep("character", 4),"numeric","integer"))
 output_directory_2 <- "~/Documents/ALSPAC_gene_pathway_pipeline_test/CLOZUK_PGC2noclo_ALSPAC_output/Genes/"
 bim_file <- fread(paste0(output_directory_2,"ALSPAC_CLOZUK_PGC2noclo_normal_gene_regions_Clumped_whole_genome_final.bim"))
 names(bim_file) <- c("CHR", "SNP", "GD", "BP", "A1", "A2")
 
-## specify the different input tables #
-Training_name <- "CLOZUK_PGC2noclo"
-Validation_name <- "ALSPAC"
-Chromosomes_to_split <- seq(1:22)
-print(Chromosomes_to_split)
+adding_unread_genes(MAGMA.gene.regions = current_table_name, y=y, clumped_SNPs = bim_file)
+
+setnames(e$Gene_clumped_SNPs,old = "CHR.x", new = "CHR")
+
+Indep_snp_n <- fread("~/Documents/ALSPAC_gene_pathway_pipeline_test/CLOZUK_PGC2noclo_ALSPAC_output/Genes/ALSPAC_CLOZUK_PGC2noclo_normal_gene_region_information_for_randomisation_tests_ater_clumping.txt", colClasses = rep("numeric",6))
+setnames(Indep_snp_n, old = "Gene", new = "GENE_NUMBER")
+setnames(Indep_snp_n, old = "Nmarkers_in_Gene", new="Nmarkers_in_Gene_independent")
+LD_scored_snps <- fread("~/Documents/ALSPAC_gene_pathway_pipeline_test/CLOZUK_PGC2noclo_ALSPAC_output/Genes/ALSPAC_CLOZUK_PGC2noclo_normal_gene_regions_Clumped_whole_genome_final.l2.ldscore", colClasses = c("character","character", "integer", "numeric"))
+merged1 <- merge(Indep_snp_n,e$Gene_clumped_SNPs,by = c("GENE_NUMBER","BP_START","BP_END","BP_start_extended","BP_end_extended"))
+merged2 <- merge(merged1,LD_scored_snps, by = c("CHR","SNP","BP"), all = F)
+merged3 <- merge(merged2,MAF_counts[, !"NCHROBS"], by = c("CHR","SNP"), all = T)
+
+#Indep_snp_n <- Markers_per_MB_non_independent_normal
+#Indep_snp_n <- Indep_snp_n[, lapply(.SD, as.integer)]
+
+
+
+
 
 ## Read in the latest Summary stats tables after converting to one table
 for (i in Chromosomes_to_split){
@@ -86,7 +115,7 @@ rand_n = 1000;
 set_len = list();
 
 #formula used to predict gene set membership in regression model
-formula_str = 'status ~ len + snp_n + snp_density + indep_snp_n + indep_snp_density';
+formula_str = 'status ~ len + L2 + MAF';
 ###################################################################################################
 #functions
 
@@ -116,17 +145,17 @@ create_random <- function(gene_data,set_name,set_n,formula_str,rand_n) {
 #read & process gene data
 setwd(info_dir);
 
-tmp <- merge(snp_n,Indep_snp_n,by = c("Gene","BP_START","BP_END","BP_start_extended","BP_end_extended"),all = F) ;
+tmp <- merged3 ;
 tmp[['LEN']] = (abs(tmp[['BP_END']] - tmp[['BP_START']]) + 1)/1000; #gene length (Kb)
-tmp[['SNP_DENSITY']] = (1000*tmp[['Nmarkers_in_Gene']])/tmp[['LEN']];     #marker density (N per Mb)
-tmp[['PARAM_DENSITY']] = (1000*tmp[['Nmarkers_in_Gene_independent']])/tmp[['LEN']];  #independent marker density (N per Mb)
-tmp2 <- merge(tmp,MAGMA.gene.regions,by=c("Gene","BP_START","BP_END","BP_start_extended","BP_end_extended"))
-tmp2 <- as.data.frame(tmp2)
-gene_data = subset(tmp2,select = c(Gene,CHR,LEN,Nmarkers_in_Gene,SNP_DENSITY,Nmarkers_in_Gene_independent,PARAM_DENSITY));
-merged1 <- merge(Gene_clumped_SNPs,gene_data,by = c("Gene","CHR"))
-names(merged1) = c('entrez_id','chr','snp','GD','BP','A1','A2','GENE_NAME','BP_START','BP_END','BP_start_extended','BP_end_extended','STRAND','len','snp_n','snp_density','indep_snp_n','indep_snp_density');
+#tmp[['SNP_DENSITY']] = (1000*tmp[['Nmarkers_in_Gene']])/tmp[['LEN']];     #marker density (N per Mb)
+#tmp[['PARAM_DENSITY']] = (1000*tmp[['Nmarkers_in_Gene_independent']])/tmp[['LEN']];  #independent marker density (N per Mb)
+#tmp2 <- merge(tmp,MAGMA.gene.regions,by=c("Gene","BP_START","BP_END","BP_start_extended","BP_end_extended"))
+#tmp2 <- as.data.frame(tmp2)
+#gene_data = subset(tmp2,select = c(Gene,CHR,LEN,Nmarkers_in_Gene,SNP_DENSITY,Nmarkers_in_Gene_independent,PARAM_DENSITY));
+#merged1 <- merge(Gene_clumped_SNPs,gene_data,by = c("Gene","CHR"))
+#names(merged1) = c('entrez_id','chr','snp','GD','BP','A1','A2','GENE_NAME','BP_START','BP_END','BP_start_extended','BP_end_extended','STRAND','len','snp_n','snp_density','indep_snp_n','indep_snp_density');
 
-print(paste('Total number of SNPs read = ',(dim(merged1)[1])));
+print(paste('Total number of SNPs read = ',(dim(tmp)[1])));
 
 ###################################################################################################
 #read & process gene-set data

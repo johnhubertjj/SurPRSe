@@ -117,47 +117,66 @@ if [[ ${Gene_regions} = "both" ]]; then
 Gene_regions=normal
 
 	gene_bim_file=${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final.bim
+        gene_file=${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final
         magma --annotate --snp-loc ${gene_bim_file} --gene-loc ${path_to_stationary_data}${Gene_location_filename} --out ${Gene_output_directory}${training_set_name}_${validation_set_name}_SNPs_normal_clumped_gene_temp
 	
-ldsc.py --bfile ${gene_bim_file} 
+ldsc.py --bfile ${gene_file}\ 
  --l2\
  --ld-wind-kb ${window}\
  --out ${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final
+
+plink --bfile ${gene_file}\
+ --freq\
+ --out ${gene_file}
 
 Gene_regions=extended
 
 	gene_bim_file=${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final.bim
+        gene_file=${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final
         magma --annotate window=35,10 --snp-loc ${gene_bim_file} --gene-loc ${path_to_stationary_data}${Gene_location_filename} --out ${Gene_output_directory}${training_set_name}_${validation_set_name}_SNPs_extended_clumped_gene_temp
 
-ldsc.py --bfile ${gene_bim_file} 
+ldsc.py --bfile ${gene_file}\ 
  --l2\
  --ld-wind-kb ${window}\
  --out ${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final
+
+plink --bfile ${gene_file}\
+ --freq\
+ --out ${gene_file}
 
 Gene_regions=both
 
 elif [[ ${Gene_regions} = "extended" ]]; then
 	
 	gene_bim_file=${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final.bim
+        gene_file=${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final
 	magma --annotate window=35,10 --snp-loc ${gene_bim_file} --gene-loc ${path_to_stationary_data}${Gene_location_filename} --out ${Gene_output_directory}${training_set_name}_${validation_set_name}_SNPs_extended_clumped_gene_temp
 
-ldsc.py --bfile ${gene_bim_file} 
+ldsc.py --bfile ${gene_file}\ 
  --l2\
  --ld-wind-kb ${window}\
  --out ${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final
+
+plink --bfile ${gene_file}\
+ --freq\
+ --out ${gene_file}
 elif [[ ${Gene_regions} = "normal" ]]; then
 
 	gene_bim_file=${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final.bim
-        magma --annotate --snp-loc ${gene_bim_file} --gene-loc ${path_to_stationary_data}${Gene_location_filename} --out ${Gene_output_directory}${training_set_name}_${validation_set_name}_SNPs_normal_clumped_gene_temp
+        gene_file=${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final
+	 magma --annotate --snp-loc ${gene_bim_file} --gene-loc ${path_to_stationary_data}${Gene_location_filename} --out ${Gene_output_directory}${training_set_name}_${validation_set_name}_SNPs_normal_clumped_gene_temp
 
-ldsc.py --bfile ${gene_bim_file} 
+ldsc.py --bfile ${gene_file}\ 
  --l2\
  --ld-wind-kb ${window}\
  --out ${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final
+
+plink --bfile ${gene_file}\
+ --freq\
+ --out ${gene_file}
 fi
 
 mkdir ${Gene_output_directory}Genes_PRS/ 
-
 
 Rscript ${path_to_scripts}RscriptEcho.R\
  ${path_to_Gene_scripts}Gene_specific_polygenic_risk_score_and_clumped_information_for_randomised_sets.R\
@@ -170,7 +189,7 @@ Rscript ${path_to_scripts}RscriptEcho.R\
  ${Gene_regions}\
  ${sig_thresholds[@]}
 
-exit 0
+exit 1
 ${path_to_gene_scripts}PRS_scoring_plink_pathways.sh ::: ${pathways[@]} ::: ${path_to_scripts} ::: ${path_to_pathway_scripts} ::: ${system}
 
 Rscript ${path_to_scripts}RscriptEcho.R\
