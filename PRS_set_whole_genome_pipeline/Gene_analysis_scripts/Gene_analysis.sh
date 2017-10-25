@@ -121,7 +121,7 @@ Gene_regions=normal
 	
 ldsc.py --bfile ${gene_bim_file} 
  --l2\
- --ld-wind-kb 500\
+ --ld-wind-kb ${window}\
  --out ${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final
 
 Gene_regions=extended
@@ -131,7 +131,7 @@ Gene_regions=extended
 
 ldsc.py --bfile ${gene_bim_file} 
  --l2\
- --ld-wind-kb 500\
+ --ld-wind-kb ${window}\
  --out ${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final
 
 Gene_regions=both
@@ -143,7 +143,7 @@ elif [[ ${Gene_regions} = "extended" ]]; then
 
 ldsc.py --bfile ${gene_bim_file} 
  --l2\
- --ld-wind-kb 500\
+ --ld-wind-kb ${window}\
  --out ${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final
 elif [[ ${Gene_regions} = "normal" ]]; then
 
@@ -152,7 +152,7 @@ elif [[ ${Gene_regions} = "normal" ]]; then
 
 ldsc.py --bfile ${gene_bim_file} 
  --l2\
- --ld-wind-kb 500\
+ --ld-wind-kb ${window}\
  --out ${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final
 fi
 
