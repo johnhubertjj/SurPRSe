@@ -3,10 +3,41 @@
 #probability of selection ~ gene_length, snp_n, indep_snp_n, snp_density, indep_snp_density (didn't use chr)
 ###################################################################################################
 library (data.table)
+e <- new.env()
+adding_unread_genes <- function(MAGMA.gene.regions.for.chromosome, clumped_SNPs, y, chromosome.number){
+  
+  Melted_MAGMA_list <- melt(y)
+  names(Melted_MAGMA_list) <- c("SNP", "Gene")
+  Melted_MAGMA_list$SNP <- as.character(Melted_MAGMA_list$SNP) 
+  clumped_SNPs$SNP <- as.character(clumped_SNPs$SNP)
+  merged_table_one <- merge(clumped_SNPs,Melted_MAGMA_list,by = "SNP", all = F)
+  merged_table_one$Gene <- as.numeric(merged_table_one$Gene)
+  Gene_clumped_SNPs <- merge(MAGMA.gene.regions,merged_table_one, by = "Gene",all.y = T)
+  Gene_clumped_SNPs[,"CHR.y" :=NULL]  # remove extra_column
+  setcolorder(Gene_clumped_SNPs, c("CHR.x","SNP", "GD", "BP", "A1","A2","GENE_NAME","Gene", "BP_START", "BP_END","BP_start_extended","BP_end_extended","STRAND"))
+  setnames(Gene_clumped_SNPs, c("CHR.x","Gene"), c("CHR","GENE_NUMBER"))
+  assign("test_data_frame", Gene_clumped_SNPs, envir = e)
+  
+}
 
+GENES_to_snps <- scan("~/Documents/ALSPAC_gene_pathway_pipeline_test/CLOZUK_PGC2noclo_ALSPAC_output/Genes/ALSPAC_CLOZUK_PGC2noclo_whole_genome_clumped_annotated_by_gene.genes.annot", what = "", sep = "\n")
+y <- strsplit(GENES_to_snps, "[[:space:]]+")
+names(y) <- sapply(y, '[[', 1)
+y <- lapply(y, '[', -1)
+
+y[[1]] <- NULL
+y[[1]] <- NULL
+adding_unread_genes(MAGMA.gene.regions.for.chromosome = MAGMA.gene.regions)
+
+setnames(Gene_clumped_SNPs,old = "CHR.x", new = "CHR")
 Indep_snp_n <- fread("~/Documents/ALSPAC_gene_pathway_pipeline_test/CLOZUK_PGC2noclo_ALSPAC_output/Genes/ALSPAC_CLOZUK_PGC2noclo_normal_gene_region_information_for_randomisation_tests_ater_clumping.txt")
-setnames(Indep_snp_n,old = "Nmarkers_in_Gene",new="Nmarkers_in_Gene_independent")
+merged1 <- merge(Indep_snp_n,Gene_clumped_SNPs,by = c("Gene","BP_START","BP_END","BP_start_extended","BP_end_extended"))
+#Indep_snp_n <- Markers_per_MB_non_independent_normal
+#Indep_snp_n <- Indep_snp_n[, lapply(.SD, as.integer)]
+setnames(Indep_snp_n, old = "Nmarkers_in_Gene", new="Nmarkers_in_Gene_independent")
 output_directory_2 <- "~/Documents/ALSPAC_gene_pathway_pipeline_test/CLOZUK_PGC2noclo_ALSPAC_output/Genes/"
+bim_file <- fread(paste0(output_directory_2,"ALSPAC_CLOZUK_PGC2noclo_normal_gene_regions_Clumped_whole_genome_final.bim"))
+names(bim_file) <- c("CHR", "SNP", "GD", "BP", "A1", "A2")
 
 ## specify the different input tables #
 Training_name <- "CLOZUK_PGC2noclo"
@@ -31,6 +62,10 @@ snp_n <- combined_final_table
 
 Pocklington_sets <- fread("~/Dropbox/Stationary_data/Selected_Pocklington_plus_GO_pathways_SCHIZ.txt")
 Pathways <- c("5HT_2C", "Cav2_channels", "FMRP_targets", "abnormal_behavior", "abnormal_long_term_potentiation", "abnormal_nervous_system_electrophysiology", "Calcium_ion_import_GO0070509", "Membrane_depolarization_during_action_potential_GO0086010", "Synaptic_transmission_GO0007268") 
+
+current_pathway <- fread("~/Documents/ALSPAC_hrc_imputed_bestguess_pathway/CLOZUK_PGC2noclo_ALSPAC_original_output/Pathways/5HT_2C/ALSPAC_original_CLOZUK_PGC2noclo_5HT_2C_Clumped_whole_genome_final.bim")
+
+names(current_pathway) <- c("CHR", "SNP", "GD", "BP", "A1", "A2")
 
 #setwd("/Users/andrew/Projects (active)/2016/SNP methodology/code/random");
 #source("generate_random.R");
@@ -70,7 +105,7 @@ create_random <- function(gene_data,set_name,set_n,formula_str,rand_n) {
 	
 	membership_prob = predict(membership_model,type = 'response');
 	
-	tmp_rand = t(replicate(rand_n,sample(gene_data[['entrez_id']],set_n,replace = FALSE,prob = membership_prob)));
+	tmp_rand = t(replicate(rand_n,sample(gene_data[['snp']],set_n,replace = FALSE,prob = membership_prob)));
 	
 	tmp_name = mapply(function(k) paste(set_name,k,sep='_random_'),(1:rand_n));
 	
@@ -88,27 +123,34 @@ tmp[['PARAM_DENSITY']] = (1000*tmp[['Nmarkers_in_Gene_independent']])/tmp[['LEN'
 tmp2 <- merge(tmp,MAGMA.gene.regions,by=c("Gene","BP_START","BP_END","BP_start_extended","BP_end_extended"))
 tmp2 <- as.data.frame(tmp2)
 gene_data = subset(tmp2,select = c(Gene,CHR,LEN,Nmarkers_in_Gene,SNP_DENSITY,Nmarkers_in_Gene_independent,PARAM_DENSITY));
-names(gene_data) = c('entrez_id','chr','len','snp_n','snp_density','indep_snp_n','indep_snp_density');
+merged1 <- merge(Gene_clumped_SNPs,gene_data,by = c("Gene","CHR"))
+names(merged1) = c('entrez_id','chr','snp','GD','BP','A1','A2','GENE_NAME','BP_START','BP_END','BP_start_extended','BP_end_extended','STRAND','len','snp_n','snp_density','indep_snp_n','indep_snp_density');
 
-print(paste('Total number of genes read = ',dim(gene_data)[1]));
+print(paste('Total number of SNPs read = ',(dim(merged1)[1])));
 
 ###################################################################################################
 #read & process gene-set data
 
   tmp <- fread("~/Dropbox/Stationary_data/Selected_Pocklington_plus_GO_pathways_SCHIZ.txt")
-  tmp <- as.data.frame(tmp)
+  names(tmp) <- c("Pathway","entrez_id")
+  tmp_5htc <- tmp[Pathway == "5HT_2C"]
+ test_full_file <- merge(gene_data,tmp_5htc, by = "Gene")
+  
   
   #Pathways <- c("5HT_2C", "Cav2_channels", "FMRP_targets", "abnormal_behavior", "abnormal_long_term_potentiation", "abnormal_nervous_system_electrophysiology", "Calcium_ion_import_GO0070509", "Membrane_depolarization_during_action_potential_GO0086010", "Synaptic_transmission_GO0007268") 
   
 	tmp = read.table(fname,header = FALSE,comment.char = '',sep='\t',as.is = TRUE);
 	
-	for (set_name in unique(tmp[['V1']])) {
+	for (set_name in unique(tmp[['Pathway']])) {
 		
-		set_genes = unique(subset(tmp,V1 == set_name)[,2]);
+		set_genes = unique(subset(tmp,Pathway == set_name)[,2]);
 		
-		set_len[[set_name]] = length(set_genes);
-		
-		gene_data[[set_name]] = mapply(function(x) {binary_membership(set_genes,x)},gene_data[['entrez_id']]);
+		tmp_pathway <- tmp[Pathway == set_name]
+		tmp_binary_measurements <- merge(tmp_pathway,merged1, by = "entrez_id", all = F)
+		tmp_binary_measurements <- as.data.frame(tmp_binary_measurements)  
+		  
+		set_len[[set_name]] = nrow(tmp_binary_measurements);
+		merged1[[set_name]] = mapply(function(x) {binary_membership(tmp_binary_measurements$snp,x)},merged1[['snp']]);
 	}
 	
 
@@ -117,7 +159,7 @@ set_names = names(set_len);
 #subset of data including only brain-expressed genes
 brain_expressed_gene_data = subset(gene_data,fagerberg_brain_expressed == 1);
 
-set_magma_len = lapply(set_names,function(x) sum(gene_data[[x]]));
+set_magma_len = lapply(set_names,function(x) sum(merged1[[x]]));
 names(set_magma_len) = set_names;
 
 #summary table of gene numbers
@@ -141,16 +183,19 @@ setwd("~/Documents/testing_random_gene_sets")
 
 for (next_name in set_names) {
 	
-	random_mtx = create_random(gene_data,next_name,set_magma_len[[next_name]],formula_str,rand_n);
+	random_mtx = create_random(merged1,next_name,set_magma_len[[next_name]],formula_str,rand_n);
 	random_mtx_df <- as.data.frame(random_mtx)
+	random_mtx_dt <- as.data.table(random_mtx)
+	
 	colanames_rndm_df <- colnames(random_mtx_df[,-1])
 	test2 <- melt(random_mtx_df,measure.vars =  colanames_rndm_df)
 	final_input_list <- test2[order(test2$tmp_name),]
 	final_input_list <- subset(final_input_list,  select = c(tmp_name,value))
-	
+	assign(paste0(next_name,"_plinkinput"), random_mtx_dt, envir = e)
 	#save samples to file
     write.table(final_input_list,file = paste0(next_name,'_random_sets.txt'), col.names = FALSE, row.names = FALSE, quote = FALSE);
-	
+    write.table(random_mtx_dt,file = paste0(next_name,'_random_sets_data_table.txt'), col.names = FALSE, row.names = FALSE, quote = FALSE);
+    
 }
 ######################
 #brain-expressed genes
@@ -162,6 +207,56 @@ for (next_name in setdiff(set_names,c('fagerberg_brain_expressed'))) {
 	#save samples to file
     write.table(random_mtx,file = paste(next_name,'_brain_expressed.txt',sep=''),col.names = FALSE,row.names = FALSE,sep = '\t',quote = FALSE);
 	
+}
+
+significance_thresholds <- 1
+Summary_stats_dataset <- fread("~/Documents/ALSPAC_gene_pathway_pipeline_test/CLOZUK_PGC2noclo_ALSPAC_output/combined_CLOZUK_PGC2noclo_table_with_CHR.POS_identifiers.txt")
+
+
+combined.test.training.clumped.Genomic.SNPs <- merge(bim_file, Summary_stats_dataset, by.x="SNP", by.y="SNP", all=F, sort=F)
+combined.test.training.clumped.Genomic.SNPs$A1.y <- toupper(combined.test.training.clumped.Genomic.SNPs$A1.y)
+combined.test.training.clumped.Genomic.SNPs$A2.y <- toupper(combined.test.training.clumped.Genomic.SNPs$A2.y)
+
+
+for (next_name in set_names){
+  current_pathway <- fread(paste0("~/Documents/testing_random_gene_sets/",next_name,"_random_sets_data_table.txt"),header = F)
+  current_pathway <- t(current_pathway)
+  colnames(current_pathway) <- current_pathway[1,]
+  current_pathway <- as.data.table(current_pathway)
+  current_pathway <- current_pathway[-1]
+ for (w in 1:length(significance_thresholds)) { 
+  for (col in 1:rand_n){
+    current_pathway_random_set <- current_pathway[,col, with = F]
+    setnames(current_pathway_random_set,"SNP")
+    a <- merge(current_pathway_random_set,combined.test.training.clumped.Genomic.SNPs, by = "SNP",all.y = F,all.x = T, sort = F)
+  
+    SNPs <- a[, .I[which(P <= significance_thresholds[w])]]
+    
+    if (length(SNPs) != 0){
+      a <- a[SNPs, .(SNP, A1.y, BETA)]
+      setkey(a,"SNP")
+      a <- unique(a)
+      
+      filename <- paste0('./Scores/',next_name,'_random_',col,'_with_', significance_thresholds[w],".score")
+      
+      write.table(file = filename, a, row.names = F, col.names = F, quote = F, sep="\t")
+    }
+      #      if (Useful_pathways[i] == "abnormal_learning|memory|conditioning" | Useful_pathways[i] == "abnormal_motor_capabilities|coordination|movement") {
+      #        Useful_pathways[i] <- "abnormal_learning\\|memory\\|conditioning"
+      #        filename <- paste0(Useful_pathways[i],'/score/', Useful_pathways[i],'_with_', p.value.thresholds[w],".score")
+      #        path_to_pathway_plink_file <- paste0(Useful_pathways[i],"/pathways_CLOZUK_GWAS_BGE_CLUMPED_",Useful_pathways[i])                         
+      #        }
+      
+      #      if (Useful_pathways[i] == "abnormal_motor_capabilities|coordination|movement") {
+      #        Useful_pathways[i] <-"abnormal_learning_motor_capabilities\|coordination\|movement"
+      #        filename <- paste0(Useful_pathways[i],'/score/', Useful_pathways[i],'_with_', p.value.thresholds[w],".score")
+      #        path_to_pathway_plink_file <- paste0(Useful_pathways[i],"/pathways_CLOZUK_GWAS_BGE_CLUMPED_",Useful_pathways[i])                         
+      #        
+      #      }
+      
+      
+    }
+}
 }
 
 #end time
