@@ -22,30 +22,28 @@ print(args)
 Training_name <- args[3]
 Validation_name <- args[4]
 Validation_full_name_serial <- args[5]
-Gene_file_name <- args[6] # the name of the file to be accessed (must be in stationary directory)
-Gene_directory <- args[7]
-gene_loc_file_name <- args[8] # the name of the file containing gene locations (magma's version)
-Gene_regions <- args[9] # whether to include/exclude the regulatory regions of a gene
-significance_thresholds <- as.numeric(args[c(10:length(args))])
+output_directory <- args[6]
+gene_loc_file_name <- args[7] # the name of the file containing gene locations (magma's version)
+Gene_regions <- args[8] # whether to include/exclude the regulatory regions of a gene
+significance_thresholds <- as.numeric(args[c(9:length(args))])
 
 
 setwd(".")
 
-Training_name <- "CLOZUK_PGC2noclo"
-Validation_name <- "ALSPAC"
-Validation_full_name_serial <- "ALSPAC_hrc_imputed_step3_mri_brain_measurements_only_chr"
-Gene_file_name <- "~/Documents/ALSPAC_gene_pathway_pipeline_test/CLOZUK_PGC2noclo_ALSPAC_output/Genes/ALSPAC_CLOZUK_PGC2noclo_extended_gene_regions_Clumped_whole_genome_final.bim"
-Gene_directory <- "Genes"
-gene_loc_file_name <-"/Users/johnhubert/Dropbox/Stationary_data/NCBI37.3.gene.loc"
-Gene_regions <- "both"
-significance_thresholds <- c(0.05,0.5)
-#setwd("~/Documents/CLOZUK_ALSPAC_PATHWAY_TESTING")
+#Training_name <- "CLOZUK_PGC2noclo"
+#Validation_name <- "ALSPAC"
+#Validation_full_name_serial <- "ALSPAC_hrc_imputed_step3_mri_brain_measurements_only_chr"
+#Gene_directory <- "Genes"
+#gene_loc_file_name <-"/Users/johnhubert/Dropbox/Stationary_data/NCBI37.3.gene.loc"
+#Gene_regions <- "both"
+#significance_thresholds <- c(0.05,0.5)
 
+#setwd("~/Documents/CLOZUK_ALSPAC_PATHWAY_TESTING")
+#Gene_file_name <- "~/Documents/ALSPAC_gene_pathway_pipeline_test/CLOZUK_PGC2noclo_ALSPAC_output/Genes/ALSPAC_CLOZUK_PGC2noclo_extended_gene_regions_Clumped_whole_genome_final.bim"
 ### environment for functions
 e <- new.env()
 
 # Create new variables based on input files to make things easier to read # 
-output_directory <- paste0("./", Training_name, "_", Validation_name, "_output/", Gene_directory, "/")
 Date <- Sys.Date()
 Training_set <- paste0("./", Training_name, "_", Validation_name,"_output/combined_", Training_name, "_table_with_CHR.POS_identifiers.txt")
 assign("Genes_PRS_output_dir",paste0(output_directory,"Genes_PRS/"),envir = e)
@@ -54,7 +52,6 @@ assign("p.value.thresholds", significance_thresholds, envir = e)
 # Reading_in_Pathway_files
 library(data.table)
 library(reshape2)
-
 
 
 ### Function which assigns genes to the SNP data ####
@@ -84,7 +81,7 @@ adding_unread_genes <- function(MAGMA.gene.regions.for.chromosome, clumped_SNPs,
 # input the name of the pathways from the orignal file
 #useful_pathways <- c("FMRP_targets", "abnormal_behavior", "abnormal_nervous_system_electrophysiology", "abnormal_learning|memory|conditioning", "abnormal_CNS_synaptic_transmission", "Cav2_channels", "abnormal_synaptic_transmission", "5HT_2C", "abnormal_long_term_potentiation", "abnormal_motor_capabilities|coordination|movement", "abnormal_behavioral_response_to_xenobiotic", "abnormal_associative_learning", "Lek2015_LoFintolerant_90", "BGS_top2_mean", "BGS_top2_max")
 
-#read in general MAGMA annotation file
+# read in general MAGMA annotation file
 MAGMA.gene.regions <- fread(gene_loc_file_name, colClasses = c("numeric","character", rep("numeric",2), rep("character",2)))
 setnames(MAGMA.gene.regions, c("Gene","CHR","BP_START","BP_END","STRAND","GENE_NAME"))
 

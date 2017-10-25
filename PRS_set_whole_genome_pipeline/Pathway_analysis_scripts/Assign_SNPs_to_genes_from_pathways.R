@@ -29,14 +29,14 @@ chromosomes_to_analyse <- as.numeric(args[c(10:length(args))])
 
 setwd(".")
 
-Training_name <- "CLOZUK_PGC2noclo"
-Validation_name <- "ALSPAC"
-Validation_full_name_serial <- "ALSPAC_hrc_imputed_step3_mri_brain_measurements_only_chr"
-Pathway_directory <- "Pathways"
-Pathway_file_name <- "/Users/johnhubert/Dropbox/Stationary_data/Pocklington2015_134sets_LoFi.txt"
-gene_loc_file_name <-"/Users/johnhubert/Dropbox/Stationary_data/NCBI37.3.gene.loc"
-Gene_regions <- "normal"
-chromosomes_to_analyse <- seq(1,22) 
+#Training_name <- "CLOZUK_PGC2noclo"
+#Validation_name <- "ALSPAC"
+#Validation_full_name_serial <- "ALSPAC_hrc_imputed_step3_mri_brain_measurements_only_chr"
+#Pathway_directory <- "Pathways"
+#Pathway_file_name <- "/Users/johnhubert/Dropbox/Stationary_data/Pocklington2015_134sets_LoFi.txt"
+#gene_loc_file_name <-"/Users/johnhubert/Dropbox/Stationary_data/NCBI37.3.gene.loc"
+#Gene_regions <- "normal"
+#chromosomes_to_analyse <- seq(1,22) 
 #setwd("~/Documents/CLOZUK_ALSPAC_PATHWAY_TESTING")
   
 # Create new variables based on input files to make things easier to read # 
