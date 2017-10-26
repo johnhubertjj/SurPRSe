@@ -54,6 +54,7 @@ Neuroticism <- fread("~/Dropbox/PRS_scores_different_summary_stats_datasets/Neur
 IQ <- fread("~/Dropbox/IQ_2017_PROFILES/PRS_scoring/IQ_GWAS_2017_CLOZUK_whole_genome_significance_threshold_at_0.2.profile")
 
 Neuropsychiatric_datasets <- list(Schizophrenia,Bipolar,Educational_attainment, PGC_MDD, BIPvsSCZ, Neuroticism, IQ)
+SCZ_BP_datasets <- list(Schizophrenia, Bipolar)
 
 #Neuropsychiatric_datasets <- list(Schizophrenia,Bipolar,Educational_attainment, PGC_MDD, BIPvsSCZ, Neuroticism)
 
@@ -97,6 +98,36 @@ Neuropsychiatric_datasets[[i]] <- PRS.Profiles.with.covariates
 #Neuropsychiatric_datasets[[i]]$FID, value=TRUE)]
 }
 
+for (i in 1:2){
+  setkey(SCZ_BP_datasets[[i]],FID)
+  # Neuropsychiatric_datasets[[i]] <- Neuropsychiatric_datasets[[i]][grep(paste(Groups_to_keep,collapse="|"), 
+  #Neuropsychiatric_datasets[[i]]$FID, value=TRUE)]
+  
+  
+  
+  PRS.profiles.1 <- SCZ_BP_datasets[[i]]
+  
+  PRS.Profiles.with.covariates <- merge(covariates,PRS.profiles.1, by.x="FID", by.y="FID", all = F)
+  PRS.Profiles.with.covariates <- merge(PRS.Profiles.with.covariates, fam2, by.x = "FID", by.y = "FID", all = F)
+  
+  #  res$model[i]<-sig[i]
+  
+  # Calculate model including covariates against the polygenic risk score
+  model0<-glm(SCORE~PC1+PC2+PC3+PC4+PC5+PC6+PC9+PC11+PC12+PC13+PC19, family = gaussian, data = PRS.Profiles.with.covariates)
+  m1<-mean(residuals(model0))
+  sd1<-sd(residuals(model0))
+  
+  # Calculate the Normalised score
+  PRS.Profiles.with.covariates$NORMSCORE<-(residuals(model0)-m1)/sd1
+  
+  #             hist(PRS.profiles$NORMSCORE)
+  
+  # change the Phenotypes so that they will work in a binary model
+  PRS.Profiles.with.covariates$PHENO.y <- PRS.Profiles.with.covariates$PHENO.y - 1
+  
+  SCZ_BP_datasets[[i]] <- PRS.Profiles.with.covariates
+}
+
 for (i in 1:6){
   setkey(Neuropsychiatric_datasets[[i]],FID)
   # Neuropsychiatric_datasets[[i]] <- Neuropsychiatric_datasets[[i]][grep(paste(Groups_to_keep,collapse="|"), 
@@ -132,6 +163,7 @@ for (i in 1:6){
 
 PCA_matrix_2 <- data.frame(Neuropsychiatric_datasets[[1]]$FID,Neuropsychiatric_datasets[[1]]$PHENO.y,Neuropsychiatric_datasets[[1]]$NORMSCORE, Neuropsychiatric_datasets[[2]]$NORMSCORE,Neuropsychiatric_datasets[[3]]$NORMSCORE, Neuropsychiatric_datasets[[4]]$NORMSCORE,Neuropsychiatric_datasets[[5]]$NORMSCORE, Neuropsychiatric_datasets[[6]]$NORMSCORE, Neuropsychiatric_datasets[[7]]$NORMSCORE)
 PCA_matrix_2 <- data.frame(Neuropsychiatric_datasets[[1]]$FID,Neuropsychiatric_datasets[[1]]$PHENO.y,Neuropsychiatric_datasets[[1]]$NORMSCORE, Neuropsychiatric_datasets[[2]]$NORMSCORE,Neuropsychiatric_datasets[[3]]$NORMSCORE, Neuropsychiatric_datasets[[4]]$NORMSCORE,Neuropsychiatric_datasets[[5]]$NORMSCORE, Neuropsychiatric_datasets[[6]]$NORMSCORE)
+PCA_matrix_2 <- data.frame(SCZ_BP_datasets[[1]]$FID, SCZ_BP_datasets[[1]]$PHENO.y, SCZ_BP_datasets[[1]]$NORMSCORE, SCZ_BP_datasets[[2]]$NORMSCORE)
 
 test <- colnames(PCA_matrix)
 colnames(PCA_matrix_2) <- test
@@ -148,6 +180,8 @@ PCA_matrix <- fread("/Volumes/PhD_storage/PRS_cross_disorder_table_optimised_thr
 
 Groups_of_individuals <- c("CLOZUK","COGS","CRESTAR1", "CRESTAR2", "CRESTAR3", "1958BC", "BLOOD", "GERAD", "CON_GS", "HYWEL","POBI","QIMR","T1DGC","TEDS","TWINSUK","WTCCC")
 
+names(PCA_matrix_2) <- c("Individuals","PHENOTYPE", "Schizophrenia", "Bipolar", "Edu attain", "MDD", "BIPvsSCZ", "Neuroticism", "IQ")
+names(PCA_matrix_2) <- c("Individuals","PHENOTYPE", "Schizophrenia", "Bipolar")
 PCA_matrix_2$Colours <- "NA"
 
 for (i in 1:length(Groups_of_individuals)){
@@ -160,8 +194,6 @@ for (i in 1:length(Groups_of_individuals)){
 library(FactoMineR)
 
 
-names(PCA_matrix_2) <- c("Individuals","PHENOTYPE", "Schizophrenia", "Bipolar", "Edu attain", "MDD", "BIPvsSCZ", "Neuroticism", "IQ")
-
 #write.csv(PCA_matrix, file = "/Volumes/PhD_storage/PRS_cross_disorder_table_optimised_thresholds.csv", col.names = T, row.names = F)
 
 PCA_matrix_df <- as.data.frame(PCA_matrix)
@@ -172,6 +204,7 @@ PCA_matrix_df_cases <- as.data.frame(PCA_matrix_df_cases)
 testing <- prcomp(PCA_matrix_2[3:8],center = T)
 testing_reduce_controls <- prcomp(PCA_matrix_2[3:8],center = T)
 testing_reduce_controls <- prcomp(PCA_matrix_2[3:9],center = T)
+testing_reduce_controls <- prcomp(PCA_matrix_2[3:4], center = T)
 
 testing_cases_only <- prcomp(PCA_matrix_df_cases[3:9], center = T)
 testing_cases_only_wo_EDU <- prcomp(PCA_matrix_df_cases[c(3:4,6:9)], center = T)
@@ -625,3 +658,45 @@ Testing_density_PC1 <- data.frame(data = PCA_matrix_df$Schizophrenia, as.factor(
 names(Testing_density_PC1) <- c("SCZ","Phenotype","Sample")
 
 ggplot(Testing_density_PC1, aes(x=SCZ)) + geom_density(aes(group=Phenotype, colour = Phenotype, fill = Phenotype), alpha = 0.3)
+
+
+
+
+
+##### Separating out risk of SCZ and BIP #####
+  
+logistic_regress_1 <- lm(PCA_matrix_2$PHENOTYPE ~ testing_reduce_controls$x[,"PC1"] )
+residualPlots(logistic_regress_1)
+residuals <- logistic_regress_1$residuals
+
+type2 <- data.frame(PCA_matrix_2$PHENOTYPE, testing_reduce_controls$x[,"PC1"], residuals)
+names(type2) <- c("Phenotype", "PC1", "residuals")
+
+logistic_regress_2 <- lm(Phenotype ~ PC1 + residuals, data = type2) 
+
+model1 <- PCA_matrix_2$PHENOTYPE ~ pca1
+model2 <- PCA_matrix_2$PHENOTYPE ~ pca1+residuals
+
+
+l0 <- deviance(model1)
+df0 <- df.residual(model1)
+
+l1 <- deviance(model2)
+df1 <- df.residual(model2)
+
+degf <- df0-df1
+if (degf > 0) pvalue <- 1-pchisq(l0-l1, df0-df1)
+
+
+logistic_regress_3 <- glm(PCA_matrix_2$PHENOTYPE ~ PCA_matrix_2$Bipolar, binomial(link = 'logit'))
+logistic_regress_5 <- glm(PCA_matrix_2$PHENOTYPE ~ PCA_matrix_2$Schizophrenia , binomial(link = 'logit'))
+logistic_regress_4 <- glm(PCA_matrix_2$PHENOTYPE ~ PCA_matrix_2$Bipolar + PCA_matrix_2$Schizophrenia , binomial(link = 'logit'))
+
+
+
+
+for (i in 1:5){
+  t <- summary(eval(parse(text = paste0("logistic_regress_",i))))$coefficients
+  print(t)
+}
+
