@@ -109,7 +109,7 @@ set_files = c('Data Supplement - Significant Sets in MAGMA analysis.txt','GeneSe
 out_dir = paste(root_dir,'/working/random/CLOZUK2/',sep='');
 
 #number of random sets to generate for each gene-set
-rand_n = 1000;
+rand_n = 10000;
 
 #length of gene sets
 set_len = list();
@@ -132,7 +132,7 @@ create_random <- function(gene_data,set_name,set_n,formula_str,rand_n) {
 	
 	membership_model<- glm(as.formula(formula_str),binomial(link = 'logit'),gene_data);
 	
-	membership_prob = predict(membership_model,type = 'response');
+	membership_prob = predict(membership_model, type = 'response');
 	
 	tmp_rand = t(replicate(rand_n,sample(gene_data[['snp']],set_n,replace = FALSE,prob = membership_prob)));
 	
@@ -147,23 +147,18 @@ setwd(info_dir);
 
 tmp <- merged3 ;
 tmp[['LEN']] = (abs(tmp[['BP_END']] - tmp[['BP_START']]) + 1)/1000; #gene length (Kb)
-#tmp[['SNP_DENSITY']] = (1000*tmp[['Nmarkers_in_Gene']])/tmp[['LEN']];     #marker density (N per Mb)
-#tmp[['PARAM_DENSITY']] = (1000*tmp[['Nmarkers_in_Gene_independent']])/tmp[['LEN']];  #independent marker density (N per Mb)
-#tmp2 <- merge(tmp,MAGMA.gene.regions,by=c("Gene","BP_START","BP_END","BP_start_extended","BP_end_extended"))
-#tmp2 <- as.data.frame(tmp2)
-#gene_data = subset(tmp2,select = c(Gene,CHR,LEN,Nmarkers_in_Gene,SNP_DENSITY,Nmarkers_in_Gene_independent,PARAM_DENSITY));
-#merged1 <- merge(Gene_clumped_SNPs,gene_data,by = c("Gene","CHR"))
-#names(merged1) = c('entrez_id','chr','snp','GD','BP','A1','A2','GENE_NAME','BP_START','BP_END','BP_start_extended','BP_end_extended','STRAND','len','snp_n','snp_density','indep_snp_n','indep_snp_density');
+merged_total <- tmp
+names(merged_total) = c('chr','snp','BP','entrez_id','BP_START','BP_END','BP_start_extended','BP_end_extended','Nmarkers_in_Gene_independent','GD','A1','A2','GENE_NAME','STRAND',"L2",'A1.y','A2.y','MAF','len');
 
-print(paste('Total number of SNPs read = ',(dim(tmp)[1])));
+print(paste('Total number of SNPs read = ',(dim(merged_total)[1])));
 
 ###################################################################################################
-#read & process gene-set data
+## Read & process gene-set data
 
   tmp <- fread("~/Dropbox/Stationary_data/Selected_Pocklington_plus_GO_pathways_SCHIZ.txt")
   names(tmp) <- c("Pathway","entrez_id")
   tmp_5htc <- tmp[Pathway == "5HT_2C"]
- test_full_file <- merge(gene_data,tmp_5htc, by = "Gene")
+  test_full_file <- merge(gene_data,tmp_5htc, by = "Gene")
   
   
   #Pathways <- c("5HT_2C", "Cav2_channels", "FMRP_targets", "abnormal_behavior", "abnormal_long_term_potentiation", "abnormal_nervous_system_electrophysiology", "Calcium_ion_import_GO0070509", "Membrane_depolarization_during_action_potential_GO0086010", "Synaptic_transmission_GO0007268") 
@@ -172,33 +167,21 @@ print(paste('Total number of SNPs read = ',(dim(tmp)[1])));
 	
 	for (set_name in unique(tmp[['Pathway']])) {
 		
-		set_genes = unique(subset(tmp,Pathway == set_name)[,2]);
+		set_genes = unique(subset(tmp, Pathway == set_name)[,2]);
 		
 		tmp_pathway <- tmp[Pathway == set_name]
-		tmp_binary_measurements <- merge(tmp_pathway,merged1, by = "entrez_id", all = F)
+		tmp_binary_measurements <- merge(tmp_pathway,merged_total, by = "entrez_id", all = F)
 		tmp_binary_measurements <- as.data.frame(tmp_binary_measurements)  
 		  
 		set_len[[set_name]] = nrow(tmp_binary_measurements);
-		merged1[[set_name]] = mapply(function(x) {binary_membership(tmp_binary_measurements$snp,x)},merged1[['snp']]);
+		merged_total[[set_name]] = mapply(function(x) {binary_membership(tmp_binary_measurements$snp,x)},merged_total[['snp']]);
 	}
 	
-
+set_magma_len = lapply(set_names,function(x) sum(merged_total[[x]]));
+names(set_magma_len) = set_names;
 set_names = names(set_len);
 
-#subset of data including only brain-expressed genes
-brain_expressed_gene_data = subset(gene_data,fagerberg_brain_expressed == 1);
 
-set_magma_len = lapply(set_names,function(x) sum(merged1[[x]]));
-names(set_magma_len) = set_names;
-
-#summary table of gene numbers
-set_summary = data.frame('set' = set_names,'total' = unlist(set_len),'magma' = unlist(set_magma_len),row.names = NULL);
-
-set_summary[['magma_brain_expressed']] = mapply(function(x) sum(brain_expressed_gene_data[[x]]),set_names);
-
-#save summary data
-setwd(out_dir);
-write.table(set_summary,file = 'gene_set_summary.txt',col.names = FALSE,row.names = FALSE,sep = '\t',quote = FALSE);
 ###################################################################################################
 # create random gene sets
 
@@ -207,12 +190,11 @@ time1=Sys.time();
 
 ######################	
 #all genes
-setwd(paste(out_dir,'all',sep='/'));
-setwd("~/Documents/testing_random_gene_sets")
+setwd("~/Documents/testing_random_gene_sets2")
 
 for (next_name in set_names) {
 	
-	random_mtx = create_random(merged1,next_name,set_magma_len[[next_name]],formula_str,rand_n);
+	random_mtx = create_random(merged_total, next_name, set_magma_len[[next_name]], formula_str, rand_n);
 	random_mtx_df <- as.data.frame(random_mtx)
 	random_mtx_dt <- as.data.table(random_mtx)
 	
