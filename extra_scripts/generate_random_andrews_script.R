@@ -2,8 +2,50 @@
 #Generate random gene sets from all/brain-expressed genes, where
 #probability of selection ~ gene_length, snp_n, indep_snp_n, snp_density, indep_snp_density (didn't use chr)
 ###################################################################################################
+
+### Start Timer
+ptm <- proc.time()
+
+#######################################
+# adding in arguments from BASH script#
+#######################################
+args <- commandArgs(trailingOnly = T)
+print(args)
+
+##################################################
+# Checking location for serial or batch analysis #
+##################################################
+
 library (data.table)
 e <- new.env()
+# specify the different input tables #
+
+Training_name <- args[3]
+Validation_name <- args[4]
+Validation_full_name_serial <- args[5]
+output_directory <- args[6]
+gene_loc_file_name <- args[7] # the name of the file containing gene locations (magma's version)
+Gene_regions <- args[8] # whether to include/exclude the regulatory regions of a gene
+#number of random sets to generate for each gene-set
+rand_n = args[9];
+significance_thresholds <- as.numeric(args[c(10:length(args))])
+
+MAF_counts <- fread("~/Documents/ALSPAC_gene_pathway_pipeline_test/CLOZUK_PGC2noclo_ALSPAC_output/Genes/ALSPAC_CLOZUK_PGC2noclo_normal_gene_regions_Clumped_whole_genome_final.frq", colClasses = c(rep("character", 4),"numeric","integer"))
+output_directory_2 <- "~/Documents/ALSPAC_gene_pathway_pipeline_test/CLOZUK_PGC2noclo_ALSPAC_output/Genes/"
+GENES_to_snps <- scan("~/Documents/ALSPAC_gene_pathway_pipeline_test/CLOZUK_PGC2noclo_ALSPAC_output/Genes/ALSPAC_CLOZUK_PGC2noclo_whole_genome_clumped_annotated_by_gene.genes.annot", what = "", sep = "\n")
+Indep_snp_n <- fread("~/Documents/ALSPAC_gene_pathway_pipeline_test/CLOZUK_PGC2noclo_ALSPAC_output/Genes/ALSPAC_CLOZUK_PGC2noclo_normal_gene_region_information_for_randomisation_tests_ater_clumping.txt", colClasses = rep("numeric",6))
+LD_scored_snps <- fread("~/Documents/ALSPAC_gene_pathway_pipeline_test/CLOZUK_PGC2noclo_ALSPAC_output/Genes/ALSPAC_CLOZUK_PGC2noclo_normal_gene_regions_Clumped_whole_genome_final.l2.ldscore", colClasses = c("character","character", "integer", "numeric"))
+Pocklington_sets <- fread("~/Dropbox/Stationary_data/Selected_Pocklington_plus_GO_pathways_SCHIZ.txt")
+Pathways <- c("5HT_2C", "Cav2_channels", "FMRP_targets", "abnormal_behavior", "abnormal_long_term_potentiation", "abnormal_nervous_system_electrophysiology", "Calcium_ion_import_GO0070509", "Membrane_depolarization_during_action_potential_GO0086010", "Synaptic_transmission_GO0007268") 
+current_pathway <- fread("~/Documents/ALSPAC_hrc_imputed_bestguess_pathway/CLOZUK_PGC2noclo_ALSPAC_original_output/Pathways/5HT_2C/ALSPAC_original_CLOZUK_PGC2noclo_5HT_2C_Clumped_whole_genome_final.bim")
+tmp <- fread("~/Dropbox/Stationary_data/Selected_Pocklington_plus_GO_pathways_SCHIZ.txt")
+setwd("~/Documents/testing_random_gene_sets2")
+Summary_stats_dataset <- fread("~/Documents/ALSPAC_gene_pathway_pipeline_test/CLOZUK_PGC2noclo_ALSPAC_output/combined_CLOZUK_PGC2noclo_table_with_CHR.POS_identifiers.txt")
+
+
+
+
+
 
 ## specify the different input tables #
 Training_name <- "CLOZUK_PGC2noclo"
@@ -12,6 +54,8 @@ Chromosomes_to_split <- seq(1:22)
 print(Chromosomes_to_split)
 gene_loc_file_name <- "~/Dropbox/Stationary_data/NCBI37.3.gene.loc"
 
+###################################################################################################
+#functions
 adding_unread_genes <- function(MAGMA.gene.regions, clumped_SNPs, y, chromosome.number){
   
   Melted_MAGMA_list <- melt(y)
@@ -27,6 +71,33 @@ adding_unread_genes <- function(MAGMA.gene.regions, clumped_SNPs, y, chromosome.
   assign("Gene_clumped_SNPs", Gene_clumped_SNPs, envir = e)
   
 }
+
+#formula used to predict gene set membership in regression model
+formula_str = 'status ~ len + L2 + MAF';
+
+binary_membership <- function(set,element) {
+  
+  if (element %in% set) { 1}
+  else {0}
+  
+}
+
+create_random <- function(gene_data,set_name,set_n,formula_str,rand_n) {
+  
+  gene_data[['status']] = gene_data[[set_name]]; #glm doesn't like variables starting with a number...
+  
+  membership_model<- glm(as.formula(formula_str),binomial(link = 'logit'),gene_data);
+  
+  membership_prob = predict(membership_model, type = 'response');
+  
+  tmp_rand = t(replicate(rand_n,sample(gene_data[['snp']],set_n,replace = FALSE,prob = membership_prob)));
+  
+  tmp_name = mapply(function(k) paste(set_name,k,sep='_random_'),(1:rand_n));
+  
+  cbind(tmp_name,tmp_rand);
+  
+}
+###################################################################################################
 
 GENES_to_snps <- scan("~/Documents/ALSPAC_gene_pathway_pipeline_test/CLOZUK_PGC2noclo_ALSPAC_output/Genes/ALSPAC_CLOZUK_PGC2noclo_whole_genome_clumped_annotated_by_gene.genes.annot", what = "", sep = "\n")
 y <- strsplit(GENES_to_snps, "[[:space:]]+")
@@ -108,40 +179,11 @@ set_files = c('Data Supplement - Significant Sets in MAGMA analysis.txt','GeneSe
 
 out_dir = paste(root_dir,'/working/random/CLOZUK2/',sep='');
 
-#number of random sets to generate for each gene-set
-rand_n = 10000;
+
 
 #length of gene sets
 set_len = list();
 
-#formula used to predict gene set membership in regression model
-formula_str = 'status ~ len + L2 + MAF';
-###################################################################################################
-#functions
-
-binary_membership <- function(set,element) {
-	
-	if (element %in% set) { 1}
-	else {0}
-	
-}
-
-create_random <- function(gene_data,set_name,set_n,formula_str,rand_n) {
-	
-	gene_data[['status']] = gene_data[[set_name]]; #glm doesn't like variables starting with a number...
-	
-	membership_model<- glm(as.formula(formula_str),binomial(link = 'logit'),gene_data);
-	
-	membership_prob = predict(membership_model, type = 'response');
-	
-	tmp_rand = t(replicate(rand_n,sample(gene_data[['snp']],set_n,replace = FALSE,prob = membership_prob)));
-	
-	tmp_name = mapply(function(k) paste(set_name,k,sep='_random_'),(1:rand_n));
-	
-	cbind(tmp_name,tmp_rand);
-	
-}
-###################################################################################################
 #read & process gene data
 setwd(info_dir);
 
