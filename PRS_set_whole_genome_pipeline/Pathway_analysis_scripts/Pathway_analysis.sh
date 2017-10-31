@@ -176,6 +176,26 @@ if [[ "$system" = "MAC" || "$system" = "LINUX" ]]; then
 
 sudo parallel ${path_to_pathway_scripts}creation_of_merge_list_file.sh ::: ${pathways[@]} ::: ${path_to_scripts} ::: ${path_to_pathway_scripts} ::: ${system} ::: ${Name_of_extra_analysis}
 
+# If randomising Gene_sets (aka ran Gene specific PRS first) then run this script:
+
+if [[ "$randomise" = TRUE ]]; then
+
+Gene_output_directory="./${training_set_name}_${validation_set_name}_output/Genes/" 
+
+sudo parallel ${path_to_pathway_scripts}Randomise_gene_sets_parallel.sh ::: ${pathways[@]} ::: ${path_to_scripts} ::: ${path_to_pathway_scripts} ::: ${path_to_Gene_scripts} ::: ${system} ::: ${Name_of_extra_analysis} ::: ${Gene_output_directory}
+
+Rscript ${path_to_scripts}RscriptEcho.R\
+ ${path_to_Gene_scripts}generate_random_andrews_script.R\
+ ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_${validation_set_name}_generate_random_andrews_script.Rout\
+ ${training_set_name}\
+ ${validation_set_name}\
+ ${Pathway_output_directory}\
+ ${Gene_output_directory}\
+ ${path_to_stationary_data}${Pathway_filename}\
+ ${Gene_regions}\
+ ${permutations}\
+ ${
+
 Rscript ${path_to_scripts}RscriptEcho.R\
  ${path_to_pathway_scripts}Pathway_PRS_scoring.R\
  ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_${validation_set_name}_Pathway_PRS_scoring.Rout\

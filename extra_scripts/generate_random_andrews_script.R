@@ -22,13 +22,13 @@ e <- new.env()
 
 Training_name <- args[3]
 Validation_name <- args[4]
-Validation_full_name_serial <- args[5]
-output_directory <- args[6]
+Gene_output_directory <- args[5]
+Pathway_output_directory <- args[6]
 gene_loc_file_name <- args[7] # the name of the file containing gene locations (magma's version)
 Gene_regions <- args[8] # whether to include/exclude the regulatory regions of a gene
-#number of random sets to generate for each gene-set
-rand_n = args[9];
-significance_thresholds <- as.numeric(args[c(10:length(args))])
+rand_n = args[9]; #number of random sets to generate for each gene-set
+
+
 
 MAF_counts <- fread("~/Documents/ALSPAC_gene_pathway_pipeline_test/CLOZUK_PGC2noclo_ALSPAC_output/Genes/ALSPAC_CLOZUK_PGC2noclo_normal_gene_regions_Clumped_whole_genome_final.frq", colClasses = c(rep("character", 4),"numeric","integer"))
 output_directory_2 <- "~/Documents/ALSPAC_gene_pathway_pipeline_test/CLOZUK_PGC2noclo_ALSPAC_output/Genes/"
@@ -37,9 +37,11 @@ Indep_snp_n <- fread("~/Documents/ALSPAC_gene_pathway_pipeline_test/CLOZUK_PGC2n
 LD_scored_snps <- fread("~/Documents/ALSPAC_gene_pathway_pipeline_test/CLOZUK_PGC2noclo_ALSPAC_output/Genes/ALSPAC_CLOZUK_PGC2noclo_normal_gene_regions_Clumped_whole_genome_final.l2.ldscore", colClasses = c("character","character", "integer", "numeric"))
 Pocklington_sets <- fread("~/Dropbox/Stationary_data/Selected_Pocklington_plus_GO_pathways_SCHIZ.txt")
 Pathways <- c("5HT_2C", "Cav2_channels", "FMRP_targets", "abnormal_behavior", "abnormal_long_term_potentiation", "abnormal_nervous_system_electrophysiology", "Calcium_ion_import_GO0070509", "Membrane_depolarization_during_action_potential_GO0086010", "Synaptic_transmission_GO0007268") 
-current_pathway <- fread("~/Documents/ALSPAC_hrc_imputed_bestguess_pathway/CLOZUK_PGC2noclo_ALSPAC_original_output/Pathways/5HT_2C/ALSPAC_original_CLOZUK_PGC2noclo_5HT_2C_Clumped_whole_genome_final.bim")
-tmp <- fread("~/Dropbox/Stationary_data/Selected_Pocklington_plus_GO_pathways_SCHIZ.txt")
-setwd("~/Documents/testing_random_gene_sets2")
+
+significance_thresholds <- as.numeric(args[c(10:length(args))])
+# tmp <- fread("~/Dropbox/Stationary_data/Selected_Pocklington_plus_GO_pathways_SCHIZ.txt")
+
+setwd("~/Documents/testing_random_gene_sets2") mk dir command 
 Summary_stats_dataset <- fread("~/Documents/ALSPAC_gene_pathway_pipeline_test/CLOZUK_PGC2noclo_ALSPAC_output/combined_CLOZUK_PGC2noclo_table_with_CHR.POS_identifiers.txt")
 
 

@@ -190,6 +190,9 @@ Rscript ${path_to_scripts}RscriptEcho.R\
  ${sig_thresholds[@]}
 
 exit 1
+
+## Unfinished, below is similar procedure for pathways ## 
+
 ${path_to_gene_scripts}PRS_scoring_plink_pathways.sh ::: ${pathways[@]} ::: ${path_to_scripts} ::: ${path_to_pathway_scripts} ::: ${system}
 
 Rscript ${path_to_scripts}RscriptEcho.R\

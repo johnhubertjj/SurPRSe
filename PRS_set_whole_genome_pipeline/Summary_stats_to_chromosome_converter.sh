@@ -29,8 +29,7 @@ if [[ "$whereami" = *"raven"* ]]; then
   module load magma/1.06
 
   path_to_scripts="/home/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/"
-  
-  
+   
   # Assign the shell variables
   source ${path_to_scripts}PRS_arguments_script.sh 
   cat ${path_to_scripts}PRS_arguments_script.sh 
@@ -46,6 +45,7 @@ if [[ "$whereami" = *"raven"* ]]; then
 fi
 
 if [[ "$system" = "MAC" || "$system" = "LINUX" ]]; then
+  
   Directory_to_work_from=$1
   cd ${Directory_to_work_from}  
   

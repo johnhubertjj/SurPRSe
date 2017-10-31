@@ -21,15 +21,38 @@ path_to_pathway_scripts="${home_OS}${extra_path}/Schizophrenia_PRS_pipeline_scri
 path_to_gene_scripts="${home_OS}${extra_path}/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/Gene_analysis_scripts/"
 
 Directory_to_work_from=`pwd`
-chromosomes=(`seq 1 22`)
+
+source ${path_to_scripts}PRS_arguments_script.sh
+cat ${path_to_scripts}PRS_arguments_script.sh
+
+Rscript ${path_to_scripts}RscriptEcho.R\
+	${path_to_scripts}Chromosome_arguments_text_file.R\ 
+	./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_Chromosome_arguments_text_file.Rout\
+	${training_set_name}\
+	${validation_set_name}\
+	${Chromosomes_to_analyse[@]}\
+ 
+Rscript ${path_to_scripts}RscriptEcho.R\
+	${path_to_scripts}sig_thresholds_lower_bounds_arguments_text_file.R\ 
+	./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_sig_thresholds_lower_bounds_arguments_text_file.Rout\
+	${training_set_name}\
+	${validation_set_name}\
+	${sig_thresholds_lower_bounds[@]}\
+
+Rscript ${path_to_scripts}RscriptEcho.R\
+	${path_to_scripts}sig_thresholds_plink_arguments_text_file.R\ 
+	./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_sig_thresholds_plink_arguments_text_file.Rout\
+	${training_set_name}\
+	${validation_set_name}\
+	${sig_thresholds[@]}\
 
 ${path_to_scripts}Summary_stats_to_chromosome_converter.sh ${Directory_to_work_from} ${path_to_scripts} ${system}
 
 # calculate polygenic scores for the whole genome across different chromosomes	
 
-#sudo parallel ${path_to_scripts}POLYGENIC_RISK_SCORE_ANALYSIS_CLOZUK_PRS_JOB_ARRAY.sh ::: ${chromosomes[@]} ::: ${Directory_to_work_from} ::: ${path_to_scripts} ::: ${system}
+sudo parallel ${path_to_scripts}POLYGENIC_RISK_SCORE_ANALYSIS_CLOZUK_PRS_JOB_ARRAY.sh ::: ${Chromosomes_to_analyse[@]} ::: ${Directory_to_work_from} ::: ${path_to_scripts} ::: ${system}
 
-#exit 0
+# exit 0
 
 # Use sed to extract the argument Extra_analysis from your output scripts in question #output the arguments to a temporary file in order to read it
 Extra_analyses=(`sed -n 's/Extra_analyses\=//p' ${path_to_scripts}PRS_arguments_script.sh`)
