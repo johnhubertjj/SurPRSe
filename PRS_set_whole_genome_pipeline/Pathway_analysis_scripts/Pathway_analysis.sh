@@ -180,7 +180,10 @@ sudo parallel ${path_to_pathway_scripts}creation_of_merge_list_file.sh ::: ${pat
 
 if [[ "$randomise" = TRUE ]]; then
 
+# Set up extra arguments from Genes directory and for PRS scoring for randomised sets
 Gene_output_directory="./${training_set_name}_${validation_set_name}_output/Genes/" 
+mkdir ${Pathway_output_directory}Randomised_gene_sets_analysis/
+mkdir ${Pathway_output_directory}Randomised_gene_sets_analysis/Scores/
 
 sudo parallel ${path_to_pathway_scripts}Randomise_gene_sets_parallel.sh ::: ${pathways[@]} ::: ${path_to_scripts} ::: ${path_to_pathway_scripts} ::: ${path_to_Gene_scripts} ::: ${system} ::: ${Name_of_extra_analysis} ::: ${Gene_output_directory}
 
@@ -194,7 +197,6 @@ Rscript ${path_to_scripts}RscriptEcho.R\
  ${path_to_stationary_data}${Pathway_filename}\
  ${Gene_regions}\
  ${permutations}\
- ${
 
 Rscript ${path_to_scripts}RscriptEcho.R\
  ${path_to_pathway_scripts}Pathway_PRS_scoring.R\
@@ -202,6 +204,7 @@ Rscript ${path_to_scripts}RscriptEcho.R\
  ${training_set_name}\
  ${validation_set_name}\
  ${Pathway_output_directory}\
+ ${Gene_output_directory}\
  ${path_to_stationary_data}${Pathway_filename}\
  ${sig_thresholds[@]}
 

@@ -18,18 +18,18 @@ args <- commandArgs(trailingOnly = T)
 print(args)
 
 # Specify the different input tables #
-training_set_name <- args[3]
-validation_set_name <- args[4]
+Training_name <- args[3]
+Validation_name <- args[4]
 Significance_thresholds <- as.numeric(args[c(5:length(args))])
 
 # Create the plink -q-score-range file for use in plink 
-Significance_thresholds_lower_bounds <- unlist(fread(file = paste0(training_set_name,"_", validation_set_name,"_significance_thresholds_lower_bounds_to_analyse_arguments_file_tmp.txt")))
+Significance_thresholds_lower_bounds <- unlist(fread(file = paste0(Training_name,"_", Validation_name,"_significance_thresholds_lower_bounds_to_analyse_arguments_file_tmp.txt")))
 rownames <- paste0("S",seq(1:length(Significance_thresholds)))
 Plink_sig_thresh_file <- data.frame(Significance_thresholds_lower_bounds,Significance_thresholds,row.names = rownames)
 
 # Write out the chromosomes to a text file for easier reading into R in future rather than a bash argument # 
-write.table(Plink_sig_thresh_file, file = paste0(training_set_name,"_", validation_set_name,"_plink_significance_thresholds_arguments_file_tmp.txt"),row.names = T, col.names = F, quote = F)
-testing_1 <- fread(file = paste0(training_set_name,"_", validation_set_name,"_plink_significance_thresholds_arguments_file_tmp.txt"))      
+write.table(Plink_sig_thresh_file, file = paste0(Training_name,"_", Validation_name,"_plink_significance_thresholds_arguments_file_tmp.txt"),row.names = T, col.names = F, quote = F)
+testing_1 <- fread(file = paste0(Training_name,"_", Validation_name,"_plink_significance_thresholds_arguments_file_tmp.txt"))      
 print(testing_1)
 
 #End Timer

@@ -25,6 +25,7 @@ Directory_to_work_from=`pwd`
 source ${path_to_scripts}PRS_arguments_script.sh
 cat ${path_to_scripts}PRS_arguments_script.sh
 
+# Create arguments files for easier input into Rscripts for parallelisation # 
 Rscript ${path_to_scripts}RscriptEcho.R\
 	${path_to_scripts}Chromosome_arguments_text_file.R\ 
 	./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_Chromosome_arguments_text_file.Rout\

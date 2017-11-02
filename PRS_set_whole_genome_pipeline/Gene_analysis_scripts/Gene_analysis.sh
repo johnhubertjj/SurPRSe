@@ -86,7 +86,7 @@ if [ -e "${Pathway_output_directory}Pathways_analysis_empty_pathways_info_file.t
 fi
 
 #run annotations of SNPs to genes, include useful information files
-#sudo parallel ${path_to_gene_scripts}Genes_MAGMA_annotation_script.sh ::: ${Chromosomes_to_analyse[@]} ::: ${Directory_to_work_from} ::: ${path_to_scripts} ::: ${path_to_gene_scripts} ::: ${system} 
+sudo parallel ${path_to_gene_scripts}Genes_MAGMA_annotation_script.sh ::: ${Chromosomes_to_analyse[@]} ::: ${Directory_to_work_from} ::: ${path_to_scripts} ::: ${path_to_gene_scripts} ::: ${system} 
 
 
 # From the above script, identify the number of pathways you want to analyse (probably safest to write to a file, port to a variable and then delete the file)
@@ -108,7 +108,7 @@ chmod -R g+rwx ${path_to_scripts}
 
 if [[ "$system" = "MAC" || "$system" = "LINUX" ]]; then
 
-#${path_to_gene_scripts}creation_of_merge_list_file.sh ${Directory_to_work_from} ${path_to_scripts} ${path_to_gene_scripts} ${system}
+${path_to_gene_scripts}creation_of_merge_list_file.sh ${Directory_to_work_from} ${path_to_scripts} ${path_to_gene_scripts} ${system}
 
 # re-annotate the large clumped file again (unfortunately, might be unneeded, but might need to be quick
 
