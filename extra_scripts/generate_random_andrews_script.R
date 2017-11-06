@@ -284,6 +284,8 @@ combined.test.training.clumped.Genomic.SNPs <- merge(bim_file, Summary_stats_dat
 combined.test.training.clumped.Genomic.SNPs$A1.y <- toupper(combined.test.training.clumped.Genomic.SNPs$A1.y)
 combined.test.training.clumped.Genomic.SNPs$A2.y <- toupper(combined.test.training.clumped.Genomic.SNPs$A2.y)
 
+# Calculate the number of cores
+no_cores <- detectCores() - 1
 
 # Initiate cluster
 cl <- makeCluster(no_cores, type = "FORK")
