@@ -38,15 +38,15 @@ Pathway_file_name <- args[10] # The input file annotating genes to pathways
 Pathways <- as.character(args[c(11:length(args))]) # All pathways
 
 # Testing_variables
- Training_name <- "CLOZUK_PGC2noclo"
- Validation_name <- "ALSPAC"
- Gene_output_directory <- paste0(Training_name,"_",Validation_name,"_output/Genes/")
- Pathway_output_directory <- paste0(Training_name,"_",Validation_name,"_output/Pathways/")
- gene_loc_file_name <- "~/Dropbox/Stationary_data/NCBI37.3.gene.loc"
- Gene_regions <- "both"
- rand_n = 10000; # Number of random sets to generate for each gene-set
- Pathway_file_name <- "~/Dropbox/Stationary_data/Selected_Pocklington_plus_GO_pathways_SCHIZ.txt"
- Pathways <- c("5HT_2C", "Cav2_channels", "FMRP_targets", "abnormal_behavior", "abnormal_long_term_potentiation", "abnormal_nervous_system_electrophysiology", "Calcium_ion_import_GO0070509", "Membrane_depolarization_during_action_potential_GO0086010", "Synaptic_transmission_GO0007268") 
+# Training_name <- "CLOZUK_PGC2noclo"
+# Validation_name <- "ALSPAC"
+# Gene_output_directory <- paste0(Training_name,"_",Validation_name,"_output/Genes/")
+# Pathway_output_directory <- paste0(Training_name,"_",Validation_name,"_output/Pathways/")
+# gene_loc_file_name <- "~/Dropbox/Stationary_data/NCBI37.3.gene.loc"
+# Gene_regions <- "both"
+# rand_n = 10000; # Number of random sets to generate for each gene-set
+# Pathway_file_name <- "~/Dropbox/Stationary_data/Selected_Pocklington_plus_GO_pathways_SCHIZ.txt"
+# Pathways <- c("5HT_2C", "Cav2_channels", "FMRP_targets", "abnormal_behavior", "abnormal_long_term_potentiation", "abnormal_nervous_system_electrophysiology", "Calcium_ion_import_GO0070509", "Membrane_depolarization_during_action_potential_GO0086010", "Synaptic_transmission_GO0007268") 
 
 # Read in array variables from file and rearrage to a vector#
 significance_thresholds <- fread(file = paste0(Training_name,"_", Validation_name,"_plink_significance_thresholds_arguments_file_tmp.txt"))      
@@ -258,7 +258,7 @@ set_names = names(set_len);
 set_magma_len = lapply(set_names,function(x) sum(merged_total[[x]]));
 names(set_magma_len) = set_names;
 number_of_pathways <- length(set_names)
-
+write(set_names, file = paste0(Pathway_output_directory,Training_name, "_", Validation_name,"_random_pathways_to_test.txt"),ncolumns = 1)
 ###################################################################################################
 # create random gene sets
 ###################################################################################################	

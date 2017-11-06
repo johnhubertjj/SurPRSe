@@ -184,6 +184,8 @@ if [[ "$randomise" = TRUE ]]; then
 Gene_output_directory="./${training_set_name}_${validation_set_name}_output/Genes/" 
 mkdir ${Pathway_output_directory}Randomised_gene_sets_analysis/
 mkdir ${Pathway_output_directory}Randomised_gene_sets_analysis/Scores/
+Random_scoring_directory=${Pathway_output_directory}Randomised_gene_sets_analysis/Scores/
+
 
 Rscript ${path_to_scripts}RscriptEcho.R\
  ${path_to_Gene_scripts}generate_random_andrews_script.R\
@@ -195,6 +197,14 @@ Rscript ${path_to_scripts}RscriptEcho.R\
  ${path_to_stationary_data}${Pathway_filename}\
  ${Gene_regions}\
  ${permutations}\
+
+pathways_for_randomisation=(`awk '{ print $1 }' ${Pathway_output_directory}${training_set_name}_${validation_set_name}_random_pathways_to_test.txt`)
+
+sudo parallel ${path_to_pathway_scripts}test_script_randomised_plink.sh ::: ${pathways_for_randomisation[@]} ::: ${path_to_scripts} ::: ${Name_of_extra_analysis} ::: ${Gene_output_directory} ::: ${Random_scoring_directory} ::: ${permutations} 
+
+Rscript ${path_to_scripts}RscriptEcho.R\
+ ${path_to_Gene_scripts}Collate_all_pathways_random.R
+  
 
 Rscript ${path_to_scripts}RscriptEcho.R\
  ${path_to_pathway_scripts}Pathway_PRS_scoring.R\
@@ -228,6 +238,4 @@ fi
 # magma --bfile CLOZUK_GWAS_BGE_chr22_magma_input_2 --gene-annot ${chr[i]}_CLOZUK_PGC_SNPs_pathway.genes.annot --out ${chr[i]}gene_annotation_for_CLOZUK_test
 
 # Then write a new R script with previous details and finish, NOTE MAKE IT EASY TO DELETE USELESS FILES 
-
-
 

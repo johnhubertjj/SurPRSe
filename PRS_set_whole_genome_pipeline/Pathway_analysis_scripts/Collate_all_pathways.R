@@ -30,7 +30,7 @@ print(args)
 
 # Specify the different input tables #
 Training_name <- args[3]
-Validation_name <- args [4]
+Validation_name <- args[4]
 Pathway_directory <- args[5]
 Pathway_file_name <- args[6] # the name of the file to be accessed (must be in stationary directory)
 
@@ -40,11 +40,11 @@ print(significance_thresholds)
 
 
 
-#Training_name <- "CLOZUK_PGC2noclo"
-#Validation_name <- "ALSPAC"
-#Pathway_directory <- paste0(Training_name,"_",Validation_name,"_output/Pathways/")
-#Pathway_file_name <- "/Users/johnhubert/Dropbox/Stationary_data/Pocklington2015_134sets_LoFi_2sets_morphology_notmorphology_deduplicated.txt"
-#significance_thresholds <- c(0.05,0.5)
+Training_name <- "CLOZUK_PGC2noclo"
+Validation_name <- "ALSPAC"
+Pathway_directory <- paste0(Training_name,"_",Validation_name,"_output/Pathways/")
+Pathway_file_name <- "/Users/johnhubert/Dropbox/Stationary_data/Pocklington2015_134sets_LoFi_2sets_morphology_notmorphology_deduplicated.txt"
+significance_thresholds <- c(0.05,0.5)
 
 Pathways_used <- file_path_sans_ext(basename(Pathway_file_name))
 

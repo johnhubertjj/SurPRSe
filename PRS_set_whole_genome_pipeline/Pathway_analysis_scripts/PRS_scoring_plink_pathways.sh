@@ -1,4 +1,4 @@
-#! /bin/bash
+! /bin/bash
 
 pathways=$1
 path_to_scripts=$2
