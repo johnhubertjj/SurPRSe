@@ -63,6 +63,8 @@ fi
 
 if [[ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" = 'johnhubert-ThinkPad-P50' ]]; then
 
+  path_to_CLOZUK="/mnt/databank/CLOZUK/GWAS/BGE/RSupdate"
+  path_to_Biobank="/c8000xd3/big-wpcvm/UKBB/"	
   path_to_PGC_conversion="Summary_stat_manipulation"
   path_to_CLOZUK_conversion="Genotype_dataset_manipulation"
   path_to_covariate_file="$home_OS/johnhubert/Dropbox/whole_genome_testing/Stationary_data/CLOZUK2.r7.select2PC.eigenvec.txt"
