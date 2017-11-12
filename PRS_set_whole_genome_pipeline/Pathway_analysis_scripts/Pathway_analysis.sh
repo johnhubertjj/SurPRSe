@@ -1,4 +1,4 @@
-#!/bin/bash
+#/bin/bash
 
 #PBS -q batch_long
 #PBS -P PR54
@@ -176,12 +176,43 @@ if [[ "$system" = "MAC" || "$system" = "LINUX" ]]; then
 
 sudo parallel ${path_to_pathway_scripts}creation_of_merge_list_file.sh ::: ${pathways[@]} ::: ${path_to_scripts} ::: ${path_to_pathway_scripts} ::: ${system} ::: ${Name_of_extra_analysis}
 
+# If randomising Gene_sets (aka ran Gene specific PRS first) then run this script:
+
+if [[ "$randomise" = TRUE ]]; then
+
+# Set up extra arguments from Genes directory and for PRS scoring for randomised sets
+Gene_output_directory="./${training_set_name}_${validation_set_name}_output/Genes/" 
+mkdir ${Pathway_output_directory}Randomised_gene_sets_analysis/
+mkdir ${Pathway_output_directory}Randomised_gene_sets_analysis/Scores/
+Random_scoring_directory=${Pathway_output_directory}Randomised_gene_sets_analysis/Scores/
+
+
+Rscript ${path_to_scripts}RscriptEcho.R\
+ ${path_to_Gene_scripts}generate_random_andrews_script.R\
+ ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_${validation_set_name}_generate_random_andrews_script.Rout\
+ ${training_set_name}\
+ ${validation_set_name}\
+ ${Pathway_output_directory}\
+ ${Gene_output_directory}\
+ ${path_to_stationary_data}${Pathway_filename}\
+ ${Gene_regions}\
+ ${permutations}\
+
+pathways_for_randomisation=(`awk '{ print $1 }' ${Pathway_output_directory}${training_set_name}_${validation_set_name}_random_pathways_to_test.txt`)
+
+sudo parallel ${path_to_pathway_scripts}test_script_randomised_plink.sh ::: ${pathways_for_randomisation[@]} ::: ${path_to_scripts} ::: ${Name_of_extra_analysis} ::: ${Gene_output_directory} ::: ${Random_scoring_directory} ::: ${permutations} 
+
+Rscript ${path_to_scripts}RscriptEcho.R\
+ ${path_to_Gene_scripts}Collate_all_pathways_random.R
+  
+
 Rscript ${path_to_scripts}RscriptEcho.R\
  ${path_to_pathway_scripts}Pathway_PRS_scoring.R\
  ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_${validation_set_name}_Pathway_PRS_scoring.Rout\
  ${training_set_name}\
  ${validation_set_name}\
  ${Pathway_output_directory}\
+ ${Gene_output_directory}\
  ${path_to_stationary_data}${Pathway_filename}\
  ${sig_thresholds[@]}
 
@@ -207,6 +238,4 @@ fi
 # magma --bfile CLOZUK_GWAS_BGE_chr22_magma_input_2 --gene-annot ${chr[i]}_CLOZUK_PGC_SNPs_pathway.genes.annot --out ${chr[i]}gene_annotation_for_CLOZUK_test
 
 # Then write a new R script with previous details and finish, NOTE MAKE IT EASY TO DELETE USELESS FILES 
-
-
 

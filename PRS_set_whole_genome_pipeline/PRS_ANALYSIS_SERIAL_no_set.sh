@@ -131,8 +131,11 @@ if [ ! -d "./${training_set_name}_${validation_set_name}_output/PRS_scoring" ]; 
   	mkdir ./${training_set_name}_${validation_set_name}_output/PRS_scoring
 fi
 
+gene_bim_file="./${validation_set_name}_${training_set_name}_FULL_GENOME_CLUMPED.bim"
+ending_name="FULL_GENOME_CLUMPED"
+
 # Create score files for each significance threshold specified 
-Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}PRS_scoring_whole_genome.R ./${training_set_name}_${validation_set_name}_extrainfo/PRS_scoring_whole_genome.Rout ${training_set_name} ${validation_set_name} ${sig_thresholds[@]} 
+Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}PRS_scoring_whole_genome.R ./${training_set_name}_${validation_set_name}_extrainfo/PRS_scoring_whole_genome.Rout ${training_set_name} ${validation_set_name} ${gene_bim_file} ${ending_name} ${sig_thresholds[@]} 
 
 # Create PRS profiles for each significance threshold specified
 for i in "${sig_thresholds[@]}" ;

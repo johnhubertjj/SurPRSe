@@ -86,7 +86,7 @@ if [ -e "${Pathway_output_directory}Pathways_analysis_empty_pathways_info_file.t
 fi
 
 #run annotations of SNPs to genes, include useful information files
-#sudo parallel ${path_to_gene_scripts}Genes_MAGMA_annotation_script.sh ::: ${Chromosomes_to_analyse[@]} ::: ${Directory_to_work_from} ::: ${path_to_scripts} ::: ${path_to_gene_scripts} ::: ${system} 
+sudo parallel ${path_to_gene_scripts}Genes_MAGMA_annotation_script.sh ::: ${Chromosomes_to_analyse[@]} ::: ${Directory_to_work_from} ::: ${path_to_scripts} ::: ${path_to_gene_scripts} ::: ${system} 
 
 
 # From the above script, identify the number of pathways you want to analyse (probably safest to write to a file, port to a variable and then delete the file)
@@ -101,7 +101,6 @@ fi
 # as an input from PATHWAYS_PRS_COLLECTING_MAGMA_INFO.R to annotate.
 # The pathways used will then be read into an array variable so that we don't have to keep reading this file and it is within the BASH environment 
 
-
 # merge all the PGC SNPs together into one table
 Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}combining_summary_stats_tables_after_conversion_to_CHR_POS.R ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_conversion.Rout ${training_set_name} ${validation_set_name} ${Chromosomes_to_analyse[@]}
 
@@ -109,7 +108,7 @@ chmod -R g+rwx ${path_to_scripts}
 
 if [[ "$system" = "MAC" || "$system" = "LINUX" ]]; then
 
-#${path_to_gene_scripts}creation_of_merge_list_file.sh ${Directory_to_work_from} ${path_to_scripts} ${path_to_gene_scripts} ${system}
+${path_to_gene_scripts}creation_of_merge_list_file.sh ${Directory_to_work_from} ${path_to_scripts} ${path_to_gene_scripts} ${system}
 
 # re-annotate the large clumped file again (unfortunately, might be unneeded, but might need to be quick
 
@@ -118,40 +117,193 @@ if [[ ${Gene_regions} = "both" ]]; then
 Gene_regions=normal
 
 	gene_bim_file=${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final.bim
-        magma --annotate --snp-loc ${gene_bim_file} --gene-loc ${path_to_stationary_data}${Gene_location_filename} --out ${Gene_output_directory}${training_set_name}_${validation_set_name}_SNPs_normal_clumped_gene_temp
+        gene_file=${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final
+	ending_name=${Gene_regions}_gene_regions_Clumped_whole_genome_final
+        
+	magma --annotate --snp-loc ${gene_bim_file} --gene-loc ${path_to_stationary_data}${Gene_location_filename} --out ${Gene_output_directory}${training_set_name}_${validation_set_name}_SNPs_normal_clumped_gene_temp
 	
+ldsc.py --bfile ${gene_file}\ 
+ --l2\
+ --ld-wind-kb ${window}\
+ --out ${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final
+
+plink --bfile ${gene_file}\
+ --freq\
+ --out ${gene_file}
+
+if [[ ${whole_genome_genic} = "TRUE" ]]; then
+
+# Create Final PRS outputs directory
+if [ ! -d "./${training_set_name}_${validation_set_name}_output/PRS_scoring" ]; then
+        mkdir ./${training_set_name}_${validation_set_name}_output/PRS_scoring
+fi
+
+# Create score files for each significance threshold specified 
+Rscript ${path_to_scripts}RscriptEcho.R\
+       	${path_to_scripts}PRS_scoring_whole_genome.R\
+       	./${training_set_name}_${validation_set_name}_extrainfo/PRS_scoring_whole_genome.Rout\
+       	${training_set_name}\
+       	${validation_set_name}\
+       	${gene_bim_file}\
+        ${ending_name}\
+	${sig_thresholds[@]}
+
+# Create PRS profiles for each significance threshold specified
+for i in "${sig_thresholds[@]}" ;
+do
+        filename="./${training_set_name}_${validation_set_name}_output/PRS_scoring/${training_set_name}_${validation_set_name}_${ending_name}_significance_threshold_at_${i}.score"
+        plink --bfile ${gene_file} --score ${filename} --out ./${training_set_name}_${validation_set_name}_output/PRS_scoring/${training_set_name}_${validation_set_name}_${ending_name}_significance_threshold_at_${i}
+done
+
+fi
+
 Gene_regions=extended
 
 	gene_bim_file=${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final.bim
-        magma --annotate window=35,10 --snp-loc ${gene_bim_file} --gene-loc ${path_to_stationary_data}${Gene_location_filename} --out ${Gene_output_directory}${training_set_name}_${validation_set_name}_SNPs_extended_clumped_gene_temp
+        gene_file=${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final
+	ending_name=${Gene_regions}_gene_regions_Clumped_whole_genome_final
+        
+	magma --annotate window=35,10 --snp-loc ${gene_bim_file} --gene-loc ${path_to_stationary_data}${Gene_location_filename} --out ${Gene_output_directory}${training_set_name}_${validation_set_name}_SNPs_extended_clumped_gene_temp
 
+ldsc.py --bfile ${gene_file}\ 
+ --l2\
+ --ld-wind-kb ${window}\
+ --out ${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final
+
+plink --bfile ${gene_file}\
+ --freq\
+ --out ${gene_file}
+
+if [[ ${whole_genome_genic} = "TRUE" ]]; then
+
+# Create Final PRS outputs directory
+if [ ! -d "./${training_set_name}_${validation_set_name}_output/PRS_scoring" ]; then
+        mkdir ./${training_set_name}_${validation_set_name}_output/PRS_scoring
+fi
+
+# Create score files for each significance threshold specified 
+Rscript ${path_to_scripts}RscriptEcho.R\
+       	${path_to_scripts}PRS_scoring_whole_genome.R\
+       	./${training_set_name}_${validation_set_name}_extrainfo/PRS_scoring_whole_genome.Rout\
+       	${training_set_name}\
+       	${validation_set_name}\
+       	${gene_bim_file}\
+        ${ending_name}\
+	${sig_thresholds[@]}
+
+# Create PRS profiles for each significance threshold specified
+for i in "${sig_thresholds[@]}" ;
+do
+        filename="./${training_set_name}_${validation_set_name}_output/PRS_scoring/${training_set_name}_${validation_set_name}_${ending_name}_significance_threshold_at_${i}.score"
+        plink --bfile ${gene_file} --score ${filename} --out ./${training_set_name}_${validation_set_name}_output/PRS_scoring/${training_set_name}_${validation_set_name}_${ending_name}_significance_threshold_at_${i}
+done
+
+fi
 Gene_regions=both
 
 elif [[ ${Gene_regions} = "extended" ]]; then
 	
 	gene_bim_file=${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final.bim
+        gene_file=${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final
+	ending_name=${Gene_regions}_gene_regions_Clumped_whole_genome_final
+	
 	magma --annotate window=35,10 --snp-loc ${gene_bim_file} --gene-loc ${path_to_stationary_data}${Gene_location_filename} --out ${Gene_output_directory}${training_set_name}_${validation_set_name}_SNPs_extended_clumped_gene_temp
 
+ldsc.py --bfile ${gene_file}\ 
+ --l2\
+ --ld-wind-kb ${window}\
+ --out ${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final
+
+plink --bfile ${gene_file}\
+ --freq\
+ --out ${gene_file}
+
+if [[ ${whole_genome_genic} = "TRUE" ]]; then
+
+# Create Final PRS outputs directory
+if [ ! -d "./${training_set_name}_${validation_set_name}_output/PRS_scoring" ]; then
+        mkdir ./${training_set_name}_${validation_set_name}_output/PRS_scoring
+fi
+
+# Create score files for each significance threshold specified 
+Rscript ${path_to_scripts}RscriptEcho.R\
+       	${path_to_scripts}PRS_scoring_whole_genome.R\
+       	./${training_set_name}_${validation_set_name}_extrainfo/PRS_scoring_whole_genome.Rout\
+       	${training_set_name}\
+       	${validation_set_name}\
+       	${gene_bim_file}\
+        ${ending_name}\
+	${sig_thresholds[@]}
+
+# Create PRS profiles for each significance threshold specified
+for i in "${sig_thresholds[@]}" ;
+do
+        filename="./${training_set_name}_${validation_set_name}_output/PRS_scoring/${training_set_name}_${validation_set_name}_${ending_name}_significance_threshold_at_${i}.score"
+        plink --bfile ${gene_file} --score ${filename} --out ./${training_set_name}_${validation_set_name}_output/PRS_scoring/${training_set_name}_${validation_set_name}_${ending_name}_significance_threshold_at_${i}
+done
+
+fi
 elif [[ ${Gene_regions} = "normal" ]]; then
 
 	gene_bim_file=${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final.bim
-        magma --annotate --snp-loc ${gene_bim_file} --gene-loc ${path_to_stationary_data}${Gene_location_filename} --out ${Gene_output_directory}${training_set_name}_${validation_set_name}_SNPs_normal_clumped_gene_temp
+        gene_file=${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final
+	ending_name=${Gene_regions}_gene_regions_Clumped_whole_genome_final
+
+	 magma --annotate --snp-loc ${gene_bim_file} --gene-loc ${path_to_stationary_data}${Gene_location_filename} --out ${Gene_output_directory}${training_set_name}_${validation_set_name}_SNPs_normal_clumped_gene_temp
+
+ldsc.py --bfile ${gene_file}\ 
+ --l2\
+ --ld-wind-kb ${window}\
+ --out ${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final
+
+plink --bfile ${gene_file}\
+ --freq\
+ --out ${gene_file}
+
+if [[ ${whole_genome_genic} = "TRUE" ]]; then
+
+# Create Final PRS outputs directory
+if [ ! -d "./${training_set_name}_${validation_set_name}_output/PRS_scoring" ]; then
+        mkdir ./${training_set_name}_${validation_set_name}_output/PRS_scoring
+fi
+
+# Create score files for each significance threshold specified 
+Rscript ${path_to_scripts}RscriptEcho.R\
+       	${path_to_scripts}PRS_scoring_whole_genome.R\
+       	./${training_set_name}_${validation_set_name}_extrainfo/PRS_scoring_whole_genome.Rout\
+       	${training_set_name}\
+       	${validation_set_name}\
+       	${gene_bim_file}\
+        ${ending_name}\
+	${sig_thresholds[@]}
+
+# Create PRS profiles for each significance threshold specified
+for i in "${sig_thresholds[@]}" ;
+do
+        filename="./${training_set_name}_${validation_set_name}_output/PRS_scoring/${training_set_name}_${validation_set_name}_${ending_name}_significance_threshold_at_${i}.score"
+        plink --bfile ${gene_file} --score ${filename} --out ./${training_set_name}_${validation_set_name}_output/PRS_scoring/${training_set_name}_${validation_set_name}_${ending_name}_significance_threshold_at_${i}
+done
 
 fi
 
+fi
+
+
 mkdir ${Gene_output_directory}Genes_PRS/ 
-exit 0 
 
 Rscript ${path_to_scripts}RscriptEcho.R\
- ${path_to_pathway_scripts}Pathway_PRS_scoring.R\
+ ${path_to_Gene_scripts}Gene_specific_polygenic_risk_score_and_clumped_information_for_randomised_sets.R\
  ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_${validation_set_name}_Pathway_PRS_scoring.Rout\
  ${training_set_name}\
  ${validation_set_name}\
- ${Pathway_output_directory}\
- ${path_to_stationary_data}${Pathway_filename}\
+ ${validation_set_usually_genotype_serial}\
+ ${Gene_output_directory}\
+ ${path_to_stationary_data}${Gene_location_filename}\
+ ${Gene_regions}\
  ${sig_thresholds[@]}
 
-${path_to_gene_scripts}PRS_scoring_plink_pathways.sh ::: ${pathways[@]} ::: ${path_to_scripts} ::: ${path_to_pathway_scripts} ::: ${system}
+
+## Unfinished, below is similar procedure for pathways ## 
 
 Rscript ${path_to_scripts}RscriptEcho.R\
  ${path_to_pathway_scripts}Collate_all_pathways.R\

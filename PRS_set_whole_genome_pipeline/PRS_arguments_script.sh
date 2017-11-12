@@ -63,6 +63,8 @@ fi
 
 if [[ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" = 'johnhubert-ThinkPad-P50' ]]; then
 
+  path_to_CLOZUK="/mnt/databank/CLOZUK/GWAS/BGE/RSupdate"
+  path_to_Biobank="/c8000xd3/big-wpcvm/UKBB/"	
   path_to_PGC_conversion="Summary_stat_manipulation"
   path_to_CLOZUK_conversion="Genotype_dataset_manipulation"
   path_to_covariate_file="$home_OS/johnhubert/Dropbox/whole_genome_testing/Stationary_data/CLOZUK2.r7.select2PC.eigenvec.txt"
@@ -120,14 +122,24 @@ if [[ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" = 'johnhuber
   window=500
   
   # Arguments for PRS_serial script
+  # DEFUNCT ARGUMENTS?#
   Multiple_Training_set_tables="TRUE"
   Running_in_Serial="TRUE"
+  
+  # Significance thresholds specifications
   sig_thresholds=(0.05 0.5)
+  sig_thresholds_lower_bounds=(0 0)
+  # Lower bounds as optional format to match up with plink lower bounds
+  
+  # arguments specific to PRS set analyses
   Extra_analyses=TRUE
   Name_of_extra_analysis=Pathways
+  randomise=TRUE
+  permutations=10000
   Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates"
   # either "extended" "normal" or "both" : change to a numerical input in the future
-  Gene_regions=normal #either ( "extended" "normal" "both" )	
+  Gene_regions=normal #either ( extended normal both )	
+  whole_genome_genic=TRUE
   external_harddrive="FALSE"
 fi
 
