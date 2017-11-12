@@ -1,3 +1,5 @@
+#! /bin/bash
+
 # Producing Chromosomes argument flat file # 
 
 #Generate random gene sets from all/brain-expressed genes, where

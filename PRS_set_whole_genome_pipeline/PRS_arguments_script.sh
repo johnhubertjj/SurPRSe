@@ -99,7 +99,7 @@ if [[ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" = 'johnhuber
   # Again I don't like it but was short on time!
 
   # Split_by_chromosome for genotype?
-  split_by_chromosome_required="FALSE" 
+  split_by_chromosome_required=FALSE 
   # Do a missingness check? 
   Missing_geno=FALSE
   genotype_missingness_check=FALSE
@@ -127,19 +127,20 @@ if [[ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" = 'johnhuber
   Running_in_Serial="TRUE"
   
   # Significance thresholds specifications
-  sig_thresholds=(0.05 0.5)
-  sig_thresholds_lower_bounds=(0 0)
+  sig_thresholds=(5e-08 1e-06 1e-04 0.01 0.05 0.1 0.2 0.5 1)
+  sig_thresholds_lower_bounds=(0 0 0 0 0 0 0 0 0)
   # Lower bounds as optional format to match up with plink lower bounds
   
   # arguments specific to PRS set analyses
   Extra_analyses=TRUE
-  Name_of_extra_analysis=Pathways
+  Name_of_extra_analysis=Genes
   randomise=TRUE
   permutations=10000
   Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates"
   # either "extended" "normal" or "both" : change to a numerical input in the future
-  Gene_regions=normal #either ( extended normal both )	
+  Gene_regions=both #either ( extended normal both )	
   whole_genome_genic=TRUE
+  Gene_specific_PRS=FALSE
   external_harddrive="FALSE"
 fi
 

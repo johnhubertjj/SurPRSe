@@ -80,7 +80,8 @@ Gene_output_directory="./${training_set_name}_${validation_set_name}_output/${Na
 
 sudo chmod  g+rwx ${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis}
 sudo chmod  g+rwx ${training_set_name}_${validation_set_name}_output/
- 
+sudo chmod  g+rwx ${path_to_gene_scripts}Genes_MAGMA_annotation_script.sh 
+
 if [ -e "${Pathway_output_directory}Pathways_analysis_empty_pathways_info_file.txt" ]; then
 	rm "${Pathway_output_directory}Pathways_analysis_empty_pathways_info_file.txt"
 fi
@@ -159,9 +160,9 @@ fi
 
 Gene_regions=extended
 
-	gene_bim_file=${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final.bim
-        gene_file=${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final
-	ending_name=${Gene_regions}_gene_regions_Clumped_whole_genome_final
+gene_bim_file=${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final.bim
+gene_file=${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final
+ending_name=${Gene_regions}_gene_regions_Clumped_whole_genome_final
         
 	magma --annotate window=35,10 --snp-loc ${gene_bim_file} --gene-loc ${path_to_stationary_data}${Gene_location_filename} --out ${Gene_output_directory}${training_set_name}_${validation_set_name}_SNPs_extended_clumped_gene_temp
 
@@ -203,9 +204,9 @@ Gene_regions=both
 
 elif [[ ${Gene_regions} = "extended" ]]; then
 	
-	gene_bim_file=${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final.bim
-        gene_file=${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final
-	ending_name=${Gene_regions}_gene_regions_Clumped_whole_genome_final
+gene_bim_file=${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final.bim
+gene_file=${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final
+ending_name=${Gene_regions}_gene_regions_Clumped_whole_genome_final
 	
 	magma --annotate window=35,10 --snp-loc ${gene_bim_file} --gene-loc ${path_to_stationary_data}${Gene_location_filename} --out ${Gene_output_directory}${training_set_name}_${validation_set_name}_SNPs_extended_clumped_gene_temp
 
@@ -245,9 +246,9 @@ done
 fi
 elif [[ ${Gene_regions} = "normal" ]]; then
 
-	gene_bim_file=${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final.bim
-        gene_file=${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final
-	ending_name=${Gene_regions}_gene_regions_Clumped_whole_genome_final
+gene_bim_file=${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final.bim
+gene_file=${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final
+ending_name=${Gene_regions}_gene_regions_Clumped_whole_genome_final
 
 	 magma --annotate --snp-loc ${gene_bim_file} --gene-loc ${path_to_stationary_data}${Gene_location_filename} --out ${Gene_output_directory}${training_set_name}_${validation_set_name}_SNPs_normal_clumped_gene_temp
 
@@ -288,6 +289,11 @@ fi
 
 fi
 
+if [[ ${Gene_specific_PRS} = "FALSE" ]]; then
+
+exit 1
+fi
+ 
 
 mkdir ${Gene_output_directory}Genes_PRS/ 
 

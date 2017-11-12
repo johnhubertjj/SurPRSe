@@ -1,5 +1,5 @@
 #!/bin/bash
-#exec &> logfile.txt
+exec &> logfile.txt
 
 whereami=$(uname -n)
 echo "$whereami"
@@ -26,26 +26,20 @@ source ${path_to_scripts}PRS_arguments_script.sh
 cat ${path_to_scripts}PRS_arguments_script.sh
 
 # Create arguments files for easier input into Rscripts for parallelisation # 
-Rscript ${path_to_scripts}RscriptEcho.R\
-	${path_to_scripts}Chromosome_arguments_text_file.R\ 
-	./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_Chromosome_arguments_text_file.Rout\
-	${training_set_name}\
-	${validation_set_name}\
-	${Chromosomes_to_analyse[@]}\
- 
-Rscript ${path_to_scripts}RscriptEcho.R\
-	${path_to_scripts}sig_thresholds_lower_bounds_arguments_text_file.R\ 
-	./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_sig_thresholds_lower_bounds_arguments_text_file.Rout\
-	${training_set_name}\
-	${validation_set_name}\
-	${sig_thresholds_lower_bounds[@]}\
+Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}Chromosome_arguments_text_file.R ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_Chromosome_arguments_text_file.Rout\
+ ${training_set_name}\
+ ${validation_set_name}\
+ ${Chromosomes_to_analyse[@]}\
 
-Rscript ${path_to_scripts}RscriptEcho.R\
-	${path_to_scripts}sig_thresholds_plink_arguments_text_file.R\ 
-	./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_sig_thresholds_plink_arguments_text_file.Rout\
-	${training_set_name}\
-	${validation_set_name}\
-	${sig_thresholds[@]}\
+Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}sig_thresholds_lower_bounds_arguments_text_file.R ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_sig_thresholds_lower_bounds_arguments_text_file.Rout\
+ ${training_set_name}\
+ ${validation_set_name}\
+ ${sig_thresholds_lower_bounds[@]}\
+
+Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}sig_thresholds_plink_arguments_text_file.R ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_sig_thresholds_plink_arguments_text_file.Rout\
+ ${training_set_name}\
+ ${validation_set_name}\
+ ${sig_thresholds[@]}\
 
 ${path_to_scripts}Summary_stats_to_chromosome_converter.sh ${Directory_to_work_from} ${path_to_scripts} ${system}
 
@@ -76,7 +70,7 @@ length_of_extra_analysis_array=`echo ${#Name_of_extra_analysis[@]}`
 	
 	elif [[ "${Name_of_extra_analysis[1]}" = "Genes" ]]; then
 		echo hi Gene
-		 ${path_to_gene_scripts}Gene_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_gene_scripts}
+		 ${path_to_gene_scripts}Gene_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_gene_scripts} ${Name_of_extra_analysis[1]}
 	fi
 else
 
