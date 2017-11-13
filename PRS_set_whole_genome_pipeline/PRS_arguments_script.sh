@@ -82,13 +82,13 @@ if [[ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" = 'johnhuber
   # - all other arguments in dataset arguments need to match file names with relevant add on to names, ONLY change these parts of the argument
   # - eventually, I will just have four arguments of dataset names and file names only (I'm sorry for this Katherine!)
  
-  training_set_usually_summary="CLOZUK_PGC2noclo_table${chromosome_number}"
+  training_set_usually_summary="CLOZUK_PGC2_table${chromosome_number}"
   training_set_original_filename="CLOZUK_PGC2noclo.METAL.assoc.dosage"
-  validation_set_usually_genotype="ALSPAC_hrc_imputed_step3_mri_brain_measurements_only_chr${chromosome_number}"
-  validation_set_usually_genotype_serial="ALSPAC_hrc_imputed_step3_mri_brain_measurements_only_chr"
+  validation_set_usually_genotype="impv1chr${chromosome_number}_limited_to_3000_brains"
+  validation_set_usually_genotype_serial="ALSPAC_hrc_imputed_step3_mri_brain_measurements_only4_chr"
   validation_set_full_name_without_chromosome="ALSPAC_hrc_imputed_step3_mri_brain_measurements_only"
-  training_set_name="CLOZUK_PGC2noclo"
-  validation_set_name="ALSPAC" 
+  training_set_name="CLOZUK_PGC2"
+  validation_set_name="Biobank_wv1_imaging" 
   
   # Pathway datasets
   Pathway_filename="Selected_Pocklington_plus_GO_pathways_SCHIZ.txt"

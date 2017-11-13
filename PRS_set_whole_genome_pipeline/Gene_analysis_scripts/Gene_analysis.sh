@@ -78,7 +78,10 @@ Gene_output_directory="./${training_set_name}_${validation_set_name}_output/${Na
         	mkdir ./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis}
 	fi
 
-chmod  g+rwx ${path_to_gene_scripts}Genes_MAGMA_annotation_script.sh 
+# Change permissions to allow analysis to be performed
+sudo chmod  g+rwx ${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis}
+sudo chmod  g+rwx ${training_set_name}_${validation_set_name}_output/
+sudo chmod  g+rwx ${path_to_gene_scripts}Genes_MAGMA_annotation_script.sh 
 
 if [ -e "${Pathway_output_directory}Pathways_analysis_empty_pathways_info_file.txt" ]; then
 	rm "${Pathway_output_directory}Pathways_analysis_empty_pathways_info_file.txt"
