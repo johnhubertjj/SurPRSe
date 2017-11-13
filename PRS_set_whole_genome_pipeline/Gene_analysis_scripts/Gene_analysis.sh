@@ -310,6 +310,7 @@ Rscript ${path_to_scripts}RscriptEcho.R\
 
 
 ## Unfinished, below is similar procedure for pathways ## 
+exit 1
 
 Rscript ${path_to_scripts}RscriptEcho.R\
  ${path_to_pathway_scripts}Collate_all_pathways.R\

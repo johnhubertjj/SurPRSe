@@ -41,6 +41,8 @@ significance_thresholds <- c(0.05,0.5)
 # setwd("~/Documents/CLOZUK_ALSPAC_PATHWAY_TESTING")
 # Gene_file_name <- "~/Documents/ALSPAC_gene_pathway_pipeline_test/CLOZUK_PGC2noclo_ALSPAC_output/Genes/ALSPAC_CLOZUK_PGC2noclo_extended_gene_regions_Clumped_whole_genome_final.bim"
 
+# setwd("~/Documents/CLOZUK_ALSPAC_PATHWAY_TESTING")
+# Gene_file_name <- "~/Documents/ALSPAC_gene_pathway_pipeline_test/CLOZUK_PGC2noclo_ALSPAC_output/Genes/ALSPAC_CLOZUK_PGC2noclo_extended_gene_regions_Clumped_whole_genome_final.bim"
 ### environment for functions
 e <- new.env()
 
