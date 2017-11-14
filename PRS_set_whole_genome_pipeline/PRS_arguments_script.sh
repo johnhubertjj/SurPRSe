@@ -84,9 +84,9 @@ if [[ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" = 'johnhuber
  
   training_set_usually_summary="CLOZUK_PGC2_table${chromosome_number}"
   training_set_original_filename="CLOZUK_PGC2noclo.METAL.assoc.dosage"
-  validation_set_usually_genotype="impv1chr${chromosome_number}_limited_to_3000_brains"
-  validation_set_usually_genotype_serial="ALSPAC_hrc_imputed_step3_mri_brain_measurements_only4_chr"
-  validation_set_full_name_without_chromosome="ALSPAC_hrc_imputed_step3_mri_brain_measurements_only"
+  validation_set_usually_genotype="Biobank_wv1_imaging_imputed_3000brains_chr${chromosome_number}"
+  validation_set_usually_genotype_serial="Biobank_wv1_imaging_imputed_3000brains_chr"
+  validation_set_full_name_without_chromosome="Biobank_wv1_imaging_imputed_3000brains"
   training_set_name="CLOZUK_PGC2"
   validation_set_name="Biobank_wv1_imaging" 
   

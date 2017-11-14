@@ -39,24 +39,27 @@ print(significance_thresholds)
 
 
 #Training_names <- c("HG19_pgc.scz.full.2012-04", "scz.swe.pgc1.results.v3","PGC2","CLOZUK_PGC2noclo")
-Training_names <- c("PGC1_only_more_sig_thresh", "PGC1_plussweden_more_sig_thresh", "PGC2_more_sig_thresh", "CLOZUK_PGC2noclo_more_sig_thresh")
+Training_names <- c("PGC1", "PGC1_swe", "PGC2noCLOZUK", "CLOZUK_PGC2noclo")
 Validation_name <- "ALSPAC"
 Scale_phenotypes <- T
 Scale_PRS <- T
-significance_thresholds <- c(5e-08, 1e-06, 1e-04, 0.01, 0.05, 0.1, 0.2, 0.5, 1)
+significance_thresholds <- c(5e-08,1e-06, 1e-04, 0.01, 0.05, 0.1, 0.2, 0.5, 1)
 
 for (Training_name in Training_names){ 
-#Training_name <- "PGC2"
+#Training_name <- "PGC2noCLOZUK"
 #Training_name <- "CLOZUK_PGC2noclo"
 #Training_name <- "scz.swe.pgc1.results.v3"
 #Training_name <- "HG19_pgc.scz.full.2012-04"
  
 # Write in the phenotype files
-Pheno_brain_thickness <- fread("ALSPAC_thickness_27january2017.txt")
-Pheno_brain_volume <-fread("ALSPAC_volumes_27january2017.txt") 
+Pheno_brain_thickness <- fread("~/Dropbox/ALSPAC_thickness_27january2017.txt")
+Pheno_brain_volume <-fread("~/Dropbox/ALSPAC_volumes_27january2017.txt") 
 
-# Collate all the scores together into one table
-my_files <- paste0(Training_name, "_", Validation_name,"_output/PRS_scoring/", Training_name, "_", Validation_name, "_whole_genome_significance_threshold_at_", significance_thresholds, ".profile")
+# Collate all the scores together into one table_normal:
+
+#my_files <- paste0(Training_name, "_", Validation_name,"_output/PRS_scoring/", Training_name, "_", Validation_name, "_normal_gene_regions_Clumped_whole_genome_final_significance_threshold_at_", significance_thresholds, ".profile")
+my_files <- paste0(Training_name, "_", Validation_name,"_output/PRS_scoring/", Training_name, "_", Validation_name, "_extended_gene_regions_Clumped_whole_genome_final_significance_threshold_at_", significance_thresholds, ".profile")
+
 my_data <- lapply(my_files, read.table, header=TRUE) 
 names(my_data) <- str_replace(my_files, pattern = ".profile", replacement = "")
 
@@ -171,6 +174,7 @@ assign(paste0("results_ICV",Training_name), results2)
 # Place the results into a list
 brain_volume_progression <- list(`results_HG19_pgc.scz.full.2012-04`, results_scz.swe.pgc1.results.v3, results_PGC2, results_CLOZUK_PGC2noclo)
 brain_volume_progression <- list(results_PGC1_only_more_sig_thresh, results_PGC1_plussweden_more_sig_thresh, results_PGC2_more_sig_thresh, results_CLOZUK_PGC2noclo_more_sig_thresh)
+brain_volume_progression <- list(results_PGC1, results_PGC1_swe, results_PGC2noCLOZUK, results_CLOZUK_PGC2noclo)
 ICV_progression <- list(`results_ICVHG19_pgc.scz.full.2012-04`, results_ICVscz.swe.pgc1.results.v3, results_ICVPGC2, results_ICVCLOZUK_PGC2noclo)
 
 #results_scaled_1 <- fread("~/Documents/CLOZUK_PGC2noclo.METAL/all_scaled_PGC1_no_sweden_HG19_UCSC_ALSPAC_brain_regions_association_PRS_results.txt")
@@ -183,11 +187,11 @@ ICV_progression <- list(`results_ICVHG19_pgc.scz.full.2012-04`, results_ICVscz.s
 
 ## PLOTS OF BETA AND SE (AND CI) ## 
 newdataframe_beta <- data.frame(brain_volume_progression[[1]]$test,brain_volume_progression[[1]]$estimate, brain_volume_progression[[2]]$estimate, brain_volume_progression[[3]]$estimate, brain_volume_progression[[4]]$estimate)
-names(newdataframe_beta) <- c("test", "PGC1", "PGC1swe", "PGC2", "QCLOZUK_PGC2noclo")
+names(newdataframe_beta) <- c("test", "PGC1", "PGC1swe", "PGC2", "CLOZUK_PGC2noclo")
 test_df <- t(newdataframe_beta)
 colnames(test_df) <- as.character(test_df[1,])
 test_df_beta <- test_df[-1,]
-test_df_beta <- cbind(test_df_beta,c("PGC1", "PGC1swe", "PGC2", "QCLOZUK_PGC2noclo"))
+test_df_beta <- cbind(test_df_beta,c("PGC1", "PGC1swe", "PGC2", "CLOZUK_PGC2noclo"))
 test_df_beta <- as.data.frame(test_df_beta)
 
 
@@ -196,11 +200,11 @@ number_of_phenotypes <- length(phenotypes)
 number_of_thresholds <- length(significance_thresholds)
 
 newdataframe_SE <- data.frame(brain_volume_progression[[1]]$test,brain_volume_progression[[1]]$SE, brain_volume_progression[[2]]$SE, brain_volume_progression[[3]]$SE, brain_volume_progression[[4]]$SE)
-names(newdataframe_SE) <- c("test", "PGC1", "PGC1swe", "PGC2", "QCLOZUK_PGC2noclo")
+names(newdataframe_SE) <- c("test", "PGC1", "PGC1swe", "PGC2", "CLOZUK_PGC2noclo")
 test_df_SE <- t(newdataframe_SE)
 colnames(test_df_SE) <- as.character(test_df_SE[1,])
 test_df_SE <- test_df_SE[-1,]
-test_df_SE <- cbind(test_df_SE,c("PGC1", "PGC1swe", "PGC2", "QCLOZUK_PGC2noclo"))
+test_df_SE <- cbind(test_df_SE,c("PGC1", "PGC1swe", "PGC2", "CLOZUK_PGC2noclo"))
 test_df_SE <- as.data.frame(test_df_SE)
 
 # create the first dataset for one significance threshold
@@ -290,7 +294,7 @@ for (i in 1:number_of_phenotypes){
 setwd("~/Desktop/")
 
 
-pdf("ALSPAC_PGC_all_brain_regions_all_sig_thresh_all_scaled.pdf", onefile = TRUE,paper = "A4")
+pdf("ALSPAC_PGC_all_brain_regions_all_sig_thresh_all_scaled_extended_brain_regions.pdf", onefile = TRUE,paper = "A4")
 invisible(lapply(gglist_0.05,print))
 dev.off()
 
