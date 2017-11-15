@@ -9,6 +9,7 @@ getRversion()
 library(ggplot2)
 library(gridExtra)
 library(data.table)
+library(cowplot)
 
 # required packages -- will only install if they are not already installed
 list.of.packages <- c("plyr", "stringr", "dplyr", "tidyr", "reshape2", "ggplot2", "scales", "data.table", "plotly")
@@ -261,6 +262,46 @@ for (i in 2:number_of_thresholds){
 
 all_plots$Pvaluethreshold <- as.factor(all_plots$Pvaluethreshold)
 gglist_0.05 <- list() 
+
+all_plots2<- all_plots[all_plots$Pvaluethreshold %in% c(5e-08, 1e-06, 0.05, 0.5),]
+all_plots2 <- all_plots2[all_plots2$Brain_region %in% c(subcortical_left,subcortical_right),] 
+
+subcortical_lR <- c(subcortical_left,subcortical_right)
+subcortical_phenotypes <- c("Lateral Ventricles","Thalamus", "Caudate Nucleus", " Putamen", "Pallidum", "Hippocampus", "Amygdala", "Nucleus Accumbens")
+
+gglist_final <- list()
+## Scatter plots with SE error bars in paper format ##
+for (i in 1:length(subcortical_left)){
+  # Plots for Betas and SE based on files #
+  all_plots_current <- all_plots2
+  all_plots_current$Brain_region <- as.character(all_plots_current$Brain_region)
+  
+  all_plots_current <- as.data.table(all_plots_current)
+  setkey(all_plots_current,"Brain_region")
+  
+  all_plots_current1 <- all_plots_current[subcortical_left[i]]
+  all_plots_current2 <- all_plots_current[subcortical_right[i]]
+  all_plots_currentLR <- rbind(all_plots_current1, all_plots_current2)
+  
+  p <- ggplot(all_plots_currentLR, aes(x=Dataset, y=BETA, fill = Pvaluethreshold, group=Dataset))
+  
+  p <- p +
+    geom_errorbar(aes(ymin = upper, ymax = lower), position = "dodge", width = 0.25) +
+    geom_point()
+  
+  p <- p + scale_x_discrete(labels=c("PGC1" = "PGC1", "PGC1swe" = "PGC1swe", "PGC2" = "PGC2", "CLOZUK_PGC2noclo" = "CLOZUK"))
+  p <- p + facet_grid(Brain_region ~ Pvaluethreshold) +
+    theme(strip.text.x = element_text(size = 10))
+  p <- p + geom_hline(aes(yintercept=0), colour = "red", linetype= "solid", alpha = 0.25)
+  p <- p + scale_fill_discrete(guide=FALSE)
+  p <- p + theme(axis.text.x = element_text(angle = 90,size = 10,hjust = 1,vjust = 0.5))
+  p <- p + ggtitle(subcortical_phenotypes[i])
+  p <- p + theme(plot.title = element_text( face = "bold",hjust = 0.5))
+  
+  gglist_final[[i]] <- p
+}
+
+Final_diagram <- plot_grid(gglist_final[[1]], gglist_final[[2]],gglist_final[[3]], gglist_final[[4]], gglist_final[[5]], gglist_final[[6]], gglist_final[[7]], gglist_final[[8]], ncol = 4, nrow = 2, labels = "AUTO")
 
 ## Scatter Plots with SE error bars ##
 for (i in 1:number_of_phenotypes){
