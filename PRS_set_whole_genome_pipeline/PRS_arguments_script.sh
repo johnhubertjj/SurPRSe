@@ -63,14 +63,14 @@ fi
 
 if [[ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" = 'johnhubert-ThinkPad-P50' ]]; then
 
-  path_to_CLOZUK="/mnt/databank/CLOZUK/GWAS/BGE/RSupdate"
-  path_to_Biobank="/c8000xd3/big-wpcvm/UKBB/"	
+  #path_to_CLOZUK="/mnt/databank/CLOZUK/GWAS/BGE/RSupdate"
+  #path_to_Biobank="/c8000xd3/big-wpcvm/UKBB/"	
   path_to_PGC_conversion="Summary_stat_manipulation"
   path_to_CLOZUK_conversion="Genotype_dataset_manipulation"
-  path_to_covariate_file="$home_OS/johnhubert/Dropbox/whole_genome_testing/Stationary_data/CLOZUK2.r7.select2PC.eigenvec.txt"
-  path_to_chromosome_length_file="$home_OS/johnhubert/Dropbox/whole_genome_testing/Stationary_data/UCSC_hg19_chromeinfo_length_of_chromosomes.txt"
-  path_to_new_fam_file="$home_OS/johnhubert/Dropbox/whole_genome_testing/output/Stationary_data/CLOZUK.r7.GWAS_IDs.fam"
-  path_to_stationary_data="$home_OS/johnhubert/Dropbox/Stationary_data/" 
+  path_to_stationary_data="${home_OS}/johnhubert/Dropbox/Stationary_data/" 
+  path_to_covariate_file="${path_to_stationary_data}CLOZUK2.r7.select2PC.eigenvec.txt"
+  path_to_chromosome_length_file="${path_to_stationary_data}UCSC_hg19_chromeinfo_length_of_chromosomes.txt"
+  path_to_new_fam_file="${path_to_stationary_data}CLOZUK.r7.GWAS_IDs.fam"
  
    
   # Datasets
@@ -82,13 +82,15 @@ if [[ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" = 'johnhuber
   # - all other arguments in dataset arguments need to match file names with relevant add on to names, ONLY change these parts of the argument
   # - eventually, I will just have four arguments of dataset names and file names only (I'm sorry for this Katherine!)
  
-  training_set_usually_summary="CLOZUK_PGC2_table${chromosome_number}"
-  training_set_original_filename="CLOZUK_PGC2noclo.METAL.assoc.dosage"
-  validation_set_usually_genotype="Biobank_wv1_imaging_imputed_3000brains_chr${chromosome_number}"
-  validation_set_usually_genotype_serial="Biobank_wv1_imaging_imputed_3000brains_chr"
-  validation_set_full_name_without_chromosome="Biobank_wv1_imaging_imputed_3000brains"
   training_set_name="CLOZUK_PGC2"
   validation_set_name="Biobank_wv1_imaging" 
+  training_set_original_filename="CLOZUK_PGC2noclo.METAL.assoc.dosage"
+  validation_set_full_name_without_chromosome="Biobank_wv1_imaging_imputed_3000brains"
+  
+  # DO NOT ALTER!!!
+  validation_set_usually_genotype="${validation_set_full_name_without_chromosome}_chr${chromosome_number}"
+  validation_set_usually_genotype_serial="${validation_set_full_name_without_chromosome}_chr"
+  training_set_usually_summary="${training_set_name}_table${chromosome_number}"
   
   # Pathway datasets
   Pathway_filename="Selected_Pocklington_plus_GO_pathways_SCHIZ.txt"
