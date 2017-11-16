@@ -62,4 +62,11 @@ path\_to\_stationary\_data: Location of standardised files for input into your P
  * additionally, each file must have the character string "\_chr" followed by the chromosome posistion appended to validation\_set\_full\_name\_without\_chromosome
   * eg: dataset\_chr1.tar.gz
 
+**Pathway\_filename**: path to gene-set file describing the locations of genes within gene-sets. Must be in format: gene-set gene
+
+* For each gene, the specified gene-set name is repeated on each row until the gene-set is complete
+ * Gene set names would be preferable without any special characters except underscores for delimiters
+
+**Gene\_location\_filename**: path to Gene location file. Either in MAGMA 1.6 .gene.loc fileformat or with the following columns: ENTREZ\_GENE\_ID, CHR, BP\_START, BP\_END, STRAND, GENE\_NAME. Ensure extension to file is also included and the BPSTART and BPEND are of gene boundaries if you wish to utilise extended gene boundaries (see Gene\_regions argument)  
+ 
 **split\_by\_chromosome\_required**: if plink files are already split by chromosome, please set to FALSE (without quotes), if one set of plink files is provided, please set to TRUE (also without quotes 
