@@ -27,9 +27,18 @@ Target_name <- args[3]
 Reference_name <- args[4]
 Target_dataset <- args[5]
 Reference_dataset <- args[6]
+Chromosomes <- args[7]
 
 Reference_dataset <- "/media/johnhubert/PHD DATA/CLOZUK2_noPGC2.assoc.dosage"
 Target_dataset <- "/media/johnhubert/PHD DATA/daner_PGC_SCZ52_0513a.resultfiles_PGC_SCZ52_0513.sh2_noclo.txt"
+
+summ_stat_target<- fread("CLOZUK2_noPGC2_chr1.txt")
+Training_table_1 <- fread("./RSupdate/CLOZUK_chr1.KAVIAR.update")
+summ_stat_reference <- fread("PGC2noCLOZUK_chr1.txt")
+
+colnames(Training_table_1) <- c("SNP","RS_SNP")
+summ_stat_target_RS <- merge(Training_table_1, summ_stat_target, by="SNP", all = F)
+summ_stat_reference[, RS_SNP := SNP ]
 
 #CHR <- args[8] 
 #SNP <- args[9]
@@ -39,9 +48,6 @@ Target_dataset <- "/media/johnhubert/PHD DATA/daner_PGC_SCZ52_0513a.resultfiles_
 #OR <- args[13]
 #BETA <- args[14]
 #number_of_frequency_columns <- args[16]
-
-summ_stat_target <- fread(Target_dataset)
-summ_stat_reference <- fread(Reference_dataset)
 
 
 # match SNPs with common identifiers 
@@ -120,37 +126,72 @@ chartr(old = c("A","T","C","G"), new = c("T", "G", "C", "A"))
          }
          assign("Combined_summ_stat", input_table1, envir = .GlobalEnv)
        }
+
+       ###############################
+       # ODDS RATIO TO BETA FUNCTION #
+       ###############################
+       # add new environment#
+       e <- new.env()
        
-       cat("Number of SNPS in ",Target_name, ": N=" ,nrow(summ_stat_target))
+       # BETA and OR change functions ###
+       log.to.odds <- function(imported.data.table) {
+         imported.dt.col.names <- colnames(imported.data.table)
+         if (any("OR" == imported.dt.col.names) == F) {
+           cat("No Odds Ratio included in", deparse(substitute(imported.data.table)))
+         }else{
+           assign("PGC.BETA", log(imported.data.table$OR), envir = e)
+         }
+       }
+       
+       Beta.to.odds <- function(imported.data.table) {
+         imported.dt.col.names <- colnames(imported.data.table)
+         if (any("BETA" == imported.dt.col.names) == F) {
+           cat("No BETA coefficient included in", deparse(substitute(imported.data.table)))
+         }else{
+           assign("PGC.OR", exp(imported.data.table$BETA), envir = e)
+         }
+       }
+       
+       change.odds <- function (odds.ratios) {
+         PGC.NEW.OR <- 1 / odds.ratios
+         assign("PGC.NEW.OR", PGC.NEW.OR, envir = e)
+       }
+       
+       change.beta <- function (beta.coefficients) {
+         PGC.NEW.BETA <- -(beta.coefficients)
+         assign("PGC.NEW.BETA", PGC.NEW.BETA, envir = e)
+       }
+####################################################################
+       cat("Number of SNPS in ",Target_name,"_chromosome_", chromosome.number,": N=" , nrow(summ_stat_target))
        
        ### Remove Duplicated SNPs in Training here ###
-       PGC.duplicated.removed <- which(duplicated(summ_stat_target$SNP))
-       PGC.duplicated.removed.rev <- which(duplicated(summ_stat_target$SNP, fromLast = T))
+       PGC.duplicated.removed <- which(duplicated(summ_stat_target$RS_SNP))
+       PGC.duplicated.removed.rev <- which(duplicated(summ_stat_target$RS_SNP, fromLast = T))
        
        ### One-line duplication check - Training ###
-       length(summ_stat_target$SNP)
+       length(summ_stat_target$RS_SNP)
        if (length(PGC.duplicated.removed) >= 1){
-         PGC_duplicate_SNPS <- summ_stat_target$SNP[(duplicated(summ_stat_target$SNP) | duplicated(summ_stat_target$SNP, fromLast = TRUE)) ]
-         summ_stat_target <- summ_stat_target[!(duplicated(summ_stat_target$SNP) | duplicated(summ_stat_target$SNP, fromLast = TRUE)) ]
+         PGC_duplicate_SNPS <- summ_stat_target$SNP[(duplicated(summ_stat_target$RS_SNP) | duplicated(summ_stat_target$RS_SNP, fromLast = TRUE)) ]
+         summ_stat_target <- summ_stat_target[!(duplicated(summ_stat_target$RS_SNP) | duplicated(summ_stat_target$RS_SNP, fromLast = TRUE)) ]
        }
-       length(summ_stat_target$SNP)
+       length(summ_stat_target$RS_SNP)
        
-       cat("Number of SNPS in ",Target_name," after duplication check Chr:",chromosome.number, "N=" ,nrow(summ_stat_target))
+       cat("Number of SNPS in ", Target_name," after duplication check Chr:",chromosome.number, "N=" ,nrow(summ_stat_target))
        
        
-       cat("Number of SNPS in ",Reference_name, ": N=" ,nrow(summ_stat_reference))
+       cat("Number of SNPS in ", Reference_name,"_chromosome_", chromosome.number,": N=" ,nrow(summ_stat_reference))
        
        ### Remove Duplicated SNPs in Training here ###
-       PGC.duplicated.removed <- which(duplicated(summ_stat_reference$SNP))
-       PGC.duplicated.removed.rev <- which(duplicated(summ_stat_reference$SNP, fromLast = T))
+       PGC.duplicated.removed <- which(duplicated(summ_stat_reference$RS_SNP))
+       PGC.duplicated.removed.rev <- which(duplicated(summ_stat_reference$RS_SNP, fromLast = T))
        
        ### One-line duplication check - Training ###
        length(summ_stat_reference$SNP)
        if (length(PGC.duplicated.removed) >= 1){
-         PGC_duplicate_SNPS <- summ_stat_reference$SNP[(duplicated(summ_stat_reference$SNP) | duplicated(summ_stat_reference$SNP, fromLast = TRUE)) ]
-         summ_stat_reference <- summ_stat_reference[!(duplicated(summ_stat_reference$SNP) | duplicated(summ_stat_reference$SNP, fromLast = TRUE)) ]
+         PGC_duplicate_SNPS <- summ_stat_reference$RS_SNP[(duplicated(summ_stat_reference$RS_SNP) | duplicated(summ_stat_reference$RS_SNP, fromLast = TRUE)) ]
+         summ_stat_reference <- summ_stat_reference[!(duplicated(summ_stat_reference$RS_SNP) | duplicated(summ_stat_reference$RS_SNP, fromLast = TRUE)) ]
        }
-       length(summ_stat_reference$SNP)
+       length(summ_stat_reference$RS_SNP)
        
        cat("Number of SNPS in ",Reference_name," after duplication check Chr:",chromosome.number, "N=" ,nrow(summ_stat_reference))
        
@@ -162,7 +203,7 @@ chartr(old = c("A","T","C","G"), new = c("T", "G", "C", "A"))
        summ_stat_reference$place <- c(1:length(summ_stat_reference$CHR))
        
        ### Merging based on BP position ###
-       Combined_summ_stat <- merge(x = PGC.alternative, y = CLOZUK.alternative, by = c('BP','CHR'), all = F, sort = F)
+       Combined_summ_stat <- merge(x = summ_stat_target_RS, y = summ_stat_reference, by = c('BP','CHR'), all = F, sort = F)
        
        ### Checking and limiting to SNPs with only one allele for each A1 and A2
        Checking_length_of_alleles(Combined_summ_stat)
@@ -176,16 +217,16 @@ chartr(old = c("A","T","C","G"), new = c("T", "G", "C", "A"))
        
        cat("Number of SNPs BEFORE flipping between CLOZUK and PGC Chr:", chromosome.number , "N=", nrow(Combined_summ_stat))
        
-       if (nrow(Combined_summ_stat) > nrow(PGC.alternative) | nrow(Combined_summ_stat) > nrow(CLOZUK.alternative)){
-         warning("combined dataset size is larger than one/both of the input datasets, check for duplicates")
-       }
+      # if (nrow(Combined_summ_stat) > nrow(PGC.alternative) | nrow(Combined_summ_stat) > nrow(CLOZUK.alternative)){
+      #   warning("combined dataset size is larger than one/both of the input datasets, check for duplicates")
+      # }
        
        a <- which(Combined_summ_stat$A1.x == "C" & Combined_summ_stat$A2.x == "G"); if (length(a)>0) {Combined_summ_stat<-Combined_summ_stat[-a]}
        a <- which(Combined_summ_stat$A1.x == "G" & Combined_summ_stat$A2.x == "C"); if (length(a)>0) {Combined_summ_stat<-Combined_summ_stat[-a]}
        a <- which(Combined_summ_stat$A1.x == "A" & Combined_summ_stat$A2.x == "T"); if (length(a)>0) {Combined_summ_stat<-Combined_summ_stat[-a]}
        a <- which(Combined_summ_stat$A1.x == "T" & Combined_summ_stat$A2.x == "A"); if (length(a)>0) {Combined_summ_stat<-Combined_summ_stat[-a]}
        
-       cat(Validation_name,"_", Training_name, "Chr:",chromosome.number,"remove A-T, C-G Step one: N=" ,nrow(Combined_summ_stat))
+       cat(Target_name,"_", Reference_name, "Chr:",chromosome.number,"remove A-T, C-G Step one: N=" ,nrow(Combined_summ_stat))
        
        a <- which(Combined_summ_stat$A1.y=="C" & Combined_summ_stat$A2.y=="G"); if (length(a)>0) {Combined_summ_stat<-Combined_summ_stat[-a]}
        a <- which(Combined_summ_stat$A1.y=="G" & Combined_summ_stat$A2.y=="C"); if (length(a)>0) {Combined_summ_stat<-Combined_summ_stat[-a]}
@@ -200,6 +241,10 @@ chartr(old = c("A","T","C","G"), new = c("T", "G", "C", "A"))
        # A1.y/A2.y are Genotype set alleles
        
        a <- which (Combined_summ_stat$A1.y == Combined_summ_stat$A2.x & Combined_summ_stat$A2.y == Combined_summ_stat$A1.x)
+       
+       # Find alleles that are swapped in a more complicated manner (eg: with A -> G)
+       a <- which(Combined_summ_stat$A1.y == Combined_summ_stat$A1.x & Combined_summ_stat$A2.y == Combined_summ_stat$A2.x)
+       d <- seq(1:nrow(Combined_summ_stat));d <- d[-a]
        
        # Specify which alleles in dataset 1 have A1 = A and A2 = G
        test1 <- which (Combined_summ_stat$A1.x[d] == "A" & Combined_summ_stat$A2.x[d] == "G")
@@ -223,6 +268,7 @@ chartr(old = c("A","T","C","G"), new = c("T", "G", "C", "A"))
            }
          }
        }
+       
        
        test2 <- which(Combined_summ_stat$A1.x[d] == "T" & Combined_summ_stat$A2.x[d] == "C")
        test2a <- which(Combined_summ_stat$A1.x[d] == "C" & Combined_summ_stat$A2.x[d] == "T")
