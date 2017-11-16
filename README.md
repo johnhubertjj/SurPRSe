@@ -43,14 +43,14 @@ path\_to\_stationary\_data: Location of standardised files for input into your P
 **path\_to\_new\_fam\_file**: Location of alternative fam file in case of plink files from meta-analysis or use of an alternatve phenotype: please use the format above replacing the covariate file with plink fam file 
 
 
-**training\_set\_name**: User defined name for the **Training** dataset in the polygenic risk score. Does not have to match the file name but **MUST NOT** include any deliminations.  
+**training\_set\_name**: User defined name for the **Training** dataset in the polygenic risk score. Does not have to match the file name but **MUST NOT** include any delimiters.  
 
 
 
 **training\_set\_original\_filename**: path to the **Training dataset** for input into polygenic risk score.  
 
 
-**validation\_set\_name**: User defined name for the **Test** dataset in the polygenic risk score. Does not have to match the file name but **MUST NOT** include any deliminations.  
+**validation\_set\_name**: User defined name for the **Test** dataset in the polygenic risk score. Does not have to match the file name but **MUST NOT** include any delimiters.  
 
 **validation\_set\_full\_name\_without\_chromosome**: path and plink prefix for **Test dataset**. File format must be the same as input into the --bfile argument to plink.
 
