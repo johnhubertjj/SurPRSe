@@ -1,7 +1,7 @@
 #!/bin/bash
 
 log_file_name=${1}
-#exec &> "${log_file_name}"_logfile.txt
+exec &> "${log_file_name}"_logfile.txt
 
 whereami=$(uname -n)
 echo "$whereami"
