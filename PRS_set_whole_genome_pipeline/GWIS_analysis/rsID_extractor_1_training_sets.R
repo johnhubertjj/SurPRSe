@@ -33,8 +33,10 @@ Reference_dataset <- "/media/johnhubert/PHD DATA/CLOZUK2_noPGC2.assoc.dosage"
 Target_dataset <- "/media/johnhubert/PHD DATA/daner_PGC_SCZ52_0513a.resultfiles_PGC_SCZ52_0513.sh2_noclo.txt"
 
 summ_stat_target<- fread("CLOZUK2_noPGC2_chr1.txt")
+summ_stat_target2 <- copy(summ_stat_target)
 Training_table_1 <- fread("./RSupdate/CLOZUK_chr1.KAVIAR.update")
 summ_stat_reference <- fread("PGC2noCLOZUK_chr1.txt")
+summ_stat_reference_2 <- copy(summ_stat_reference)
 
 colnames(Training_table_1) <- c("SNP","RS_SNP")
 summ_stat_target_RS <- merge(Training_table_1, summ_stat_target, by="SNP", all = F)
@@ -51,18 +53,18 @@ summ_stat_reference[, RS_SNP := SNP ]
 
 
 # match SNPs with common identifiers 
-combined_table_1 <- merge(summ_stat_target, summ_stat_reference, by = c("CHR","BP","A1","A2"), all = F)
+#combined_table_1 <- merge(summ_stat_target, summ_stat_reference, by = c("CHR","BP","A1","A2"), all = F)
 
 # alter the allele positions
-altered_table_reference_1 <- setnames(summ_stat_reference, old = c("A1","A2"), new = c("A2","A1"))
+#altered_table_reference_1 <- setnames(summ_stat_reference, old = c("A1","A2"), new = c("A2","A1"))
 
 #merge again
-combined_table_2 <- merge(summ_stat_target,altered_table_reference_1, by = c("CHR","BP","A1","A2"), all = F)
-combined_table_3 <- merge(combined_table_1,combined_table_2, by = c("CHR","BP"), all = F)
+#combined_table_2 <- merge(summ_stat_target,altered_table_reference_1, by = c("CHR","BP","A1","A2"), all = F)
+#combined_table_3 <- merge(combined_table_1,combined_table_2, by = c("CHR","BP"), all = F)
 
-final_table <- rbind(combined_table_1, combined_table_2)
+#final_table <- rbind(combined_table_1, combined_table_2)
 
-chartr(old = c("A","T","C","G"), new = c("T", "G", "C", "A")) 
+#chartr(old = c("A","T","C","G"), new = c("T", "G", "C", "A")) 
        
        
        
@@ -162,6 +164,7 @@ chartr(old = c("A","T","C","G"), new = c("T", "G", "C", "A"))
          assign("PGC.NEW.BETA", PGC.NEW.BETA, envir = e)
        }
 ####################################################################
+       
        cat("Number of SNPS in ",Target_name,"_chromosome_", chromosome.number,": N=" , nrow(summ_stat_target))
        
        ### Remove Duplicated SNPs in Training here ###
@@ -195,6 +198,22 @@ chartr(old = c("A","T","C","G"), new = c("T", "G", "C", "A"))
        
        cat("Number of SNPS in ",Reference_name," after duplication check Chr:",chromosome.number, "N=" ,nrow(summ_stat_reference))
        
+#       if(BETA == FALSE & OR == TRUE) {  
+#         ### Adding BETA column to data
+#         log.to.odds(PGC.alternative)
+#         PGC.alternative[,BETA := e$PGC.BETA]
+#         PGC.data.frame[,BETA := e$PGC.BETA]
+#       }
+       
+#       if(BETA == TRUE & OR == FALSE) {
+#         Beta.to.odds(PGC.alternative)
+#         PGC.alternative[, OR := e$PGC.OR]
+#         PGC.data.frame[, OR := e$PGC.OR]
+#       }
+       
+#       if(BETA == FALSE & OR == FALSE){
+#         stop("neither BETAs or Odds ratios supplied in the Training set datatable, please calculate before merging with Genotype")
+#       }
        
        
        
@@ -203,7 +222,7 @@ chartr(old = c("A","T","C","G"), new = c("T", "G", "C", "A"))
        summ_stat_reference$place <- c(1:length(summ_stat_reference$CHR))
        
        ### Merging based on BP position ###
-       Combined_summ_stat <- merge(x = summ_stat_target_RS, y = summ_stat_reference, by = c('BP','CHR'), all = F, sort = F)
+       Combined_summ_stat <- merge(x = summ_stat_reference, y = summ_stat_target, by = c('BP','CHR'), all = F, sort = F)
        
        ### Checking and limiting to SNPs with only one allele for each A1 and A2
        Checking_length_of_alleles(Combined_summ_stat)
@@ -241,6 +260,23 @@ chartr(old = c("A","T","C","G"), new = c("T", "G", "C", "A"))
        # A1.y/A2.y are Genotype set alleles
        
        a <- which (Combined_summ_stat$A1.y == Combined_summ_stat$A2.x & Combined_summ_stat$A2.y == Combined_summ_stat$A1.x)
+       
+       # Change the values of the OR to suit Allele changes #
+       if (length(a) >= 1) {
+         # Combined_summ_stat$BETA[a] <- (-Combined_summ_stat$BETA[a])
+         PGC.OR <- Combined_summ_stat$OR.x[a]
+         #PGC.BETA <- Combined_summ_stat$BETA[a]
+         change.odds(PGC.OR)
+         #change.beta(PGC.BETA)
+         Combined_summ_stat$OR.x[a]<- e$PGC.NEW.OR
+         #Combined_summ_stat$BETA[a] <- e$PGC.NEW.BETA
+         rm(PGC.NEW.OR, envir = e)
+         rm(PGC.OR)
+         #rm(PGC.NEW.BETA, envir = e)
+         #rm(PGC.BETA)
+         Combined_summ_stat$A1.x[a] <- as.character(Combined_summ_stat$A1.y[a])
+         Combined_summ_stat$A2.x[a] <- as.character(Combined_summ_stat$A2.y[a])
+       }
        
        # Find alleles that are swapped in a more complicated manner (eg: with A -> G)
        a <- which(Combined_summ_stat$A1.y == Combined_summ_stat$A1.x & Combined_summ_stat$A2.y == Combined_summ_stat$A2.x)
@@ -293,6 +329,24 @@ chartr(old = c("A","T","C","G"), new = c("T", "G", "C", "A"))
        
        a <- which(Combined_summ_stat$A1.y==Combined_summ_stat$A2.x & Combined_summ_stat$A2.y==Combined_summ_stat$A1.x)
        
+       # Same OR change #
+       if (length(a) >= 1 ){
+         # Combined_summ_stat$BETA[a] <- (-Combined_summ_stat$BETA[a])
+         PGC.OR <- Combined_summ_stat$OR.x[a]
+         #PGC.BETA <- Combined_summ_stat$BETA[a]
+         change.odds(PGC.OR)
+         #change.beta(PGC.BETA)
+         Combined_summ_stat$OR.x[a]<- e$PGC.NEW.OR
+         #Combined_summ_stat$BETA[a] <- e$PGC.NEW.BETA
+         rm(PGC.NEW.OR, envir = e)
+         rm(PGC.OR)
+         #rm(PGC.NEW.BETA, envir = e)
+         #rm(PGC.BETA)
+         
+         Combined_summ_stat$A1.x[a] <- as.character(Combined_summ_stat$A1.y[a])
+         Combined_summ_stat$A2.x[a] <- as.character(Combined_summ_stat$A2.y[a])
+       }
+       
        a <- which(Combined_summ_stat$A1.y != Combined_summ_stat$A1.x | Combined_summ_stat$A2.y!=Combined_summ_stat$A2.x)
        if (length(a)>0) Combined_summ_stat <- Combined_summ_stat[-a,]
        cat("Chr:", chromosome.number,", remove A-T, C-G and other mismatches: N=", nrow(Combined_summ_stat))
@@ -301,16 +355,49 @@ chartr(old = c("A","T","C","G"), new = c("T", "G", "C", "A"))
        PGC.final.index <- Combined_summ_stat$place.x
        PGC.A1.allele.changes <- Combined_summ_stat$A1.x
        PGC.A2.allele.changes <- Combined_summ_stat$A2.x
-       PGC.OR.changes <- Combined_summ_stat$OR
-       PGC.BETA.changes <- Combined_summ_stat$BETA
+       PGC.OR.changes <- Combined_summ_stat$OR.x
+       #PGC.BETA.changes <- Combined_summ_stat$BETA
        CLOZUK.final.index <- Combined_summ_stat$place.x
        
        
        ### Alter original files to have the right allele switching and the right BETA coefficient #
-       PGC.data.frame <- PGC.data.frame[PGC.final.index,A1:= PGC.A1.allele.changes]
-       PGC.data.frame <- PGC.data.frame[PGC.final.index,A2:= PGC.A2.allele.changes]
-       PGC.data.frame <- PGC.data.frame[PGC.final.index,OR:= PGC.OR.changes]
-       PGC.data.frame <- PGC.data.frame[PGC.final.index,BETA:= PGC.BETA.changes]
-       oldnames_training <- colnames(PGC.data.frame)
+       summ_stat_reference <- summ_stat_reference[PGC.final.index, A1:= PGC.A1.allele.changes]
+       summ_stat_reference <- summ_stat_reference[PGC.final.index,A2:= PGC.A2.allele.changes]
+       summ_stat_reference <- summ_stat_reference[PGC.final.index,OR:= PGC.OR.changes]
+       # summ_stat_reference <- summ_stat_reference[PGC.final.index,BETA:= PGC.BETA.changes]
+       oldnames_training <- colnames(summ_stat_reference)
+       
+       
+       ### checking everything is above board ###
+       Checking_allele_swapping(summ_stat_reference, summ_stat_reference_2, which.is.combined = "NONE")
+       Checking_allele_swapping(summ_stat_target, summ_stat_target2, which.is.combined = "NONE")
+       
+       if (length(e$summ_stat_targetflipped.alleles) != 0) {
+         warning("alleles have been flipped on CLOZUK")
+       }
+         checking.which.OR.do.not.equal.each.other <- which(summ_stat_reference$OR != summ_stat_reference_2$OR)
+         rm(PGC.data.frame.original)
+         
+         problematic.SNPs <- match(e$summ_stat_referenceflipped.alleles, checking.which.OR.do.not.equal.each.other)
+         problematic.SNPs <- which(is.na(problematic.SNPs))
+         check1_index <- e$summ_stat_referenceflipped.alleles[problematic.SNPs]
+         check1 <- summ_stat_reference[check1_index]
+         check2 <- summ_stat_reference[check1_index]
+         
+         if (all(check1$OR == 1) & all(check2$OR == 1)){
+           cat("You have",length(check1$CHR),"flipped SNPs with OR = 1")
+         } else {
+           warning("There is an uneven amount of flipped SNPs")
+         }
+       
+
+       ### Checking conversions of SNPs ###
+       checking.duplications.PGC <- which (duplicated(combined.CLOZUK.PGC$SNP.x))
+       checking.duplications.CZK <- which (duplicated(combined.CLOZUK.PGC$SNP.y))
+       
+       if (length(checking.duplications.CZK) != 0 & length(checking.duplications.PGC) != 0) {
+         warning("There are duplicated SNPs common between CLOZUK and PGC")
+       }
+       
        
   
