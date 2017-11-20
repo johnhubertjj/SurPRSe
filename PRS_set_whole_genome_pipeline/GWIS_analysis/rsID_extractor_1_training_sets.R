@@ -32,10 +32,11 @@ Chromosomes <- args[7]
 Reference_dataset <- "/media/johnhubert/PHD DATA/CLOZUK2_noPGC2.assoc.dosage"
 Target_dataset <- "/media/johnhubert/PHD DATA/daner_PGC_SCZ52_0513a.resultfiles_PGC_SCZ52_0513.sh2_noclo.txt"
 
-summ_stat_target<- fread("CLOZUK2_noPGC2_chr1.txt")
+for (chromosome.number in 1:22){
+summ_stat_target<- fread(paste0("CLOZUK2_noPGC2_chr",chromosome.number,".txt"))
 summ_stat_target2 <- copy(summ_stat_target)
-Training_table_1 <- fread("./RSupdate/CLOZUK_chr1.KAVIAR.update")
-summ_stat_reference <- fread("PGC2noCLOZUK_chr1.txt")
+Training_table_1 <- fread(paste0("./RSupdate/CLOZUK_chr",chromosome.number,".KAVIAR.update"))
+summ_stat_reference <- fread(paste0("PGC2noCLOZUK_chr",chromosome.number,".txt"))
 summ_stat_reference_2 <- copy(summ_stat_reference)
 
 colnames(Training_table_1) <- c("SNP","RS_SNP")
@@ -399,5 +400,5 @@ summ_stat_reference[, RS_SNP := SNP ]
          warning("There are duplicated SNPs common between CLOZUK and PGC")
        }
        
-       
+}
   
