@@ -131,7 +131,7 @@ if [ ! -d "./${training_set_name}_${validation_set_name}_output/PRS_scoring" ]; 
   	mkdir ./${training_set_name}_${validation_set_name}_output/PRS_scoring
 fi
 
-gene_bim_file="./${validation_set_name}_${training_set_name}_FULL_GENOME_CLUMPED.bim"
+gene_bim_file="./${training_set_name}_${validation_set_name}_output/${validation_set_name}_${training_set_name}_FULL_GENOME_CLUMPED.bim"
 ending_name="FULL_GENOME_CLUMPED"
 
 # Create score files for each significance threshold specified 
@@ -140,7 +140,7 @@ Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}PRS_scoring_whole_geno
 # Create PRS profiles for each significance threshold specified
 for i in "${sig_thresholds[@]}" ;
 do
-	filename="./${training_set_name}_${validation_set_name}_output/PRS_scoring/${training_set_name}_${validation_set_name}_whole_genome_significance_threshold_at_${i}.score"
+	filename="./${training_set_name}_${validation_set_name}_output/PRS_scoring/${training_set_name}_${validation_set_name}_${ending_name}_significance_threshold_at_${i}.score"
 	plink --bfile ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_${training_set_name}_FULL_GENOME_CLUMPED --score ${filename} --out ./${training_set_name}_${validation_set_name}_output/PRS_scoring/${training_set_name}_${validation_set_name}_whole_genome_significance_threshold_at_${i}
 done
 

@@ -56,11 +56,12 @@ Column_headers <- c("CHR", "SNP", "BP", "A1", "A2", "OR", "BETA")
 Column_headers_to_keep_elements <- which(Column_headers_to_keep == TRUE)
 Column_headers <- Column_headers[Column_headers_to_keep_elements]
 
+#Column_headers <- c("CHR","SNP", "BP", "A1", "A2", "BETA")
  #setwd("~/Documents/testing_cross_disorder") 
- #Validation_datatable_bim_file <- "CLOZUK_GWAS_BGE_chr14.bim"
+ #Validation_datatable_bim_file <- "COGSv2016_IMPUTE2_Missing_hwe_chr22/COGSv2016_IMPUTE2_Missing_hwe_chr22.bim"
 # Validation_datatable_bim_file <- "/Volumes/HD-PCU2/g1000_European_cohort_only_NO_bad_LD_Extracted.bim"
 # Training_datatable <- "/Volumes/HD-PCU2/ADD/daner_meta_filtered_NA_iPSYCH23_PGC11_sigPCs_woSEX_2ell6sd_EUR_Neff_70.meta"
- #Training_datatable <- "/Volumes/HD-PCU2/PGC_noCLOZUK_data/PGC_table14.txt"
+#Training_datatable <- "CLOZUK_PGC2noCOGS_table22.txt"
 ###############################
 # ODDS RATIO TO BETA FUNCTION #
 ###############################
@@ -271,16 +272,17 @@ if (all(combined_a == combined_b)){
   stop("duplicated SNPs in training datset, refer back and correct")
 }
 length(combined.CLOZUK.PGC$SNP.x)
-
-### Checking and limiting to SNPs with only one allele for each A1 and A2
-Checking_length_of_alleles(combined.CLOZUK.PGC)
-
 # Change all alleles to uppercase: saving time method
 # below it states:
 ## assign columns you want to change to object cols
 ## take all rows of data.table; apply the toupper function to Subset of Data columns named in cols object
 cols <- c('A1.x','A2.x','A1.y','A2.y')
 combined.CLOZUK.PGC[, (cols) := lapply(.SD, toupper), .SDcols = cols ]
+
+### Checking and limiting to SNPs with only one allele for each A1 and A2
+Checking_length_of_alleles(combined.CLOZUK.PGC)
+
+
 
 cat("Number of SNPs BEFORE flipping between CLOZUK and PGC Chr:", chromosome.number , "N=", nrow(combined.CLOZUK.PGC))
 

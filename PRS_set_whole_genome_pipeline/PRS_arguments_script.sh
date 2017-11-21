@@ -82,10 +82,10 @@ if [[ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" = 'johnhuber
   # - all other arguments in dataset arguments need to match file names with relevant add on to names, ONLY change these parts of the argument
   # - eventually, I will just have four arguments of dataset names and file names only (I'm sorry for this Katherine!)
  
-  training_set_name="CLOZUK_PGC2"
-  validation_set_name="Biobank_wv1_imaging" 
-  training_set_original_filename="CLOZUK_PGC2noclo.METAL.assoc.dosage"
-  validation_set_full_name_without_chromosome="Biobank_wv1_imaging_imputed_3000brains"
+  training_set_name="BIP_PGC2"
+  validation_set_name="COGSv2016_IMPUTE2" 
+  training_set_original_filename="daner_PGC_BIP32b_mds7a"
+  validation_set_full_name_without_chromosome="COGSv2016_IMPUTE2_Missing_hwe"
   
   # DO NOT ALTER!!!
   validation_set_usually_genotype="${validation_set_full_name_without_chromosome}_chr${chromosome_number}"
@@ -107,7 +107,7 @@ if [[ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" = 'johnhuber
   genotype_missingness_check=FALSE
   # MAF, INFO and SE
   MAF_summary="FALSE"
-  MAF_threshold=0.1
+  MAF_threshold=0.01
   MAF_genotype=TRUE
   INFO_summary="TRUE"
   INFO_threshold=0.9
@@ -134,14 +134,14 @@ if [[ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" = 'johnhuber
   # Lower bounds as optional format to match up with plink lower bounds
   
   # arguments specific to PRS set analyses
-  Extra_analyses=TRUE
-  Name_of_extra_analysis=Genes
-  randomise=TRUE
+  Extra_analyses=FALSE
+  Name_of_extra_analysis=NULL
+  randomise=FALSE
   permutations=10000
   Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates"
   # either "extended" "normal" or "both" : change to a numerical input in the future
   Gene_regions=both #either ( extended normal both )	
-  whole_genome_genic=TRUE
+  whole_genome_genic=FALSE
   Gene_specific_PRS=FALSE
   external_harddrive="FALSE"
 fi
