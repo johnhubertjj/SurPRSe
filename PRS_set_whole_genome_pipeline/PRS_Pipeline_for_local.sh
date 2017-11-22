@@ -75,8 +75,6 @@ length_of_extra_analysis_array=`echo ${#Name_of_extra_analysis[@]}`
 		 ${path_to_gene_scripts}Gene_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_gene_scripts} ${Name_of_extra_analysis[1]}
 	fi
 else
-
-exit 0	
 	# Need an alternative to Raven's log files to extract locally on the computer probably output important information to one file
 	${path_to_scripts}PRS_ANALYSIS_SERIAL_no_set.sh ${Directory_to_work_from} ${path_to_scripts} ${system}
 fi
