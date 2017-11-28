@@ -74,13 +74,6 @@ if [[ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" = 'johnhuber
  
    
   # Datasets
-
-  # Dataset naming is unnessarily confusing here, essentially:\
-  # - training set name and validation set name are the names that THE USER wants \
-  # to call each dataset, they DO NOT need to match the file names
-  # - the beginning (before '_table') of training_set_usually_summary needs to match to training_set_name
-  # - all other arguments in dataset arguments need to match file names with relevant add on to names, ONLY change these parts of the argument
-  # - eventually, I will just have four arguments of dataset names and file names only (I'm sorry for this Katherine!)
  
   training_set_name="BIP_PGC2"
   validation_set_name="COGSv2016_IMPUTE2" 

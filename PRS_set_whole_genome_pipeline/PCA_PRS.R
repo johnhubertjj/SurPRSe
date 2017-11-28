@@ -41,14 +41,19 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
 
 #Schizophrenia <- fread("/Volumes/PhD_storage/PGC_CLOZUK_output/PRS_scoring/PGC_CLOZUK_whole_genome_significance_threshold_at_0.1.profile")
 Schizophrenia <- fread("~/Dropbox/PRS_scores_different_summary_stats_datasets/PGC_CLOZUK_whole_genome_significance_threshold_at_0.1.profile")
+
 #Bipolar <- fread("/Volumes/PhD_storage/BIP_CLOZUK_output/PRS_scoring/BIP_CLOZUK_whole_genome_significance_threshold_at_0.4.profile")
 Bipolar <- fread("~/Dropbox/PRS_scores_different_summary_stats_datasets/BIP_CLOZUK_whole_genome_significance_threshold_at_0.4.profile")
+
 #Educational_attainment <- fread("/Volumes/PhD_storage/EDU_main_CLOZUK_output/PRS_scoring/EDU_main_CLOZUK_whole_genome_significance_threshold_at_0.3.profile")
 Educational_attainment <- fread("~/Dropbox/PRS_scores_different_summary_stats_datasets/EDU_main_CLOZUK_whole_genome_significance_threshold_at_0.3.profile")
+
 #PGC_MDD <- fread("/Volumes/PhD_storage/PGC_MDD_CLOZUK_output/PRS_scoring/PGC_MDD_CLOZUK_whole_genome_significance_threshold_at_0.45.profile")
 PGC_MDD <- fread("~/Dropbox/PRS_scores_different_summary_stats_datasets/PGC_MDD_CLOZUK_whole_genome_significance_threshold_at_0.45.profile")
+
 #BIPvsSCZ <- fread("/Volumes/PhD_storage/BIPvsSCZ_CLOZUK_output/PRS_scoring/BIPvsSCZ_CLOZUK_whole_genome_significance_threshold_at_0.35.profile")
 BIPvsSCZ <- fread("~/Dropbox/PRS_scores_different_summary_stats_datasets/BIPvsSCZ_CLOZUK_whole_genome_significance_threshold_at_0.35.profile")
+
 #Neuroticism <- fread("/Volumes/PhD_storage/Neurot_Assoc_Biobank_CLOZUK_output/PRS_scoring/Neurot_Assoc_Biobank_CLOZUK_whole_genome_significance_threshold_at_0.15.profile")
 Neuroticism <- fread("~/Dropbox/PRS_scores_different_summary_stats_datasets/Neurot_Assoc_Biobank_CLOZUK_whole_genome_significance_threshold_at_0.15.profile")
 IQ <- fread("~/Dropbox/IQ_2017_PROFILES/PRS_scoring/IQ_GWAS_2017_CLOZUK_whole_genome_significance_threshold_at_0.2.profile")
