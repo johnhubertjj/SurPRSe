@@ -1,15 +1,6 @@
 #!/bin/bash
 
 exec &> Rtestoutclusterlogfile$1.txt
-#PBS -q batch_long
-#PBS -P PR54
-#PBS -l select=1:ncpus=1:mem=10GB
-#PBS -l walltime=24:00:00
-#PBS -o /home/c1020109/
-#PBS -e /home/c1020109/
-#PBS -j oe
-#PBS -J 1-22
-#PBS -N PRS_whole_genome
 
 # script requries 22 files for each validation and training set
 
@@ -17,29 +8,6 @@ exec &> Rtestoutclusterlogfile$1.txt
 whereami=$(uname -n)
 echo "$whereami"
 system=$4
-
-if [[ "$whereami" = *"raven"* ]]; then
-  # assign a new variable for the PBS_ARRAY_variable
-  chromosome_number=${PBS_ARRAY_INDEX}
-  
-  # Load both Plink and R
-  module purge
-  module load R/3.3.0
-  module load plink/1.9c3
-  module load python/2.7.11
-  module load magma/1.06
-
-  cd $PBS_O_WORKDIR
-  path_to_scripts="/home/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/"
-  
-  # Assign the shell variables
-  source ${path_to_scripts}PRS_arguments_script.sh 
-  cat ${path_to_scripts}PRS_arguments_script.sh 
-   
-  # Alter/add variables depending on what type of Training dataset you have
-  source ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
-  cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
-fi
  
 if [[ "$system" = "MAC" || "$system" = "LINUX" ]]; then
   # add directory to work from at the top of the script (just in case)
@@ -310,12 +278,12 @@ rm ./${training_set_name}_${validation_set_name}_output/extracted_Duplicate_snps
 rm ./${training_set_name}_${validation_set_name}_output/CLUMPED_EXTRACT_${validation_set_name}_chr${chromosome_number}.txt 
 
 # Append job ID to PRS_arguments_script
-if [[ "$PBS_ARRAYID" = 1 ]]; then
-	echo "Batch_job_ID=${PBS_JOBID}" >> ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
-fi
+#if [[ "$PBS_ARRAYID" = 1 ]]; then
+#	echo "Batch_job_ID=${PBS_JOBID}" >> ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
+#fi
 
-#purge all modules 
-if [[ "$whereami" = *"raven"* ]]; then
-	module purge
+if [[ "${Using_raven}" = "TRUE" ]]; then
+#Purge all modules
+module purge
 fi
 

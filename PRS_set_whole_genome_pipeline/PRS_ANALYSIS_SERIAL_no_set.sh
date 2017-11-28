@@ -1,14 +1,6 @@
 #!/bin/bash
 
-#PBS -q serial
-#PBS -P PR54
-#PBS -l select=1:ncpus=1:mem=8GB
-#PBS -l walltime=2:00:00
-#PBS -j oe
-#PBS -o /home/c1020109/merging_datasets_PRS_information
-#PBS -N merging_datasets_and_calculating_PRS
-
-if [[ "$whereami" = *"raven"* ]]; then
+if [[ "$Using_raven" = "TRUE" ]]; then
 	cd $PBS_O_WORKDIR
 fi
 
@@ -21,31 +13,6 @@ system=$3
  #echo "Press CTRL+C to proceed."
  #trap "pkill -f 'sleep 1h'" INT
  #trap "set +x ; sleep 1h ; set -x" DEBUG
-
-
-if [[ "$whereami" = *"raven"* ]]; then
-  
-  # assign a new variable for the PBS_ARRAY_variable
-  chromosome_number=NA
-
-  # Load both Plink and R
-  module purge
-  module load R/3.3.0
-  module load plink/1.9c3
-  module load python/2.7.11
-  module load magma/1.06
-
-  cd $PBS_O_WORKDIR
-  path_to_scripts="/home/${USER}/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/"
-  
-  # Assign the shell variables
-  source ${path_to_scripts}/PRS_arguments_script.sh
-  cat ${path_to_scripts}/PRS_arguments_script.sh
-
-  # Alter/add variables depending on what type of training dataset you have 
-  source ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt  
-  cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
-fi
 
 if [[ "$system" = "MAC" || "$system" = "LINUX" ]]; then
 
@@ -71,24 +38,24 @@ fi
 # trap "pkill -f 'sleep 1h'" INT
 # trap "set +x ; sleep 1h ; set -x" DEBUG
 
-if [[ "$whereami" = *"raven"* ]]; then
-	echo ${Batch_job_ID}
+#if [[ "$whereami" = *"raven"* ]]; then
+#	echo ${Batch_job_ID}
 	# move the raven.OU files to one directory
-	cd /home/$USER/
-	shopt -s nullglob #enable
-	set -- *${Batch_job_ID}*
-	if [ "$#" -gt 0 ]; then
-		if [[ ! -d "${Raven_out_info_directory}" ]]; then
-			mkdir ${Raven_out_info_directory}
-		fi
-		cp *${Batch_job_ID}* ${Raven_out_info_directory}
-	else
-		echo "cannot find raven output scripts, check jobid from batch run (*POLYGENIC_RISK_SCORE* script) and add to end of *new_PRS_argument* script in relevant extrainfo directory"
-		exit 1
-	fi
-	shopt -u nullglob #disable
-	cd $PBS_O_WORKDIR
-fi
+#	cd /home/$USER/
+#	shopt -s nullglob #enable
+#	set -- *${Batch_job_ID}*
+#	if [ "$#" -gt 0 ]; then
+#		if [[ ! -d "${Raven_out_info_directory}" ]]; then
+#			mkdir ${Raven_out_info_directory}
+#		fi
+#		cp *${Batch_job_ID}* ${Raven_out_info_directory}
+#	else
+#		echo "cannot find raven output scripts, check jobid from batch run (*POLYGENIC_RISK_SCORE* script) and add to end of *new_PRS_argument* script in relevant extrainfo directory"
+#		exit 1
+#	fi
+#	shopt -u nullglob #disable
+#	cd $PBS_O_WORKDIR
+#fi
 
 if [[ "$system" = "MAC" || "$system" = "LINUX" ]]; then
 	shopt -s nullglob
@@ -145,4 +112,9 @@ do
 done
 
 #Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}PRS_whole_genome_calc_log_regres_with_sig_thresh.R ./${training_set_name}_${validation_set_name}_extrainfo/PRS_genome_calc_log_regres.Rout ${training_set_name} ${validation_set_name} ${sig_thresholds[@]}
+
+if [[ "${Using_raven}" = "TRUE" ]]; then
+#Purge all modules
+module purge
+fi
 
