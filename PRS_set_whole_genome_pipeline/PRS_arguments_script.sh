@@ -5,8 +5,19 @@ whereami=$(uname -n)
 echo "$whereami"
 
 if [[ "$whereami" = *"raven"* ]]; then
+
+  # Assign a variable to show that you are on raven
+  Using_raven=TRUE
+ 
+  # Load Modules for analysis
+  module purge
+  module load R/3.3.0
+  module load plink/1.9c3
+  module load python/2.7.11
+  module load magma/1.06
+  module load parallel/20170322 
   
-  #Path_to_locations_on_the_server
+  # Path_to_locations_on_the_server
   path_to_PRS_scripts="${HOME}/PhD_scripts/Schizophrenia_pipeline_scipts/"
   
   # Re-assign to the training_set_usually_genotype and validation_full_name_without_chromosome using the sed command
@@ -36,7 +47,7 @@ if [[ "$whereami" = *"raven"* ]]; then
   training_set_original_filename=`echo "${path_to_training_dataset}" | sed 's:.*/::'`
   validation_set_full_name_without_chromosome=`echo "${path_to_validation_dataset}" | sed 's:.*/::'`
   
-  #Pathway datasets
+  # Pathway datasets
   Pathway_filename="Pocklington2015_134sets_LoFi.txt"
   Gene_location_filename="NCBI37.3.gene.loc"
   
@@ -93,6 +104,9 @@ home_OS="/home"
 fi
 
 if [[ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" = 'johnhubert-ThinkPad-P50' ]]; then
+
+  # Assign a Variable to show you are local
+  Using_raven=FALSE
 
   #path_to_CLOZUK="/mnt/databank/CLOZUK/GWAS/BGE/RSupdate"
   #path_to_Biobank="/c8000xd3/big-wpcvm/UKBB/"	

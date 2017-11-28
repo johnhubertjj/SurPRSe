@@ -1,11 +1,18 @@
 #! /bin/bash
 
+#PBS -q serial_long
+#PBS -P PR54
+#PBS -l select=1:ncpus=12:mem=40GB
+#PBS -l walltime=1:00:00
+#PBS -j oe
+#PBS -o /home/c102019/Summary_stats_info
+#PBS -N PRS_pipeline_test
+
 log_file_name=${1}
 exec &> "${log_file_name}"_logfile.txt
 
 whereami=$(uname -n)
 echo "$whereami"
-
 
 if [ "$whereami" = "v1711-0ab8c3db.mobile.cf.ac.uk" ]; then
 home_OS="/Users"
@@ -15,7 +22,12 @@ system=MAC
 elif [ "$whereami" = "johnhubert-ThinkPad-P50" ]; then
 home_OS="/home"
 extra_path="/johnhubert/Documents"
-system=LINUX #oh god programmers are going to hate me for using this argument
+system=LINUX # oh god programmers are going to hate me for using this argument
+
+elif [[ "$whereami" = *"raven"* ]]; then 
+home_OS=${HOME}
+extra_path="PhD_scripts"
+system=LINUX #Too late to change now...its official, Raven runs on Linux because my scripts says so.
 fi
 
 path_to_scripts="${home_OS}${extra_path}/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/"
@@ -78,3 +90,9 @@ else
 	# Need an alternative to Raven's log files to extract locally on the computer probably output important information to one file
 	${path_to_scripts}PRS_ANALYSIS_SERIAL_no_set.sh ${Directory_to_work_from} ${path_to_scripts} ${system}
 fi
+
+if [[ "${Using_raven}" = "TRUE" ]]; then
+#Purge all modules
+module purge
+fi
+
