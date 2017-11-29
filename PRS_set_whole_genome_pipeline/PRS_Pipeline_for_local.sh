@@ -1,16 +1,19 @@
 #! /bin/bash
 
-#PBS -q serial_long
+#PBS -q serial
 #PBS -P PR54
-#PBS -l select=1:ncpus=12:mem=40GB
-#PBS -l walltime=1:00:00
-#PBS -j oe
-#PBS -o /home/c102019/Summary_stats_info
-#PBS -N PRS_pipeline_test
+#PBS -l ncpus=16
+#PBS -l mem=20gb
+#PBS -l walltime=8:00:00
+#PBS -o /home/c1020109/Summary_stats_info
 
 log_file_name=${1}
 exec &> "${log_file_name}"_logfile.txt
 
+echo ${PBS_O_WORKDIR}
+cd $PBS_O_WORKDIR 
+echo "hi"
+ 
 whereami=$(uname -n)
 echo "$whereami"
 
@@ -26,7 +29,7 @@ system=LINUX # oh god programmers are going to hate me for using this argument
 
 elif [[ "$whereami" = *"raven"* ]]; then 
 home_OS=${HOME}
-extra_path=/PhD_scripts"
+extra_path="/PhD_scripts"
 system=LINUX #Too late to change now...its official, Raven runs on Linux because my scripts says so.
 fi
 
@@ -39,21 +42,31 @@ Directory_to_work_from=`pwd`
 source ${path_to_scripts}PRS_arguments_script.sh
 cat ${path_to_scripts}PRS_arguments_script.sh
 
+  if [[ ! -d "${training_set_name}_${validation_set_name}_output" ]]; then
+     mkdir ${training_set_name}_${validation_set_name}_output
+  fi
+
+  if [[ ! -d "${training_set_name}_${validation_set_name}_extrainfo" ]]; then
+     mkdir ${training_set_name}_${validation_set_name}_extrainfo
+  fi
+
+# use the require function to make sure that the packages are up to date with the software
+
 # Create arguments files for easier input into Rscripts for parallelisation # 
 Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}Chromosome_arguments_text_file.R ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_Chromosome_arguments_text_file.Rout\
  ${training_set_name}\
  ${validation_set_name}\
- ${Chromosomes_to_analyse[@]}\
+ ${Chromosomes_to_analyse[@]}
 
 Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}sig_thresholds_lower_bounds_arguments_text_file.R ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_sig_thresholds_lower_bounds_arguments_text_file.Rout\
  ${training_set_name}\
  ${validation_set_name}\
- ${sig_thresholds_lower_bounds[@]}\
+ ${sig_thresholds_lower_bounds[@]}
 
 Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}sig_thresholds_plink_arguments_text_file.R ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_sig_thresholds_plink_arguments_text_file.Rout\
  ${training_set_name}\
  ${validation_set_name}\
- ${sig_thresholds[@]}\
+ ${sig_thresholds[@]}
 
 ${path_to_scripts}Summary_stats_to_chromosome_converter.sh ${Directory_to_work_from} ${path_to_scripts} ${system}
 

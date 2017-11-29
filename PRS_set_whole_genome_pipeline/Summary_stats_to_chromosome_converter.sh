@@ -1,49 +1,5 @@
 #!/bin/bash
 
-#PBS -q serial
-#PBS -P PR54
-#PBS -l select=1:ncpus=1:mem=8GB
-#PBS -l walltime=1:00:00
-#PBS -j oe
-#PBS -o /home/c1020109/Summary_stats_info
-#PBS -N c1020109_separate_summary_stats_whole_genome
-
-cd $PBS_O_WORKDIR
-
-# Script attempts to resolve what type of summary stats you have and how it influences the arguments further down the pipeline
-echo "I'm running"
-# Run locally or on ARCCA
-whereami=$(uname -n)
-echo "$whereami"
-
-system=$3
-
-if [[ "$whereami" = *"raven"* ]]; then
-  # assign a new variable for the PBS_ARRAY_variable
-  
-  # Load both Plink and R
-  module purge
-  module load R/3.3.0
-  module load plink/1.9c3
-  module load python/2.7.11
-  module load magma/1.06
-
-  path_to_scripts="/home/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/"
-   
-  # Assign the shell variables
-  source ${path_to_scripts}PRS_arguments_script.sh 
-  cat ${path_to_scripts}PRS_arguments_script.sh 
-
-  # make directories for output and extra info
-  if [[ ! -d "${training_set_name}_${validation_set_name}_output" ]]; then
-     mkdir ${training_set_name}_${validation_set_name}_output
-  fi
-  
-  if [[ ! -d "${training_set_name}_${validation_set_name}_extrainfo" ]]; then
-     mkdir ${training_set_name}_${validation_set_name}_extrainfo
-  fi
-fi
-
 if [[ "$system" = "MAC" || "$system" = "LINUX" ]]; then
   
   Directory_to_work_from=$1
@@ -89,7 +45,7 @@ if [ "${split_by_chromosome_required}" = "TRUE" ]; then
 fi
 
 
-if [[ "$whereami" = *"raven"* ]]; then
+if [[ "${Using_raven}" = "TRUE" ]]; then
 #Purge all modules
 module purge
 fi

@@ -41,18 +41,18 @@ if [[ "$whereami" = *"raven"* ]]; then
   validation_set_name="ALSPAC_brain_measurements_only" 
  
   # DO NOT ALTER!!!
+  training_set_original_filename=`echo "${path_to_training_dataset}" | sed 's:.*/::'`
+  validation_set_full_name_without_chromosome=`echo "${path_to_validation_dataset}" | sed 's:.*/::'`
   validation_set_usually_genotype="${validation_set_full_name_without_chromosome}_chr${chromosome_number}"
   validation_set_usually_genotype_serial="${validation_set_full_name_without_chromosome}_chr"
   training_set_usually_summary="${training_set_name}_table${chromosome_number}"
-  training_set_original_filename=`echo "${path_to_training_dataset}" | sed 's:.*/::'`
-  validation_set_full_name_without_chromosome=`echo "${path_to_validation_dataset}" | sed 's:.*/::'`
   
   # Pathway datasets
   Pathway_filename="Pocklington2015_134sets_LoFi.txt"
   Gene_location_filename="NCBI37.3.gene.loc"
   
   # Split_by_chromosome for genotype?
-  split_by_chromosome_required=FALSE 
+  split_by_chromosome_required=TRUE 
   
   # Do a missingness check?
   Missing_geno=FALSE
