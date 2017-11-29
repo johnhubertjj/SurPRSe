@@ -33,6 +33,17 @@ if(any(list.of.packages %in% old_packages_use$Package)){
 # loads the required packages
 lapply(list.of.packages, require, character.only = TRUE)
 
+library("data.table")
+
+tmp.install.packages <- function(pack, dependencies=TRUE, ...) {
+  path <- tempdir()
+  ## Add 'path' to .libPaths, and be sure that it is not
+  ## at the first position, otherwise any other package during
+  ## this session would be installed into 'path'
+  firstpath <- .libPaths()[1]
+  .libPaths(c(firstpath, path))
+  install.packages(pack, dependencies=dependencies, lib=path, ...)
+}
 #######################################
 # adding in arguments from BASH script#
 #######################################
@@ -46,7 +57,7 @@ Significance_thresholds_lower_bounds <- as.numeric(args[c(5:length(args))])
 
 # Write out the chromosomes to a text file for easier reading into R in future rather than a bash argument # 
 write(Significance_thresholds_lower_bounds, file = paste0(training_set_name,"_", validation_set_name,"_significance_thresholds_lower_bounds_to_analyse_arguments_file_tmp.txt"), ncolumns = 1)
-testing_1 <- fread(file = paste0(training_set_name,"_", validation_set_name,"_significance_thresholds_lower_bounds_to_analyse_arguments_file_tmp.txt"))      
+testing_1 <- fread(paste0(training_set_name,"_", validation_set_name,"_significance_thresholds_lower_bounds_to_analyse_arguments_file_tmp.txt"))      
 print(testing_1)
 
 #End Timer
