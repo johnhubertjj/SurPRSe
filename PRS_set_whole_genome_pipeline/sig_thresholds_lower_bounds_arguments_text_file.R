@@ -33,6 +33,17 @@ if(any(list.of.packages %in% old_packages_use$Package)){
 # loads the required packages
 lapply(list.of.packages, require, character.only = TRUE)
 
+library("data.table")
+
+tmp.install.packages <- function(pack, dependencies=TRUE, ...) {
+  path <- tempdir()
+  ## Add 'path' to .libPaths, and be sure that it is not
+  ## at the first position, otherwise any other package during
+  ## this session would be installed into 'path'
+  firstpath <- .libPaths()[1]
+  .libPaths(c(firstpath, path))
+  install.packages(pack, dependencies=dependencies, lib=path, ...)
+}
 #######################################
 # adding in arguments from BASH script#
 #######################################

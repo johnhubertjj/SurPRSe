@@ -29,7 +29,7 @@ Plink_sig_thresh_file <- data.frame(Significance_thresholds_lower_bounds,Signifi
 
 # Write out the chromosomes to a text file for easier reading into R in future rather than a bash argument # 
 write.table(Plink_sig_thresh_file, file = paste0(Training_name,"_", Validation_name,"_plink_significance_thresholds_arguments_file_tmp.txt"),row.names = T, col.names = F, quote = F)
-testing_1 <- fread(file = paste0(Training_name,"_", Validation_name,"_plink_significance_thresholds_arguments_file_tmp.txt"))      
+testing_1 <- fread(paste0(Training_name,"_", Validation_name,"_plink_significance_thresholds_arguments_file_tmp.txt"))      
 print(testing_1)
 
 #End Timer
