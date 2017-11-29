@@ -72,7 +72,14 @@ ${path_to_scripts}Summary_stats_to_chromosome_converter.sh ${Directory_to_work_f
 
 # calculate polygenic scores for the whole genome across different chromosomes	
 
+if [[ "${Using_raven}" = "FALSE" ]]; then
+
+# Quick fix for permissions on local and on the cluster
 sudo parallel ${path_to_scripts}POLYGENIC_RISK_SCORE_ANALYSIS_CLOZUK_PRS_JOB_ARRAY.sh ::: ${Chromosomes_to_analyse[@]} ::: ${Directory_to_work_from} ::: ${path_to_scripts} ::: ${system}
+else
+# For use on local
+parallel ${path_to_scripts}POLYGENIC_RISK_SCORE_ANALYSIS_CLOZUK_PRS_JOB_ARRAY.sh ::: ${Chromosomes_to_analyse[@]} ::: ${Directory_to_work_from} ::: ${path_to_scripts} ::: ${system}
+fi
 
 # exit 0
 

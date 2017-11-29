@@ -46,7 +46,7 @@ Significance_thresholds_lower_bounds <- as.numeric(args[c(5:length(args))])
 
 # Write out the chromosomes to a text file for easier reading into R in future rather than a bash argument # 
 write(Significance_thresholds_lower_bounds, file = paste0(training_set_name,"_", validation_set_name,"_significance_thresholds_lower_bounds_to_analyse_arguments_file_tmp.txt"), ncolumns = 1)
-testing_1 <- fread(file = paste0(training_set_name,"_", validation_set_name,"_significance_thresholds_lower_bounds_to_analyse_arguments_file_tmp.txt"))      
+testing_1 <- fread(paste0(training_set_name,"_", validation_set_name,"_significance_thresholds_lower_bounds_to_analyse_arguments_file_tmp.txt"))      
 print(testing_1)
 
 #End Timer

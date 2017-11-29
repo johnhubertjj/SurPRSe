@@ -1,4 +1,12 @@
 #!/bin/bash
+ cd $PBS_O_WORKDIR
+	
+ 
+ # Script attempts to resolve what type of summary stats you have and how it influences the arguments further down the pipeline
+ echo "I'm running"
+ # Run locally or on ARCCA
+ 
+ system=$3
 
 if [[ "$system" = "MAC" || "$system" = "LINUX" ]]; then
   
