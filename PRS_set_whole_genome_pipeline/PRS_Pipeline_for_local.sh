@@ -26,7 +26,7 @@ system=LINUX # oh god programmers are going to hate me for using this argument
 
 elif [[ "$whereami" = *"raven"* ]]; then 
 home_OS=${HOME}
-extra_path="PhD_scripts"
+extra_path=/PhD_scripts"
 system=LINUX #Too late to change now...its official, Raven runs on Linux because my scripts says so.
 fi
 

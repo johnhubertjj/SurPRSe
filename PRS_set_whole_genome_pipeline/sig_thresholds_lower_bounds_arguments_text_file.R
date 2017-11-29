@@ -8,8 +8,30 @@
 ### Start Timer
 ptm <- proc.time()
 
-### Read in packages
-library (data.table)
+### Read in required packages
+list.of.packages <- c("data.table")
+
+### Find packages which are not installed on this version of R 
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+
+#Install these packates
+if(length(new.packages)) install.packages(new.packages)
+
+# Find old packages
+old_packages <- old.packages()
+old_packages_use <- as.data.frame(old_packages,stringsAsFactors = F)
+
+# Find out if any of the currently installed packages are old and install the newer, stable versions
+if(any(list.of.packages %in% old_packages_use$Package)){
+  df_of_packages <- data.frame(list.of.packages,stringsAsFactors = F)
+  colnames(df_of_packages) <- "Package"
+  packages_to_update_table <- merge(df_of_packages,old_packages, by = "Package", all = F)
+  Update_packages <- packages_to_update_table$Package
+  install.packages(Update_packages)
+}
+
+# loads the required packages
+lapply(list.of.packages, require, character.only = TRUE)
 
 #######################################
 # adding in arguments from BASH script#
