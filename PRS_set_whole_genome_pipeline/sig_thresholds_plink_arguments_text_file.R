@@ -23,7 +23,7 @@ Validation_name <- args[4]
 Significance_thresholds <- as.numeric(args[c(5:length(args))])
 
 # Create the plink -q-score-range file for use in plink 
-Significance_thresholds_lower_bounds <- unlist(fread(file = paste0(Training_name,"_", Validation_name,"_significance_thresholds_lower_bounds_to_analyse_arguments_file_tmp.txt")))
+Significance_thresholds_lower_bounds <- unlist(fread(paste0(Training_name,"_", Validation_name,"_significance_thresholds_lower_bounds_to_analyse_arguments_file_tmp.txt")))
 rownames <- paste0("S",seq(1:length(Significance_thresholds)))
 Plink_sig_thresh_file <- data.frame(Significance_thresholds_lower_bounds,Significance_thresholds,row.names = rownames)
 

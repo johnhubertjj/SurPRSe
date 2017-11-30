@@ -3,12 +3,10 @@
 #PBS -q serial
 #PBS -P PR54
 #PBS -l ncpus=16
-#PBS -l mem=20gb
+#PBS -l mem=40gb
 #PBS -l walltime=8:00:00
 #PBS -o /home/c1020109/Summary_stats_info
 
-log_file_name=${1}
-exec &> "${log_file_name}"_logfile.txt
 
 echo ${PBS_O_WORKDIR}
 cd $PBS_O_WORKDIR 
@@ -40,7 +38,12 @@ path_to_gene_scripts="${home_OS}${extra_path}/Schizophrenia_PRS_pipeline_scripts
 Directory_to_work_from=`pwd`
 
 source ${path_to_scripts}PRS_arguments_script.sh
+
+log_file_name="${validation_set_name}_${training_set_name}_PRS_analysis"
+exec &> "${log_file_name}"_logfile.txt
+
 cat ${path_to_scripts}PRS_arguments_script.sh
+
 
   if [[ ! -d "${training_set_name}_${validation_set_name}_output" ]]; then
      mkdir ${training_set_name}_${validation_set_name}_output
@@ -75,10 +78,10 @@ ${path_to_scripts}Summary_stats_to_chromosome_converter.sh ${Directory_to_work_f
 if [[ "${Using_raven}" = "FALSE" ]]; then
 
 # Quick fix for permissions on local and on the cluster
-sudo parallel ${path_to_scripts}POLYGENIC_RISK_SCORE_ANALYSIS_CLOZUK_PRS_JOB_ARRAY.sh ::: ${Chromosomes_to_analyse[@]} ::: ${Directory_to_work_from} ::: ${path_to_scripts} ::: ${system}
+sudo parallel ${path_to_scripts}POLYGENIC_RISK_SCORE_ANALYSIS_CLOZUK_PRS_JOB_ARRAY.sh ::: ${Chromosomes_to_analyse[@]} ::: ${Directory_to_work_from} ::: ${path_to_scripts} ::: ${system} ::: ${training_set_name} ::: ${validation_set_name}
 else
 # For use on local
-parallel ${path_to_scripts}POLYGENIC_RISK_SCORE_ANALYSIS_CLOZUK_PRS_JOB_ARRAY.sh ::: ${Chromosomes_to_analyse[@]} ::: ${Directory_to_work_from} ::: ${path_to_scripts} ::: ${system}
+parallel ${path_to_scripts}POLYGENIC_RISK_SCORE_ANALYSIS_CLOZUK_PRS_JOB_ARRAY.sh ::: ${Chromosomes_to_analyse[@]} ::: ${Directory_to_work_from} ::: ${path_to_scripts} ::: ${system} ::: ${training_set_name} ::: ${validation_set_name} 
 fi
 
 # exit 0

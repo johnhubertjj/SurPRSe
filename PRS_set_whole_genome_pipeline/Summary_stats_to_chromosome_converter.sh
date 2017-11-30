@@ -50,7 +50,15 @@ if [ "${split_by_chromosome_required}" = "TRUE" ]; then
 	tar -zcvf ${validation_set_usually_genotype_serial}${i}.tar.gz ${validation_set_usually_genotype_serial}${i}.{bim,bed,fam,log}
 	rm ${validation_set_usually_genotype_serial}${i}.{bed,bim,fam,log} 
    done
-fi
+else
+   
+   for i in "${Chromosomes_to_analyse[@]}" ;
+   do
+	cp -v "${path_to_validation_dataset}_chr${i}.tar.gz" ${PBS_O_WORKDIR}
+   done
+fi 
+
+
 
 
 if [[ "${Using_raven}" = "TRUE" ]]; then

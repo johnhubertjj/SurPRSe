@@ -1,6 +1,7 @@
 #!/bin/bash
 
-exec &> Rtestoutclusterlogfile$1.txt
+logname="${5}_${6}"
+exec &> "${logname}_Rtestoutclusterlogfile$1.txt"
 
 # script requries 22 files for each validation and training set
 

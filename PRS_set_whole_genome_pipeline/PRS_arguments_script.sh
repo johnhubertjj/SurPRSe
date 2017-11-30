@@ -21,8 +21,8 @@ if [[ "$whereami" = *"raven"* ]]; then
   path_to_PRS_scripts="${HOME}/PhD_scripts/Schizophrenia_pipeline_scipts/"
   
   # Re-assign to the training_set_usually_genotype and validation_full_name_without_chromosome using the sed command
-  path_to_validation_dataset="/scratch/${USER}/PR54/ALSPAC_test_pipeline/ALSPAC_hrc_imputed_step3_mri_brain_measurements_only"
-  path_to_training_dataset="/scratch/${USER}/PR54/ALSPAC_test_pipeline/CLOZUK_PGC2noclo.METAL.assoc.dosage"
+  path_to_validation_dataset="/scratch/${USER}/PR54/PGC_CLOZUK_PRS/Biobank_wv1_imaging_imputed_3000brains"
+  path_to_training_dataset="/scratch/${USER}/PR54/PGC_CLOZUK_PRS/ALSPAC_training_sets/daner_PGC_SCZ52_0513a.resultfiles_PGC_SCZ52_0513.sh2_noclo.txt"
 
   # State paths to the relevant stationary folders required for the analysis
   path_to_PGC_conversion="${path_to_PRS_scripts}/Summary_stat_manipulation/"
@@ -37,8 +37,8 @@ if [[ "$whereami" = *"raven"* ]]; then
   path_to_gene_annotation_file="${path_to_stationary_file}NCBI37.3.gene.loc"  
   
   # Datasets
-  training_set_name="CLOZUK_PGC2noclo"
-  validation_set_name="ALSPAC_brain_measurements_only" 
+  training_set_name="PGC2noCLOZUK"
+  validation_set_name="Biobank_3000brains" 
  
   # DO NOT ALTER!!!
   training_set_original_filename=`echo "${path_to_training_dataset}" | sed 's:.*/::'`
@@ -52,7 +52,7 @@ if [[ "$whereami" = *"raven"* ]]; then
   Gene_location_filename="NCBI37.3.gene.loc"
   
   # Split_by_chromosome for genotype?
-  split_by_chromosome_required=TRUE 
+  split_by_chromosome_required=FALSE 
   
   # Do a missingness check?
   Missing_geno=FALSE
@@ -60,7 +60,7 @@ if [[ "$whereami" = *"raven"* ]]; then
   
   # MAF, INFO and SE
   MAF_summary=FALSE
-  MAF_threshold=0.01
+  MAF_threshold=0.1
   MAF_genotype=TRUE
   INFO_summary=TRUE
   INFO_threshold=0.9
