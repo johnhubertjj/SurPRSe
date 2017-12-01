@@ -7,9 +7,11 @@
 #PBS -l walltime=8:00:00
 #PBS -o /home/c1020109/Summary_stats_info
 
-
+if [ ${Using_raven} == "TRUE" ]; then
 echo ${PBS_O_WORKDIR}
 cd $PBS_O_WORKDIR 
+fi
+
 echo "hi"
  
 whereami=$(uname -n)
