@@ -3,12 +3,11 @@
 PGCnoCLOZUK
 -------------- 
 Location on rocks: /home/SHARED/PGC/daner_PGC_SCZ52_0513a.resultfiles_PGC_SCZ52_0513.sh2_noclo.txt
-Build: 37.13 : tested on one SNP, rs62513865 had the same BP position.
 Summary stats
 
 CLOZUK_no_PGC:
 ---------------
-Location on rocks: /mnt/databank/CLOZUK/GWAS/BGE/*CLOZUK_GWAS_BGE*.tar.gz
+Location on rocks: /mnt/databank/CLOZUK/GWAS/BGE/\*CLOZUK_GWAS_BGE\*.tar.gz
 Build: 
 Best guess genotype data
 
@@ -47,12 +46,12 @@ path\_to\_stationary\_data: Location of standardised files for input into your P
 
 
 
-**training\_set\_original\_filename**: path to the **Training dataset** for input into polygenic risk score.  
+**path\_to\_training\_dataset**: path to the **Training dataset** for input into polygenic risk score.  
 
 
 **validation\_set\_name**: User defined name for the **Test** dataset in the polygenic risk score. Does not have to match the file name but **MUST NOT** include any delimiters.  
 
-**validation\_set\_full\_name\_without\_chromosome**: path and plink prefix for **Test dataset**. File format must be the same as input into the --bfile argument to plink.
+**path\_to\_validation\_dataset**: path and plink prefix for **Test dataset**. File format must be the same as input into the --bfile argument to plink.
 
 * The file format can be one set of plink files (aka one each of .bim/.bed/.fam)
  * **NOTE** all analysis is split by chromosome, please set the split\_by\_chromosome\_required argument to **TRUE** 
