@@ -22,7 +22,7 @@ if [[ "$whereami" = *"raven"* ]]; then
   
   # Re-assign to the training_set_usually_genotype and validation_full_name_without_chromosome using the sed command
   path_to_validation_dataset="/scratch/${USER}/PR54/PGC_CLOZUK_PRS/Biobank_wv1_imaging_imputed_3000brains"
-  path_to_training_dataset="/scratch/${USER}/PR54/PGC_CLOZUK_PRS/ALSPAC_training_sets/daner_PGC_SCZ52_0513a.resultfiles_PGC_SCZ52_0513.sh2_noclo.txt"
+  path_to_training_dataset="/scratch/${USER}/PR54/PGC_CLOZUK_PRS/ALSPAC_training_sets/scz.swe.pgc1.results.v3.txt"
 
   # State paths to the relevant stationary folders required for the analysis
   path_to_PGC_conversion="${path_to_PRS_scripts}/Summary_stat_manipulation/"
@@ -37,7 +37,7 @@ if [[ "$whereami" = *"raven"* ]]; then
   path_to_gene_annotation_file="${path_to_stationary_file}NCBI37.3.gene.loc"  
   
   # Datasets
-  training_set_name="PGC2noCLOZUK"
+  training_set_name="PGC1_sweden"
   validation_set_name="Biobank_3000brains" 
  
   # DO NOT ALTER!!!
