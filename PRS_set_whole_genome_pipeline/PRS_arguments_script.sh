@@ -13,7 +13,7 @@ if [[ "$whereami" = *"raven"* ]]; then
   module purge
   module load R/3.3.0
   module load plink/1.9c3
-  module load python/2.7.11
+  module load python/2.7.11-genomics
   module load magma/1.06
   module load parallel/20170322 
   
@@ -21,8 +21,8 @@ if [[ "$whereami" = *"raven"* ]]; then
   path_to_PRS_scripts="${HOME}/PhD_scripts/Schizophrenia_pipeline_scipts/"
   
   # Re-assign to the training_set_usually_genotype and validation_full_name_without_chromosome using the sed command
-  path_to_validation_dataset="/scratch/${USER}/PR54/PGC_CLOZUK_PRS/Biobank_wv1_imaging_imputed_3000brains"
-  path_to_training_dataset="/scratch/${USER}/PR54/PGC_CLOZUK_PRS/ALSPAC_training_sets/scz.swe.pgc1.results.v3.txt"
+  path_to_validation_dataset="/scratch/${USER}/PR54/PGC_CLOZUK_PRS/ALSPAC_hrc_imputed_step3_mri_brain_measurements_only"
+  path_to_training_dataset="/scratch/${USER}/PR54/PGC_CLOZUK_PRS/ALSPAC_training_sets/CLOZUK_PGC2noclo.METAL.assoc.dosage"
 
   # State paths to the relevant stationary folders required for the analysis
   path_to_PGC_conversion="${path_to_PRS_scripts}/Summary_stat_manipulation/"
@@ -30,15 +30,15 @@ if [[ "$whereami" = *"raven"* ]]; then
   path_to_MAGMA_scripts="${path_to_PRS_scripts}/MAGMA/"
   
   # Path to where stationary file is kept
-  path_to_stationary_file="${HOME}/Stationary_data/"
+  path_to_stationary_data="${HOME}/Stationary_data/"
   path_to_covariate_file="${path_to_stationary_data}CLOZUK2.r7.select2PC.eigenvec.txt" 
   path_to_chromosome_length_file="${path_to_stationary_data}UCSC_hg19_chromeinfo_length_of_chromosomes.txt"
   path_to_new_fam_file="${path_to_stationary_data}CLOZUK.r7.GWAS_IDs.fam"
-  path_to_gene_annotation_file="${path_to_stationary_file}NCBI37.3.gene.loc"  
+  path_to_gene_annotation_file="${path_to_stationary_data}NCBI37.3.gene.loc"  
   
   # Datasets
-  training_set_name="PGC1_sweden"
-  validation_set_name="Biobank_3000brains" 
+  training_set_name="CLOZUK_PGC2noclo"
+  validation_set_name="ALSPAC" 
  
   # DO NOT ALTER!!!
   training_set_original_filename=`echo "${path_to_training_dataset}" | sed 's:.*/::'`
@@ -46,6 +46,9 @@ if [[ "$whereami" = *"raven"* ]]; then
   validation_set_usually_genotype="${validation_set_full_name_without_chromosome}_chr${chromosome_number}"
   validation_set_usually_genotype_serial="${validation_set_full_name_without_chromosome}_chr"
   training_set_usually_summary="${training_set_name}_table${chromosome_number}"
+  
+  # Path to LDscore regression python script
+  ldsc="/Users/c1020109/ldsc/ldsc.py"  
   
   # Pathway datasets
   Pathway_filename="Pocklington2015_134sets_LoFi.txt"
@@ -85,15 +88,16 @@ if [[ "$whereami" = *"raven"* ]]; then
   sig_thresholds=(5e-08 1e-06 1e-04 0.01 0.05 0.1 0.2 0.5 1)
   sig_thresholds_lower_bounds=(0 0 0 0 0 0 0 0 0)
  
-  #Arguments specific to PRS set analysis
-  Extra_analyses=FALSE
-  Name_of_extra_analysis=NULL
-  randomise=FALSE
+  # Arguments specific to PRS set analysis
+  Extra_analyses=TRUE
+  Name_of_extra_analysis=(Pathways Genes)
+  randomise=TRUE
   permutations=10000
   Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates" 
+  
   # either "extended" "normal" or "both" : change to a numerical input in the future
   Gene_regions=both #either ( "extended" "normal" "both" )
-  whole_genome_genic=FALSE
+  whole_genome_genic=TRUE
   Gene_specific_PRS=FALSE
 
 
@@ -117,19 +121,21 @@ if [[ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" = 'johnhuber
   path_to_chromosome_length_file="${path_to_stationary_data}UCSC_hg19_chromeinfo_length_of_chromosomes.txt"
   path_to_new_fam_file="${path_to_stationary_data}CLOZUK.r7.GWAS_IDs.fam"
  
+  # Re-assign to the training_set_usually_genotype and validation_full_name_without_chromosome using the sed command
+  path_to_training_dataset="daner_PGC_BIP32b_mds7a"
+  path_to_validation_dataset="COGSv2016_IMPUTE2_Missing_hwe"
    
   # Datasets
- 
   training_set_name="BIP_PGC2"
   validation_set_name="COGSv2016_IMPUTE2" 
-  training_set_original_filename="daner_PGC_BIP32b_mds7a"
-  validation_set_full_name_without_chromosome="COGSv2016_IMPUTE2_Missing_hwe"
   
   # DO NOT ALTER!!!
+  training_set_original_filename=`echo "${path_to_training_dataset}" | sed 's:.*/::'`
+  validation_set_full_name_without_chromosome=`echo "${path_to_validation_dataset}" | sed 's:.*/::'`
   validation_set_usually_genotype="${validation_set_full_name_without_chromosome}_chr${chromosome_number}"
   validation_set_usually_genotype_serial="${validation_set_full_name_without_chromosome}_chr"
   training_set_usually_summary="${training_set_name}_table${chromosome_number}"
-  
+
   # Pathway datasets
   Pathway_filename="Selected_Pocklington_plus_GO_pathways_SCHIZ.txt"
   Gene_location_filename="NCBI37.3.gene.loc"

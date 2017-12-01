@@ -146,10 +146,9 @@ fi
 
 if [[ ${Extra_analyses} = "TRUE" ]]; then
 # NEED A CHECK ON WHAT EXTRA ANALYSES YOU ARE RUNNING HERE! 
-Name_of_extra_analysis=(`sed -n 's/Name_of_extra_analysis\=//p' ${path_to_scripts}PRS_arguments_script.sh`)
 length_of_extra_analysis_array=`echo ${#Name_of_extra_analysis[@]}`
 
-if [ "${length_of_extra_analysis_array}" -gt  "2" ]; then
+if [ "${length_of_extra_analysis_array}" -eq  "2" ]; then
 Name_of_extra_analysis_specific=(Pathways Genes)
 # Create output directory for Extra_analysis results
 	if [ ! -d "./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis_specific[0]}" ]; then
@@ -186,8 +185,8 @@ echo "Arguments script stated that this analysis is for ${Name_of_extra_analysis
 
 else
 
-	if [ ! -d "./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis[1]}" ]; then
-		mkdir ./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis[1]}
+	if [ ! -d "./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis[0]}" ]; then
+		mkdir ./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis[0]}
 	fi
 
 # Create files for Clumping
@@ -196,12 +195,20 @@ else
 --exclude ./${training_set_name}_${validation_set_name}_output/extracted_Duplicate_snps_${validation_set_name}_${training_set_name}_chr${chromosome_number}.txt \
 --extract ./${training_set_name}_${validation_set_name}_output/chr${chromosome_number}${training_set_name}_${validation_set_name}_common_SNPs.txt \
 --make-bed \
---out ./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis[1]}/${validation_set_usually_genotype}_consensus_with_${training_set_name}_flipped_alleles_no_duplicates
+--out ./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis[0]}/${validation_set_usually_genotype}_consensus_with_${training_set_name}_flipped_alleles_no_duplicates
 
-echo "Arguments script stated that this analysis is for ${Name_of_extra_analysis[1]}\
+echo "Arguments script stated that this analysis is for ${Name_of_extra_analysis[0]}\
 , therefore clumping will be not be performed for Polygenic risk scores"
 
 
+fi
+
+### Clean up original datasets to only leave the tar.gz file 
+shopt -s nullglob
+set -- *${validation_set_usually_genotype}*
+if [ "$#" -gt 3 ]; then
+	rm -rf ${validation_set_usually_genotype}.{bim,bed,fam,log} 
+	shopt -u nullglob
 fi
 
 # Exit so that clumping is not performed on the whole dataset

@@ -40,7 +40,7 @@ Directory_to_work_from=`pwd`
 source ${path_to_scripts}PRS_arguments_script.sh
 
 log_file_name="${validation_set_name}_${training_set_name}_PRS_analysis"
-exec &> "${log_file_name}"_logfile.txt
+# exec &> "${log_file_name}"_logfile.txt
 
 cat ${path_to_scripts}PRS_arguments_script.sh
 
@@ -87,23 +87,24 @@ fi
 # exit 0
 
 # Use sed to extract the argument Extra_analysis from your output scripts in question #output the arguments to a temporary file in order to read it
-Extra_analyses=(`sed -n 's/Extra_analyses\=//p' ${path_to_scripts}PRS_arguments_script.sh`)
-Name_of_extra_analysis=(`sed -n 's/Name_of_extra_analysis\=//p' ${path_to_scripts}PRS_arguments_script.sh`)
+
+# Extra_analyses=(`sed -n 's/Extra_analyses\=//p' ${path_to_scripts}PRS_arguments_script.sh`)
+# Name_of_extra_analysis=(`sed -n 's/Name_of_extra_analysis\=//p' ${path_to_scripts}PRS_arguments_script.sh`)
 
 
-if [ "${Extra_analyses[1]}" = "TRUE" ]; then
+if [ "${Extra_analyses}" = "TRUE" ]; then
 	echo hi
 length_of_extra_analysis_array=`echo ${#Name_of_extra_analysis[@]}`
-	if [ "${length_of_extra_analysis_array}" -gt  "2" ]; then
+	if [ "${length_of_extra_analysis_array}" -eq  "2" ]; then
 		echo hi all
-		Name_of_extra_analysis_specific=(Genes Pathways)
-		#${path_to_pathway_scripts}Pathway_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_pathway_scripts} ${Name_of_extra_analysis_specific[1]} 
-		 ${path_to_gene_scripts}Gene_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_gene_scripts} ${Name_of_extra_analysis_specific[0]}
+		Name_of_extra_analysis_specific=(Pathways Genes)
+		${path_to_gene_scripts}Gene_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_gene_scripts} ${Name_of_extra_analysis_specific[1]}
+		${path_to_pathway_scripts}Pathway_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_pathway_scripts} ${Name_of_extra_analysis_specific[0]} 
 	
-	elif  [[ "${Name_of_extra_analysis[1]}" = "Pathways" ]]; then
+	elif  [[ "${Name_of_extra_analysis[0]}" = "Pathways" ]]; then
 		echo hi Pat
-		echo ${Name_of_extra_analysis[1]}
- ${path_to_pathway_scripts}Pathway_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_pathway_scripts} ${Name_of_extra_analysis[1]} 
+		echo ${Name_of_extra_analysis[0]}
+ 		${path_to_pathway_scripts}Pathway_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_pathway_scripts} ${Name_of_extra_analysis[0]} 
 	
 	elif [[ "${Name_of_extra_analysis[1]}" = "Genes" ]]; then
 		echo hi Gene
