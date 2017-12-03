@@ -107,7 +107,7 @@ ending_name=${Gene_regions}_gene_regions_Clumped_whole_genome_final
         
 	magma --annotate --snp-loc ${gene_bim_file} --gene-loc ${path_to_stationary_data}${Gene_location_filename} --out ${Gene_output_directory}${training_set_name}_${validation_set_name}_SNPs_normal_clumped_gene_temp
 	
-ldsc.py --bfile ${gene_file} --l2 --ld-wind-kb ${window} --out ${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final
+${ldsc} --bfile ${gene_file} --l2 --ld-wind-kb ${window} --out ${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final
 
 plink --bfile ${gene_file}\
  --freq\
@@ -147,7 +147,7 @@ ending_name=${Gene_regions}_gene_regions_Clumped_whole_genome_final
         
 	magma --annotate window=35,10 --snp-loc ${gene_bim_file} --gene-loc ${path_to_stationary_data}${Gene_location_filename} --out ${Gene_output_directory}${training_set_name}_${validation_set_name}_SNPs_extended_clumped_gene_temp
 
-ldsc.py --bfile ${gene_file} --l2 --ld-wind-kb ${window} --out ${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final
+${ldsc} --bfile ${gene_file} --l2 --ld-wind-kb ${window} --out ${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final
 
 plink --bfile ${gene_file}\
  --freq\
@@ -188,7 +188,7 @@ ending_name=${Gene_regions}_gene_regions_Clumped_whole_genome_final
 	
 	magma --annotate window=35,10 --snp-loc ${gene_bim_file} --gene-loc ${path_to_stationary_data}${Gene_location_filename} --out ${Gene_output_directory}${training_set_name}_${validation_set_name}_SNPs_extended_clumped_gene_temp
 
-ldsc.py --bfile ${gene_file} --l2 --ld-wind-kb ${window} --out ${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final
+${ldsc} --bfile ${gene_file} --l2 --ld-wind-kb ${window} --out ${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final
 
 plink --bfile ${gene_file}\
  --freq\
@@ -227,7 +227,7 @@ ending_name=${Gene_regions}_gene_regions_Clumped_whole_genome_final
 
 	 magma --annotate --snp-loc ${gene_bim_file} --gene-loc ${path_to_stationary_data}${Gene_location_filename} --out ${Gene_output_directory}${training_set_name}_${validation_set_name}_SNPs_normal_clumped_gene_temp
 
-ldsc.py --bfile ${gene_file} --l2 --ld-wind-kb ${window} --out ${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final
+${ldsc} --bfile ${gene_file} --l2 --ld-wind-kb ${window} --out ${Gene_output_directory}${validation_set_name}_${training_set_name}_${Gene_regions}_gene_regions_Clumped_whole_genome_final
 
 plink --bfile ${gene_file}\
  --freq\

@@ -18,7 +18,7 @@ if [[ "$whereami" = *"raven"* ]]; then
   module load parallel/20170322 
   
   # Path_to_locations_on_the_server
-  path_to_PRS_scripts="${HOME}/PhD_scripts/Schizophrenia_pipeline_scipts/"
+  path_to_PRS_scripts="${HOME}/PhD_scripts/Schizophrenia_pipeline_scripts/"
   
   # Re-assign to the training_set_usually_genotype and validation_full_name_without_chromosome using the sed command
   path_to_validation_dataset="/scratch/${USER}/PR54/PGC_CLOZUK_PRS/ALSPAC_hrc_imputed_step3_mri_brain_measurements_only"
@@ -48,10 +48,10 @@ if [[ "$whereami" = *"raven"* ]]; then
   training_set_usually_summary="${training_set_name}_table${chromosome_number}"
   
   # Path to LDscore regression python script
-  ldsc="/Users/c1020109/ldsc/ldsc.py"  
+  ldsc="/home/c1020109/ldsc/ldsc.py"  
   
   # Pathway datasets
-  Pathway_filename="Pocklington2015_134sets_LoFi.txt"
+  Pathway_filename="Selected_Pocklington_plus_GO_pathways_SCHIZ.txt"
   Gene_location_filename="NCBI37.3.gene.loc"
   
   # Split_by_chromosome for genotype?
