@@ -267,7 +267,7 @@ all_plots2<- all_plots[all_plots$Pvaluethreshold %in% c(5e-08, 1e-06, 0.05, 0.5)
 all_plots2 <- all_plots2[all_plots2$Brain_region %in% c(subcortical_left,subcortical_right),] 
 
 subcortical_lR <- c(subcortical_left,subcortical_right)
-subcortical_phenotypes <- c("Lateral Ventricles","Thalamus", "Caudate Nucleus", " Putamen", "Pallidum", "Hippocampus", "Amygdala", "Nucleus Accumbens")
+subcortical_phenotypes <- c("Lateral Ventricles", "Thalamus", "Caudate Nucleus", " Putamen", "Pallidum", "Hippocampus", "Amygdala", "Nucleus Accumbens")
 
 gglist_final <- list()
 ## Scatter plots with SE error bars in paper format ##
