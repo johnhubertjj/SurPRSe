@@ -29,32 +29,65 @@ Target_dataset <- args[5]
 Reference_dataset <- args[6]
 Chromosomes <- args[7]
 
-Reference_dataset <- "/media/johnhubert/PHD DATA/CLOZUK2_noPGC2.assoc.dosage"
-Target_dataset <- "/media/johnhubert/PHD DATA/daner_PGC_SCZ52_0513a.resultfiles_PGC_SCZ52_0513.sh2_noclo.txt"
+#Reference_dataset <- "/media/johnhubert/PHD DATA/CLOZUK2_noPGC2.assoc.dosage"
+#Target_dataset <- "/media/johnhubert/PHD DATA/daner_PGC_SCZ52_0513a.resultfiles_PGC_SCZ52_0513.sh2_noclo.txt"
 
-hapmap_reffreq_PHASE2_3_CEU <- read.table("~/Dropbox/bip1.scz1.ruderfer2014 (1)/hapmap_reffreq_PHASE2_3_CEU.txt", header=T, quote="\"")
+#########################################
+# Preparing unique treatment resistance # 
+#########################################
+Reference_dataset <-"~/Documents/GWIS_on_TREATMENT_RESISTANCE/TRSvsSCZ/PGC_GWAS.metal"
+Target_dataset <- "~/Documents/GWIS_on_TREATMENT_RESISTANCE/TRSvsSCZ/CLOZUK.1KGp1.assoc.dosage"
 
-BP_CLEAN <- merge(BPSCZ.bp.only.results ,hapmap_reffreq_PHASE2_3_CEU,by.x=2,by.y=1)
+merged_table <- merge(Reference_table,Target_table,by = "SNP")
+
+Reference_table2 <- merged_table[,.(SNP,BP,CHR,A1.x,A2.x,MAF,OR.x,SE.x,P.x)]
+Target_table2 <- merged_table[,.(SNP,BP,CHR,A1.y,A2.y,OR.y,SE.y,P.y)]
+
+setnames(Reference_table2,old = c("A1.x","A2.x","OR.x","SE.x","P.x"), new = c("A1","A2","OR","SE","P"))
+setnames(Target_table2, old = c("A1.y","A2.y","OR.y","SE.y","P.y"), new = c("A1","A2","OR", "SE", "P"))
+
+setkey(Reference_table2, CHR)
+setkey(Target_table2, CHR)
+
+Chromosomes_to_split <- seq(1,22)
+setwd("~/Documents/GWIS_on_TREATMENT_RESISTANCE/TRSvsSCZ/")
+for (chromosome.number in Chromosomes_to_split) { 
+  write.table(eval(parse(text = paste0("Reference_table2[J(",chromosome.number,")]"))), file = paste0("PGC_GWAS_Metal_table", chromosome.number,".txt"), quote = F, row.names = F)
+}
+for (chromosome.number in Chromosomes_to_split) { 
+  write.table(eval(parse(text = paste0("Target_table2[J(",chromosome.number,")]"))), file = paste0("CLOZUK.1kGp1_table", chromosome.number,".txt"), quote = F, row.names = F)
+}
+
+################################
+# Reading in reference dataset #
+################################
+#hapmap_reffreq_PHASE2_3_CEU <- fread("~/Dropbox/bip1.scz1.ruderfer2014 (1)/hapmap_reffreq_PHASE2_3_CEU.txt", header=T, quote="\"")
+thousandgenomes <- fread("~/Documents/1000genomes_european/g1000_European_populations_QC_NO_bad_LD.frq", header=T)
+Reference_table <- fread(Reference_dataset)
+Target_table <- fread(Target_dataset)
+
+#BP_CLEAN <- merge(BPSCZ.bp.only.results ,hapmap_reffreq_PHASE2_3_CEU,by.x=2,by.y=1)
 
 
 # drop iINFO out of bounds and refmaf out of bound snps:
-BP_CLEAN_out <- BP_CLEAN[BP_CLEAN[,6] > .9 & BP_CLEAN[,6] < 1.1 & BP_CLEAN[,15] < 0.95 & BP_CLEAN[,15] > 0.05,]
+#BP_CLEAN_out <- BP_CLEAN[BP_CLEAN[,6] > .9 & BP_CLEAN[,6] < 1.1 & BP_CLEAN[,15] < 0.95 & BP_CLEAN[,15] > 0.05,]
 
 
-write.table(BP_CLEAN_out[,1:10], "BIP_CLEAN_FOR_LD_SCORE.txt",row.names=F,quote=F)
+#write.table(BP_CLEAN_out[,1:10], "BIP_CLEAN_FOR_LD_SCORE.txt",row.names=F,quote=F)
 
 
 
 for (chromosome.number in 1:22){
-  summ_stat_target<- fread(paste0("CLOZUK2_noPGC2_chr",chromosome.number,".txt"))
+  #summ_stat_target<- fread(paste0("CLOZUK2_noPGC2_chr",chromosome.number,".txt"))
+  summ_stat_target <- fread(paste0("PGC_GWAS_Metal_table",chromosome.number,".txt"))
   summ_stat_target2 <- copy(summ_stat_target)
-  Training_table_1 <- fread(paste0("./RSupdate/CLOZUK_chr",chromosome.number,".KAVIAR.update"))
-  summ_stat_reference <- fread(paste0("PGC2noCLOZUK_chr",chromosome.number,".txt"))
+  #Training_table_1 <- fread(paste0("./RSupdate/CLOZUK_chr",chromosome.number,".KAVIAR.update"))
+  summ_stat_reference <- fread(paste0("CLOZUK.1kGp1_table",chromosome.number,".txt"))
   summ_stat_reference_2 <- copy(summ_stat_reference)
   
-  colnames(Training_table_1) <- c("SNP","RS_SNP")
-  summ_stat_target_RS <- merge(Training_table_1, summ_stat_target, by="SNP", all = F)
-  summ_stat_reference[, RS_SNP := SNP ]
+  #colnames(Training_table_1) <- c("SNP","RS_SNP")
+  #summ_stat_target_RS <- merge(Training_table_1, summ_stat_target, by="SNP", all = F)
+  #summ_stat_reference[, RS_SNP := SNP ]
   
   #CHR <- args[8] 
   #SNP <- args[9]
@@ -344,7 +377,7 @@ for (chromosome.number in 1:22){
   a <- which(Combined_summ_stat$A1.y==Combined_summ_stat$A2.x & Combined_summ_stat$A2.y==Combined_summ_stat$A1.x)
   
   # Same OR change #
-  if (length(a) >= 1 ){
+  if (length(a) >= 1){
     # Combined_summ_stat$BETA[a] <- (-Combined_summ_stat$BETA[a])
     PGC.OR <- Combined_summ_stat$OR.x[a]
     #PGC.BETA <- Combined_summ_stat$BETA[a]
@@ -403,7 +436,6 @@ for (chromosome.number in 1:22){
   } else {
     warning("There is an uneven amount of flipped SNPs")
   }
-  
   
   ### Checking conversions of SNPs ###
   checking.duplications.PGC <- which (duplicated(combined.CLOZUK.PGC$SNP.x))

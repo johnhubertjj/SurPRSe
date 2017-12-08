@@ -3,22 +3,22 @@ library(data.table)
 
 list_of_datasets <- list()
 
-  21003-2.0 - age at scan
-  25010-2.0 Volume brain (White+grey matter)
-  25878-2.0 Left Thalamus
-  25879-2.0 Right Thalamus
-  25880-2.0 Left Caudate
-  25881-2.0 Right Caudate
-  25882-2.0 Left Putamen
-  25883-2.0 Right Putamen
-  25884-2.0 Left Pallidum
-  25885-2.0 Right Pallidum
-  25886-2.0 Left Hippocampus
-  25887-2.0 Right Hippocampus
-  25888-2.0 Left Amygdala
-  25889-2.0 Right Amygdala
-  25890-2.0 Left Ventral striatum
-  25892-2.0 Right Ventral Striatum
+  #21003-2.0 - age at scan
+  #25010-2.0 Volume brain (White+grey matter)
+  #25878-2.0 Left Thalamus
+  #25879-2.0 Right Thalamus
+  #25880-2.0 Left Caudate
+  #25881-2.0 Right Caudate
+  #25882-2.0 Left Putamen
+  #25883-2.0 Right Putamen
+  #25884-2.0 Left Pallidum
+  #25885-2.0 Right Pallidum
+  #25886-2.0 Left Hippocampus
+  #25887-2.0 Right Hippocampus
+  #25888-2.0 Left Amygdala
+  #25889-2.0 Right Amygdala
+  #25890-2.0 Left Ventral striatum
+  #25892-2.0 Right Ventral Striatum
 
 setnames(x = covariates_and_samples, old = c("X21003.2.0","X25010.2.0","X25878.2.0", "X25879.2.0","X25880.2.0","X25881.2.0","X25882.2.0","X25883.2.0","X25884.2.0","X25885.2.0","X25886.2.0","X25887.2.0","X25888.2.0","X25889.2.0","X25890.2.0", "X25892.2.0"),
                                      new = c("age", "ICV", "Lthal", "Rthal", "Lcaud", "Rcaud", "Lput", "Rput", "Lpal","Rpal","Lhippo","Rhippo",
