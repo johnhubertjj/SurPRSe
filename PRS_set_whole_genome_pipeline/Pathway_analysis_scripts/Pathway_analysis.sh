@@ -125,7 +125,6 @@ if [[ "${Gene_regions}" = "extended" || ${Gene_regions} = "both" ]]; then
 	fi
 fi
 
-# Where I got to on Saturday: need to complete on Monday after Tim Hortons
 Rscript ${path_to_scripts}RscriptEcho.R\
  ${path_to_pathway_scripts}Assign_SNPs_to_genes_from_pathways.R\
  ./${training_set_name}_${validation_set_name}_extrainfo/${pathways}_assiging_SNPs_to_genes_from_pathways.Rout\
@@ -138,16 +137,28 @@ Rscript ${path_to_scripts}RscriptEcho.R\
  ${Gene_regions}\
  ${Chromosomes_to_analyse[@]}
 
-
 # merge all the PGC SNPs together into one table
 Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}combining_summary_stats_tables_after_conversion_to_CHR_POS.R ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_conversion.Rout ${training_set_name} ${validation_set_name} ${Chromosomes_to_analyse[@]}
 
-chmod -R g+rwx ${path_to_scripts} 
+if [ ${Using_raven} = "FALSE" ]; then
+  chmod -R g+rwx ${path_to_scripts} 
+
+else
+  chmod -R u+rwx ${path_to_scripts}
+
+fi
+
 echo ${pathways[@]}
 
 if [[ "$system" = "MAC" || "$system" = "LINUX" ]]; then
 
+if [ ${Using_raven} = "FALSE" ]; then
 sudo parallel ${path_to_pathway_scripts}creation_of_merge_list_file.sh ::: ${pathways[@]} ::: ${path_to_scripts} ::: ${path_to_pathway_scripts} ::: ${system} ::: ${Name_of_extra_analysis}
+
+else
+parallel ${path_to_pathway_scripts}creation_of_merge_list_file.sh ::: ${pathways[@]} ::: ${path_to_scripts} ::: ${path_to_pathway_scripts} ::: ${system} ::: ${Name_of_extra_analysis}
+
+fi
 
 # If randomising Gene_sets (aka ran Gene specific PRS first) then run this script:
 
@@ -159,17 +170,20 @@ mkdir ${Pathway_output_directory}Randomised_gene_sets_analysis/
 mkdir ${Pathway_output_directory}Randomised_gene_sets_analysis/Scores/
 Random_scoring_directory=${Pathway_output_directory}Randomised_gene_sets_analysis/Scores/
 
-
+# Got to here; need to figure out file paths...again...also need to un gunzip LD score files
 Rscript ${path_to_scripts}RscriptEcho.R\
- ${path_to_Gene_scripts}generate_random_andrews_script.R\
+ ${path_to_gene_scripts}generate_random_andrews_script.R\
  ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_${validation_set_name}_generate_random_andrews_script.Rout\
  ${training_set_name}\
  ${validation_set_name}\
- ${Pathway_output_directory}\
  ${Gene_output_directory}\
- ${path_to_stationary_data}${Pathway_filename}\
+ ${Pathway_output_directory}\
+ ${path_to_stationary_data}${Gene_location_filename}\
  ${Gene_regions}\
  ${permutations}\
+ ${path_to_stationary_data}${Pathway_filename}\
+ ${calculate_indep_SNPs}\
+ ${pathways[@]}
 
 pathways_for_randomisation=(`awk '{ print $1 }' ${Pathway_output_directory}${training_set_name}_${validation_set_name}_random_pathways_to_test.txt`)
 

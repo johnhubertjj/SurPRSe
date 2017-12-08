@@ -261,6 +261,8 @@ fi
 
 fi
 
+gunzip ${Gene_output_directory}*.l2.ldscore.gz
+
 if [[ ${Gene_specific_PRS} = "FALSE" ]]; then
 
 exit 1

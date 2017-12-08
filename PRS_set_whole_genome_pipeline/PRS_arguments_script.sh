@@ -53,7 +53,8 @@ if [[ "$whereami" = *"raven"* ]]; then
   # Pathway datasets
   Pathway_filename="Selected_Pocklington_plus_GO_pathways_SCHIZ.txt"
   Gene_location_filename="NCBI37.3.gene.loc"
-  
+  calculate_indep_SNPs=FALSE
+ 
   # Split_by_chromosome for genotype?
   split_by_chromosome_required=FALSE 
   

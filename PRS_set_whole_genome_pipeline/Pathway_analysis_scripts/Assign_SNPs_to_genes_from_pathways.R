@@ -29,14 +29,14 @@ chromosomes_to_analyse <- as.numeric(args[c(10:length(args))])
 
 setwd(".")
 
-Training_name <- "CLOZUK_PGC2noclo"
-Validation_name <- "ALSPAC"
-Validation_full_name_serial <- "ALSPAC_hrc_imputed_step3_mri_brain_measurements_only_chr"
-Pathway_directory <- "Pathways"
-Pathway_file_name <- "/home/johnhubert/Dropbox/Stationary_data/Selected_Pocklington_plus_GO_pathways_SCHIZ.txt"
-gene_loc_file_name <-"/home/johnhubert/Dropbox/Stationary_data/NCBI37.3.gene.loc"
-Gene_regions <- "both"
-chromosomes_to_analyse <- seq(1,22) 
+#Training_name <- "CLOZUK_PGC2noclo"
+#Validation_name <- "ALSPAC"
+#Validation_full_name_serial <- "ALSPAC_hrc_imputed_step3_mri_brain_measurements_only_chr"
+#Pathway_directory <- "Pathways"
+#Pathway_file_name <- "/home/johnhubert/Dropbox/Stationary_data/Selected_Pocklington_plus_GO_pathways_SCHIZ.txt"
+#gene_loc_file_name <-"/home/johnhubert/Dropbox/Stationary_data/NCBI37.3.gene.loc"
+#Gene_regions <- "both"
+#chromosomes_to_analyse <- seq(1,22) 
 #setwd("~/Documents/CLOZUK_ALSPAC_PATHWAY_TESTING")
   
 # Create new variables based on input files to make things easier to read # 
@@ -276,7 +276,7 @@ for (i in 1:number_of_pathways_to_analyse) {
       y[[1]] <- NULL
       y[[1]] <- NULL
       
-      adding_unread_genes(MAGMA.gene.regions.for.chromosome = temp_pathway_table, clumped_SNPs = selecting_chromosomes, y = y, chromosome.number = l, pathway = pathway_names[i])  
+      adding_unread_genes(MAGMA.gene.regions.for.chromosome = temp_pathway_table, clumped_SNPs = selecting_chromosomes, y = y, chromosome.number = l)  
       
       e$test_data_frame[,c("BP_start_extended","BP_end_extended") := NULL]
       which(duplicated(e$test_data_frame$SNP,fromLast = T))

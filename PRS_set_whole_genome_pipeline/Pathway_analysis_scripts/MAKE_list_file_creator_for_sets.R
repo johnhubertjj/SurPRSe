@@ -36,7 +36,7 @@ output_directory <- paste0("./", Training_name, "_", Validation_name, "_output/"
 
 
 # Read in both of the error files to check which pathways you want to analyse
-unread_pathways_one <- read.delim(paste0(Pathway_directory,"/MAGMA_empty_files_after_analysis.txt"), header = F, stringsAsFactors = F)
+unread_pathways_one <- read.delim(paste0(Pathway_directory,"/MAGMA_empty_files_after_analysis_normal.txt"), header = F, stringsAsFactors = F)
 unread_pathways_two <- fread(paste0(Pathway_directory,"/Pathways_analysis_empty_pathways_info_file.txt"), header = F, stringsAsFactors = F)
 
 # For the moment I create Dummy files so that R will always recognise that file instead of searching to check if the file exits.

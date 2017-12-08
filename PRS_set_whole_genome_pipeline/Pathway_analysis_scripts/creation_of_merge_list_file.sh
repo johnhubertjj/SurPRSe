@@ -29,7 +29,7 @@ do
 
 	PRSACPJA_data_output="./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis}/${validation_set_usually_genotype_serial}${a}_consensus_with_${training_set_name}_flipped_alleles_no_duplicates"
 	
-	plink --bfile ${PRSACPJA_data_output} --extract ${Pathway_output_directory}/chromosome_${a}_${pathways}_SNPs_for_clumping_regular_gene_regions.txt --make-bed --out ${Pathway_output_directory}/${pathways}/chromosome_${a}_${validation_set_name}_${training_set_name}_${pathways}
+	plink --bfile ${PRSACPJA_data_output} --extract ${Pathway_output_directory}/chromosome_${a}_${pathways}_SNPs_for_clumping_normal_gene_regions.txt --make-bed --out ${Pathway_output_directory}/${pathways}/chromosome_${a}_${validation_set_name}_${training_set_name}_${pathways}
 
 done
 
