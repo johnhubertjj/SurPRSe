@@ -36,7 +36,9 @@ Gene_regions <- args[8] # Whether to include/exclude the regulatory regions of a
 rand_n = args[9]; # Number of random sets to generate for each gene-set
 Pathway_file_name <- args[10] # The input file annotating genes to pathways
 calculate_indep_SNPs <- args[11]
-Pathways <- as.character(args[c(12:length(args))]) # All pathways
+Randomised_output_directory <- args[12]
+Random_scoring_directory <- args[13]
+Pathways <- as.character(args[c(14:length(args))]) # All pathways
 
 # Testing_variables
 # Training_name <- "CLOZUK_PGC2noclo"
@@ -66,9 +68,11 @@ print(Chromosomes_to_split)
 MAF_counts <- fread(paste0(Gene_output_directory,Validation_name,"_",Training_name,"_normal_gene_regions_Clumped_whole_genome_final.frq"), colClasses = c(rep("character", 4),"numeric","integer"))
 GENES_to_snps <- scan(paste0(Gene_output_directory,Training_name,"_",Validation_name,"_SNPs_normal_clumped_gene_temp.genes.annot"), what = "", sep = "\n")
 
+if (calculate_indep_SNPs == TRUE){ 
 Indep_snp_n <- fread(paste0(Gene_output_directory,Validation_name,"_",Training_name,"_normal_gene_region_information_for_randomisation_tests_ater_clumping.txt"), colClasses = rep("numeric",6))
 setnames(Indep_snp_n, old = "Gene", new = "GENE_NUMBER")
 setnames(Indep_snp_n, old = "Nmarkers_in_Gene", new="Nmarkers_in_Gene_independent")
+}
 
 LD_scored_snps <- fread(paste0(Gene_output_directory,Validation_name,"_",Training_name,"_normal_gene_regions_Clumped_whole_genome_final.l2.ldscore"), colClasses = c("character","character", "integer", "numeric"))
 Pathway_sets <- fread(Pathway_file_name)
@@ -79,7 +83,7 @@ bim_file <- fread(paste0(Gene_output_directory, Validation_name, "_", Training_n
 names(bim_file) <- c("CHR", "SNP", "GD", "BP", "A1", "A2")
 
 # Clarify output directory and where the Summary stats file is #
-Randomised_output_directory <- paste0(Pathway_output_directory,"Randomised_gene_set_analysis/")
+Randomised_output_directory <- paste0(Pathway_output_directory,"Randomised_gene_sets_analysis/")
 Summary_stats_dataset <- fread(paste0("./", Training_name, "_", Validation_name, "_output/combined_",Training_name,"_table_with_CHR.POS_identifiers.txt"))
 
 print(Chromosomes_to_split)
@@ -131,8 +135,9 @@ create_random <- function(i,gene_data,set_names,set_n,formula_str,rand_n, Random
   random_mtx_dt <- as.data.table(random_mtx)
   
   rm(random_mtx)
-  
-  colnames_rndm_dt <- colnames(random_mtx_dt[,!"tmp_name"])
+  testa <- copy(random_mtx_dt)
+  colnames_rndm_dt <- colnames(testa[,tmp_name := NULL])
+  rm(testa)
   test2 <- melt(random_mtx_dt,measure.vars =  colnames_rndm_dt)
   final_input_list <- test2[order(test2$tmp_name),]
   final_input_list <- subset(final_input_list,  select = c(tmp_name,value))
@@ -289,7 +294,6 @@ parLapply(cl, 1:number_of_pathways, create_random, merged_total, set_names, set_
 stopCluster(cl)
 
 # significance_thresholds <- 1
-
 
 combined.test.training.clumped.Genomic.SNPs <- merge(bim_file, Summary_stats_dataset, by.x="SNP", by.y="SNP", all=F, sort=F)
 combined.test.training.clumped.Genomic.SNPs$A1.y <- toupper(combined.test.training.clumped.Genomic.SNPs$A1.y)

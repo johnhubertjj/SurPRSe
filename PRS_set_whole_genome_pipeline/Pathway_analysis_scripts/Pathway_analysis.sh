@@ -166,7 +166,10 @@ if [[ "$randomise" = TRUE ]]; then
 
 # Set up extra arguments from Genes directory and for PRS scoring for randomised sets
 Gene_output_directory="./${training_set_name}_${validation_set_name}_output/Genes/" 
+
 mkdir ${Pathway_output_directory}Randomised_gene_sets_analysis/
+Random_directory=${Pathway_output_directory}Randomised_gene_sets_analysis/
+
 mkdir ${Pathway_output_directory}Randomised_gene_sets_analysis/Scores/
 Random_scoring_directory=${Pathway_output_directory}Randomised_gene_sets_analysis/Scores/
 
@@ -183,16 +186,32 @@ Rscript ${path_to_scripts}RscriptEcho.R\
  ${permutations}\
  ${path_to_stationary_data}${Pathway_filename}\
  ${calculate_indep_SNPs}\
+ ${Random_directory}\
+ ${Random_scoring_directory}\
  ${pathways[@]}
 
 pathways_for_randomisation=(`awk '{ print $1 }' ${Pathway_output_directory}${training_set_name}_${validation_set_name}_random_pathways_to_test.txt`)
 
+if [[ ${Using_raven} = FALSE ]];then
 sudo parallel ${path_to_pathway_scripts}test_script_randomised_plink.sh ::: ${pathways_for_randomisation[@]} ::: ${path_to_scripts} ::: ${Name_of_extra_analysis} ::: ${Gene_output_directory} ::: ${Random_scoring_directory} ::: ${permutations} 
 
-Rscript ${path_to_scripts}RscriptEcho.R\
- ${path_to_Gene_scripts}Collate_all_pathways_random.R
-  
+else
+parallel ${path_to_pathway_scripts}test_script_randomised_plink.sh ::: ${pathways_for_randomisation[@]} ::: ${path_to_scripts} ::: ${Name_of_extra_analysis} ::: ${Gene_output_directory} ::: ${Random_scoring_directory} ::: ${permutations} 
 
+fi
+
+Rscript ${path_to_scripts}RscriptEcho.R\
+ ${path_to_gene_scripts}Collate_all_pathways_random.R
+ ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_${validation_set_name}_collate_all_pathways_random.Rout\
+ ${training_set_name}\
+ ${validation_set_name}\
+ ${Gene_output_directory}\
+ ${Pathway_output_directory}\
+ ${Gene_regions}\
+ ${permutations}\
+ ${path_to_stationary_data}${Pathway_filename}\
+ ${pathways[@]}
+ 
 Rscript ${path_to_scripts}RscriptEcho.R\
  ${path_to_pathway_scripts}Pathway_PRS_scoring.R\
  ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_${validation_set_name}_Pathway_PRS_scoring.Rout\
