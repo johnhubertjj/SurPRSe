@@ -6,6 +6,7 @@
 ### Start Timer
 ptm <- proc.time()
 
+library(magrittr)
 
 
 ## try http:// if https:// URLs are not supported
@@ -423,7 +424,6 @@ for (chromosome.number in 1:22){
     warning("alleles have been flipped on CLOZUK")
   }
   checking.which.OR.do.not.equal.each.other <- which(summ_stat_reference$OR != summ_stat_reference_2$OR)
-  rm(PGC.data.frame.original)
   
   problematic.SNPs <- match(e$summ_stat_referenceflipped.alleles, checking.which.OR.do.not.equal.each.other)
   problematic.SNPs <- which(is.na(problematic.SNPs))
@@ -436,13 +436,187 @@ for (chromosome.number in 1:22){
   } else {
     warning("There is an uneven amount of flipped SNPs")
   }
+
+new.target.datatable <- Combined_summ_stat[,.(SNP.y,BP,CHR,A1.y,A2.y,MAF,OR.y,SE.y,P.y)]
+setnames(new.target.datatable, old = c("SNP.y","A1.y","A2.y","OR.y","SE.y","P.y"), new = c("SNP","A1","A2","OR", "SE", "P"))
   
-  ### Checking conversions of SNPs ###
-  checking.duplications.PGC <- which (duplicated(combined.CLOZUK.PGC$SNP.x))
-  checking.duplications.CZK <- which (duplicated(combined.CLOZUK.PGC$SNP.y))
+new.reference.datatable <- Combined_summ_stat[,.(SNP.x,BP,CHR,A1.x,A2.x,OR.x,SE.x,P.x)]
+setnames(new.reference.datatable, old = c("SNP.x","A1.x","A2.x","OR.x","SE.x","P.x"), new = c("SNP","A1","A2","OR", "SE", "P"))
+
+new.target.table <- paste0(Target_name,"_table", chromosome.number,"_new.txt")
+new.reference.table <-  paste0(Reference_name,"_table", chromosome.number,"_new.txt")
   
-  if (length(checking.duplications.CZK) != 0 & length(checking.duplications.PGC) != 0) {
-    warning("There are duplicated SNPs common between CLOZUK and PGC")
-  }
-  
+# Write update file for plink
+write.table(new.target.datatable, file = new.target.table, quote = F, row.names = F, col.names = T)
+
+# Write update file for plink
+write.table(new.reference.datatable, file = new.reference.table, quote = F, row.names = F, col.names = T)
+
 }
+
+## Read in the latest Summary stats tables after converting to one table
+for (i in 1:22){
+  assign(paste0("NON_trs_table", i), fread(paste0("Non_TRS_people_aka_PGC2_table",i,"_new.txt")),envir = .GlobalEnv)
+}
+l = list()
+
+## print out to one table under a common filename
+for (i in 1:22) {
+  l[[i]] <- eval(parse(text = paste0("NON_trs_table",i)))
+}
+combined_final_table <- rbindlist(l)
+
+write.table(combined_final_table, file = "PGC_GWAS_metal_aligned_and_matched_snps.txt",quote = F,row.names = F)
+
+## Read in the latest Summary stats tables after converting to one table
+for (i in 1:22){
+  assign(paste0("TRS_table", i), fread(paste0("TRS_people_aka_CLOZUK_table",i,"_new.txt")),envir = .GlobalEnv)
+}
+l = list()
+
+## print out to one table under a common filename
+for (i in 1:22) {
+  l[[i]] <- eval(parse(text = paste0("NON_trs_table",i)))
+}
+combined_final_table <- rbindlist(l)
+
+write.table(combined_final_table, file = "CLOZUK.1kGp1_table.txt",quote = F,row.names = F)
+###########################################
+###### GWIS #######
+###########################################
+
+h2TRS <- 0.3549 #(0.0183)
+h2non_TRS <-  0.4942 #(0.0255)
+gcov <-  0.4188 #(0.0216)
+
+Non_TRS <- fread("PGC_GWAS_metal_aligned_and_matched_snps.txt")
+TRS <-  fread("CLOZUK.1kGp1_table.txt")
+thousandgenomes <- fread("~/Documents/1000genomes_european/g1000_European_populations_QC_NO_bad_LD.frq", header=T)
+
+BPSCZ.bp.only.results <- read.delim("~/Dropbox/bip1.scz1.ruderfer2014 (1)/BPSCZ.bp-only.results.txt",stringsAsFactors =F)
+BPSCZ.scz.only.results <- read.delim("~/Dropbox/bip1.scz1.ruderfer2014 (1)/BPSCZ.scz-only.results.txt",stringsAsFactors =F)
+
+
+#### Rotate to obtain Unique BIP and Unique SCZ, first merge the files and allign the reference allel:
+primary <- merge(TRS,Non_TRS,by="SNP")
+
+#primary  <- merge(BPSCZ.bp.only.results,BPSCZ.scz.only.results,by=2)
+
+primary[primary$A1.x != primary$A1.y,7] <- exp(log(primary[primary$A1.x != primary$A1.y,7]) * -1)
+
+primary[primary$A1.x != primary$A1.y,4] <- primary[primary$A1.x != primary$A1.y,13]
+
+primary[primary$A2.x != primary$A2.y,5] <- primary[primary$A2.x != primary$A2.y,14]
+View(primary)
+
+
+# merge with reference allel frequency:
+primary2 <- merge(primary,thousandgenomes,by="SNP")
+
+# flip ref allele freq to align with the ref allel in BIP and SCZ
+rows_with_MAF_change <- which(primary2$A1.x != primary2$A1) 
+primary2$MAF[rows_with_MAF_change] <- 1 - primary2$MAF[rows_with_MAF_change]
+
+
+# compute allel frequencies to ensure proper accounting for the AF in computing the new beta:
+p <- primary2$MAF
+base <- 2*p * (1-p) + (1-p)^2
+het <- 2*p * (1-p) / base
+hom <- (1-p)^2/base
+
+
+
+
+################################# BELOW FIRST BIP - SCZ #################################
+# TRS - NON_TRS
+
+
+primary2 <- primary2[,1:24]
+
+# compute the variables c as described in the methosds, essential for transformation.
+c <- (h2TRS - gcov) / (h2TRS + gcov)
+
+
+primary2 <- cbind(primary2, het * ( (1+ c) *log(primary2$OR.x) - (1 - c) * log(primary2$OR.y))/2 + hom * ( (1+ c) * 2*log(primary2$OR.x)- (1 - c) * 2*log(primary2$OR.y))/4 )
+
+primary2 <- primary2[,1:25]
+
+# USe the delta method to get the SE for the beta:
+require(msm)
+se <- matrix(NA,nrow=nrow(primary2),ncol=1)
+for(i in 1:nrow(primary2)){
+  c1 <- 1+c 
+  c2 <- 1-c 
+  homi <- hom[i]
+  heti <- het[i]
+  se[i,] <-  deltamethod(~(heti*(c1) *log(x2) - (c2) *log(x1))/2 +  homi*((c1) *2*log(x2) - (c2) * 2*log(x1))/4 ,mean=c(primary2$OR.y[i],primary2$OR.x[i]),cov=diag(c(primary2$SE.y[i],primary2$SE.x[i])) %*%matrix(c(1,0,0,1),2,2) %*% diag(c(primary2$SE.y[i],primary2$SE.x[i])) )
+} 
+
+primary2 <- cbind(primary2,se)
+primary2 <- cbind(primary2,pchisq((primary2[,25]/primary2[,26])^2,1,lower.tail=F))
+
+
+primary2_out <- primary2[primary2[,6] > .9 & primary2[,6] < 1.1 & primary2[,24] < 0.95 & primary2[,24] > 0.05,]
+
+
+BIP_min_SCZ_out <- primary2_out[,c(1,2,3,4,5,24,25,26,27)]
+
+names(BIP_min_SCZ_out) <- c("SNP","CHR", "BP","A1","A2","EAF","Beta","SE","P" )
+
+write.table(BIP_min_SCZ_out,"BIP_min_SCZ_out_LDSCORE.txt",row.names=F,quote=F)
+
+
+
+######################################## REPEAT FOR SCZ - BIP 
+
+# drop all BIP steps
+
+primary2 <- primary2[,1:24]
+
+
+
+# compute the variables c as described in the methosds, essential for transformation.
+c <- (h2BIP - gcov) / (h2BIP + gcov)
+
+
+primary2 <- cbind(primary2, het * ( (1+c) *log(primary2$OR.y) -  (1-c) * log(primary2$OR.x))/2 + hom * ( (1+ c) * 2*log(primary2$OR.y)- (1 - c) * 2*log(primary2$OR.x))/4 )
+
+primary2 <- primary2[,1:25]
+
+# Use the delta method to get the SE for the beta:
+require(msm)
+se <- matrix(NA,nrow=nrow(primary2),ncol=1)
+for(i in 1:nrow(primary2)){
+  c1 <- 1+c 
+  c2 <- 1-c 
+  homi <- hom[i]
+  heti <- het[i]
+  se[i,] <-  deltamethod(~(heti*(c1) *log(x1) - (c2) *log(x2))/2 +  homi*((c1) *2*log(x1) - (c2) * 2*log(x2))/4 ,mean=c(primary2$OR.y[i],primary2$OR.x[i]),cov=diag(c(primary2$SE.y[i],primary2$SE.x[i])) %*%matrix(c(1,0,0,1),2,2) %*% diag(c(primary2$SE.y[i],primary2$SE.x[i])) )
+} 
+
+primary2 <- cbind(primary2,se)
+primary2 <- cbind(primary2,pchisq((primary2[,25]/primary2[,26])^2,1,lower.tail=F))
+
+
+primary2_out <- primary2[primary2[,6] > .9 & primary2[,6] < 1.1 & primary2[,24] < 0.95 & primary2[,24] > 0.05,]
+
+
+SCZ_min_BIP_out <- primary2_out[,c(1,2,3,4,5,24,25,26,27)]
+
+names(SCZ_min_BIP_out) <- c("SNP","CHR", "BP","A1","A2","EAF","Beta","SE","P" )
+
+write.table(SCZ_min_BIP_out,"SCZ_min_BIP_out_LDSCORE.txt",row.names=F,quote=F)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
