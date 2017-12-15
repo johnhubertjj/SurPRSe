@@ -1,15 +1,5 @@
 #/bin/bash
 
-#PBS -q batch_long
-#PBS -P PR54
-#PBS -l select=1:ncpus=1:mem=45GB
-#PBS -l walltime=24:00:00
-#PBS -o /home/c1020109/
-#PBS -e /home/c1020109/
-#PBS -j oe
-#PBS -J 1-22
-#PBS -N c1020109_job_array_whole_genome
-
 # script requries 22 files for each validation and training set
 
 # Run locally or on ARCCA
@@ -18,29 +8,6 @@ echo "$whereami"
 
 #Am I Local or on a server? 
 system=$3
-
-if [[ "$whereami" = *"raven"* ]]; then
-  # assign a new variable for the PBS_ARRAY_variable
-  chromosome_number=${PBS_ARRAY_INDEX}
-  
-  # Load both Plink and R
-  module purge
-  module load R/3.3.0
-  module load plink/1.9c3
-  module load python/2.7.11
-  module load magma/1.06
-
-  cd $PBS_O_WORKDIR
-  path_to_scripts="/home/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/"
-  path_to_pathway_scripts="/home/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/Pathway_analysis_scripts"
-  # Assign the shell variables
-  source ${path_to_scripts}PRS_arguments_script.sh 
-  cat ${path_to_scripts}PRS_arguments_script.sh 
-   
-  # Alter/add variables depending on what type of Training dataset you have
-  source ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
-  cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
-fi
  
 if [[ "$system" = "MAC" || "$system" = "LINUX" ]]; then
   
@@ -74,9 +41,14 @@ Pathway_output_directory="./${training_set_name}_${validation_set_name}_output/$
         	mkdir ./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis}
 	fi
 
-sudo chmod  g+rwx ${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis}
-sudo chmod  g+rwx ${training_set_name}_${validation_set_name}_output/
- 
+if [ ${Using_raven} = "FALSE" ]; then
+  sudo chmod  g+rwx ${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis}
+  sudo chmod  g+rwx ${training_set_name}_${validation_set_name}_output/
+ else 
+  chmod  u+rwx ${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis}
+  chmod  u+rwx ${training_set_name}_${validation_set_name}_output/
+fi
+
 if [ -e "${Pathway_output_directory}Pathways_analysis_empty_pathways_info_file.txt" ]; then
 	rm "${Pathway_output_directory}Pathways_analysis_empty_pathways_info_file.txt"
 fi
@@ -107,7 +79,7 @@ Pathway_file_name=${Pathway_output_directory}Pathway_names.txt
 # The pathways used will then be read into an array variable so that we don't have to keep reading this file and it is within the BASH environment 
 
 if [[ ${Gene_regions} = "extended" || ${Gene_regions} = "both" ]]; then
-
+echo "extended gene regions"
 	while IFS='' read -r line || [[ -n "$line" ]]; 
 	do
 		for i in ${Chromosomes_to_analyse[@]};
@@ -120,7 +92,7 @@ if [[ ${Gene_regions} = "extended" || ${Gene_regions} = "both" ]]; then
 fi
 
 if [[ "${Gene_regions}" = "normal" || ${Gene_regions} = "both" ]]; then
-echo normal gene regions
+echo "normal gene regions"
 echo ${Pathway_file_name}
 	while IFS='' read -r line || [[ -n "$line" ]]; 
 	do
@@ -165,16 +137,28 @@ Rscript ${path_to_scripts}RscriptEcho.R\
  ${Gene_regions}\
  ${Chromosomes_to_analyse[@]}
 
-
 # merge all the PGC SNPs together into one table
 Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}combining_summary_stats_tables_after_conversion_to_CHR_POS.R ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_conversion.Rout ${training_set_name} ${validation_set_name} ${Chromosomes_to_analyse[@]}
 
-chmod -R g+rwx ${path_to_scripts} 
+if [ ${Using_raven} = "FALSE" ]; then
+  chmod -R g+rwx ${path_to_scripts} 
+
+else
+  chmod -R u+rwx ${path_to_scripts}
+
+fi
+
 echo ${pathways[@]}
 
 if [[ "$system" = "MAC" || "$system" = "LINUX" ]]; then
 
+if [ ${Using_raven} = "FALSE" ]; then
 sudo parallel ${path_to_pathway_scripts}creation_of_merge_list_file.sh ::: ${pathways[@]} ::: ${path_to_scripts} ::: ${path_to_pathway_scripts} ::: ${system} ::: ${Name_of_extra_analysis}
+
+else
+parallel ${path_to_pathway_scripts}creation_of_merge_list_file.sh ::: ${pathways[@]} ::: ${path_to_scripts} ::: ${path_to_pathway_scripts} ::: ${system} ::: ${Name_of_extra_analysis}
+
+fi
 
 # If randomising Gene_sets (aka ran Gene specific PRS first) then run this script:
 
@@ -182,30 +166,52 @@ if [[ "$randomise" = TRUE ]]; then
 
 # Set up extra arguments from Genes directory and for PRS scoring for randomised sets
 Gene_output_directory="./${training_set_name}_${validation_set_name}_output/Genes/" 
+
 mkdir ${Pathway_output_directory}Randomised_gene_sets_analysis/
+Random_directory=${Pathway_output_directory}Randomised_gene_sets_analysis/
+
 mkdir ${Pathway_output_directory}Randomised_gene_sets_analysis/Scores/
 Random_scoring_directory=${Pathway_output_directory}Randomised_gene_sets_analysis/Scores/
 
-
+# Got to here; need to figure out file paths...again...also need to un gunzip LD score files
 Rscript ${path_to_scripts}RscriptEcho.R\
- ${path_to_Gene_scripts}generate_random_andrews_script.R\
+ ${path_to_gene_scripts}generate_random_andrews_script.R\
  ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_${validation_set_name}_generate_random_andrews_script.Rout\
  ${training_set_name}\
  ${validation_set_name}\
- ${Pathway_output_directory}\
  ${Gene_output_directory}\
- ${path_to_stationary_data}${Pathway_filename}\
+ ${Pathway_output_directory}\
+ ${path_to_stationary_data}${Gene_location_filename}\
  ${Gene_regions}\
  ${permutations}\
+ ${path_to_stationary_data}${Pathway_filename}\
+ ${calculate_indep_SNPs}\
+ ${Random_directory}\
+ ${Random_scoring_directory}\
+ ${pathways[@]}
 
 pathways_for_randomisation=(`awk '{ print $1 }' ${Pathway_output_directory}${training_set_name}_${validation_set_name}_random_pathways_to_test.txt`)
 
+if [[ ${Using_raven} = FALSE ]];then
 sudo parallel ${path_to_pathway_scripts}test_script_randomised_plink.sh ::: ${pathways_for_randomisation[@]} ::: ${path_to_scripts} ::: ${Name_of_extra_analysis} ::: ${Gene_output_directory} ::: ${Random_scoring_directory} ::: ${permutations} 
 
-Rscript ${path_to_scripts}RscriptEcho.R\
- ${path_to_Gene_scripts}Collate_all_pathways_random.R
-  
+else
+parallel ${path_to_pathway_scripts}test_script_randomised_plink.sh ::: ${pathways_for_randomisation[@]} ::: ${path_to_scripts} ::: ${Name_of_extra_analysis} ::: ${Gene_output_directory} ::: ${Random_scoring_directory} ::: ${permutations} 
 
+fi
+
+Rscript ${path_to_scripts}RscriptEcho.R\
+ ${path_to_gene_scripts}Collate_all_pathways_random.R
+ ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_${validation_set_name}_collate_all_pathways_random.Rout\
+ ${training_set_name}\
+ ${validation_set_name}\
+ ${Gene_output_directory}\
+ ${Pathway_output_directory}\
+ ${Gene_regions}\
+ ${permutations}\
+ ${path_to_stationary_data}${Pathway_filename}\
+ ${pathways[@]}
+ 
 Rscript ${path_to_scripts}RscriptEcho.R\
  ${path_to_pathway_scripts}Pathway_PRS_scoring.R\
  ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_${validation_set_name}_Pathway_PRS_scoring.Rout\

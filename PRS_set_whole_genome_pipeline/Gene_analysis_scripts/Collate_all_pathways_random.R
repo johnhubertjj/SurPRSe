@@ -33,26 +33,28 @@ e <- new.env()
 # specify the different input tables #
 Training_name <- args[3]
 Validation_name <- args[4]
-Pathway_output_directory <- args[5]
-Gene_output_directory <- args[6]
-Gene_regions <- args[8] # Whether to include/exclude the regulatory regions of a gene
-rand_n = args[9]; # Number of random sets to generate for each gene-set
-Pathway_file_name <- args[10] # The input file annotating genes to pathways
+Gene_output_directory <- args[5]
+Pathway_output_directory <- args[6]
+Gene_regions <- args[7] # Whether to include/exclude the regulatory regions of a gene
+rand_n = args[8]; # Number of random sets to generate for each gene-set
+Pathway_file_name <- args[9] # The input file annotating genes to pathways
+Pathways <- as.character(args[c(10:length(args))])
 
-# Testing_variables
- Training_name <- "CLOZUK_PGC2noclo"
- Validation_name <- "ALSPAC"
- Gene_output_directory <- paste0(Training_name,"_", Validation_name, "_output/Genes/")
- Pathway_output_directory <- paste0(Training_name,"_",Validation_name,"_output/Pathways/")
- Randomised_output_directory <- paste0(Training_name,"_", Validation_name, "_output/Pathways/Randomised_gene_set_analysis/Scores/")
+## Variables_useful_for_testing ## 
+
+# Training_name <- "CLOZUK_PGC2noclo"
+# Validation_name <- "ALSPAC"
+# Gene_output_directory <- paste0(Training_name,"_", Validation_name, "_output/Genes/")
+# Pathway_output_directory <- paste0(Training_name,"_",Validation_name,"_output/Pathways/")
+# Randomised_output_directory <- paste0(Training_name,"_", Validation_name, "_output/Pathways/Randomised_gene_sets_analysis/Scores/")
 # gene_loc_file_name <- "~/Dropbox/Stationary_data/NCBI37.3.gene.loc"
 # Gene_regions <- "both"
- rand_n = 10000; # Number of random sets to generate for each gene-set
- Pathway_file_name <- "~/Dropbox/Stationary_data/Selected_Pocklington_plus_GO_pathways_SCHIZ.txt"
+# rand_n = 10000; # Number of random sets to generate for each gene-set
+# Pathway_file_name <- "~/Dropbox/Stationary_data/Selected_Pocklington_plus_GO_pathways_SCHIZ.txt"
 # Pathways <- c("5HT_2C", "Cav2_channels", "FMRP_targets", "abnormal_behavior", "abnormal_long_term_potentiation", "abnormal_nervous_system_electrophysiology", "Calcium_ion_import_GO0070509", "Membrane_depolarization_during_action_potential_GO0086010", "Synaptic_transmission_GO0007268") 
 
 # Read in array variables from file and rearrage to a vector#
-significance_thresholds <- fread(file = paste0(Training_name,"_", Validation_name,"_plink_significance_thresholds_arguments_file_tmp.txt"))      
+significance_thresholds <- fread(paste0(Training_name,"_", Validation_name,"_plink_significance_thresholds_arguments_file_tmp.txt"))      
 significance_thresholds <- unlist(significance_thresholds$V3)
 print(significance_thresholds)
 
@@ -62,7 +64,7 @@ Pathways_used <- file_path_sans_ext(basename(Pathway_file_name))
 pathway_sets <- fread(Pathway_file_name)
 setnames(pathway_sets, c("Pathway", "Gene"))
 
-#extract names of each pathway
+# extract names of each pathway
 factorise_column_1<- as.factor(pathway_sets$Pathway)
 pathway_names <- levels(factorise_column_1)
 number_of_pathways_to_analyse <- length(pathway_names)
@@ -74,6 +76,9 @@ Collate_all_profiles <- function(i, pathway_names, Randomised_output_directory, 
 
 # Select the pathway #  
 pathway <- pathway_names[i]
+
+# add in an error catch and write to directory for p-value thresholds that do not have score files! ###
+# alter the significance threshold file accordingly (aka write over it or use a new one from now onwards ###
 
 # Create the column order for the large data.table #
 for (w in 1:length(significance_thresholds)){

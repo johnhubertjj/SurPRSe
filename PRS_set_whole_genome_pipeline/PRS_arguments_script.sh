@@ -48,12 +48,13 @@ if [[ "$whereami" = *"raven"* ]]; then
   training_set_usually_summary="${training_set_name}_table${chromosome_number}"
   
   # Path to LDscore regression python script
-  ldsc="/Users/c1020109/ldsc/ldsc.py"  
+  ldsc="/home/c1020109/ldsc/ldsc.py"  
   
   # Pathway datasets
-  Pathway_filename="Pocklington2015_134sets_LoFi.txt"
+  Pathway_filename="Selected_Pocklington_plus_GO_pathways_SCHIZ.txt"
   Gene_location_filename="NCBI37.3.gene.loc"
-  
+  calculate_indep_SNPs=FALSE
+ 
   # Split_by_chromosome for genotype?
   split_by_chromosome_required=FALSE 
   
