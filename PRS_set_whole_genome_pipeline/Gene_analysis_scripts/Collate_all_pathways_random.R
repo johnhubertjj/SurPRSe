@@ -21,8 +21,8 @@ library(data.table)
 
 # required packages -- will only install if they are not already installed
 list.of.packages <- c("plyr", "stringr", "dplyr", "tidyr", "reshape2", "ggplot2", "scales", "data.table", "plotly","tools")
-new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
-if(length(new.packages)) install.packages(new.packages)
+#new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+#if(length(new.packages)) install.packages(new.packages)
 
 # loads the required packages
 lapply(list.of.packages, require, character.only = TRUE)
@@ -55,8 +55,10 @@ Pathways <- as.character(args[c(10:length(args))])
 
 # Read in array variables from file and rearrage to a vector#
 significance_thresholds <- fread(paste0(Training_name,"_", Validation_name,"_plink_significance_thresholds_arguments_file_tmp.txt"))      
-significance_thresholds <- unlist(significance_thresholds$V3)
+significance_thresholds <- as.character(unlist(significance_thresholds$V3))
 print(significance_thresholds)
+
+significance_thresholds <- c(0.5,1)
 
 Pathways_used <- file_path_sans_ext(basename(Pathway_file_name))
 
@@ -69,6 +71,7 @@ factorise_column_1<- as.factor(pathway_sets$Pathway)
 pathway_names <- levels(factorise_column_1)
 number_of_pathways_to_analyse <- length(pathway_names)
 
+Randomised_output_directory <- paste0(Pathway_output_directory,"Randomised_gene_sets_analysis/Scores/")
 final_scoring_output_file <- NULL
 order_of_output_for_sig_thresh <- NULL
 
@@ -96,7 +99,7 @@ names(my_data) <- str_replace(final_scoring_output_file, pattern = ".profile", r
 
 # iterate through significance thresholds and random sets, re-name column headings to a simpler format
 for (i in 1:length(final_scoring_output_file)) {
-  my_data[[i]] <- my_data[[i]][,c(1,2,6)]
+  my_data[[i]] <- my_data[[i]][,.(1,2,6)]
   colnames(my_data[[i]]) <- c("FID", "IID", paste("SCORE_", order_of_output_for_sig_thresh[i], sep=""))
 }
 
@@ -104,7 +107,7 @@ for (i in 1:length(final_scoring_output_file)) {
 all_prs <- join_all(my_data, by=c("FID", "IID"), type='left')
 
 # Write to the output directory
-write.table(all_prs,file = paste0(Pathway_output_directory,"FINAL_PATHWAY_RESULTS_PRS_PROFILES", Training_name, "_", Validation_name, "_", pathway, ".txt"),quote = F,row.names = F)
+write.table(all_prs,file = paste0(Randomised_output_directory,"FINAL_PATHWAY_RESULTS_PRS_PROFILES", Training_name, "_", Validation_name, "_", pathway, ".txt"),quote = F,row.names = F)
 }
 
 # Calculate the number of cores

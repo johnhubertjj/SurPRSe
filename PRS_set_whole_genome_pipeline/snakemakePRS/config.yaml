@@ -1,0 +1,48 @@
+directory: .
+chr:
+  from: 1
+  to: 22
+  chrlist: ~
+     # use dashes here for list of others
+ref:
+  prefix: /sc/orga/projects/LOAD/Public_Data/1000GP_Phase3/
+  prefix2: 1000GP_Phase3
+  fasta: /sc/orga/projects/LOAD/Brian/fasta/human_g1k_v37.fasta
+datasets:
+  training_path: "/scratch/c1020109/PR54/PGC_CLOZUK_PRS/ALSPAC_training_sets/CLOZUK_PGC2noclo.METAL.assoc.dosage" 
+  validation_path: "/scratch/c1020109/PR54/PGC_CLOZUK_PRS/ALSPAC_hrc_imputed_step3_mri_brain_measurements_only"
+
+  training_set_name: "CLOZUK_PGC2noclo"
+  validation_set_name: "ALSPAC"
+paths:
+  path_to_PRS_scripts: &root
+    val: "/home/PhD_scripts/Schizophrenia_pipeline_scripts/" 
+  path_to_MAGMA_scripts: &MAGMA
+    path_to_PRS_scripts: *root
+    rel_path: "MAGMA/"
+ 
+#  path_to_stationary_data: &alt_dir
+#    val: ${HOME}/Stationary_data/
+#  path_to_covariate_file: &CLOZUK.r7.select2PC.eigenvec.txt
+#    path_to_stationary_data: *alt_dir
+#    rel_path: CLOZUK2.r7.select2PC.eigenvec.txt
+#  path_to_chromosome_length_file: &UCSC
+#    path_to_stationary_data: *alt_dir
+#    rel_path: UCSC_hg19_chrominfo_length_of_chromosomes.txt
+#  path_to_new_fam_file: &fam
+#  path_to_MAGMA_scripts: "${path_to_PRS_scripts}/MAGMA/"
+qc:
+    # Hardy-Weinberg Equilibrium Cutoff
+  hwe: 0.000001
+    # MAF Cutoff
+  maf: 0.01
+    # Variant level missingness cutoff
+  geno: 0.05
+    # Subject level missingness cutoff
+  mind: 0.05
+
+paths2:
+  root_path: &root2 a/path/to/root
+  patha: !join [*root2, a]
+  pathb: !join [*root2, b]
+  pathc: !join [*root2, c]

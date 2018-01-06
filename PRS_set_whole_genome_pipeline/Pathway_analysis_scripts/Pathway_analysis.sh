@@ -163,7 +163,7 @@ fi
 # If randomising Gene_sets (aka ran Gene specific PRS first) then run this script:
 
 if [[ "$randomise" = TRUE ]]; then
-
+# start a snakemake file from here: should link everything up together properly #
 # Set up extra arguments from Genes directory and for PRS scoring for randomised sets
 Gene_output_directory="./${training_set_name}_${validation_set_name}_output/Genes/" 
 
@@ -201,8 +201,7 @@ parallel ${path_to_pathway_scripts}test_script_randomised_plink.sh ::: ${pathway
 fi
 
 Rscript ${path_to_scripts}RscriptEcho.R\
- ${path_to_gene_scripts}Collate_all_pathways_random.R
- ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_${validation_set_name}_collate_all_pathways_random.Rout\
+ ${path_to_gene_scripts}Collate_all_pathways_random.R ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_${validation_set_name}_collate_all_pathways_random.Rout\
  ${training_set_name}\
  ${validation_set_name}\
  ${Gene_output_directory}\
@@ -222,16 +221,18 @@ Rscript ${path_to_scripts}RscriptEcho.R\
  ${path_to_stationary_data}${Pathway_filename}\
  ${sig_thresholds[@]}
 
+if [ ${Using_raven} = FALSE ]; then
 sudo parallel ${path_to_pathway_scripts}PRS_scoring_plink_pathways.sh ::: ${pathways[@]} ::: ${path_to_scripts} ::: ${path_to_pathway_scripts} ::: ${system} ::: ${Name_of_extra_analysis}
+else
+parallel ${path_to_pathway_scripts}PRS_scoring_plink_pathways.sh ::: ${pathways[@]} ::: ${path_to_scripts} ::: ${path_to_pathway_scripts} ::: ${system} ::: ${Name_of_extra_analysis}
+fi
 
 Rscript ${path_to_scripts}RscriptEcho.R\
- ${path_to_pathway_scripts}Collate_all_pathways.R\
- ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_${validation_set_name}_Collate_all_pathways.Rout\ 
- ${training_set_name}\
+ ${path_to_pathway_scripts}Collate_all_pathways.R ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_${validation_set_name}_Collate_all_pathways.Rout ${training_set_name}\
  ${validation_set_name}\
  ${Pathway_output_directory}\
  ${path_to_stationary_data}${Pathway_filename}\
- ${sig_thresholds}
+ ${sig_thresholds[@]}
 
 # now just require the collate all paths script here... (can do at home)
 else
