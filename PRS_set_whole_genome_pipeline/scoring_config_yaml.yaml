@@ -1,0 +1,12 @@
+Training_name: CLOZUK1
+Validation_name: pointtwo
+Pathway_output_directory: pointthree
+Gene_output_directory: pointfour
+Gene_location_filename: pointfive
+Gene_regions: pointsix
+permutations: pointseven
+Pathway_annotation: pointeight
+calculate_indep_SNPs: pointnine
+Random_directory: pointten
+Random_scoring_directory: pointeleven
+sample_replace: pointtwelve

@@ -45,6 +45,7 @@ Validation_name <- "ALSPAC"
 Scale_phenotypes <- T
 Scale_PRS <- T
 significance_thresholds <- c(5e-08,1e-06, 1e-04, 0.01, 0.05, 0.1, 0.2, 0.5, 1)
+Training_names <- "CLOZUK_PGC2noclo"
 
 for (Training_name in Training_names){ 
 #Training_name <- "PGC2noCLOZUK"
@@ -59,7 +60,8 @@ Pheno_brain_volume <-fread("~/Dropbox/ALSPAC_volumes_27january2017.txt")
 # Collate all the scores together into one table_normal:
 
 #my_files <- paste0(Training_name, "_", Validation_name,"_output/PRS_scoring/", Training_name, "_", Validation_name, "_normal_gene_regions_Clumped_whole_genome_final_significance_threshold_at_", significance_thresholds, ".profile")
-my_files <- paste0(Training_name, "_", Validation_name,"_output/PRS_scoring/", Training_name, "_", Validation_name, "_extended_gene_regions_Clumped_whole_genome_final_significance_threshold_at_", significance_thresholds, ".profile")
+#my_files <- paste0(Training_name, "_", Validation_name,"_output/PRS_scoring/", Training_name, "_", Validation_name, "_extended_gene_regions_Clumped_whole_genome_final_significance_threshold_at_", significance_thresholds, ".profile")
+my_files <- paste0("~/Dropbox/Untitled Folder/PRS_scoring/", Training_name, "_", Validation_name, "_normal_gene_regions_Clumped_whole_genome_final_significance_threshold_at_", significance_thresholds, ".profile")
 
 my_data <- lapply(my_files, read.table, header=TRUE) 
 names(my_data) <- str_replace(my_files, pattern = ".profile", replacement = "")
