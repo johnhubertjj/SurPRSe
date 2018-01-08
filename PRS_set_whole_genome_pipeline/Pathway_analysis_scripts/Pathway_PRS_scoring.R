@@ -26,10 +26,11 @@ print(args)
 Training_name <- args[3]
 Validation_name <- args [4]
 Pathway_directory <- args[5]
-Pathway_file_name <- args[6] # the name of the file to be accessed (must be in stationary directory)
+Gene_output_directory <- args[6]
+Pathway_file_name <- args[7] # the name of the file to be accessed (must be in stationary directory)
 
 # This will be a problem, write in a script that defines what the arguments are (probably have to be linked with the arguments script however...stop un-needed analysis)
-significance_thresholds <- as.numeric(args[c(7:length(args))])
+significance_thresholds <- as.character(args[c(8:length(args))])
 print(significance_thresholds)
 
 #Training_name <- "HG19_pgc.scz.full.2012-04"

@@ -1,0 +1,47 @@
+
+configfile: "config.yaml"
+shell.executable("/bin/bash")
+
+if not config["chr"]["chrlist"]:
+    CHRLIST = []
+else:
+    CHRLIST = config["chr"]["chrlist"]
+CHR = list(range(config["chr"]["from"],config["chr"]["to"]+1)) + CHRLIST
+INPATH = config["directory"]
+
+# Sample is every base name for the .bed files in the INPATH directory
+import re
+import glob
+
+
+rule all: 
+        input: 
+                 
+for ext in "fastq fq".split():
+    rule:
+        input:   expand("{{sample}}.{ext}", ext=ext)
+        output: ...
+        shell:   "somecommand {input} {output}"
+
+
+rule unzip: 
+        input: 
+                '{z}.zip' 
+        output: 
+                '{z}.decompression.done' 
+        shell: 
+                ''' 
+                unzip {input} 
+                touch {output} 
+                ''' 
+
+ rule transform: 
+        input: 
+                lambda wc: "{z}.decompression.done".format(z=d[wc.x]) 
+        output: 
+                '{x}.txt.gz' 
+        params: 
+                '{x}.txt' 
+        shell: 
+                'gzip {params}' 
+
