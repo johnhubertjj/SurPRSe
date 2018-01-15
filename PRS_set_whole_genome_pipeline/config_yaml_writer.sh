@@ -1,6 +1,11 @@
 path_to_scripts=$1
 system=$2
 
+Pathway_output_directory=$4
+Gene_output_directory=$5
+Random_directory=$6
+Random_scoring_directory=$7
+
 #if [[ "$system" = "MAC" || "$system" = "LINUX" ]]; then
 
 #source ${path_to_scripts}/PRS_arguments_script.sh
@@ -13,7 +18,18 @@ system=$2
 #Random_scoring_directory=${Pathway_output_directory}Randomised_gene_sets_analysis/Scores/
 
 #fi
-training_set_name=CLOZUK1
-sed -i -e "/Training_name:/ s/: .*/: ${training_set_name}/" "$3"
+source ${path_to_scripts}PRS_arguments_script.sh
 
+# training_set_name=CLOZUK1
+sed -i -e "/Training_name:/ s/: .*/: ${training_set_name}/" "$3"
+sed -i -e "/Validation_name:/ s/: .*/: ${validation_set_name}/" "$3"
+sed -i -e "/Pathway_output_directory:/ s/: .*/: ${Pathway_output_directory}/" "$3"
+sed -i -e "/Gene_output_directory:/ s/: .*/: ${Gene_output_directory}/" "$3"
+sed -i -e "/Gene_location_filename:/ s/: .*/: ${Gene_location_filename}/" "$3"
+sed -i -e "/Gene_regions:/ s/: .*/: ${Gene_regions}/" "$3"
+sed -i -e "/permutations:/ s/: .*/: ${permutations}/" "$3"
+sed -i -e "/calculate_indep_SNPs:/ s/: .*/: ${calculate_indep_SNPs}/" "$3"
+sed -i -e "/Random_directory:/ s/: .*/: ${Random_directory}/" "$3"
+sed -i -e "/Random_scoring_directory:/ s/: .*/: ${Random_scoring_directory}/" "$3"
+sed -i -e "/sample_replace:/ s/: .*/: ${sample_replace}/" "$3"
 

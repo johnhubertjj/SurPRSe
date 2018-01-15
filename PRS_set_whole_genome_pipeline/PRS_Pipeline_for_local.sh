@@ -120,5 +120,6 @@ fi
 if [[ "${Using_raven}" = "TRUE" ]]; then
 #Purge all modules
 module purge
+# rsync -avz . /neurocluster/filesync/c1020109/. 
 fi
 
