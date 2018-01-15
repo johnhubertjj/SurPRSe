@@ -13,7 +13,6 @@ rows_to_keep_SCZ_unique <- New_phenotypes[DSM_diagnosis_new == 1 | DSM_diagnosis
 rows_to_keep_SCZ_unique_SCZ_affective <- New_phenotypes[DSM_diagnosis_new == 1 | DSM_diagnosis_new == 2 | DSM_diagnosis_new == 3 | DSM_diagnosis_new == 4]
 
 
-
 keep_file_SCZ_unique <- merge(fam_file, rows_to_keep_SCZ_unique, by =c("FID","IID"), all = F)
 keep_file_SCZ_affective_unique <- merge(fam_file, rows_to_keep_SCZ_unique_SCZ_affective, by =c("FID","IID"), all = F)
 

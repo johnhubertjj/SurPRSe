@@ -124,12 +124,12 @@ if [[ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" = 'johnhuber
   path_to_new_fam_file="${path_to_stationary_data}CLOZUK.r7.GWAS_IDs.fam"
  
   # Re-assign to the training_set_usually_genotype and validation_full_name_without_chromosome using the sed command
-  path_to_training_dataset="daner_PGC_BIP32b_mds7a"
-  path_to_validation_dataset="COGSv2016_IMPUTE2_Missing_hwe"
+  path_to_training_dataset="/Users/johnhubert/Documents/Tutorial_PRS_pipeline/sumstats.txt"
+  path_to_validation_dataset="/Users/johnhubert/Documents/Tutorial_PRS_pipeline/1kg_phase1_all"
    
   # Datasets
-  training_set_name="BIP_PGC2"
-  validation_set_name="COGSv2016_IMPUTE2" 
+  training_set_name="IQ"
+  validation_set_name="thousand_genomes" 
   
   # DO NOT ALTER!!!
   training_set_original_filename=`echo "${path_to_training_dataset}" | sed 's:.*/::'`
@@ -147,17 +147,17 @@ if [[ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" = 'johnhuber
   # Again I don't like it but was short on time!
 
   # Split_by_chromosome for genotype?
-  split_by_chromosome_required=FALSE 
+  split_by_chromosome_required=TRUE 
   # Do a missingness check? 
   Missing_geno=FALSE
   genotype_missingness_check=FALSE
   # MAF, INFO and SE
-  MAF_summary="FALSE"
+  MAF_summary=FALSE
   MAF_threshold=0.01
   MAF_genotype=TRUE
-  INFO_summary="TRUE"
+  INFO_summary=TRUE
   INFO_threshold=0.9
-  SE_summary="FALSE"
+  SE_summary=FALSE
   SE_threshold=5
   Raven_out_info_directory="${training_set_name}_${validation_set_name}_clumping_log_files/"
   # The number of chromosomes you wish to analyse (PRS_serial)

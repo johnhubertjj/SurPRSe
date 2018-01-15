@@ -22,6 +22,7 @@ print(args)
 library (data.table)
 library (parallel)
 library (base)
+library (Rcurl)
 
 # Set independent environment when needed #
 e <- new.env()

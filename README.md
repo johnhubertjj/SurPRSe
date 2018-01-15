@@ -3,12 +3,11 @@
 PGCnoCLOZUK
 -------------- 
 Location on rocks: /home/SHARED/PGC/daner_PGC_SCZ52_0513a.resultfiles_PGC_SCZ52_0513.sh2_noclo.txt
-Build: 37.13 : tested on one SNP, rs62513865 had the same BP position.
 Summary stats
 
 CLOZUK_no_PGC:
 ---------------
-Location on rocks: /mnt/databank/CLOZUK/GWAS/BGE/*CLOZUK_GWAS_BGE*.tar.gz
+Location on rocks: /mnt/databank/CLOZUK/GWAS/BGE/\*CLOZUK_GWAS_BGE\*.tar.gz
 Build: 
 Best guess genotype data
 
@@ -47,12 +46,12 @@ path\_to\_stationary\_data: Location of standardised files for input into your P
 
 
 
-**training\_set\_original\_filename**: path to the **Training dataset** for input into polygenic risk score.  
+**path\_to\_training\_dataset**: path to the **Training dataset** for input into polygenic risk score.  
 
 
 **validation\_set\_name**: User defined name for the **Test** dataset in the polygenic risk score. Does not have to match the file name but **MUST NOT** include any delimiters.  
 
-**validation\_set\_full\_name\_without\_chromosome**: path and plink prefix for **Test dataset**. File format must be the same as input into the --bfile argument to plink.
+**path\_to\_validation\_dataset**: path and plink prefix for **Test dataset**. File format must be the same as input into the --bfile argument to plink.
 
 * The file format can be one set of plink files (aka one each of .bim/.bed/.fam)
  * **NOTE** all analysis is split by chromosome, please set the split\_by\_chromosome\_required argument to **TRUE** 
@@ -69,4 +68,55 @@ path\_to\_stationary\_data: Location of standardised files for input into your P
 
 **Gene\_location\_filename**: path to Gene location file. Either in MAGMA 1.6 .gene.loc fileformat or with the following columns: ENTREZ\_GENE\_ID, CHR, BP\_START, BP\_END, STRAND, GENE\_NAME. Ensure extension to file is also included and the BPSTART and BPEND are of gene boundaries if you wish to utilise extended gene boundaries (see Gene\_regions argument)  
  
-**split\_by\_chromosome\_required**: if plink files are already split by chromosome, please set to FALSE (without quotes), if one set of plink files is provided, please set to TRUE (also without quotes 
+**split\_by\_chromosome\_required**: if plink files are already split by chromosome, please set to FALSE (without quotes), if one set of plink files is provided, please set to TRUE (also without quotes
+
+**Missing\_geno**: check for missingness in SNP calling, remove SNPs with a low genotyping rate.
+
+**genotype\_missingness\_check**: _Not sure what this does, i think it links with the above but could be an individual missingness check_
+
+**MAF\_summary**: Do you want to check the minor allele frequency in the summary stats dataset?
+
+**MAF\_threshold**: threshold of SNPs to remove based on their minor allele frequency. Every SNP below this threshold will be removed
+
+**MAF\_genotype**: Do you want to check the minor allele frequncy in the genotype test dataset?
+
+**INFO\_summary**: INFO score QC?
+
+**INFO\_threshold**: What INFO score threshold do you want to use? Every SNP below this threshold will be remove
+
+**SE\_summary**: do you want to QC on standard error? 
+
+**SE\_threshold**: what SE threshold do you want to use? Every SNP above this threhold will be removed.
+
+**Raven\_out\_info\_directory**: DEFUNCT?
+
+**Chromosomes\_to\_analyse**: which chromosomes do you want to analyse? Must be in the form of an array.
+
+**p1**: p-value threshold one for intelligent pruning in plink
+
+**p2**: p-value threshold two for intelligent pruning in plink
+
+**r2**: r2 value threhold for intelligent pruning in plink
+
+**window**: size of window for intelligent pruning in plink. scale to KB.
+
+**sig\_thresholds**: p-value thresholds for Polygenic risk score. must be an array.
+
+**sig\_thresholds\_lower\_bounds**: element-by-element lower bound for match-up to plink's p value threshold value. must equal the length of sig\_thresholds and also be an array.
+
+**Extra\_analysis**: Do you want to perform more than the standard whole genome polygenic risk score?
+
+**Name\_of\_extra\_analysis**: State either "Genes", "Pathways" or an array of (Genes Pathways)
+
+**randomise**: do you want to perform permutation analysis on a pathway-specific polygenic risk score?
+
+**permutations**: number of iterations to permute the pathway specific polygenic risk score.
+
+**Magma\_validation\_set\_name**: UNSURE
+
+**Gene\_regions**: use gene boundaries as limits or include extended transcription regions? either normal, extended or both.
+
+**whole\_genome\_genic**: perform the whole genome polygenic risk score wihthin genic limits?
+
+**Gene\_specific\_PRS**: perform a polygenic risk score per gene?
+
