@@ -179,8 +179,8 @@ Rscript ${path_to_scripts}RscriptEcho.R\
  ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_${validation_set_name}_generate_random_andrews_script.Rout\
  ${training_set_name}\
  ${validation_set_name}\
- ${Gene_output_directory}\
  ${Pathway_output_directory}\
+ ${Gene_output_directory}\
  ${path_to_stationary_data}${Gene_location_filename}\
  ${Gene_regions}\
  ${permutations}\
@@ -188,6 +188,7 @@ Rscript ${path_to_scripts}RscriptEcho.R\
  ${calculate_indep_SNPs}\
  ${Random_directory}\
  ${Random_scoring_directory}\
+ ${sample_replace}\
  ${pathways[@]}
 
 pathways_for_randomisation=(`awk '{ print $1 }' ${Pathway_output_directory}${training_set_name}_${validation_set_name}_random_pathways_to_test.txt`)

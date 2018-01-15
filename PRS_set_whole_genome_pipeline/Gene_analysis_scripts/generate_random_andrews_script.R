@@ -38,7 +38,8 @@ Pathway_file_name <- args[10] # The input file annotating genes to pathways
 calculate_indep_SNPs <- args[11]
 Randomised_output_directory <- args[12]
 Random_scoring_directory <- args[13]
-Pathways <- as.character(args[c(14:length(args))]) # All pathways
+sample_replace <- args[14]
+Pathways <- as.character(args[c(15:length(args))]) # All pathways
 
 # Testing_variables
 # Training_name <- "CLOZUK_PGC2noclo"
@@ -116,7 +117,7 @@ binary_membership <- function(set,element) {
   
 }
 
-create_random <- function(i,gene_data,set_names,set_n,formula_str,rand_n, Randomised_output_directory) {
+create_random <- function(i,gene_data,set_names,set_n,formula_str,rand_n, sample_replace, Randomised_output_directory) {
  
   set_name <- set_names[i]
   set_n <- set_n[[i]]
@@ -126,9 +127,12 @@ create_random <- function(i,gene_data,set_names,set_n,formula_str,rand_n, Random
   membership_model<- glm(as.formula(formula_str),binomial(link = 'logit'),gene_data);
   
   membership_prob = predict(membership_model, type = 'response');
-  
-  tmp_rand = t(replicate(rand_n,sample(gene_data[['snp']],set_n,replace = FALSE,prob = membership_prob)));
-  
+ 
+  if (sample_replace == "TRUE"){ 
+  tmp_rand = t(replicate(rand_n,sample(gene_data[['snp']],set_n,replace = TRUE, prob = membership_prob)));
+  }else{
+ tmp_rand = t(replicate(rand_n,sample(gene_data[['snp']],set_n,replace = FALSE, prob = membership_prob)));
+}
   tmp_name = mapply(function(k) paste(set_name,k,sep='_random_'),(1:rand_n));
   
   random_mtx <-cbind(tmp_name,tmp_rand);
@@ -290,7 +294,7 @@ cl <- makeCluster(no_cores, type = "FORK")
 clusterExport(cl, "e")
 
 # Create n random sets at a time where n=number of cores on a singular node
-parLapply(cl, 1:number_of_pathways, create_random, merged_total, set_names, set_magma_len, formula_str, rand_n, Randomised_output_directory)
+parLapply(cl, 1:number_of_pathways, create_random, merged_total, set_names, set_magma_len, formula_str, rand_n, sample_replace, Randomised_output_directory)
 stopCluster(cl)
 
 # significance_thresholds <- 1

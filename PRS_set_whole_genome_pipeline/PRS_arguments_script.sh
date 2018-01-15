@@ -93,6 +93,7 @@ if [[ "$whereami" = *"raven"* ]]; then
   Extra_analyses=TRUE
   Name_of_extra_analysis=(Pathways Genes)
   randomise=TRUE
+  sample_replace=TRUE
   permutations=10000
   Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates" 
   
