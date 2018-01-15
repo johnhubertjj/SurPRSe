@@ -7,10 +7,6 @@
 #PBS -l walltime=8:00:00
 #PBS -o /home/c1020109/Summary_stats_info
 
-if [ ${Using_raven} == "TRUE" ]; then
-echo ${PBS_O_WORKDIR}
-cd $PBS_O_WORKDIR 
-fi
 
 echo "hi"
  
@@ -37,9 +33,15 @@ path_to_scripts="${home_OS}${extra_path}/Schizophrenia_PRS_pipeline_scripts/PRS_
 path_to_pathway_scripts="${home_OS}${extra_path}/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/Pathway_analysis_scripts/"
 path_to_gene_scripts="${home_OS}${extra_path}/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/Gene_analysis_scripts/"
 
-Directory_to_work_from=`pwd`
 
 source ${path_to_scripts}PRS_arguments_script.sh
+
+if [ ${Using_raven} = "TRUE" ]; then
+echo ${PBS_O_WORKDIR}
+cd $PBS_O_WORKDIR 
+fi
+
+Directory_to_work_from=`pwd`
 
 log_file_name="${validation_set_name}_${training_set_name}_PRS_analysis"
 # exec &> "${log_file_name}"_logfile.txt

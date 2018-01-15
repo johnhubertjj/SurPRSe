@@ -1,6 +1,7 @@
 # vim: set ft=python:
 # this file is /data/$USER/test_data/chipseq/Snakefile
 import sys
+import pandas
 
 configfile: "config.yaml"
 shell.executable("/bin/bash")
@@ -11,7 +12,6 @@ else:
     CHRLIST = config["chr"]["chrlist"]
 CHR = list (range(config["chr"]["from"],config["chr"]["to"]+1)) + CHRLIST
 INPATH = config["directory"]
-
 
 shell.prefix("set -eo pipefail; ")
 
@@ -37,28 +37,47 @@ rule Summary_stats_to_chromosome_converter:
 '''Snakefile for MIS preparation
    Version 0.4'''
 
-configfile: "config.yaml"
+configfile: "scoring_config_yaml.yaml"
 shell.executable("/bin/bash")
-shell.prefix("PATH=" + config["anaconda"] + ":$PATH; ")
-if not config["chr"]["chrlist"]:
-    CHRLIST = []
-else:
-    CHRLIST = config["chr"]["chrlist"]
-CHR = list(range(config["chr"]["from"],config["chr"]["to"]+1)) + CHRLIST
-INPATH = config["directory"]
 
-# Sample is every base name for the .bed files in the INPATH directory
 import re
 import glob
-SAMPLE =  [re.search(r"(^.*\/)(.*)(?=\.bed)",x)[2] for x in  glob.iglob(INPATH + "*.bed")]
+import pandas
+import numpy
+
+#SAMPLE =  [re.search(r"(^.*\/)(.*)(?=\.bed)",x)[2] for x in  glob.iglob(INPATH + "*.bed")]
+
+Gene_output_directory = config["Gene_output_directory"]
+Validation_name = config["validation_set_name"]
+training_name = config["training_set_name"]
+Pathway_names = config["Pathway_names"]
+
+Random_scoring_directory = config["Random_scoring_directory"]
+permutations = config["permutations"]
 
 BPLINK = ["bed", "bim", "fam"]
+INPATH = {Gene_output_directory} + {Validation_name} + {training_name} + "_normal_gene_regions_Clumped_whole_genome_final" 
+significance_thresholds=pandas.read_table({training_name} + "_" + {Validation_name} + "_plink_significance_thresholds_arguments_file_tmp.txt", sep = " ", header=None)
+significance_thresholds=significance_thresholds[table_current.columns[2]].values
+
+pathways=pandas.read_table(Pathway_names, sep = " ", header=None)
+pathways=pathways[pathways.columns[0]].values
 
 localrules: all, var_qc, subj_qc, split_plink, make_vcf, sort_vcf, flippyr_plink
 
 rule all:
     input:
-        expand("log/{sample}_chr{chr}.check.log", sample=SAMPLE, chr=CHR)
+        expand("{Gene_output_directory}{Validation_name}_{training_name}_normal_gene_regions_Clumped_whole_genome_final.{ext}", Gene_output_directory=Gene_output_directory, Validation_name=Validation_name, training_name=training_name, ext=BPLINK)
+ 
+rule run_profile_creation: 
+    input: 
+	score = expand("{Random_scoring_directory}{pathway}_random_{permutations}_with_{significance_thresholds}.score", Random_scoring_directory=Random_scoring_directory, pathway=pathways, permutations=permutations, significance_thresholds=significance_thresholds)
+    output:
+	out = expand("{Random_scoring_directory}{pathway}_random_{permutations}_with_{significance_thresholds}.profile"Random_scoring_directory=Random_scoring_directory, pathway=pathways, permutations=permutations, significance_thresholds=significance_thresholds)
+     params:
+	ins = INPATH 
+    shell: "module load plink/1.90; "
+	"plink --bfile {params.ins} --score {input.score} --out {output.out}"
 
 #Pre-split QC
 

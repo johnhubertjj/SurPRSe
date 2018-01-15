@@ -2,10 +2,18 @@ path_to_scripts=$1
 system=$2
 
 Pathway_output_directory=$4
-Gene_output_directory=$5
-Random_directory=$6
-Random_scoring_directory=$7
+Pathway_output_directory=$(echo $Pathway_output_directory | sed 's_/_\\/_g')
 
+Gene_output_directory=$5
+Gene_output_directory=$(echo $Gene_output_directory | sed 's_/_\\/_g')
+
+Random_directory=$6
+Random_directory=$(echo $Random_directory | sed 's_/_\\/_g')
+
+Random_scoring_directory=$7
+Random_scoring_directory=$(echo $Random_scoring_directory | sed 's_/_\\/_g')
+
+Pathway_names=${Pathway_output_directory}Pathway_names.txt
 #if [[ "$system" = "MAC" || "$system" = "LINUX" ]]; then
 
 #source ${path_to_scripts}/PRS_arguments_script.sh
@@ -32,4 +40,4 @@ sed -i -e "/calculate_indep_SNPs:/ s/: .*/: ${calculate_indep_SNPs}/" "$3"
 sed -i -e "/Random_directory:/ s/: .*/: ${Random_directory}/" "$3"
 sed -i -e "/Random_scoring_directory:/ s/: .*/: ${Random_scoring_directory}/" "$3"
 sed -i -e "/sample_replace:/ s/: .*/: ${sample_replace}/" "$3"
-
+sed -i -e "/Pathway_names:/ s/: .*/: ${Pathway_names}/" "$3"
