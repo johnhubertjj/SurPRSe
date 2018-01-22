@@ -1,10 +1,10 @@
 #! /bin/bash
 
+# Assign scripts to read in arguments
 pathways=$1
 path_to_scripts=$2
 path_to_pathway_scripts=$3
 system=$4
-Name_of_extra_analysis=$5
 
 # Assign the shell variables
 source ${path_to_scripts}/PRS_arguments_script.sh
@@ -14,6 +14,8 @@ cat ${path_to_scripts}/PRS_arguments_script.sh
 source ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
 cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
 
+# overwrite the Name_of_extra_analysis_variable to work on this script
+Name_of_extra_analysis=$5
 Pathway_output_directory="./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis}"
 
 for a in ${Chromosomes_to_analyse[@]};

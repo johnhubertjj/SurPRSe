@@ -78,6 +78,8 @@ Pathway_file_name=${Pathway_output_directory}Pathway_names.txt
 # as an input from PATHWAYS_PRS_COLLECTING_MAGMA_INFO.R to annotate.
 # The pathways used will then be read into an array variable so that we don't have to keep reading this file and it is within the BASH environment 
 
+# it stops here, run interactive session here to solve...
+
 if [[ ${Gene_regions} = "extended" || ${Gene_regions} = "both" ]]; then
 echo "extended gene regions"
 	while IFS='' read -r line || [[ -n "$line" ]]; 
@@ -198,7 +200,7 @@ ${path_to_scripts}config_yaml_writer.sh ${path_to_scripts} ${system} ${path_to_c
 
 cp ${path_to_config_file} ${PBS_O_WORKDIR}
 
-if [[ ${Using_raven} = FALSE ]];then
+if [[ ${Using_raven} = FALSE ]]; then
 sudo parallel ${path_to_pathway_scripts}test_script_randomised_plink.sh ::: ${pathways_for_randomisation[@]} ::: ${path_to_scripts} ::: ${Name_of_extra_analysis} ::: ${Gene_output_directory} ::: ${Random_scoring_directory} ::: ${permutations} 
 
 else
@@ -212,6 +214,8 @@ Rscript ${path_to_scripts}RscriptEcho.R\
  ${validation_set_name}\
  ${Gene_output_directory}\
  ${Pathway_output_directory}\
+ ${Random_scoring_directory}\
+ ${path_to_stationary_data}${Gene_location_filename}\
  ${Gene_regions}\
  ${permutations}\
  ${path_to_stationary_data}${Pathway_filename}\
@@ -244,8 +248,9 @@ Rscript ${path_to_scripts}RscriptEcho.R\
 else
 	exit 1
 fi
-
 fi
+fi
+
 # ADD ALEX's PIPELINE SCRIPTS HERE FOR PRS ANALYSIS AND TO GET ALL THE PATHWAYS IN THE RIGHT FORMAT IN PERL (but only the collate_all_paths.pl)
 
 # magma --bfile CLOZUK_GWAS_BGE_chr22_magma_input_2 --gene-annot ${chr[i]}_CLOZUK_PGC_SNPs_pathway.genes.annot --out ${chr[i]}gene_annotation_for_CLOZUK_test

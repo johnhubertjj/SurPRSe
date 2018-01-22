@@ -21,7 +21,7 @@ if [[ "$whereami" = *"raven"* ]]; then
   path_to_PRS_scripts="${HOME}/PhD_scripts/Schizophrenia_pipeline_scripts/"
   
   # Re-assign to the training_set_usually_genotype and validation_full_name_without_chromosome using the sed command
-  path_to_validation_dataset="/scratch/${USER}/PR54/PGC_CLOZUK_PRS/ALSPAC_hrc_imputed_step3_mri_brain_measurements_only"
+  path_to_validation_dataset="/scratch/${USER}/PR54/PGC_CLOZUK_PRS/Biobank_wv1_imaging_imputed_3000brains"
   path_to_training_dataset="/scratch/${USER}/PR54/PGC_CLOZUK_PRS/ALSPAC_training_sets/CLOZUK_PGC2noclo.METAL.assoc.dosage"
 
   # State paths to the relevant stationary folders required for the analysis
@@ -38,7 +38,7 @@ if [[ "$whereami" = *"raven"* ]]; then
   
   # Datasets
   training_set_name="CLOZUK_PGC2noclo"
-  validation_set_name="ALSPAC" 
+  validation_set_name="Biobank_3000brains" 
  
   # DO NOT ALTER!!!
   training_set_original_filename=`echo "${path_to_training_dataset}" | sed 's:.*/::'`
@@ -100,7 +100,7 @@ if [[ "$whereami" = *"raven"* ]]; then
   # either "extended" "normal" or "both" : change to a numerical input in the future
   Gene_regions=both #either ( "extended" "normal" "both" )
   whole_genome_genic=TRUE
-  Gene_specific_PRS=FALSE
+  Gene_specific_PRS=TRUE
 
 
 elif [ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
@@ -180,15 +180,15 @@ if [[ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" = 'johnhuber
   # Lower bounds as optional format to match up with plink lower bounds
   
   # arguments specific to PRS set analyses
-  Extra_analyses=FALSE
-  Name_of_extra_analysis=NULL
-  randomise=FALSE
+  Extra_analyses=TRUE
+  Name_of_extra_analysis=(Pathways Genes)
+  randomise=TRUE
   permutations=10000
   Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates"
   # either "extended" "normal" or "both" : change to a numerical input in the future
   Gene_regions=both #either ( extended normal both )	
-  whole_genome_genic=FALSE
-  Gene_specific_PRS=FALSE
+  whole_genome_genic=TRUE
+  Gene_specific_PRS=TRUE
   external_harddrive="FALSE"
 fi
 

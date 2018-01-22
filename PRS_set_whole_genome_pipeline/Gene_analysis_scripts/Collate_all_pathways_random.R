@@ -35,10 +35,12 @@ Training_name <- args[3]
 Validation_name <- args[4]
 Gene_output_directory <- args[5]
 Pathway_output_directory <- args[6]
-Gene_regions <- args[7] # Whether to include/exclude the regulatory regions of a gene
-rand_n = args[8]; # Number of random sets to generate for each gene-set
-Pathway_file_name <- args[9] # The input file annotating genes to pathways
-Pathways <- as.character(args[c(10:length(args))])
+Randomised_output_directory <- args[7]
+gene_loc_file_name <- args[8]
+Gene_regions <- args[9] # Whether to include/exclude the regulatory regions of a gene
+rand_n = args[10]; # Number of random sets to generate for each gene-set
+Pathway_file_name <- args[11] # The input file annotating genes to pathways
+Pathways <- as.character(args[c(12:length(args))])
 
 ## Variables_useful_for_testing ## 
 
@@ -47,10 +49,10 @@ Pathways <- as.character(args[c(10:length(args))])
 # Gene_output_directory <- paste0(Training_name,"_", Validation_name, "_output/Genes/")
 # Pathway_output_directory <- paste0(Training_name,"_",Validation_name,"_output/Pathways/")
 # Randomised_output_directory <- paste0(Training_name,"_", Validation_name, "_output/Pathways/Randomised_gene_sets_analysis/Scores/")
-# gene_loc_file_name <- "~/Dropbox/Stationary_data/NCBI37.3.gene.loc"
+# gene_loc_file_name <- "/home/c1020109/Stationary_data/NCBI37.3.gene.loc"
 # Gene_regions <- "both"
-# rand_n = 10000; # Number of random sets to generate for each gene-set
-# Pathway_file_name <- "~/Dropbox/Stationary_data/Selected_Pocklington_plus_GO_pathways_SCHIZ.txt"
+# rand_n = 1000; # Number of random sets to generate for each gene-set
+# Pathway_file_name <- "/home/c1020109/Stationary_data/Selected_Pocklington_plus_GO_pathways_SCHIZ.txt"
 # Pathways <- c("5HT_2C", "Cav2_channels", "FMRP_targets", "abnormal_behavior", "abnormal_long_term_potentiation", "abnormal_nervous_system_electrophysiology", "Calcium_ion_import_GO0070509", "Membrane_depolarization_during_action_potential_GO0086010", "Synaptic_transmission_GO0007268") 
 
 # Read in array variables from file and rearrage to a vector#
@@ -58,7 +60,7 @@ significance_thresholds <- fread(paste0(Training_name,"_", Validation_name,"_pli
 significance_thresholds <- as.character(unlist(significance_thresholds$V3))
 print(significance_thresholds)
 
-significance_thresholds <- c(0.5,1)
+significance_thresholds <- c(0.05,0.5)
 
 Pathways_used <- file_path_sans_ext(basename(Pathway_file_name))
 
@@ -96,18 +98,17 @@ for (w in 1:length(significance_thresholds)){
 my_data <- lapply(final_scoring_output_file, fread, header=TRUE) 
 names(my_data) <- str_replace(final_scoring_output_file, pattern = ".profile", replacement = "")
 
-
 # iterate through significance thresholds and random sets, re-name column headings to a simpler format
 for (i in 1:length(final_scoring_output_file)) {
-  my_data[[i]] <- my_data[[i]][,.(1,2,6)]
+  my_data[[i]] <- my_data[[i]][,c(1,2,6), with = F]
   colnames(my_data[[i]]) <- c("FID", "IID", paste("SCORE_", order_of_output_for_sig_thresh[i], sep=""))
 }
 
-#Join all list items into one large data.table
+# Join all list items into one large data.table
 all_prs <- join_all(my_data, by=c("FID", "IID"), type='left')
 
 # Write to the output directory
-write.table(all_prs,file = paste0(Randomised_output_directory,"FINAL_PATHWAY_RESULTS_PRS_PROFILES", Training_name, "_", Validation_name, "_", pathway, ".txt"),quote = F,row.names = F)
+write.table(all_prs,file = paste0("FINAL_PATHWAY_RESULTS_PRS_PROFILES", Training_name, "_", Validation_name, "_", pathway, "randomised_gene_sets.txt"),quote = F,row.names = F)
 }
 
 # Calculate the number of cores
