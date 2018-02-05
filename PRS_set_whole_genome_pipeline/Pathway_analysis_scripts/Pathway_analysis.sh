@@ -17,7 +17,8 @@ if [[ "$system" = "MAC" || "$system" = "LINUX" ]]; then
   # Arguments
   path_to_scripts=$2
   path_to_pathway_scripts=$4
-  
+  path_to_gene_scripts=$5
+
   # Assign the shell variables
   source ${path_to_scripts}/PRS_arguments_script.sh
   cat ${path_to_scripts}/PRS_arguments_script.sh 
@@ -27,7 +28,7 @@ if [[ "$system" = "MAC" || "$system" = "LINUX" ]]; then
   cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
 fi
 
-Name_of_extra_analysis=$5 
+Name_of_extra_analysis=$6 
 ##########################################################################################################################
 ###################                  ###############                                 ###############                     #
 ################### PATHWAY ANALYSIS ###############      PATHWAY ANALYSIS           ############### PATHWAY ANALYSIS    #
@@ -250,6 +251,10 @@ else
 fi
 fi
 fi
+
+find "${Random_scoring_directory}" -type f -name '*.score' -maxdepth 1 >> "${Random_directory}score_files_to_compress_or_delete.txt"
+tar -zcv -T "${Random_directory}score_files_to_compress_or_delete.txt" -f "${Random_directory}${training_set_name}_${validation_set_name}_tarball_for_scores.tar.gz"
+
 
 # ADD ALEX's PIPELINE SCRIPTS HERE FOR PRS ANALYSIS AND TO GET ALL THE PATHWAYS IN THE RIGHT FORMAT IN PERL (but only the collate_all_paths.pl)
 

@@ -3,7 +3,7 @@
 #PBS -q serial
 #PBS -P PR54
 #PBS -l ncpus=16
-#PBS -l mem=20gb
+#PBS -l mem=46gb
 #PBS -l walltime=24:00:00
 #PBS -o /home/c1020109/Summary_stats_info_pathways_random.txt
 
@@ -33,7 +33,6 @@ path_to_scripts="${home_OS}${extra_path}/Schizophrenia_PRS_pipeline_scripts/PRS_
 path_to_pathway_scripts="${home_OS}${extra_path}/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/Pathway_analysis_scripts/"
 path_to_gene_scripts="${home_OS}${extra_path}/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/Gene_analysis_scripts/"
 
-
 source ${path_to_scripts}PRS_arguments_script.sh
 
 if [ ${Using_raven} = "TRUE" ]; then
@@ -44,7 +43,7 @@ fi
 Directory_to_work_from=`pwd`
 
 log_file_name="${validation_set_name}_${training_set_name}_PRS_analysis"
-# exec &> "${log_file_name}"_logfile.txt
+ exec &> "${log_file_name}"_logfile_collate_all_pathways.txt
 
 cat ${path_to_scripts}PRS_arguments_script.sh
 
@@ -63,9 +62,10 @@ Rscript ${path_to_scripts}RscriptEcho.R\
  ${validation_set_name}\
  ${Gene_output_directory}\
  ${Pathway_output_directory}\
+ ${Random_scoring_directory}\
+ ${path_to_stationary_data}${Gene_location_filename}\
  ${Gene_regions}\
  ${permutations}\
  ${path_to_stationary_data}${Pathway_filename}\
  ${pathways[@]}
-
 

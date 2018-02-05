@@ -3,7 +3,7 @@
 #PBS -q serial
 #PBS -P PR54
 #PBS -l ncpus=16
-#PBS -l mem=15gb
+#PBS -l mem=45gb
 #PBS -l walltime=24:00:00
 #PBS -o /home/c1020109/Summary_stats_info
 

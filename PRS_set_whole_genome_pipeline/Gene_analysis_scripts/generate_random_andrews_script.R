@@ -323,4 +323,5 @@ proc.time() - ptm
 # Make sure to prune the background set of SNPs beforehand, that way we don't have to worry about LD.
 
 
+quit()
 
