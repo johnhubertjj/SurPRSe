@@ -20,15 +20,32 @@ list_of_datasets <- list()
   #25890-2.0 Left Ventral striatum
   #25892-2.0 Right Ventral Striatum
 
-setnames(x = covariates_and_samples, old = c("X21003.2.0","X25010.2.0","X25878.2.0", "X25879.2.0","X25880.2.0","X25881.2.0","X25882.2.0","X25883.2.0","X25884.2.0","X25885.2.0","X25886.2.0","X25887.2.0","X25888.2.0","X25889.2.0","X25890.2.0", "X25892.2.0"),
-                                     new = c("age", "ICV", "Lthal", "Rthal", "Lcaud", "Rcaud", "Lput", "Rput", "Lpal","Rpal","Lhippo","Rhippo",
-                                             "Lamyg","Ramyg","Lventralstria","Rventralstria"))  
+Xaviers_dataset <- fread("/Users/johnhubert/Dropbox/ALSPAC_brain_regions_paper_and_extra_information/Ant_data.csv")
+covariates_and_samples <- fread("/Users/johnhubert/Dropbox/ALSPAC_work_Biobank_whole_genome_PRS/Image_UK_Irish_with8cov.txt")
+setnames(Xaviers_dataset, old = "eid", new = "app17044")
 
-columns_to_standardise <- c("Lthal", "Rthal", "Lcaud", "Rcaud", "Lput", "Rput", "Lpal","Rpal","Lhippo","Rhippo",
-"Lamyg","Ramyg","Lventralstria","Rventralstria")
+setnames(covariates_and_samples, old = colnames(covariates_and_samples[,4:190]), new = substring(names(covariates_and_samples[,4:190]), 2))
+setnames(Xaviers_dataset, old = colnames(Xaviers_dataset[,2:ncol(Xaviers_dataset)]), new = gsub(x = colnames(Xaviers_dataset[,2:ncol(Xaviers_dataset)]), pattern = "\\-", replacement = "\\."))
 
-covariates_and_samples <- fread("/home/johnhubert/Dropbox/ALSPAC_work_Biobank_whole_genome_PRS/Image_UK_Irish_with8cov.txt")
-setnames(covariates_and_samples, old = "app6553", new = "FID")
+vector_to_combine <- colnames(Xaviers_dataset)
+new_combined_samples <- merge(x = Xaviers_dataset, y = covariates_and_samples, by = vector_to_combine, all.y = T)
+
+
+
+setnames(new_combined_samples, old = "app6553", new = "FID")
+setnames(x = new_combined_samples, old = c("21003.2.0","25010.2.0","25878.2.0", "25879.2.0","25880.2.0","25881.2.0","25882.2.0","25883.2.0","25884.2.0","25885.2.0","25886.2.0","25887.2.0","25888.2.0","25889.2.0","25890.2.0", "25892.2.0"),
+         new = c("age", "ICV", "Lthal_grey", "Rthal_grey", "Lcaud_grey", "Rcaud_grey", "Lput_grey", "Rput_grey", "Lpal_grey","Rpal_grey","Lhippo_grey","Rhippo_grey",
+                 "Lamyg_grey","Ramyg_grey","Lventralstria_grey","Rventralstria_grey"))  
+
+setnames(x = new_combined_samples, old = c("25011.2.0", "25012.2.0", "25013.2.0","25014.2.0","25015.2.0","25016.2.0","25017.2.0","25018.2.0","25019.2.0","25020.2.0","25021.2.0","25022.2.0","25023.2.0","25024.2.0"),
+         new = c("Lthal", "Rthal", "Lcaud", "Rcaud", "Lput", "Rput", "Lpal","Rpal","Lhippo","Rhippo",
+                 "Lamyg","Ramyg","Laccumbens","Raccumbens"))
+
+columns_to_standardise <- c("ICV","Lthal_grey", "Rthal_grey", "Lcaud_grey", "Rcaud_grey", "Lput_grey", "Rput_grey", "Lpal_grey","Rpal_grey","Lhippo_grey","Rhippo_grey",
+                            "Lamyg_grey","Ramyg_grey","Lventralstria_grey","Rventralstria_grey","Lthal", "Rthal", "Lcaud", "Rcaud", "Lput", "Rput", "Lpal","Rpal","Lhippo","Rhippo",
+                            "Lamyg","Ramyg","Laccumbens","Raccumbens")
+
+
 
 Training_names <- c("PGC1", "PGC1_sweden", "PGC2noCLOZUK", "CLOZUK_PGC2noclo")
 Validation_name <- "Biobank_3000brains"
@@ -51,7 +68,7 @@ lapply(list.of.packages, require, character.only = TRUE)
 for (Training_name in Training_names){ 
 
   
-  my_files <- paste0("/home/johnhubert/Dropbox/ALSPAC_work_Biobank_whole_genome_PRS/PRS_scoring/", Training_name, "_", Validation_name, "_whole_genome_significance_threshold_at_", significance_thresholds, ".profile")
+  my_files <- paste0("/Users/johnhubert/Dropbox/ALSPAC_work_Biobank_whole_genome_PRS/PRS_scoring/", Training_name, "_", Validation_name, "_whole_genome_significance_threshold_at_", significance_thresholds, ".profile")
   
   my_data <- lapply(my_files, read.table, header=TRUE) 
   names(my_data) <- str_replace(my_files, pattern = ".profile", replacement = "")
@@ -67,7 +84,7 @@ for (Training_name in Training_names){
   
   for (l in 3:(length(significance_thresholds) + 2)){
    current_polygenic_score <- all_prs[,c(1,l)]
-   test_one <- merge(current_polygenic_score,covariates_and_samples,  by= "FID")
+   test_one <- merge(current_polygenic_score,new_combined_samples,  by= "FID")
    model0 <- glm(test_one[,2]~c01+c02+c03+c04+c05+c06+c08+array, family = gaussian, data = test_one)
    m1<-mean(residuals(model0))
    sd1<-sd(residuals(model0))
@@ -76,12 +93,18 @@ for (Training_name in Training_names){
   }
   
   if (Scale_phenotypes == T){
-    DATA_pheno_scaled <- cbind(covariates_and_samples[,.(FID,gender,age,ICV)],(scale(covariates_and_samples[,columns_to_standardise,with=FALSE], center = T, scale = T)))
+    DATA_pheno_scaled <- cbind(new_combined_samples[,.(FID,gender,age)],(scale(new_combined_samples[,columns_to_standardise,with=FALSE], center = T, scale = T)))
     DATA_pheno <- DATA_pheno_scaled
   }
   
   # Add names of phenotypes corresponding to the table
-  subcortical <-colnames(DATA_pheno[,c(5:18)])
+  subcortical_grey <-colnames(DATA_pheno[,c(5:18)])
+  subcortical_grey_left <- subcortical[c(T,F)]
+  subcortical_grey_right <- subcortical[c(F,T)]
+  subcortical_grey_names <- c("avrg_LR_thal_grey","avrg_LR_caud_grey","avrg_LR_put_grey","avrg_LR_pal_grey","avrg_LR_hippo_grey","avrg_LR_amyg_grey","avrg_LR_ventralstria_grey")
+  
+  # Add names of phenotypes corresponding to the table
+  subcortical <- colnames(DATA_pheno[,c(19:32)])
   subcortical_left <- subcortical[c(T,F)]
   subcortical_right <- subcortical[c(F,T)]
   subcortical_names <- c("avrg_LR_thal","avrg_LR_caud","avrg_LR_put","avrg_LR_pal","avrg_LR_hippo","avrg_LR_amyg","avrg_LR_ventralstria")
@@ -99,7 +122,7 @@ for (Training_name in Training_names){
   
   # create a score list
   score_list <- colnames(all_prs[,-1:-2])
-  phenotypes <- colnames(DATA_pheno[,5:ncol(DATA_pheno)])
+  phenotypes <- colnames(DATA_pheno[,19:32])
   
 #Training_names <- c("HG19_pgc.scz.full.2012-04", "scz.swe.pgc1.results.v3","PGC2","CLOZUK_PGC2noclo")
   # dont' change obj it makes the loop output a dataframe with the regression results
@@ -148,118 +171,6 @@ for (Training_name in Training_names){
 
 
 
-for (Training_name in Training_names){ 
-  #Training_name <- "PGC2noCLOZUK"
-  #Training_name <- "CLOZUK_PGC2noclo"
-  #Training_name <- "scz.swe.pgc1.results.v3"
-  #Training_name <- "HG19_pgc.scz.full.2012-04"
-  
-  # Write in the phenotype files
-  Pheno_brain_thickness <- fread("~/Dropbox/ALSPAC_thickness_27january2017.txt")
-  Pheno_brain_volume <-fread("~/Dropbox/ALSPAC_volumes_27january2017.txt") 
-  
-  # Collate all the scores together into one table_normal:
-  
-  #my_files <- paste0(Training_name, "_", Validation_name,"_output/PRS_scoring/", Training_name, "_", Validation_name, "_normal_gene_regions_Clumped_whole_genome_final_significance_threshold_at_", significance_thresholds, ".profile")
-  my_files <- paste0(Training_name, "_", Validation_name,"_output/PRS_scoring/", Training_name, "_", Validation_name, "_extended_gene_regions_Clumped_whole_genome_final_significance_threshold_at_", significance_thresholds, ".profile")
-  
-  my_data <- lapply(my_files, read.table, header=TRUE) 
-  names(my_data) <- str_replace(my_files, pattern = ".profile", replacement = "")
-  
-  # iterate through significance thresholds 
-  for (i in 1:length(significance_thresholds)) {
-    my_data[[i]] <- my_data[[i]][,c(1,2,6)]
-    colnames(my_data[[i]]) <- c("FID", "IID", paste("SCORE_", significance_thresholds[i], sep=""))
-  }
-  
-  all_prs <- join_all(my_data, by=c("FID", "IID"), type='left')
-  
-  if (Scale_PRS == T){
-    all_prs[,-1:-2] <- scale(all_prs[,-1:-2], center = T, scale = T)
-  }
-  
-  
-  # Join all the tables together
-  setnames(Pheno_brain_volume,old = "SubjID", new = "FID")
-  setnames(Pheno_brain_thickness,old = "SubjID", new = "FID")
-  
-  DATA_pheno <- join_all(list(Pheno_brain_thickness, Pheno_brain_volume), by=c("FID", "kz021", "age", "ICV"), type='inner')
-  
-  if (Scale_phenotypes == T){
-    DATA_pheno_scaled <- cbind(DATA_pheno[,1:3],(scale(DATA_pheno[,4:ncol(DATA_pheno)], center = T, scale = T)))
-    DATA_pheno <- DATA_pheno_scaled
-  }
-  
-  # Add names of phenotypes corresponding to the table
-  phenotypes <- colnames(DATA_pheno[,5:ncol(DATA_pheno)])
-  subcortical <-colnames(DATA_pheno[,c(25:40)])
-  subcortical_left <- subcortical[c(T,F)]
-  subcortical_right <- subcortical[c(F,T)]
-  subcortical_names <- c("avrg_LR_LatVent","avrg_LR_thal","avrg_LR_caud","avrg_LR_put","avrg_LR_pal","avrg_LR_hippo","avrg_LR_amyg","avrg_LR_accumb")
-  
-  for (i in 1:length(subcortical_left)){
-    names <- subcortical_names[i]
-    new_df <- data.frame(DATA_pheno[[subcortical_left[i]]],DATA_pheno[[subcortical_right[i]]])
-    current_column <- rowMeans(new_df,na.rm = T)
-    DATA_pheno[[names]] <- current_column
-  } 
-  
-  
-  
-  DATA <- join_all(list(all_prs, DATA_pheno), by=c("FID"), type='inner')
-  
-  # create a score list
-  score_list <- colnames(all_prs[,-1:-2])
-  phenotypes <- colnames(DATA_pheno[,5:ncol(DATA_pheno)])
-  DATA$kz021 <- as.factor(DATA$kz021)
-  
-  # Remove individuals with missing values
-  #remove_ICV <- which(is.na(DATA$ICV))
-  #DATA <- DATA[-remove_ICV,]
-  
-  # dont' change obj it makes the loop output a dataframe with the regression results
-  obj <- data.frame(test=0, score=0, estimate=0, SE=0, tvalue=0, p=0, r.squared=0, lower = 0, upper = 0)
-  obj_ICV <- data.frame(test=0, score=0, estimate=0, SE=0, tvalue=0, p=0, r.squared=0, lower = 0, upper = 0)
-  
-  # this example if for a linear regression (the phenotype of interest is a quantiative trait)
-  # is using a discrete phenotype, a logistic regression needs to be run, and the code altered from 'lm' to 'glm' including the argument of 'family = binomial'
-  # alterations for the calculation of R2 will also need to be made using the command highlighted above
-  
-  for (i in score_list) {
-    for (j in phenotypes) {
-      fit <- lm(DATA[,j] ~ DATA[,i] + kz021 + age + ICV,  data=DATA)
-      fit1 <- lm(DATA[,j] ~ kz021 + age + ICV, data=DATA)
-      tmp <- coef(summary(fit))
-      tmp2 <- summary(fit)
-      hold <- summary(fit1)
-      true_r2 <- tmp2$r.squared - hold$r.squared
-      CI <- confint(fit, level=0.95)
-      CI <- CI[2,]
-      tmp3 <- c(j,i,tmp[2,], true_r2, CI)
-      obj <- rbind(obj, tmp3)
-    }
-  }
-  
-  for (i in score_list){
-    fit <- lm(ICV ~ DATA[,i] + kz021 + age,  data=DATA)
-    fit1 <- lm(ICV ~ kz021 + age, data=DATA)
-    tmp <- coef(summary(fit))
-    tmp2 <- summary(fit)
-    hold <- summary(fit1)
-    true_r2 <- tmp2$r.squared - hold$r.squared
-    CI <- confint(fit, level=0.95)
-    CI <- CI[2,]
-    tmp3 <- c("ICV",i,tmp[2,], true_r2, CI)
-    obj_ICV <- rbind(obj_ICV, tmp3)
-  }
-  
-  # this is a clean-up step - do not change
-  results <- obj[which(obj$score %in% score_list),]
-  results2 <- obj_ICV[which(obj_ICV$score %in% score_list),]
-  
-  assign(paste0("results_",Training_name), results)
-  assign(paste0("results_ICV",Training_name), results2)
-}
 
 brain_volume_progression <- list(results_PGC1, results_PGC1_sweden, results_PGC2noCLOZUK, results_CLOZUK_PGC2noclo)
 ICV_progression <- list(`results_ICVHG19_pgc.scz.full.2012-04`, results_ICVscz.swe.pgc1.results.v3, results_ICVPGC2, results_ICVCLOZUK_PGC2noclo)

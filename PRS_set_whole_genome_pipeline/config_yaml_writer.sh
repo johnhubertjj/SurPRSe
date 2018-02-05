@@ -3,7 +3,6 @@ system=$2
 
 Pathway_output_directory=$4
 Pathway_output_directory=$(echo $Pathway_output_directory | sed 's_/_\\/_g')
-
 Gene_output_directory=$5
 Gene_output_directory=$(echo $Gene_output_directory | sed 's_/_\\/_g')
 
@@ -31,7 +30,7 @@ source ${path_to_scripts}PRS_arguments_script.sh
 # training_set_name=CLOZUK1
 sed -i -e "/Training_name:/ s/: .*/: ${training_set_name}/" "$3"
 sed -i -e "/Validation_name:/ s/: .*/: ${validation_set_name}/" "$3"
-sed -i -e "/Pathway_output_directory:/ s/: .*/: ${Pathway_output_directory}/" "$3"
+sed -i -e "/Pathway_output_directory:/ s/: .*/: "${Pathway_output_directory}"/" "$3"
 sed -i -e "/Gene_output_directory:/ s/: .*/: ${Gene_output_directory}/" "$3"
 sed -i -e "/Gene_location_filename:/ s/: .*/: ${Gene_location_filename}/" "$3"
 sed -i -e "/Gene_regions:/ s/: .*/: ${Gene_regions}/" "$3"
