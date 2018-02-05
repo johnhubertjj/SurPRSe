@@ -59,8 +59,11 @@ if [[ "$whereami" = *"raven"* ]]; then
   split_by_chromosome_required=FALSE 
   
   # Do a missingness check?
-  Missing_geno=FALSE
-  genotype_missingness_check=FALSE
+  Missing_geno=TRUE
+  genotype_missingness_check=0.1
+  HWE_thresh=1e-04
+  hwe_p_test="mid-p"
+  include_noncntrl="include-nonctrl"
   
   # MAF, INFO and SE
   MAF_summary=FALSE
