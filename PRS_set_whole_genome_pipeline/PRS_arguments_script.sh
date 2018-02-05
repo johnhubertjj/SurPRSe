@@ -21,8 +21,8 @@ if [[ "$whereami" = *"raven"* ]]; then
   path_to_PRS_scripts="${HOME}/PhD_scripts/Schizophrenia_pipeline_scripts/"
   
   # Re-assign to the training_set_usually_genotype and validation_full_name_without_chromosome using the sed command
-  path_to_validation_dataset="/scratch/${USER}/PR54/PGC_CLOZUK_PRS/Biobank_wv1_imaging_imputed_3000brains"
-  path_to_training_dataset="/scratch/${USER}/PR54/PGC_CLOZUK_PRS/ALSPAC_training_sets/CLOZUK_PGC2noclo.METAL.assoc.dosage"
+  path_to_validation_dataset="/scratch/${USER}/PR54/PGC_CLOZUK_PRS/COGS_CLOZUK_datasets/COGSv2016_IMPUTE2"
+  path_to_training_dataset="/scratch/${USER}/PR54/PGC_CLOZUK_PRS/COGS_CLOZUK_datasets/CLOZUK_PGC2_noCOGSmetaanalysis_flipped_INFOabove0point9.txt"
 
   # State paths to the relevant stationary folders required for the analysis
   path_to_PGC_conversion="${path_to_PRS_scripts}/Summary_stat_manipulation/"
@@ -31,14 +31,14 @@ if [[ "$whereami" = *"raven"* ]]; then
   
   # Path to where stationary file is kept
   path_to_stationary_data="${HOME}/Stationary_data/"
-  path_to_covariate_file="${path_to_stationary_data}CLOZUK2.r7.select2PC.eigenvec.txt" 
+  path_to_covariate_file="${path_to_stationary_data}COGSv2016.noREL.txt" 
   path_to_chromosome_length_file="${path_to_stationary_data}UCSC_hg19_chromeinfo_length_of_chromosomes.txt"
   path_to_new_fam_file="${path_to_stationary_data}CLOZUK.r7.GWAS_IDs.fam"
   path_to_gene_annotation_file="${path_to_stationary_data}NCBI37.3.gene.loc"  
   
   # Datasets
-  training_set_name="CLOZUK_PGC2noclo"
-  validation_set_name="Biobank_3000brains" 
+  training_set_name="CLOZUKPGC2_NO_COGS"
+  validation_set_name="COGS" 
  
   # DO NOT ALTER!!!
   training_set_original_filename=`echo "${path_to_training_dataset}" | sed 's:.*/::'`
@@ -56,13 +56,13 @@ if [[ "$whereami" = *"raven"* ]]; then
   calculate_indep_SNPs=FALSE
  
   # Split_by_chromosome for genotype?
-  split_by_chromosome_required=FALSE 
+  split_by_chromosome_required=TRUE 
   
   # Do a missingness check?
   Missing_geno=TRUE
   genotype_missingness_check=0.1
   HWE_thresh=1e-04
-  hwe_p_test="mid-p"
+  hwe_p_test="midp"
   include_noncntrl="include-nonctrl"
   
   # MAF, INFO and SE
@@ -81,7 +81,7 @@ if [[ "$whereami" = *"raven"* ]]; then
   # Clumping Arguments
   p1=1
   p2=1
-  r2=0.1
+  r2=0.01
   window=500
   
   # Arguments for PRS_serial script
@@ -97,7 +97,7 @@ if [[ "$whereami" = *"raven"* ]]; then
   Name_of_extra_analysis=(Pathways Genes)
   randomise=TRUE
   sample_replace=TRUE
-  permutations=10000
+  permutations=1000
   Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates" 
   
   # either "extended" "normal" or "both" : change to a numerical input in the future
