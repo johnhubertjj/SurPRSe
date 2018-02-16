@@ -102,7 +102,7 @@ length_of_extra_analysis_array=`echo ${#Name_of_extra_analysis[@]}`
 		echo hi all
 		Name_of_extra_analysis_specific=(Pathways Genes)
 		${path_to_gene_scripts}Gene_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_gene_scripts} ${Name_of_extra_analysis_specific[1]}
-		${path_to_pathway_scripts}Pathway_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_pathway_scripts} ${Name_of_extra_analysis_specific[0]} 
+		${path_to_pathway_scripts}Pathway_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_pathway_scripts} ${path_to_gene_scripts} ${Name_of_extra_analysis_specific[0]} 
 	
 	elif  [[ "${Name_of_extra_analysis[0]}" = "Pathways" ]]; then
 		echo hi Pat

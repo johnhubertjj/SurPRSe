@@ -272,7 +272,7 @@ fi
 mkdir ${Gene_output_directory}Genes_PRS/ 
 
 Rscript ${path_to_scripts}RscriptEcho.R\
- ${path_to_Gene_scripts}Gene_specific_polygenic_risk_score_and_clumped_information_for_randomised_sets.R\
+ ${path_to_gene_scripts}Gene_specific_polygenic_risk_score_and_clumped_information_for_randomised_sets.R\
  ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_${validation_set_name}_Pathway_PRS_scoring.Rout\
  ${training_set_name}\
  ${validation_set_name}\

@@ -81,7 +81,7 @@ if [[ "$whereami" = *"raven"* ]]; then
   # Clumping Arguments
   p1=1
   p2=1
-  r2=0.01
+  r2=0.1
   window=500
   
   # Arguments for PRS_serial script

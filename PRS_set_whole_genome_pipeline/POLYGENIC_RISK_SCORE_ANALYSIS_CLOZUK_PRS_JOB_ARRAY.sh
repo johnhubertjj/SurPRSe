@@ -104,7 +104,7 @@ if [[ ${Missing_geno} = "TRUE" ]]; then
 --update-name ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_chr${chromosome_number}_chr.pos.txt \
 --maf ${MAF_threshold} \
 --geno ${genotype_missingness_check} \
---hwe ${HWE_thresh} ${hwe_p_test} ${include_noncntrl}
+--hwe ${HWE_thresh} ${hwe_p_test} ${include_noncntrl} \
 --make-bed  \
 --out ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype}_2
 else 
@@ -125,7 +125,7 @@ plink \
 --bfile ${validation_set_usually_genotype} \
 --update-name ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_chr${chromosome_number}_chr.pos.txt \
 --geno ${genotype_missingness_check} \
---hwe ${HWE_thresh} ${hwe_p_test} ${include_noncntrl}
+--hwe ${HWE_thresh} ${hwe_p_test} ${include_noncntrl} \
 --make-bed \
 --out ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype}_2
 
