@@ -158,19 +158,20 @@ echo ${pathways[@]}
 if [[ "$system" = "MAC" || "$system" = "LINUX" ]]; then
 
 if [ ${Using_raven} = "FALSE" ]; then
-sudo parallel ${path_to_pathway_scripts}creation_of_merge_list_file.sh ::: ${pathways[@]} ::: ${path_to_scripts} ::: ${path_to_pathway_scripts} ::: ${system} ::: ${Name_of_extra_analysis}
+sudo parallel ${path_to_pathway_scripts}creation_of_merge_list_file.sh ::: ${pathways[@]} ::: ${path_to_scripts} ::: ${path_to_pathway_scripts} ::: ${system} ::: ${Name_of_extra_analysis} ::: ${Gene_regions} 
 
 else
-parallel ${path_to_pathway_scripts}creation_of_merge_list_file.sh ::: ${pathways[@]} ::: ${path_to_scripts} ::: ${path_to_pathway_scripts} ::: ${system} ::: ${Name_of_extra_analysis}
+parallel ${path_to_pathway_scripts}creation_of_merge_list_file.sh ::: ${pathways[@]} ::: ${path_to_scripts} ::: ${path_to_pathway_scripts} ::: ${system} ::: ${Name_of_extra_analysis} ::: ${Gene_regions}
 
 fi
 
 # If randomising Gene_sets (aka ran Gene specific PRS first) then run this script:
 
+Gene_output_directory="./${training_set_name}_${validation_set_name}_output/Genes/" 
+
 if [[ "$randomise" = TRUE ]]; then
 # start a snakemake file from here: should link everything up together properly #
 # Set up extra arguments from Genes directory and for PRS scoring for randomised sets
-Gene_output_directory="./${training_set_name}_${validation_set_name}_output/Genes/" 
 
 mkdir ${Pathway_output_directory}Randomised_gene_sets_analysis/
 Random_directory=${Pathway_output_directory}Randomised_gene_sets_analysis/
@@ -235,9 +236,9 @@ Rscript ${path_to_scripts}RscriptEcho.R\
  ${sig_thresholds[@]}
 
 if [ ${Using_raven} = FALSE ]; then
-sudo parallel ${path_to_pathway_scripts}PRS_scoring_plink_pathways.sh ::: ${pathways[@]} ::: ${path_to_scripts} ::: ${path_to_pathway_scripts} ::: ${system} ::: ${Name_of_extra_analysis}
+sudo parallel ${path_to_pathway_scripts}PRS_scoring_plink_pathways.sh ::: ${pathways[@]} ::: ${path_to_scripts} ::: ${path_to_pathway_scripts} ::: ${system} ::: ${Name_of_extra_analysis} ::: ${Gene_regions}
 else
-parallel ${path_to_pathway_scripts}PRS_scoring_plink_pathways.sh ::: ${pathways[@]} ::: ${path_to_scripts} ::: ${path_to_pathway_scripts} ::: ${system} ::: ${Name_of_extra_analysis}
+parallel ${path_to_pathway_scripts}PRS_scoring_plink_pathways.sh ::: ${pathways[@]} ::: ${path_to_scripts} ::: ${path_to_pathway_scripts} ::: ${system} ::: ${Name_of_extra_analysis} ::: ${Gene_regions} 
 fi
 
 Rscript ${path_to_scripts}RscriptEcho.R\
@@ -247,9 +248,36 @@ Rscript ${path_to_scripts}RscriptEcho.R\
  ${path_to_stationary_data}${Pathway_filename}\
  ${sig_thresholds[@]}
 
+
 # now just require the collate all paths script here... (can do at home)
 else
-	exit 1
+
+Rscript ${path_to_scripts}RscriptEcho.R\
+ ${path_to_pathway_scripts}Pathway_PRS_scoring.R\
+ ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_${validation_set_name}_Pathway_PRS_scoring.Rout\
+ ${training_set_name}\
+ ${validation_set_name}\
+ ${Pathway_output_directory}\
+ ${Gene_output_directory}\
+ ${path_to_stationary_data}${Pathway_filename}\
+ ${Gene_regions}\
+ ${sig_thresholds[@]}
+
+if [ ${Using_raven} = FALSE ]; then
+sudo parallel ${path_to_pathway_scripts}PRS_scoring_plink_pathways.sh ::: ${pathways[@]} ::: ${path_to_scripts} ::: ${path_to_pathway_scripts} ::: ${system} ::: ${Name_of_extra_analysis} ::: ${Gene_regions}
+else
+parallel ${path_to_pathway_scripts}PRS_scoring_plink_pathways.sh ::: ${pathways[@]} ::: ${path_to_scripts} ::: ${path_to_pathway_scripts} ::: ${system} ::: ${Name_of_extra_analysis} ::: ${Gene_regions}
+fi
+
+Rscript ${path_to_scripts}RscriptEcho.R\
+ ${path_to_pathway_scripts}Collate_all_pathways.R ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_${validation_set_name}_Collate_all_pathways.Rout ${training_set_name}\
+ ${validation_set_name}\
+ ${Pathway_output_directory}\
+ ${path_to_stationary_data}${Pathway_filename}\
+ ${Gene_regions}\
+ ${sig_thresholds[@]}
+
+
 fi
 fi
 fi

@@ -150,8 +150,13 @@ if(length(grep("\\bOR\\b", Parsing_colnames)) == 1){
   OR_name <- "OR_name=FALSE"  
 }
 
-if(length(grep("\\bBETA\\b", Parsing_colnames)) == 1){
+if(length(grep("\\bBETA\\b", Parsing_colnames)) == 1 | length(grep("\\bB\\b", Parsing_colnames)) == 1){
   BETA_name <- "BETA_name=TRUE"
+ if(length(grep("\\bB\\b", Parsing_colnames)) == 1){
+    place.of.change.bp <- grep("\\bB\\b", Parsing_colnames)
+    Parsing_colnames[place.of.change.bp] <- "BETA"
+    warning("B heading found, assuming this stands for BETA, but if not, change column heading to something more verbose")
+}
 }else{
   BETA_name <- "BETA_name=FALSE"  
 }

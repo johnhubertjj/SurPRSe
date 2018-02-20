@@ -178,6 +178,7 @@ do
 done
 
 fi
+
 Gene_regions=both
 
 elif [[ ${Gene_regions} = "extended" ]]; then

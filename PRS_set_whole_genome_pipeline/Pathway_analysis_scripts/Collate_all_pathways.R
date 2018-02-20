@@ -33,9 +33,10 @@ Training_name <- args[3]
 Validation_name <- args[4]
 Pathway_directory <- args[5]
 Pathway_file_name <- args[6] # the name of the file to be accessed (must be in stationary directory)
+Gene_regions <- args[7]
 
 # This will be a problem, write in a script that defines what the arguments are (probably have to be linked with the arguments script however...stop un-needed analysis)
-significance_thresholds <- as.character(args[c(7:length(args))])
+significance_thresholds <- as.character(args[c(8:length(args))])
 print(significance_thresholds)
 
 
@@ -60,8 +61,14 @@ number_of_pathways_to_analyse <- length(pathway_names)
 final_scoring_output_file <- NULL
 order_of_output_for_sig_thresh <- NULL
 
+if (Gene_regions == "both" | Gene_regions == "normal"){
+
+final_scoring_output_file <- NULL
+order_of_output_for_sig_thresh <- NULL
+extra_gene_regions <- "normal"
+
 for (i in significance_thresholds){
-scoring_output_file <- paste0(Pathway_directory,pathway_names,"/scoring_",Training_name,"_",Validation_name,"_pathway_",pathway_names,"_with_",i,".profile")
+scoring_output_file <- paste0(Pathway_directory,pathway_names,"/scoring_",Training_name,"_",Validation_name,"_pathway_",pathway_names,"_", extra_gene_regions,"_with_",i,".profile")
 final_scoring_output_file <- c(final_scoring_output_file,scoring_output_file)
 order_of_output_for_sig_thresh <- c(order_of_output_for_sig_thresh, paste0(pathway_names,"_",rep(i,length(scoring_output_file))))
 }
@@ -78,4 +85,33 @@ for (i in 1:length(final_scoring_output_file)) {
 
 all_prs <- join_all(my_data, by=c("FID", "IID"), type='left')
 
-write.table(all_prs,file = paste0("FINAL_PATHWAY_RESULTS_PRS_PROFILES",Training_name,"_",Validation_name, "_", Pathways_used, ".txt"),quote = F,row.names = F)
+write.table(all_prs,file = paste0("FINAL_PATHWAY_RESULTS_PRS_PROFILES",Training_name,"_",Validation_name, "_", Pathways_used,"_", extra_gene_regions, ".txt"),quote = F,row.names = F)
+}
+
+if (Gene_regions == "both" | Gene_regions == "extended"){
+
+final_scoring_output_file <- NULL
+order_of_output_for_sig_thresh <- NULL
+extra_gene_regions <- "extended"
+
+for (i in significance_thresholds){
+scoring_output_file <- paste0(Pathway_directory,pathway_names,"/scoring_",Training_name,"_",Validation_name,"_pathway_",pathway_names,"_", extra_gene_regions,"_with_",i,".profile")
+final_scoring_output_file <- c(final_scoring_output_file,scoring_output_file)
+order_of_output_for_sig_thresh <- c(order_of_output_for_sig_thresh, paste0(pathway_names,"_",rep(i,length(scoring_output_file))))
+}
+
+my_data <- lapply(final_scoring_output_file, read.table, header=TRUE) 
+names(my_data) <- str_replace(final_scoring_output_file, pattern = ".profile", replacement = "")
+
+
+# iterate through significance thresholds 
+for (i in 1:length(final_scoring_output_file)) {
+  my_data[[i]] <- my_data[[i]] [,c(1,2,6)]
+  colnames(my_data[[i]]) <- c("FID", "IID", paste("SCORE_", order_of_output_for_sig_thresh[i], sep=""))
+}
+
+all_prs <- join_all(my_data, by=c("FID", "IID"), type='left')
+
+write.table(all_prs,file = paste0("FINAL_PATHWAY_RESULTS_PRS_PROFILES",Training_name,"_",Validation_name, "_", Pathways_used,"_", extra_gene_regions, ".txt"),quote = F,row.names = F)
+}
+
