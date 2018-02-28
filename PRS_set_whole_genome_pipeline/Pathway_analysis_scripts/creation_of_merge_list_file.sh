@@ -42,7 +42,7 @@ done
 extra_gene_regions=normal
 
 # Create Make file from list of current files in directory
-Rscript ${path_to_scripts}RscriptEcho.R ${path_to_pathway_scripts}MAKE_list_file_creator_for_sets.R ${Pathway_output_directory}/${pathways}/MAKE_list_file_creator.Rout ${validation_set_usually_genotype_serial} ${training_set_name} ${validation_set_name} ${Pathway_output_directory} ${pathways} ${extra_gene_regions} ${Chromosomes_to_analyse[@]} 
+Rscript ${path_to_scripts}RscriptEcho.R ${path_to_pathway_scripts}MAKE_list_file_creator_for_sets.R ${Pathway_output_directory}/${pathways}/MAKE_list_file_creator.Rout ${validation_set_usually_genotype_serial} ${training_set_name} ${validation_set_name} ${Pathway_output_directory} ${pathways} ${extra_gene_regions} ${Use_files_for_pattern_matching_make_list} ${Chromosomes_to_analyse[@]} 
 
 plink --merge-list ${Pathway_output_directory}/${pathways}/make_full_plink_${pathways}_${extra_gene_regions}.txt --make-bed --out ${Pathway_output_directory}/${pathways}/${pathways}_Clumping_input_${extra_gene_regions}
 
@@ -74,7 +74,7 @@ done
 extra_gene_regions=extended
 
 # Create Make file from list of current files in directory
-Rscript ${path_to_scripts}RscriptEcho.R ${path_to_pathway_scripts}MAKE_list_file_creator_for_sets.R ${Pathway_output_directory}/${pathways}/MAKE_list_file_creator.Rout ${validation_set_usually_genotype_serial} ${training_set_name} ${validation_set_name} ${Pathway_output_directory} ${pathways} ${extra_gene_regions} ${Chromosomes_to_analyse[@]}
+Rscript ${path_to_scripts}RscriptEcho.R ${path_to_pathway_scripts}MAKE_list_file_creator_for_sets.R ${Pathway_output_directory}/${pathways}/MAKE_list_file_creator.Rout ${validation_set_usually_genotype_serial} ${training_set_name} ${validation_set_name} ${Pathway_output_directory} ${pathways} ${extra_gene_regions} ${Use_files_for_pattern_matching_make_list} ${Chromosomes_to_analyse[@]}
 
 plink --merge-list ${Pathway_output_directory}/${pathways}/make_full_plink_${pathways}_${extra_gene_regions}.txt --make-bed --out ${Pathway_output_directory}/${pathways}/${pathways}_Clumping_input_${extra_gene_regions}
 

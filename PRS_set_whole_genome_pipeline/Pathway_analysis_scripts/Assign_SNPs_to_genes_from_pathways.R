@@ -302,7 +302,7 @@ for (i in 1:number_of_pathways_to_analyse) {
         #GENES_to_snps <- scan(file = "10_CLOZUK_PGC2noclo_ALSPAC_SNPs_5HT_2C_extended_pathway_temp.genes.annot",what = "", sep = "\n")      
         }, error=function(e){cat("Pathway",pathway_names[i],"on chromosome",l,"must_be_empty,check with MAGMA errors\n")
         message <- paste0(pathway_names[i],"\t",l)
-        write(message, file = paste0(output_directory,"MAGMA_empty_files_after_analysis_normal.txt"), append = T)
+        write(message, file = paste0(output_directory,"MAGMA_empty_files_after_analysis_extended.txt"), append = T)
         list(next_loop = T)
       })
       

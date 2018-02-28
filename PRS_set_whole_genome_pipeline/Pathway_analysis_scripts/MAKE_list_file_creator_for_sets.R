@@ -23,7 +23,8 @@ Validation_name <- args[5]
 Pathway_directory <- args[6]
 current_pathway <- args[7]
 Gene_regions <- args[8]
-chromosomes_to_parse <- as.numeric(args[c(9:length(args))])
+Use_files <- args[9]
+chromosomes_to_parse <- as.numeric(args[c(10:length(args))])
 print(chromosomes_to_parse)
 
 output_directory <- paste0("./", Training_name, "_", Validation_name, "_output/")
@@ -35,6 +36,24 @@ output_directory <- paste0("./", Training_name, "_", Validation_name, "_output/"
 #current_pathway <- "Morphology_schizophrenia_related"
 #chromosomes_to_parse <- seq(1,22)
 
+if (Use_files == T){
+
+start_directory <- getwd()
+switch_directory <- paste0(Pathway_directory,"/",current_pathway)
+setwd(switch_directory) 
+pattern <- paste0(Gene_regions,"_gene_regions.bim")
+basename.matches <- list.files( pattern = pattern, recursive = T, full.names = T)
+new_basename <- gsub("\\.bim", "", basename.matches)
+new_basename_2 <- gsub("^\\.","",new_basename)
+
+all_files <- paste0(Pathway_directory,"/",current_pathway,new_basename_2)
+new_data_frame <- data.frame(filenames=all_files)
+
+setwd(start_directory)
+filename <- paste0(Pathway_directory,"/",current_pathway,"/make_full_plink_",current_pathway,"_",Gene_regions,".txt")
+write.table (new_data_frame, file = filename, col.names = F, row.names = F, quote = F)
+quit()
+}
 
 # Read in both of the error files to check which pathways you want to analyse
 unread_pathways_one <- read.delim(paste0(Pathway_directory,"/MAGMA_empty_files_after_analysis_",Gene_regions,".txt"), header = F, stringsAsFactors = F)
@@ -53,16 +72,23 @@ if (nrow(unread_pathways_one) == 1 & nrow(unread_pathways_two) == 1){
   write.table (new_data_frame, file = filename, col.names = F, row.names = F, quote = F)
   quit()
 }
+# Potential solution one
+
+#setwd(paste0(Pathway_directory,"/",current_pathway)
+#pattern <- paste0(Gene_regions,"_gene_regions.bim")
+#basename.matches <- list.files( pattern = pattern, recursive = T, full.names = T)
+
 
 unread_pathways_one <- as.data.table(unread_pathways_one)
 unread_pathways_two <- as.data.table(unread_pathways_two)
-cat("Some chromosomes within the pathway do not have any SNPs contained within them for ", current_pathway," these will be ignored")
+cat("Some chromosomes within the pathway may not have any SNPs contained within them for ", current_pathway," these will be ignored")
 
 if (nrow(unread_pathways_one) == 1 & nrow(unread_pathways_two) != 1){
+ 
   unread_pathways_two <- unread_pathways_two[-1]
   rm(unread_pathways_one)
-  cat("No empty chromosomes found in R analysis for ", current_pathway,"but some found in MAGMA analysis")
-  
+  cat("No empty chromosomes found in MAGMA analysis for ", current_pathway,"but some found in R analysis")
+   
   # Print out a new make file with the relevant chromosomes removed
   setnames(unread_pathways_two, c("Pathway","chromosome"))
   unread_pathways_total <- unread_pathways_two
@@ -70,7 +96,7 @@ if (nrow(unread_pathways_one) == 1 & nrow(unread_pathways_two) != 1){
 } else if (nrow(unread_pathways_one) != 1 & nrow(unread_pathways_two) == 1){
     unread_pathways_one <- unread_pathways_one[-1]
     rm(unread_pathways_two)
-    cat("No empty chromosomes found in MAGMA analysis for ", current_pathway,"but some found in R analysis")
+    cat("No empty chromosomes found in R analysis for ", current_pathway,"but some found in MAGMA analysis")
     
     # Print out a new make file with the relevant chromosomes removed
     setnames(unread_pathways_one, c("Pathway","chromosome"))
