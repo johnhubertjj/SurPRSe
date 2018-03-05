@@ -3,6 +3,36 @@ title: "COGS_pathway_DSM"
 output: html_document
 ---
 
+# SUMMARY for 22/02/17
+
+* Age and gender have been added as covariates to COGS
+* Regulatory regions for both whole genome and pathway PRS have been updated and are fully functional in the pipeline
+* A new DSM group of AllminusNarrow Schizophrenia has been defined as a measure to check accuracy of results (still in progress)
+
+# RESULTS Summary
+
+* With extended gene regions, abnormal grooming behaviour consistently predicts cognition across all p-value thresholds and even captures more variation than a whole genome PRS
+* FMRP targets geneset drops in significance when extended gene regions added
+* Cav 2 channels increase in  significance
+
+* BETA Directions: 
+  * whole genome (both genic and all) = negative
+  * Cav2 = negative
+  * abnormal grooming behaviour = negative
+  * FMRP = positive but insignificant with extended regions included
+
+* If narrow SCZ DSM measure is removed, beta of a whole genome PRS switches to positive association but low sample size and insignificant
+
+# Discussion points
+
+* Run data-driven pathway analysis? (link up with Andrews annotations)
+* Use a gene-PRS to decipher which segments are contributing to the signal in gene-set PRS?
+* Software engineers
+* Still worth defining new sets based on LoF and FMRP?
+* More narrow examination at this analysis?
+* Secondary proposal for BD de-duplicated from SCZ
+
+
 ## INFORMATION
 
 #### Polygenic risk score
@@ -38,11 +68,13 @@ output: html_document
 * Cav2 channels
 * FMRP targets
 * LOF intolerance
-* Membrane Depolarisation during action potential
-* Synaptic transmission
+* Membrane Depolarisation during action potential (GO)
+* Synaptic transmission (GO)
+
+
 
 * All taken from James + Antonio's paper apart from GO terms which were defined in Amigo GO
-
+  * GO terms were part of a conditional analysis at the top of Antonio's/James' paper in a data-driven pathway analysis so I've included them here
 #### Phenotypes
 
 **DSM**
@@ -124,12 +156,16 @@ Files that are required to be read into this analysis:
 * COGS covariates
 * Pathway results with COGS and CLOZUK_PGC2_noCOGS summarised
 * Phenotype files with DSM information and Cognition and treatment resistance
+* COGS gene boundaries (normal) gene set polygenic risk scores
+* COGS regulatory regions (+ 10kb, -35kb from gene boundary; extended) gene set polygenic risk scores
+* COGS whole genome genic (gene boundaries = normal; regulatory regions = extended) polygenic risk scores
+* COGS whole genome polygenic risk scores
 
-#### Read in whole genome genic files
+#### Read in whole genome normal and extended genic files before separating
 ```{r}
 significance_threshold <- c(5e-08,1e-06,1e-04,0.01,0.05,0.1,0.2,0.5,1)
 
-my_files <- paste0("~/Documents/COGS_pathways_results/PRS_scoring/CLOZUKPGC2_NO_COGS_COGS_extended_gene_regions_Clumped_whole_genome_final_significance_threshold_at_",significance_threshold, ".profile")
+my_files <- paste0("~/Documents/COGS_pathways_results/whole_genome/PRS_scoring/PRS_scoring/CLOZUK_PGC2_noCOGS_COGS_normal_gene_regions_Clumped_whole_genome_final_significance_threshold_at_",significance_threshold, ".profile")
 
 
 my_data <- lapply(my_files, fread, header=TRUE) 
@@ -141,9 +177,62 @@ for (i in 1:length(significance_threshold)) {
   colnames(my_data[[i]]) <- c("FID", "IID", paste("SCORE_whole_genome_", significance_threshold[i], sep=""))
 }
 
-all_prs <- join_all(my_data, by=c("FID", "IID"), type='left')
+all_prs_normal <- join_all(my_data, by=c("FID", "IID"), type='left')
+
+cols <- names(all_prs_normal)[3:ncol(all_prs_normal)]
+setnames(all_prs_normal, old = c(3:ncol(all_prs_normal)), new = paste("normal.genic.genome", cols, sep = "_"))
+
+my_files <- paste0("~/Documents/COGS_pathways_results/whole_genome/PRS_scoring/PRS_scoring/CLOZUK_PGC2_noCOGS_COGS_extended_gene_regions_Clumped_whole_genome_final_significance_threshold_at_",significance_threshold, ".profile")
+
+
+my_data <- lapply(my_files, fread, header=TRUE) 
+names(my_data) <- str_replace(my_files, pattern = ".profile", replacement = "")
+
+# iterate through significance thresholds 
+for (i in 1:length(significance_threshold)) {
+  my_data[[i]] <- my_data[[i]][,c(1,2,6)]
+  colnames(my_data[[i]]) <- c("FID", "IID", paste("SCORE_whole_genome_", significance_threshold[i], sep=""))
+}
+
+all_prs_extended <- join_all(my_data, by=c("FID", "IID"), type='left')
+
+cols <- names(all_prs_extended)[3:ncol(all_prs_extended)]
+setnames(all_prs_extended, old = c(3:ncol(all_prs_extended)), new = paste("extended.genic.genome", cols, sep = "_"))
 
 ```
+
+#### Read in whole genome; entire genome
+```{r}
+my_files <- paste0("~/Documents/COGS_pathways_results/whole_genome/PRS_scoring/CLOZUKPGC2_NO_COGS_COGS_whole_genome_significance_threshold_at_",significance_threshold, ".profile")
+
+my_data <- lapply(my_files, fread, header=TRUE) 
+names(my_data) <- str_replace(my_files, pattern = ".profile", replacement = "")
+
+# iterate through significance thresholds 
+for (i in 1:length(significance_threshold)) {
+  my_data[[i]] <- my_data[[i]][,c(1,2,6)]
+  colnames(my_data[[i]]) <- c("FID", "IID", paste("SCORE_whole_genome_", significance_threshold[i], sep=""))
+}
+
+all_prs_whole_genome <- join_all(my_data, by=c("FID", "IID"), type='left')
+cols <- names(all_prs_whole_genome)[3:ncol(all_prs_whole_genome)]
+setnames(all_prs_whole_genome, old = c(3:ncol(all_prs_whole_genome)), new = paste("All.genome", cols, sep = "_"))
+
+```
+### Add column patterns to distinguish between gene boundaries and regulatory regions
+
+```{r}
+COGS_Pathway_results_normal = fread("~/Documents/COGS_pathways_results/FINAL_PATHWAY_RESULTS_PRS_PROFILESCLOZUK_PGC2_noCOGS_COGS_Selected_Pocklington_plus_GO_pathways_SCHIZ_normal.txt")
+cols <- names(COGS_Pathway_results_normal)[3:ncol(COGS_Pathway_results_normal)]
+setnames(COGS_Pathway_results_normal, old = c(3:ncol(COGS_Pathway_results_normal)), new = paste("normal_geneset", cols, sep = "_"))
+
+COGS_Pathway_results_extended = fread("~/Documents/COGS_pathways_results/FINAL_PATHWAY_RESULTS_PRS_PROFILESCLOZUK_PGC2_noCOGS_COGS_Selected_Pocklington_plus_GO_pathways_SCHIZ_extended.txt")
+cols <- names(COGS_Pathway_results_extended)[3:ncol(COGS_Pathway_results_extended)]
+setnames(COGS_Pathway_results_extended, old = c(3:ncol(COGS_Pathway_results_extended)), new = paste("extended_geneset", cols, sep = "_"))
+
+```
+
+
 #### Read in all input files
 
 ```{r}
@@ -156,9 +245,14 @@ COGS_Phenotypes <- merge(COGS_Phenotypes,COGS_ID_S, by = "Study_ID")
 COGS_list <- list(
 COGS_covaraties = fread("~/Documents/COGS_pathways_results/COGSv2016.noREL.eigenvec"),
 COGS_duplicates = fread("~/Documents/COGS_pathways_results/COGSv2016.PGCrelatives[2] copy.txt", header = F),
-COGS_Pathway_results = fread("~/Documents/COGS_pathways_results/FINAL_PATHWAY_RESULTS_PRS_PROFILESCLOZUKPGC2_NO_COGS_COGS_Selected_Pocklington_plus_GO_pathways_SCHIZ.txt"),
-COGS_whole_genome_results = all_prs,
-# COGS_Pathway_test_randomisation <- fread("~/Documents/COGS_pathways_results/FINAL_PATHWAY_RESULTS_PRS_PROFILESCLOZUKPGC2_NO_COGS_COGS_abnormal_behaviorrandomised_gene_sets.txt")
+#COGS_Pathway_results = fread("~/Documents/COGS_pathways_results/FINAL_PATHWAY_RESULTS_PRS_PROFILESCLOZUKPGC2_NO_COGS_COGS_Selected_Pocklington_plus_GO_pathways_SCHIZ.txt"),
+COGS_Pathway_results_normal = COGS_Pathway_results_normal,
+COGS_Pathway_results_extended = COGS_Pathway_results_extended,
+COGS_age_gender = fread("~/Documents/COGS_pathways_results/COGS_AGE_SEX_Feb_18.txt"),
+COGS_whole_genome_genic_normal = all_prs_normal,
+COGS_whole_genome_genic_extended = all_prs_extended,
+COGS_whole_genome = all_prs_whole_genome,
+#COGS_Pathway_test_randomisation <- fread("~/Documents/COGS_pathways_results/FINAL_PATHWAY_RESULTS_PRS_PROFILESCLOZUKPGC2_NO_COGS_COGS_abnormal_behaviorrandomised_gene_sets.txt")
 COGS_Phenotypes = COGS_Phenotypes
 )
 
@@ -199,16 +293,27 @@ PC_s <- grep(x = names(COGS_total), pattern = "PC\\d+")
 ## Limit to DSM (narrow and broad) and run multiple linear regressions on cognition
 
 * SCZ all cognition = 772 individuals after QC
-* SCZ all TRS =  individuals after QC
+* SCZ all TRS =  812 individuals after QC
 
 * SCZ narrow = 678 individuals after QC
 * SCZ broad = 827 individuals after QC
 
-* SCZ narrow_cognition = 586 after removing missing values
-* SCZ broad_cognition = 725 after removing missing values
+* SCZ all minus narrow cognition = 182 after removing missing values
+* SCZ narrow cognition = 586 after removing missing values
+* SCZ broad cognition = 725 after removing missing values
 
-* SCZ narrow_TRS = 638 after removing missing values
-* SCZ broad_TRS = 773 after removing missing values
+* SCZ all minus narrow TRS = 172 after removing missing values
+* SCZ narrow TRS = 638 after removing missing values
+* SCZ broad TRS = 773 after removing missing values
+
+## Limiting to age and gender phenotypes
+
+* Age at interview
+* Gender
+  * 1 = male
+  * 0 = female
+
+* No NA values in covariates are seen after QC above (some are seen in full dataset but are removed by coincidence)
 
 
 ```{r, message=FALSE}
@@ -216,6 +321,7 @@ PC_s <- grep(x = names(COGS_total), pattern = "PC\\d+")
 
 rows_to_keep_SCZ_narrow <- COGS_total[DSM_diagnosis_new == 1 | DSM_diagnosis_new == 2 ]
 rows_to_keep_SCZ_broad <- COGS_total[DSM_diagnosis_new == 1 | DSM_diagnosis_new == 2 | DSM_diagnosis_new == 3 | DSM_diagnosis_new == 4]
+rows_to_keep_all_minus_narrow <- COGS_total[DSM_diagnosis_new != 1 & DSM_diagnosis_new != 2]
 
 COGS_cognition <- COGS_total[Composite_Zimpute != 999]
 COGS_treatment_resistance <- COGS_total[FINAL_TRS != 9]
@@ -225,15 +331,21 @@ rows_to_keep_SCZ_broad_cognition <- rows_to_keep_SCZ_broad[Composite_Zimpute != 
 rows_to_keep_SCZ_narrow_TRS <- rows_to_keep_SCZ_narrow[FINAL_TRS != 9]
 rows_to_keep_SCZ_broad_TRS <- rows_to_keep_SCZ_broad[FINAL_TRS != 9]
 
+rows_to_keep_all_minus_narrow_cognition <- rows_to_keep_all_minus_narrow[Composite_Zimpute != 999]
+rows_to_keep_all_minus_narrow_TRS <- rows_to_keep_all_minus_narrow[FINAL_TRS != 9]
+
+
 list_of_tests_cognition <- list(
-  rows_to_keep_SCZ_narrow_cognition = as.data.frame(rows_to_keep_SCZ_narrow_cognition[,test:= Composite_Zimpute]),
-  rows_to_keep_SCZ_broad_cognition = as.data.frame(rows_to_keep_SCZ_broad_cognition[,test := Composite_Zimpute]),
+  rows_to_keep_SCZ_narrow_cognition = as.data.frame(rows_to_keep_SCZ_narrow_cognition[, test:= Composite_Zimpute]),
+  rows_to_keep_SCZ_broad_cognition = as.data.frame(rows_to_keep_SCZ_broad_cognition[, test := Composite_Zimpute]),
+  rows_to_keep_SCZ_all_minus_narrow_cognition = as.data.frame(rows_to_keep_all_minus_narrow_cognition[, test := Composite_Zimpute]),
   COGS_cognition = as.data.frame(COGS_cognition[,test:= Composite_Zimpute])
   )  
 
 list_of_tests_TRS <- list(
   rows_to_keep_SCZ_narrow_TRS = as.data.frame(rows_to_keep_SCZ_narrow_TRS[,test := FINAL_TRS]),
   rows_to_keep_SCZ_broad_TRS = as.data.frame(rows_to_keep_SCZ_broad_TRS[,test:= FINAL_TRS]),
+  rows_to_keep_SCZ_all_minus_narrow_TRS = as.data.frame(rows_to_keep_all_minus_narrow_TRS[,test := FINAL_TRS]),
   COGS_treatment_resistance = as.data.frame(COGS_treatment_resistance[,test:= FINAL_TRS])
 )
 
@@ -248,10 +360,12 @@ names_of_analyses <- names(list_of_tests_cognition)
 for (l in names_of_analyses){
 obj <- data.frame(test=0, score=0, estimate=0, SE=0, tvalue=0, p=0, r.squared=0, lower = 0, upper = 0)
 for (i in score_list) {
-    fit <- lm(test ~ list_of_tests_cognition[[l]][,i],  data=list_of_tests_cognition[[l]])
+    fit <- lm(test ~ list_of_tests_cognition[[l]][,i] + male_sex + Age_at_Interview,  data=list_of_tests_cognition[[l]])
+    fit2 <- lm (test ~ male_sex + Age_at_Interview, data = list_of_tests_cognition[[l]])
     tmp <- coef(summary(fit))
     tmp2 <- summary(fit)
-    true_r2 <- tmp2$r.squared
+    hold <- summary(fit2)
+    true_r2 <- tmp2$r.squared - hold$r.squared
     CI <- confint(fit, level=0.95)
     CI <- CI[2,]
     tmp3 <- c(l,i,tmp[2,], true_r2, CI)
@@ -266,8 +380,8 @@ names_of_analyses <- names(list_of_tests_TRS)
 for (l in names_of_analyses){
 obj <- data.frame(test=0, score=0, estimate=0, SE=0, zvalue=0, p=0, r.squared.Nagel=0, lower = 0, upper = 0)
 for (i in score_list) {
-    fit <- lrm(test ~ list_of_tests_TRS[[l]][,i], data = list_of_tests_TRS[[l]],se.fit = T)
-    fit2 <- glm(test ~ list_of_tests_TRS[[l]][,i], data = list_of_tests_TRS[[l]], family = "binomial")
+    fit <- lrm(test ~ list_of_tests_TRS[[l]][,i] + male_sex + Age_at_Interview, data = list_of_tests_TRS[[l]],se.fit = T)
+    fit2 <- glm(test ~ list_of_tests_TRS[[l]][,i] + male_sex + Age_at_Interview, data = list_of_tests_TRS[[l]], family = "binomial")
     tmp <- coef(summary(fit2))
     
     SE <- sqrt(diag(vcov(fit)))
@@ -295,32 +409,92 @@ for (i in score_list) {
 * For logistic regression, confit in R might produce different CI's than manual CI's in R see here: [http://people.upei.ca/hstryhn/stryhn208.pdf]
   * and here: [https://stats.stackexchange.com/questions/5304/why-is-there-a-difference-between-manually-calculating-a-logistic-regression-95]
 
-* CURRENTLY, the whole genome genic used an R2 for clumping of 0.01 instead of 0.1, but results change was minimal when re-done for pathways, will still re-run in any case...
 
 #### TABLES
 
-```{r echo=F,results='asis', message=F}
+* Need to do these sets of analysis and plot each one for broad, narrow, all and allminusnarrow
+  * compare pathways against a whole genome genic with normal regions
+  * compare pathways against a whole genome genic with extended regions
+  * compare normal pathways against a whole genome without regions
+  * compare extended pathways against a whole genome without regions
+  
+* Also make secondary proposal for de-duplication against the PGC for Bipolar cases and controls
+* Will convert all of this to a Shiny app
+*   
+```{r echo=F,results='asis', message=F, warning=F}
 
 all_cogs_PRS_results <- list(
   Cognition_all_samples = results_COGS_cognition,
   Cognition_broad = results_rows_to_keep_SCZ_broad_cognition,
-  Cognition_narrow = results_rows_to_keep_SCZ_narrow_cognition
+  Cognition_narrow = results_rows_to_keep_SCZ_narrow_cognition,
+  Cognition_minus_narrow = results_rows_to_keep_SCZ_all_minus_narrow_cognition
   )
 
 all_TRS_PRS_results <- list (
   TRS_all_samples <- results_COGS_treatment_resistance,
   TRS_broad <- results_rows_to_keep_SCZ_broad_TRS,
-  TRS_narrow <- results_rows_to_keep_SCZ_narrow_TRS
+  TRS_narrow <- results_rows_to_keep_SCZ_narrow_TRS,
+  TRS_minus_narrow <- results_rows_to_keep_SCZ_all_minus_narrow_TRS
 )
+
 library(knitr)
 
-samples <- c("ALL", "broad", "narrow")
+samples <- c("Everything", "broad", "narrow", "All_minus_narrow")
 
-for (t in 1:3){
-current_table <- as.data.table(all_cogs_PRS_results[[t]])
-current_table <- current_table[order(current_table$p)]
-print(kable(current_table[1:20], caption = paste0("Cognition tables across different DSM ranges for ",samples[t]," samples")) %>%
-kable_styling())
+for (i in 1:length(samples)){
+  all_cogs_PRS_results[[i]] <- cbind(all_cogs_PRS_results[[i]], samples[i])
+} 
+
+Full_data <- ldply(all_cogs_PRS_results, data.frame)
+Full_data <- as.data.table(Full_data)
+
+#for (t in 1:4){
+  
+Final_analysis <- list(
+current_table_extended <- Full_data[grepl("^extended",Full_data$score)],
+current_table_normal <- Full_data[grepl("^normal",Full_data$score)],
+current_table_extended_All.genome <- Full_data[grepl("^extended",Full_data$score) | grepl("All.genome", Full_data$score)],
+current_table_normal_All.genome <- Full_data[grepl("^normal", Full_data$score) | grepl("All.genome", Full_data$score)]
+)
+
+#current_table_extended <- current_table_extended[order(current_table$p)]
+#current_table_normal <- current_table_normal[order(current_table_normal$p)]
+#current_table_extended_All.genome <- current_table_extended_All.genome[order(current_table_extended_All.genome$p)]
+#current_table_normal_All.genome <- current_table_normal_All.genome[order(current_table_normal_All.genome$p)]
+
+
+
+#Full_analysis_list <- list( analysis1, analysis2, analysis3, analysis4)
+#cut_down_analysis_list <- Full_analysis_list
+
+Analysis_vector <- c("normal vs whole genome genic", "extended vs whole genome genic", "normal vs whole genome all", "extended vs whole genome all")
+
+samples2 <- c("Everything", "broad", "narrow", "All_minus_narrow")
+
+for (t in 3:4){
+  
+current_analysis <- Final_analysis[[t]]
+
+ if (t > 2){
+   to_remove <- current_analysis[,.I[grepl("genic.genome",current_analysis$score)]]
+   current_analysis <- current_analysis[-to_remove]
+ } 
+setkey(current_analysis, "samples.i.")
+cutdown_tables_current <- current_analysis[order(p)]
+cutdown_tables_current <- cutdown_tables_current[,.SD[1:10], by = samples.i.]
+
+cutdown_tables_current %>% 
+mutate_if(is.factor, as.character) -> cutdown_tables_current
+
+print(
+kable(cutdown_tables_current[,c(1,2,4:ncol(cutdown_tables_current))], format = "html",caption = paste0("Cognition;",Analysis_vector[t],";across different DSM ranges")) %>%
+kable_styling("striped", full_width = F, position = "left",bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>%
+group_rows(cutdown_tables_current[1,"samples.i."], 1, 10) %>%
+group_rows(cutdown_tables_current[11,"samples.i."], 11, 20) %>%
+group_rows(cutdown_tables_current[21,"samples.i."], 21, 30) %>%
+group_rows(cutdown_tables_current[31,"samples.i."], 31, 40 ) %>%  
+add_footnote(c("Some footnote", "Some other footnote"))
+)
 }
 
 for (t in 1:3){
@@ -329,14 +503,19 @@ kable(all_TRS_PRS_results[[t]][1:20,], caption = "TRS tables across different DS
 ```
 
 ### Plotting
-```{r echo = F,message = F, results=F}
+```{r echo = F,message = F, results=F, warning=F}
+
+Final_analysis_gglist_pval <- list()
+Final_analysis_beta <- list()
+Final_analysis_r2_pathways <- list()
 
 gglist_pathways <- list()
 gglist_beta_pathways <- list()
 gglist_r2_dir_pathways <- list()
 
-for (t in 1:3){
-  current_table <- as.data.table(all_cogs_PRS_results[[t]])
+for (t in 1:4){
+
+current_table <- Final_analysis[[t]]
 
 # Pathways
 str(current_table)
@@ -368,23 +547,31 @@ for (i in 1:length(split_data_frame_0.05)){
   # Obtaining the log p-values
   top_five_pathways <- split_data_frame_0.05[[i]][order(split_data_frame_0.05[[i]]$score)]
   top_five_pathways$P_threshold <- 0.05
-  top_five_pathways$Type <- c(rep("Pathway",11),"Whole_genome")
-  top_five_pathways_0.05 <- which(top_five_pathways$score == "SCORE_whole_genome_0.05")
+  
+  # Alter to find the whole genome row from the pathway rows
+  top_five_pathways_0.05 <- top_five_pathways[,.I[grepl("genic.genome",top_five_pathways$score) | grepl("All.genome", top_five_pathways$score)]]
+  Type_vector <- rep("Pathway",nrow(top_five_pathways))
+  Type_vector[top_five_pathways_0.05] <- "Whole_genome"
+  top_five_pathways$Type <- Type_vector
   
   # By Factoring the p-values, you can get them to trend decreasingly without affecting the whole genome p-value
   top_five_pathways$p <- as.numeric(top_five_pathways$p)
-  top_five_pathways$score <- factor(top_five_pathways$score, levels = top_five_pathways$score[c(top_five_pathways_0.05, order(top_five_pathways$score[-top_five_pathways_0.05]))])
+  top_five_pathways$score <- factor(top_five_pathways$score, levels = top_five_pathways$score[order(top_five_pathways$score, top_five_pathways$Type)])
   
   
   # Do the same for the 0.5 p-thresholds
   top_five_pathways2 <- split_data_frame_0.5[[i]][order(split_data_frame_0.5[[i]]$score)]
   top_five_pathways2$P_threshold <- 0.5
-  top_five_pathways2$Type <- c(rep("Pathway",11),"Whole_genome")
-  top_five_pathways_0.5 <- which(top_five_pathways2$score == "SCORE_whole_genome_0.5")
+  
+  top_five_pathways_0.5 <- top_five_pathways2[,.I[grepl("genic.genome",top_five_pathways2$score) | grepl("All.genome", top_five_pathways2$score)]]
+  Type_vector <- rep("Pathway",nrow(top_five_pathways2))
+  Type_vector[top_five_pathways_0.5] <- "Whole_genome"
+  top_five_pathways2$Type <- Type_vector
+  
   
   # By Factoring the p-values, you can get them to trend decreasingly without affecting the whole genome p-value
   top_five_pathways2$p <- as.numeric(top_five_pathways2$p)
-  top_five_pathways2$score <- factor(top_five_pathways2$score, levels = top_five_pathways2$score[c(top_five_pathways_0.5, order(top_five_pathways2$score[-top_five_pathways_0.5]))])
+  top_five_pathways2$score <- factor(top_five_pathways2$score, levels = top_five_pathways2$score[order(top_five_pathways2$score, top_five_pathways2$Type)])
   
   
   top_five_pathways_all <- rbind(top_five_pathways,top_five_pathways2)
@@ -411,13 +598,24 @@ for (i in 1:length(split_data_frame_0.05)){
     geom_point(aes(colour = Type))
   
   test1 <- levels(p$data$score)
-  whole_genome_positions <- grep(x = test1,pattern = "SCORE_whole_genome_\\d.\\d+",perl = T)
+  whole_genome_positions <- grep(x = test1, pattern = "SCORE_whole_genome_\\d.\\d+",perl = T)
+  
+  if (t > 2){
+    whole_genome_genic_positions <- grep(x = test1, pattern = "genic.genome_SCORE_whole_genome_\\d.\\d+",perl = T)
+    whole_genome_all_genome_positions <- grep(x = test1, pattern = "All.genome_SCORE_whole_genome_\\d.\\d+",perl = T)
+  }
+  
   alterations <- test1
   alterations[-whole_genome_positions] <- str_replace(string = test1[-whole_genome_positions], pattern = "SCORE_(.*)_\\d.\\d+",replacement = "\\1")
   alterations[-whole_genome_positions] <- str_replace(string = alterations[-whole_genome_positions], pattern = "long_term_potentiation",replacement = "LTP")
   alterations[-whole_genome_positions] <- str_replace(string = alterations[-whole_genome_positions], pattern = "action_potential",replacement = "AP")
   alterations[-whole_genome_positions] <- str_replace(string = alterations[-whole_genome_positions], pattern = "depolarization",replacement = "DP")
   alterations[whole_genome_positions] <- rep(x = "Whole Genome PRS", 2)
+  
+  if (t > 2){
+   alterations[whole_genome_genic_positions] <- rep(x = "Whole Genome PRS GENIC", 2)
+   alterations[whole_genome_all_genome_positions] <- rep(x = "Whole Genome PRS ALL", 2)
+  }
   
   test2 <- vector(length = length(test1))
   names(alterations) <- test1
@@ -429,28 +627,41 @@ for (i in 1:length(split_data_frame_0.05)){
   p <- p + geom_hline(aes(yintercept=1.30103), colour = "red", linetype= "solid", alpha = 0.25)
   p <- p + scale_fill_brewer(palette = "Paired")
   p <- p + theme(axis.text.x = element_text(angle = 90,size = 10,hjust = 1,vjust = 0.5))
-  p <- p + ggtitle(top_five_pathways_all$test[1])
+  p <- p + ggtitle(top_five_pathways_all$.id[1])
   #p <- p + theme(plot.title = element_text( face = "bold",hjust = 0.5,vjust = 0.5,angle = 90))
   p <- p + theme(plot.title = element_text( face = "bold",hjust = 0.5))
   p <- p + ylab(label = expression(-'log'[10]*'(p)'))
   p <- p + xlab(label = "Polygenic risk score")
 
-  gglist_pathways[[t]] <- p
+  gglist_pathways[[i]] <- p
   
   p <- ggplot(top_five_pathways_all, aes(x=score, y=estimate, fill = Type, group=P_threshold))
   
   p <- p +
-    geom_errorbar(aes(ymin = SE_higher, ymax = SE_lower), position = "dodge", width = 0.25) +
+    geom_errorbar(aes(ymin = upper, ymax = lower), position = "dodge", width = 0.25) +
     geom_point(aes(colour = Type))
   
   test1 <- levels(p$data$score)
   whole_genome_positions <- grep(x = test1,pattern = "SCORE_whole_genome_\\d.\\d+",perl = T)
+  
+  if (t > 2){
+    whole_genome_genic_positions <- grep(x = test1, pattern = "genic.genome_SCORE_whole_genome_\\d.\\d+",perl = T)
+    whole_genome_all_genome_positions <- grep(x = test1, pattern = "All.genome_SCORE_whole_genome_\\d.\\d+",perl = T)
+  }
+
+
   alterations <- test1
   alterations[-whole_genome_positions] <- str_replace(string = test1[-whole_genome_positions], pattern = "SCORE_(.*)_\\d.\\d+",replacement = "\\1")
   alterations[-whole_genome_positions] <- str_replace(string = alterations[-whole_genome_positions], pattern = "long_term_potentiation",replacement = "LTP")
   alterations[-whole_genome_positions] <- str_replace(string = alterations[-whole_genome_positions], pattern = "action_potential",replacement = "AP")
   alterations[-whole_genome_positions] <- str_replace(string = alterations[-whole_genome_positions], pattern = "depolarization",replacement = "DP")
   alterations[whole_genome_positions] <- rep(x = "Whole Genome PRS", 2)
+  
+  if (t > 2){
+   alterations[whole_genome_genic_positions] <- rep(x = "Whole Genome PRS GENIC", 2)
+   alterations[whole_genome_all_genome_positions] <- rep(x = "Whole Genome PRS ALL", 2)
+  }
+  
   test2 <- vector(length = length(test1))
   names(alterations) <- test1
   
@@ -460,12 +671,12 @@ for (i in 1:length(split_data_frame_0.05)){
   p <- p + geom_hline(aes(yintercept=0), colour = "red", linetype= "solid", alpha = 0.25)
   p <- p + scale_fill_brewer(palette = "Paired")
   p <- p + theme(axis.text.x = element_text(angle = 90,size = 10,hjust = 1,vjust = 0.5))
-  p <- p + ggtitle(top_five_pathways_all$test[1])
+  p <- p + ggtitle(top_five_pathways_all$.id[1])
   p <- p + theme(plot.title = element_text( face = "bold",hjust = 0.5))
   p <- p + ylab(label = "BETA")
   p <- p + xlab(label = "Polygenic risk score")
   
-  gglist_beta_pathways[[t]] <- p
+  gglist_beta_pathways[[i]] <- p
   
   p <- ggplot(top_five_pathways_all, aes(x=score, y=r2_dir, fill = Type, group=P_threshold))
   p <- p +
@@ -483,6 +694,13 @@ for (i in 1:length(split_data_frame_0.05)){
   test1 <- levels(p$data$score)
   whole_genome_positions <- grep(x = test1,pattern = "SCORE_whole_genome_\\d.\\d+",perl = T)
   alterations <- test1
+  
+  if (t > 2){
+    whole_genome_genic_positions <- grep(x = test1, pattern = "genic.genome_SCORE_whole_genome_\\d.\\d+",perl = T)
+    whole_genome_all_genome_positions <- grep(x = test1, pattern = "All.genome_SCORE_whole_genome_\\d.\\d+",perl = T)
+  }
+
+  
   alterations[-whole_genome_positions] <- str_replace(string = test1[-whole_genome_positions], pattern = "SCORE_(.*)_\\d.\\d+",replacement = "\\1")
   alterations[-whole_genome_positions] <- str_replace(string = alterations[-whole_genome_positions], pattern = "long_term_potentiation",replacement = "LTP")
   alterations[-whole_genome_positions] <- str_replace(string = alterations[-whole_genome_positions], pattern = "action_potential",replacement = "AP")
@@ -491,35 +709,63 @@ for (i in 1:length(split_data_frame_0.05)){
   test2 <- vector(length = length(test1))
   names(alterations) <- test1
   
+  if (t > 2){
+   alterations[whole_genome_genic_positions] <- rep(x = "Whole Genome PRS GENIC", 2)
+   alterations[whole_genome_all_genome_positions] <- rep(x = "Whole Genome PRS ALL", 2)
+  }
+  
   p <- p + scale_x_discrete(labels= alterations)
 
   p <- p + scale_y_continuous(expand = expand_scale(mult = c(0.2,.6)))
   p <- p + facet_grid(. ~ P_threshold, scales = "free_x", space = "free_x") +
     theme(strip.text.x = element_text(size = 10))
   p <- p + theme(axis.text.x = element_text(angle = 90, size = 10, hjust = 1,vjust = 0.5))
-  p <- p + ggtitle(top_five_pathways_all$test[1])
+  p <- p + ggtitle(top_five_pathways_all$.id[1])
   p <- p + theme(plot.title = element_text( face = "bold",hjust = 0.5))
   p <- p + ylab(label = "R2_dir (%)")
   p <- p + xlab(label = "Polygenic risk score")
   
-  gglist_r2_dir_pathways[[t]] <- p
+  gglist_r2_dir_pathways[[i]] <- p
   
   
 }
+
+Final_analysis_gglist_pval[[t]] <- gglist_pathways
+Final_analysis_beta[[t]] <- gglist_beta_pathways
+Final_analysis_r2_pathways[[t]] <- gglist_r2_dir_pathways
+
 }
 
-gglist_beta_pathways
-gglist_r2_dir_pathways
 
-pdf("~/Documents/COGS_pathways_results/COGS_CLOZUK_pathway_whole_genome_genic_comparison_R2_dir_12_pathways.pdf", onefile = TRUE)
-invisible(lapply(gglist_r2_dir_pathways,print))
-dev.off()
 
-pdf("~/Documents/COGS_pathways_results/COGS_CLOZUK_pathway_whole_genome_genic_comparison_beta_12_pathways.pdf", onefile = TRUE)
-invisible(lapply(gglist_beta_pathways,print))
-dev.off()
 
 
 ```
+#### Save the plots to File
+
+```{r, message=F, include=F}
+pdf("~/Documents/COGS_pathways_results/COGS_CLOZUK_pathway_whole_genome_genic_comparison_R2_dir_12_pathways_EXTENDED_REGIONS.pdf", onefile = TRUE)
+invisible(lapply(Final_analysis_r2_pathways[[3]],print))
+dev.off()
+
+pdf("~/Documents/COGS_pathways_results/COGS_CLOZUK_pathway_whole_genome_genic_comparison_R2_dir_12_pathways_NORMAL_REGIONS.pdf", onefile = TRUE)
+invisible(lapply(Final_analysis_r2_pathways[[4]],print))
+dev.off()
 
 
+pdf("~/Documents/COGS_pathways_results/COGS_CLOZUK_pathway_whole_genome_genic_comparison_beta_12_pathways_EXTENDED_REGIONS.pdf", onefile = TRUE)
+invisible(lapply(Final_analysis_beta[[3]],print))
+dev.off()
+
+pdf("~/Documents/COGS_pathways_results/COGS_CLOZUK_pathway_whole_genome_genic_comparison_beta_12_pathways_NORMAL_REGIONS.pdf", onefile = TRUE)
+invisible(lapply(Final_analysis_beta[[4]],print))
+dev.off()
+
+# NOT RUN {
+x <- knitr::kable(head(mtcars), "html")
+# Add a row of header with 3 columns on the top of the table. The column
+# span for the 2nd and 3rd one are 5 & 6.
+add_header_above(x, c(" ", "Group 1" = 5, "Group 2" = 6))
+
+```
+ 

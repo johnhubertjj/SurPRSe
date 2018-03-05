@@ -23,7 +23,7 @@ lapply(list.of.packages, require, character.only = TRUE)
 setwd(".")
 
 ########################################
-# adding in arguments from BASH script #
+# Adding in arguments from BASH script #
 ########################################
 args <- commandArgs(trailingOnly = T)
 getwd()
