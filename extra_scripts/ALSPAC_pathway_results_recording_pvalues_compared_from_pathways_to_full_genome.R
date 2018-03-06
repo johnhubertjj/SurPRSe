@@ -1,15 +1,24 @@
 library(data.table)
 
-ALSPAC_all_pathways <- fread(file = "CLOZUK_PGC2noclo_all_pocklington_inclu_LoF_specific_scores.txt")
+#ALSPAC_all_pathways <- fread(file = "CLOZUK_PGC2noclo_all_pocklington_inclu_LoF_specific_scores.txt")
+ALSPAC_all_pathways <- fread("~/Dropbox/Untitled Folder/CLOZUK_PGC2noclo_Selected_SCZ_pathways.txt")
 
-ALSPAC_full_brain_regions <- results_CLOZUK_PGC2noclo_more_sig_thresh
+#ALSPAC_full_brain_regions <- results_CLOZUK_PGC2noclo_more_sig_thresh
+ALSPAC_full_brain_regions <- results_CLOZUK_PGC2noclo
+testa <- ALSPAC_full_brain_regions
 ALSPAC_full_brain_regions <- as.data.table(ALSPAC_full_brain_regions)
 
 # Pathways
 str(ALSPAC_all_pathways)
 
 ALSPAC_only_0.5 <- ALSPAC_all_pathways[grepl("_0.5",ALSPAC_all_pathways$score)] 
-ALSPAC_only_0.05 <- ALSPAC_all_pathways[!grepl("_0.5",ALSPAC_all_pathways$score)] 
+ALSPAC_only_0.05 <- ALSPAC_all_pathways[grepl("_0.05",ALSPAC_all_pathways$score)] 
+
+ALSPAC_only_0.05 <- ALSPAC_only_0.05[!grepl("abnormal_grooming_behavior", ALSPAC_only_0.05$score)]
+ALSPAC_only_0.5 <- ALSPAC_only_0.5[!grepl("abnormal_grooming_behavior", ALSPAC_only_0.5$score)]
+
+ALSPAC_only_0.05 <- ALSPAC_only_0.05[!grepl("Lek2015_LoFintolerant_90", ALSPAC_only_0.05$score)]
+ALSPAC_only_0.5 <- ALSPAC_only_0.5[!grepl("Lek2015_LoFintolerant_90", ALSPAC_only_0.5$score)]
 
 split_data_frame_0.05 <- split(ALSPAC_only_0.05, by = "test")
 split_data_frame_0.5 <- split(ALSPAC_only_0.5, by = "test")
@@ -136,6 +145,8 @@ pdf("~/Desktop/ALSPAC_CLOZUK_pathway_whole_genome_comparison.pdf", onefile = TRU
 #pdf("~/Desktop/ALSPAC_CLOZUK_pathway_whole_genome_comparison_rotated.pdf", onefile = TRUE)
 pdf("~/Desktop/ALSPAC_CLOZUK_pathway_whole_genome_comparison_BETAs.pdf", onefile = TRUE)
 pdf("~/Desktop/ALSPAC_CLOZUK_pathway_whole_genome_comparison_R2_dir.pdf", onefile = TRUE)
+
+pdf("~/Dropbox/Untitled Folder/ALSPAC_CLOZUK_pathway_whole_genome_genic_comparison_R2_dir_9_pathways.pdf", onefile = TRUE)
 
 #invisible(lapply(gglist_pathways,print))
 invisible(lapply(gglist_beta_pathways,print))

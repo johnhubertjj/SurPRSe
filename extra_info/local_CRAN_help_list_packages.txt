@@ -1,0 +1,18 @@
+/scratch/c1020109/PR54/ALSPAC_test_pipeline/ALSPAC_hrc_imputed_step3_mri_brain_measurements_only.bim
+
+if [[ "${Using_raven}" = "TRUE" ]]; then
+#Purge all modules
+module purge
+fi
+
+data.table
+stringr
+plyr
+zoom
+ggplot2
+grid
+gridExtra
+gtools
+calibrate
+lattice
+gclus

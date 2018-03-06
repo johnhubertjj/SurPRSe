@@ -30,8 +30,10 @@ Reference_dataset <- args[6]
 Chromosomes <- args[7]
 
 Reference_dataset <- "/media/johnhubert/PHD DATA/CLOZUK2_noPGC2.assoc.dosage"
-Target_dataset <- "/media/johnhubert/PHD DATA/daner_PGC_SCZ52_0513a.resultfiles_PGC_SCZ52_0513.sh2_noclo.txt"
+Target_dataset <- "~/Dropbox/Summary_stats_files/daner_PGC_BIP32b_mds7a"
 
+summ_stat_target <- fread(Target_dataset)
+summ_stat_reference <- fread(Reference_dataset)
 for (chromosome.number in 1:22){
 summ_stat_target<- fread(paste0("CLOZUK2_noPGC2_chr",chromosome.number,".txt"))
 summ_stat_target2 <- copy(summ_stat_target)

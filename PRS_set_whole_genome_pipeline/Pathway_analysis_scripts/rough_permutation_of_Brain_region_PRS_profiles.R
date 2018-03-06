@@ -45,20 +45,17 @@ Training_names <- "CLOZUK_PGC2noclo"
 Validation_name <- "ALSPAC"
 Scale_phenotypes <- F
 Scale_PRS <- T
-significance_thresholds <- c(0.05, 0.5, 1)
+significance_thresholds <- c(0.05, 0.5)
 
-#ALL_PRS_DATA <- read.table("FINAL_PATHWAY_RESULTS_PRS_PROFILESHG19_pgc.scz.full.2012-04_ALSPAC.txt",header = T)
-ALL_PRS_DATA <- all_prs
-ALL_PRS_DATA <- test_CLOZUK_results
 
-ALL_PRS_DATA <- read.table("FINAL_PATHWAY_RESULTS_PRS_PROFILESCLOZUK_PGC2noclo_ALSPAC_Pocklington2015_134sets_LoFi_morphology_only_deduplicated.txt",header = T)
-ALL_PRS_DATA <- read.table("FINAL_PATHWAY_RESULTS_PRS_PROFILESCLOZUK_PGC2noclo_ALSPAC_Pocklington2015_134sets_LoFi_2sets_morphology_notmorphology_deduplicated.txt",header = T)
+set_names <- c("5HT_2C", "Cav2_channels", "FMRP_targets", "abnormal_behavior", "abnormal_long_term_potentiation", "abnormal_nervous_system_electrophysiology", "Calcium_ion_import_GO0070509", "Membrane_depolarization_during_action_potential_GO0086010", "Synaptic_transmission_GO0007268")
 
-s <- 0.5
+next_name <- "Calcium_ion_import_GO0070509"
+
 for (next_name in set_names){
   
 
-ALL_PRS_DATA <- read.table(paste0("./FINAL_RANDOM_PATHWAY_RESULTS_PRS_PROFILESCLOZUK_PGC2noclo_ALSPAC_",next_name,"_",s,".txt"),header = T)
+ALL_PRS_DATA <- fread(paste0("./FINAL_PATHWAY_RESULTS_PRS_PROFILESCLOZUK_PGC2noclo_ALSPAC_",next_name,"randomised_gene_sets.txt"),header = T)
 
 for (Training_name in Training_names){ 
   #Training_name <- "PGC2"
@@ -67,12 +64,15 @@ for (Training_name in Training_names){
   #Training_name <- "HG19_pgc.scz.full.2012-04"
   
   # Write in the phenotype files
-  Pheno_brain_thickness <- fread("/home/johnhubert/Dropbox/ALSPAC_thickness_27january2017.txt")
-  Pheno_brain_volume <-fread("/home/johnhubert/Dropbox/ALSPAC_volumes_27january2017.txt") 
+  
+  Pheno_brain_thickness <- fread("/Users/johnhubert/Dropbox/ALSPAC_thickness_27january2017.txt")
+  Pheno_brain_volume <-fread("/Users/johnhubert/Dropbox/ALSPAC_volumes_27january2017.txt") 
   
   
   if (Scale_PRS == T){
-    ALL_PRS_DATA[-1:-2] <- scale(ALL_PRS_DATA[,-1:-2], center = T, scale = T)
+    current_dataframe <- ALL_PRS_DATA[,lapply(.SD, scale, center = T, scale = T) ,.SDcols = !c("FID","IID")]
+    Identifiers <- ALL_PRS_DATA[,c("FID", "IID"), with = F]
+    ALL_PRS_DATA <- cbind(Identifiers,current_dataframe)
   }
   
   
@@ -107,26 +107,27 @@ for (Training_name in Training_names){
   
   # create a score list
   score_list <- colnames(ALL_PRS_DATA[,-1:-2])
+  
   phenotypes <- colnames(DATA_pheno[,5:ncol(DATA_pheno)])
   DATA$kz021 <- as.factor(DATA$kz021)
   
   # Remove individuals with missing values
   #remove_ICV <- which(is.na(DATA$ICV))
   #DATA <- DATA[-remove_ICV,]
-  
   # dont' change obj it makes the loop output a dataframe with the regression results
   
-  phenotype_pvalue_list <- matrix(NA,nrow = 1000,ncol = length(phenotypes))
+  phenotype_pvalue_list <- matrix(NA,nrow = 2000,ncol = length(phenotypes))
   #obj_ICV <- data.frame(test=0, score=0, estimate=0, SE=0, tvalue=0, p=0, r.squared=0, lower = 0, upper = 0)
   
   # this example if for a linear regression (the phenotype of interest is a quantiative trait)
   # is using a discrete phenotype, a logistic regression needs to be run, and the code altered from 'lm' to 'glm' including the argument of 'family = binomial'
   # alterations for the calculation of R2 will also need to be made using the command highlighted above
+  
   for (j in phenotypes) {
   obj <- NULL
     for (i in score_list) {
     
-      fit <- lm(DATA[,j] ~ DATA[,i] + kz021 + age + ICV, data=DATA)
+      fit <- lm(DATA[[j]] ~ DATA[[i]] + kz021 + age + ICV, data=DATA)
       tmp <- coef(summary(fit))
       tmp <- tmp[2,4]
       obj <- c(obj, tmp)
@@ -134,42 +135,51 @@ for (Training_name in Training_names){
     phenotype_pvalue_list[,which(phenotypes == j)]<- obj
   }
     colnames(phenotype_pvalue_list) <- phenotypes
-    write.table(phenotype_pvalue_list,file = paste0(next_name,"_",s,"table_of_random_p_values.txt"), col.names = T,row.names = F ,quote=F)
+    phenotype_pvalue_list <- cbind(phenotype_pvalue_list, score_list)
+    write.table(phenotype_pvalue_list,file = paste0(next_name,"_table_of_random_p_values.txt"), col.names = T,row.names = F ,quote=F)
 }
 }
-real_p_values <- fread("~/Dropbox/CLOZUK_PGC2noclo_all_pocklington_inclu_LoF_specific_scores.txt")
+
+real_p_values <- fread("CLOZUK_PGC2noclo_Selected_SCZ_pathways.txt")
 real_p_values <- real_p_values[,.(test,score,p)]
 setkey(real_p_values,score)
-s <- 0.5
 
-final_results <- matrix(NA,nrow = 44,ncol=11)
+
+for (sig in significance_thresholds){
+
+final_results <- matrix(NA,nrow = 44,ncol=9)
 rownames(final_results) <- phenotypes
 colnames(final_results) <- set_names
 
 for (next_name in set_names){
-matching <- paste0("SCORE_",next_name,"_",s)
+matching <- paste0("SCORE_",next_name,"_",sig)
 relevant_table <- real_p_values[score == matching]
 setkey(relevant_table,test)
 
 for (j in phenotypes){
   relevant_p_value <- as.numeric(relevant_table[test == j,.(p)])
-  relevant_random_sets <- fread(paste0("~/Documents/testing_random_gene_sets/",next_name,"_",s,"table_of_random_p_values.txt"), header = T)
-  permutation_p_value <- (length(which(relevant_random_sets[[j]] < relevant_p_value)))/1000
+  relevant_random_sets <- fread(paste0(next_name,"_table_of_random_p_values.txt"), header = T)
+  pattern <- paste0("\\_",sig,"$")
+  permutation_p_value <- relevant_random_sets[grep(score_list, pattern = pattern, perl = T), sum(.SD < relevant_p_value)/1000 ,.SDcol = j]
+
   final_results[j,next_name] <- permutation_p_value
-  }
+}
+}
+assign(paste("final_results_",sig), final_results,envir = .GlobalEnv)
 }
 
-write.table(final_results, "FINAL_RESULTS_OF_PERMUTATION_TESTS_OF_RANDOM_SNPS_0.05_OH_GOD_ITS_DONE.txt",col.names = T,row.names = T,quote = F)
-write.table(final_results, "FINAL_RESULTS_OF_PERMUTATION_TESTS_OF_RANDOM_SNPS_0.5_OH_GOD_ITS_DONE.txt",col.names = T,row.names = T,quote = F)
 
-write.csv(final_results, "FINAL_RESULTS_OF_PERMUTATION_TESTS_OF_RANDOM_SNPS_0.05_OH_GOD_ITS_DONE.csv",col.names = T,row.names = T)
-write.csv(final_results, "FINAL_RESULTS_OF_PERMUTATION_TESTS_OF_RANDOM_SNPS_0.5_OH_GOD_ITS_DONE.csv",col.names = T,row.names = T)
+write.table(`final_results_ 0.05`, "FINAL_RESULTS_OF_PERMUTATION_TESTS_OF_RANDOM_SNPS_0.05_OH_GOD_ITS_DONE.txt",col.names = T,row.names = T,quote = F)
+write.table(`final_results_ 0.5`, "FINAL_RESULTS_OF_PERMUTATION_TESTS_OF_RANDOM_SNPS_0.5_OH_GOD_ITS_DONE.txt",col.names = T,row.names = T,quote = F)
+
+write.csv(`final_results_ 0.05`, "FINAL_RESULTS_OF_PERMUTATION_TESTS_OF_RANDOM_SNPS_0.05_OH_GOD_ITS_DONE.csv",col.names = T,row.names = T)
+write.csv(`final_results_ 0.5`, "FINAL_RESULTS_OF_PERMUTATION_TESTS_OF_RANDOM_SNPS_0.5_OH_GOD_ITS_DONE.csv",col.names = T,row.names = T)
+
+testing_4 <- grep(x = row.names(`final_results_ 0.05`),pattern = "thickavg")
+new_table <- `final_results_ 0.05`[-testing_4,]
+
+permutation_p_value
+
+set.seed(1)
 
 
-# this is a clean-up step - do not change
-  results <- obj[which(obj$score %in% score_list),]
-  results2 <- obj_ICV[which(obj_ICV$score %in% score_list),]
-  
-  assign(paste0("results_",Training_name), results)
-  assign(paste0("results_ICV",Training_name), results2)
-}

@@ -19,6 +19,8 @@ print(args)
 # Checking location for serial or batch analysis #
 ##################################################
 
+#library(RCurl)
+
 library (data.table)
 library (parallel)
 library (base)
@@ -127,7 +129,7 @@ create_random <- function(i,gene_data,set_names,set_n,formula_str,rand_n, Random
   
   membership_prob = predict(membership_model, type = 'response');
   
-  tmp_rand = t(replicate(rand_n,sample(gene_data[['snp']],set_n,replace = FALSE,prob = membership_prob)));
+  tmp_rand = t(replicate(rand_n,sample(gene_data[['snp']], set_n, replace = TRUE, prob = membership_prob)));
   
   tmp_name = mapply(function(k) paste(set_name,k,sep='_random_'),(1:rand_n));
   
