@@ -1,5 +1,3 @@
-
-
 ---
 title: "COGS_pathway_DSM"
 runtime: shiny
@@ -134,7 +132,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r, message=FALSE, include=F, results = 'hide'}
 # required packages -- will only install if they are not already installed
-list.of.packages <- c("plyr", "stringr", "dplyr", "tidyr", "reshape2", "ggplot2", "scales", "data.table", "plotly", "devtools", "gridExtra", "cowplot", "repr", "knitr", "kableExtra", "IRdisplay")
+list.of.packages <- c("plyr", "stringr", "dplyr", "tidyr", "reshape2", "ggplot2", "scales", "data.table", "plotly", "devtools", "gridExtra", "cowplot", "repr", "knitr", "kableExtra", "IRdisplay","DT")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 
@@ -459,7 +457,105 @@ current_table_normal <- Full_data[grepl("^normal",Full_data$score)],
 current_table_extended_All.genome <- Full_data[grepl("^extended",Full_data$score) | grepl("All.genome", Full_data$score)],
 current_table_normal_All.genome <- Full_data[grepl("^normal", Full_data$score) | grepl("All.genome", Full_data$score)]
 )
+```
 
+```{r, message=FALSE, include=F, results = 'hide'}
+# required packages -- will only install if they are not already installed
+list.of.packages <- c("plyr", "stringr", "dplyr", "tidyr", "reshape2", "ggplot2", "scales", "data.table", "plotly", "devtools", "gridExtra", "cowplot", "repr", "knitr", "kableExtra", "IRdisplay","DT")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+
+
+#library(ggplot2) 
+    
+# loads the required packages
+lapply(list.of.packages, require, character.only = TRUE)
+
+library(data.table)
+library(plyr)
+library(dplyr)
+library(rms)
+```
+
+This R Markdown document is made interactive using Shiny. Unlike the more traditional workflow of creating static reports, you can now create documents that allow your readers to change the assumptions underlying your analysis and see the results immediately. 
+
+To learn more, see [Interactive Documents](http://rmarkdown.rstudio.com/authoring_shiny.html).
+
+## Inputs and Outputs
+
+You can embed Shiny inputs and outputs in your document. Outputs are automatically updated whenever inputs change.  This demonstrates how a standard R plot can be made interactive by wrapping it in the Shiny `renderPlot` function. The `selectInput` and `sliderInput` functions create the input widgets used to drive the plot.
+
+```{r eruptions, echo=FALSE}
+Full_data <- fread("test_run")
+
+Full_data[, Genesets := gsub(pattern = ".*_SCORE_(.*)_.*", replacement = "\\1", x = Full_data$score,perl = T)]
+Full_data[, Gene_regions := gsub(pattern = "^(.*)_geneset_SCORE_.*", replacement = "\\1", x = Full_data$score,perl = T)]
+Full_data[, Significance_thresholds := gsub(pattern = ".*_(.*$)", replacement = "\\1", x = Full_data$score,perl = T)]
+
+Gene.sets.input <- unique(Full_data$Genesets)
+significance_threshold.input <- unique(Full_data$Significance_thresholds)
+DSM.input <- unique(Full_data$samples.i.)
+
+whole_genome_genic_positions_Full_data <- grep(x = Full_data$Gene_regions, pattern = "genic.genome_SCORE_whole_genome",perl = T)
+whole_genome_all_genome_positions_Full_data <- grep(x = Full_data$Gene_regions, pattern = "All.genome_SCORE_whole_genome",perl = T)
+
+
+Full_data[whole_genome_genic_positions_Full_data, Gene_regions := gsub(pattern = "^(.*).genic.genome_SCORE_.*", replacement = "\\1", x = Full_data$Gene_regions[whole_genome_genic_positions_Full_data],perl = T)]
+
+Full_data[whole_genome_all_genome_positions_Full_data, Gene_regions := gsub(pattern = ".*", replacement = "NA", x = Full_data$Gene_regions[whole_genome_all_genome_positions_Full_data],perl = T)]
+
+extra_table <- Full_data[whole_genome_all_genome_positions_Full_data]
+cols <- c("estimate", "SE","r.squared","p")
+  
+inputPanel(
+  checkboxGroupInput("Significance_threshold", label = "PRS P Value Threshold:",
+              choices = significance_threshold.input, selected = "0.05"),
+  checkboxGroupInput("Gene_regions", label = "Length of Gene regions:",
+              choices = c("extended","normal")),
+  selectInput("DSM", label = "DSM type:",
+              choices = DSM.input),
+  checkboxGroupInput("geneset", label = "Geneset PRS to include:",
+                     choices = Gene.sets.input)
+)
+
+renderDataTable({
+  if (is.null(input$Significance_threshold)) {
+        return(NULL)
+  }    
+  if (is.null(input$geneset)) {
+        return(NULL)
+  }    
+  if (is.null(input$Gene_regions)) {
+        return(NULL)
+  }    
+
+  sample_analysis_extra <- extra_table %>%
+    filter(samples.i. == input$DSM,
+           Significance_thresholds %in% input$Significance_threshold,
+           Genesets %in% input$geneset
+           )
+  
+  sample_analysis <- Full_data %>%
+    filter(samples.i. == input$DSM,
+           Gene_regions %in% input$Gene_regions,
+           Significance_thresholds %in% input$Significance_threshold,
+           Genesets %in% input$geneset
+           ) 
+    Sample_analysis_2 <- rbindlist(list(sample_analysis,sample_analysis_extra)) %>%
+    select(c(score:SE,p,r.squared)) %>%
+    arrange(p)
+    
+    Sample_analysis_2 <- as.data.table(Sample_analysis_2)
+    
+    Sample_analysis_2[, (cols) := lapply(.SD, formatC, digits = 3, format = "g"), .SDcols = cols]
+    
+ datatable(data = Sample_analysis_2,
+            options = list(pageLength = 10),
+            rownames = F)
+})
+```
+
+```{r echo = F, eval=FALSE, message=FALSE, include=FALSE, results=F}
 #current_table_extended <- current_table_extended[order(current_table$p)]
 #current_table_normal <- current_table_normal[order(current_table_normal$p)]
 #current_table_extended_All.genome <- current_table_extended_All.genome[order(current_table_extended_All.genome$p)]
