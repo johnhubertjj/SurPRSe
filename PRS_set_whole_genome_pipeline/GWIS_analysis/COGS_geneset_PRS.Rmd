@@ -146,6 +146,11 @@ library(plyr)
 library(dplyr)
 library(rms)
 ```
+# Write the Name of the analysis below 
+```{r}
+Name_of_analysis <- "COGS_CLOZUK_PGC2_noCOGS_pathway_PRS_analysis"
+
+```
 
 
 ## Files I need
@@ -163,12 +168,31 @@ Files that are required to be read into this analysis:
 
 #### Read in whole genome normal and extended genic files before separating
 ```{r}
+
+# Output arguments and significance threshold arguments
+Name_of_analysis <- "COGS_CLOZUK_PGC2_noCOGS_pathway_PRS_analysis"
 significance_threshold <- c(5e-08,1e-06,1e-04,0.01,0.05,0.1,0.2,0.5,1)
+Location_of_analysis <- ("~/Documents/COGS_pathways_results/")
 
-my_files <- paste0("~/Documents/COGS_pathways_results/whole_genome/PRS_scoring/PRS_scoring/CLOZUK_PGC2_noCOGS_COGS_normal_gene_regions_Clumped_whole_genome_final_significance_threshold_at_",significance_threshold, ".profile")
+# Location of whole genome files
+Location_of_whole_genome_normal_gene_files <- paste0("~/Documents/COGS_pathways_results/whole_genome/PRS_scoring/PRS_scoring/CLOZUK_PGC2_noCOGS_COGS_normal_gene_regions_Clumped_whole_genome_final_significance_threshold_at_",significance_threshold, ".profile")
+
+Location_of_whole_genome_extended_gene_files <- paste0("~/Documents/COGS_pathways_results/whole_genome/PRS_scoring/PRS_scoring/CLOZUK_PGC2_noCOGS_COGS_extended_gene_regions_Clumped_whole_genome_final_significance_threshold_at_",significance_threshold, ".profile")
+
+Location_of_whole_genome_entire_genome_files <-  paste0("~/Documents/COGS_pathways_results/whole_genome/PRS_scoring/CLOZUKPGC2_NO_COGS_COGS_whole_genome_significance_threshold_at_",significance_threshold, ".profile")
+
+# Location of gene-set PRS files
+Location_of_extended_gene_set_PRS_files <- "~/Documents/COGS_pathways_results/FINAL_PATHWAY_RESULTS_PRS_PROFILESCLOZUK_PGC2_noCOGS_COGS_Selected_Pocklington_plus_GO_pathways_SCHIZ_extended.txt"
+Location_of_gene_boundary_gene_set_PRS_files <- "~/Documents/COGS_pathways_results/FINAL_PATHWAY_RESULTS_PRS_PROFILESCLOZUK_PGC2_noCOGS_COGS_Selected_Pocklington_plus_GO_pathways_SCHIZ_normal.txt" 
+# Location of Phenotype and covariate files 
+Location_of_Phenotype_file <- "~/Documents/COGS_pathways_results/Phenotypes.txt"
+Location_of_Alternative_ID_file <- "~/Documents/COGS_pathways_results/COGS_IDs_V2.txt"
+Location_of_Covariates <- "~/Documents/COGS_pathways_results/COGSv2016.noREL.eigenvec"
+Location_of_Duplicate_samples <-"~/Documents/COGS_pathways_results/COGSv2016.PGCrelatives[2] copy.txt"
+Location_of_age_and_gender_phenotypes <-"~/Documents/COGS_pathways_results/COGS_AGE_SEX_Feb_18.txt"
 
 
-my_data <- lapply(my_files, fread, header=TRUE) 
+my_data <- lapply(Location_of_whole_genome_normal_gene_files, fread, header=TRUE) 
 names(my_data) <- str_replace(my_files, pattern = ".profile", replacement = "")
 
 # iterate through significance thresholds 
@@ -182,10 +206,8 @@ all_prs_normal <- join_all(my_data, by=c("FID", "IID"), type='left')
 cols <- names(all_prs_normal)[3:ncol(all_prs_normal)]
 setnames(all_prs_normal, old = c(3:ncol(all_prs_normal)), new = paste("normal.genic.genome", cols, sep = "_"))
 
-my_files <- paste0("~/Documents/COGS_pathways_results/whole_genome/PRS_scoring/PRS_scoring/CLOZUK_PGC2_noCOGS_COGS_extended_gene_regions_Clumped_whole_genome_final_significance_threshold_at_",significance_threshold, ".profile")
 
-
-my_data <- lapply(my_files, fread, header=TRUE) 
+my_data <- lapply(Location_of_whole_genome_extended_gene_files, fread, header=TRUE) 
 names(my_data) <- str_replace(my_files, pattern = ".profile", replacement = "")
 
 # iterate through significance thresholds 
@@ -203,9 +225,8 @@ setnames(all_prs_extended, old = c(3:ncol(all_prs_extended)), new = paste("exten
 
 #### Read in whole genome; entire genome
 ```{r}
-my_files <- paste0("~/Documents/COGS_pathways_results/whole_genome/PRS_scoring/CLOZUKPGC2_NO_COGS_COGS_whole_genome_significance_threshold_at_",significance_threshold, ".profile")
 
-my_data <- lapply(my_files, fread, header=TRUE) 
+my_data <- lapply(Location_of_whole_genome_entire_genome_files, fread, header=TRUE) 
 names(my_data) <- str_replace(my_files, pattern = ".profile", replacement = "")
 
 # iterate through significance thresholds 
@@ -222,11 +243,11 @@ setnames(all_prs_whole_genome, old = c(3:ncol(all_prs_whole_genome)), new = past
 ### Add column patterns to distinguish between gene boundaries and regulatory regions
 
 ```{r}
-COGS_Pathway_results_normal = fread("~/Documents/COGS_pathways_results/FINAL_PATHWAY_RESULTS_PRS_PROFILESCLOZUK_PGC2_noCOGS_COGS_Selected_Pocklington_plus_GO_pathways_SCHIZ_normal.txt")
+COGS_Pathway_results_normal = fread(Location_of_gene_boundary_gene_set_PRS_files)
 cols <- names(COGS_Pathway_results_normal)[3:ncol(COGS_Pathway_results_normal)]
 setnames(COGS_Pathway_results_normal, old = c(3:ncol(COGS_Pathway_results_normal)), new = paste("normal_geneset", cols, sep = "_"))
 
-COGS_Pathway_results_extended = fread("~/Documents/COGS_pathways_results/FINAL_PATHWAY_RESULTS_PRS_PROFILESCLOZUK_PGC2_noCOGS_COGS_Selected_Pocklington_plus_GO_pathways_SCHIZ_extended.txt")
+COGS_Pathway_results_extended = fread(Location_of_extended_gene_set_PRS_files)
 cols <- names(COGS_Pathway_results_extended)[3:ncol(COGS_Pathway_results_extended)]
 setnames(COGS_Pathway_results_extended, old = c(3:ncol(COGS_Pathway_results_extended)), new = paste("extended_geneset", cols, sep = "_"))
 
@@ -237,18 +258,18 @@ setnames(COGS_Pathway_results_extended, old = c(3:ncol(COGS_Pathway_results_exte
 
 ```{r}
 
-COGS_Phenotypes = fread("~/Documents/COGS_pathways_results/Phenotypes.txt")
-COGS_ID_S = fread("~/Documents/COGS_pathways_results/COGS_IDs_V2.txt")
+COGS_Phenotypes = fread(Location_of_Phenotype_file)
+COGS_ID_S = fread(Location_of_Alternative_ID_file)
 setnames(COGS_Phenotypes, old = "ID", new = "Study_ID")
 COGS_Phenotypes <- merge(COGS_Phenotypes,COGS_ID_S, by = "Study_ID")
 
 COGS_list <- list(
-COGS_covaraties = fread("~/Documents/COGS_pathways_results/COGSv2016.noREL.eigenvec"),
-COGS_duplicates = fread("~/Documents/COGS_pathways_results/COGSv2016.PGCrelatives[2] copy.txt", header = F),
+COGS_covaraties = fread(Location_of_Covariates),
+COGS_duplicates = fread(Location_of_Duplicate_samples, header = F),
 #COGS_Pathway_results = fread("~/Documents/COGS_pathways_results/FINAL_PATHWAY_RESULTS_PRS_PROFILESCLOZUKPGC2_NO_COGS_COGS_Selected_Pocklington_plus_GO_pathways_SCHIZ.txt"),
 COGS_Pathway_results_normal = COGS_Pathway_results_normal,
 COGS_Pathway_results_extended = COGS_Pathway_results_extended,
-COGS_age_gender = fread("~/Documents/COGS_pathways_results/COGS_AGE_SEX_Feb_18.txt"),
+COGS_age_gender = fread(Location_of_age_and_gender_phenotypes),
 COGS_whole_genome_genic_normal = all_prs_normal,
 COGS_whole_genome_genic_extended = all_prs_extended,
 COGS_whole_genome = all_prs_whole_genome,
@@ -349,10 +370,69 @@ list_of_tests_TRS <- list(
   COGS_treatment_resistance = as.data.frame(COGS_treatment_resistance[,test:= FINAL_TRS])
 )
 
+Testing_COGS_cognition <- COGS_cognition
+
+rows_to_keep_SCZ_narrow_integer <- na.omit(COGS_cognition[,.I[DSM_diagnosis_new == 1 | DSM_diagnosis_new == 2]])
+rows_to_keep_SCZ_broad_integer <- na.omit(COGS_cognition[,.I[DSM_diagnosis_new == 1 | DSM_diagnosis_new == 2 | DSM_diagnosis_new == 3 | DSM_diagnosis_new == 4]])
+rows_to_keep_all_minus_narrow_integer <- na.omit(COGS_cognition[,.I[DSM_diagnosis_new != 1 & DSM_diagnosis_new != 2]])
+rows_to_keep_is_na <- COGS_cognition[,.I[is.na(DSM_diagnosis_new)]]
+
+Testing_COGS_cognition[, narrow_DSM := 0]
+Testing_COGS_cognition[rows_to_keep_SCZ_narrow_integer,narrow_DSM := 1]
+Testing_COGS_cognition[rows_to_keep_is_na,narrow_DSM := NA]
+
+Testing_COGS_cognition[, Broad_DSM := 0]
+Testing_COGS_cognition[rows_to_keep_SCZ_broad_integer, Broad_DSM := 1]
+Testing_COGS_cognition[rows_to_keep_is_na, Broad_DSM := NA]
+
+Testing_COGS_cognition[, All_minus_narrow_DSM := 0]
+Testing_COGS_cognition[rows_to_keep_all_minus_narrow_integer, All_minus_narrow_DSM := 1]
+Testing_COGS_cognition[rows_to_keep_is_na, All_minus_narrow_DSM := NA]
+
+
+
 # create a score list
 score_list <- PRS_names
 names_of_analyses <- names(list_of_tests_cognition)
 
+# Whole_genome_DSM_check
+obj <- data.frame(test=0, score=0, estimate=0, SE=0, tvalue=0, p=0, r.squared=0, lower = 0, upper = 0)
+
+  fit <- lm (Composite_Zimpute ~ narrow_DSM, data = Testing_COGS_cognition)
+  fit2 <- lm (Composite_Zimpute ~ Broad_DSM, data = Testing_COGS_cognition)
+  fit3 <- lm (Composite_Zimpute ~ All_minus_narrow_DSM, data = Testing_COGS_cognition)
+  
+  tmp <- coef(summary(fit))
+  tmp2 <- summary(fit)
+  hold <- summary(fit2)
+  true_r2 <- tmp2$r.squared - hold$r.squared
+  CI <- confint(fit, level=0.95)
+  CI <- CI[2,]
+  tmp3 <- c(l,i,tmp[2,], true_r2, CI)
+  obj <- rbind(obj, tmp3)
+}
+
+results <- obj[which(obj$score %in% score_list),]
+results_narrow_DSM_comparison <- results
+
+# Whole_genome_DSM_check
+obj <- data.frame(test=0, score=0, estimate=0, SE=0, tvalue=0, p=0, r.squared=0, lower = 0, upper = 0)
+
+for (i in score_list) {
+  fit <- lm (test ~ COGS_cognition$i + male_sex + Age_at_Interview + Broad_DSM, data = COGS_cognition)
+  fit2 <- lm (test ~ male_sex + Age_at_Interview + Broad_DSM, data = COGS_cognition)
+  tmp <- coef(summary(fit))
+  tmp2 <- summary(fit)
+  hold <- summary(fit2)
+  true_r2 <- tmp2$r.squared - hold$r.squared
+  CI <- confint(fit, level=0.95)
+  CI <- CI[2,]
+  tmp3 <- c(l,i,tmp[2,], true_r2, CI)
+  obj <- rbind(obj, tmp3)
+}
+
+results <- obj[which(obj$score %in% score_list),]
+results_narrow_DSM_comparison <- results
 
 # this example if for a linear regression (the phenotype of interest is a quantiative trait)
 # is using a discrete phenotype, a logistic regression needs to be run, and the code altered from 'lm' to 'glm' including the argument of 'family = binomial'
@@ -447,6 +527,8 @@ for (i in 1:length(samples)){
 
 Full_data <- ldply(all_cogs_PRS_results, data.frame)
 Full_data <- as.data.table(Full_data)
+
+write.table(Full_data,file = paste0(Location_of_analysis,Name_of_analysis,".txt"), row.names = F, quote = F)
 
 #for (t in 1:4){
   
