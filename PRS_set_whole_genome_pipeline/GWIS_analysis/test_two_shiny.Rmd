@@ -23,6 +23,7 @@ if(length(new.packages)) install.packages(new.packages)
 lapply(list.of.packages, require, character.only = TRUE)
 
 library(data.table)
+library(DT)
 library(plyr)
 library(dplyr)
 library(rms)
@@ -39,7 +40,7 @@ You can embed Shiny inputs and outputs in your document. Outputs are automatical
 ```{r eruptions, echo=FALSE}
 
 ## Read in data
-Full_data <- fread("test_run")
+Full_data <- fread("~/Dropbox/COGS_CLOZUK_PGC2_noCOGS_pathway_PRS_analysis.txt")
 
 ## Create new columns parsing the identifiers in the Full_data score column and input to the shiny app
 Full_data[, Genesets := gsub(pattern = ".*_SCORE_(.*)_.*", replacement = "\\1", x = Full_data$score,perl = T)]
