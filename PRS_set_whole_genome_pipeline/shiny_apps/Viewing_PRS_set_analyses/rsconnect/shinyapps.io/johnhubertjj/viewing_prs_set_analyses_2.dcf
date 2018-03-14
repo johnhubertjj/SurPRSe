@@ -1,0 +1,12 @@
+name: viewing_prs_set_analyses_2
+title: Viewing_PRS_set_analyses_2
+username:
+account: johnhubertjj
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 298701
+bundleId: 1266611
+url: https://johnhubertjj.shinyapps.io/viewing_prs_set_analyses_2/
+when: 1520961591.5404
+asMultiple: FALSE
+asStatic: FALSE
