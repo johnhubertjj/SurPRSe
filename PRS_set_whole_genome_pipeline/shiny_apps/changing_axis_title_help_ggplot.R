@@ -12,10 +12,17 @@ gt <- ggplotGrob( g + facet_wrap( ~V3, scales = "free" ) )
 gt
 gt$grobs[[6]]$children[[2]]$grobs[[2]]$children[[1]]$gp
 
-pt$grobs[[6]]$children[[2]]$grobs[[2]]$children[[1]]$gp$col <- "orange"
+
+pt$grobs[[10]]$children[[2]]$grobs[[2]]$children[[1]]$gp$col
 pt$grobs[[7]]$children[[2]]$grobs[[2]]$children[[1]]$gp
 
 
 pt <- ggplotGrob(p)
 
 grid::grid.draw(pt)
+
+2 facets = $grobs[[6,7]]
+3 facets = $grob[[8,9,10]]
+4 facets = $grob[[10-14]]
+5 facets = $grob[12-17]
+6 facets = $grob[14-20]
