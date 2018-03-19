@@ -1,4 +1,4 @@
-# Cognition and treatment resistance in CLOZUK ##
+## Cognition and treatment resistance in CLOZUK ##
 library(data.table)
 
 Fam_IDs <- fread("~/Documents/CLOZUK_cognition_METAL/COGS_IDs_V2.txt")

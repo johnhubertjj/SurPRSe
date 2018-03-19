@@ -392,7 +392,6 @@ shinyServer(function(input, output) {
       Sample_analysis_2[rows_to_be_highlighted,colour_change := "green"]
       testing_sample_analysis <- Sample_analysis_2[order(Sample_analysis_2$Significance_thresholds,Sample_analysis_2$alterations)]
       d1 <- split(testing_sample_analysis$colour_change, ceiling(seq_along(testing_sample_analysis$colour_change)/length(levels(testing_sample_analysis$alterations))))
-    }
     
     # Put in the code below above, removing all of the excess alterations work to create the pdf plots...
     
@@ -420,7 +419,25 @@ shinyServer(function(input, output) {
     }
     
     grid::grid.draw(pt)
-    
+    }else{
+      p <- ggplot(Sample_analysis_2, aes(x=score, y=estimate, fill = Type, group=Significance_thresholds))
+      
+      p <- p +
+        geom_errorbar(aes(ymin = upper, ymax = lower), position = "dodge", width = 0.25) +
+        geom_point(aes(colour = Type))
+      
+      p <- p + scale_x_discrete(labels= levels(Sample_analysis_2$alterations))
+      p <- p + facet_grid(. ~ Significance_thresholds, scales = "free_x", space = "free_x") +
+        theme(strip.text.x = element_text(size = 10))
+      p <- p + geom_hline(aes(yintercept=0), colour = "red", linetype= "solid", alpha = 0.25)
+      p <- p + scale_fill_brewer(palette = "Paired")
+      p <- p + theme(axis.text.x = element_text(angle = 90,size = 10,hjust = 1,vjust = 0.5))
+      p <- p + ggtitle(Sample_analysis_2$.id[1])
+      p <- p + theme(plot.title = element_text( face = "bold",hjust = 0.5))
+      p <- p + ylab(label = "BETA")
+      p <- p + xlab(label = "Polygenic risk score")
+      p
+    }
     # ggplotly(p) %>% 
     # layout(height = input$plotHeight, autosize=TRUE)
     
