@@ -1,5 +1,5 @@
 ---
-title: "COGS_pathway_DSM"
+title: "COGS_IQ_pathway_DSM"
 output: html_document
 ---
 
@@ -52,7 +52,17 @@ output: html_document
 #### Sample sizes
 
 * COGS = 1024
-* CLOZUK_PGC2_NO_COGS \~ 104,000
+* IQ = **????**
+
+#### Testing set Info
+**?????**
+
+* Sample info, NSNPs in the analysis  
+
+#### Training set info  
+**?????**
+
+* Obtained from where? what year? what paper? who was involved?
 
 #### Gene sets
 
@@ -72,6 +82,7 @@ output: html_document
 
 * All taken from James + Antonio's paper apart from GO terms which were defined in Amigo GO
   * GO terms were part of a conditional analysis at the top of Antonio's/James' paper in a data-driven pathway analysis so I've included them here
+  
 #### Phenotypes
 
 **DSM**
@@ -166,20 +177,20 @@ Files that are required to be read into this analysis:
 ```{r}
 
 # Output arguments and significance threshold arguments
-Name_of_analysis <- "COGS_CLOZUK_PGC2_noCOGS_pathway_PRS_analysis"
+Name_of_analysis <- "COGS_IQ_pathway_PRS_analysis"
 significance_threshold <- c(5e-08,1e-06,1e-04,0.01,0.05,0.1,0.2,0.5,1)
-Location_of_analysis <- ("~/Documents/COGS_pathways_results/")
+Location_of_analysis <- ("~/Documents/COGS_pathways_results/IQ_COGS_PRS_pathway_analysis/")
 
 # Location of whole genome files
-Location_of_whole_genome_normal_gene_files <- paste0("~/Documents/COGS_pathways_results/whole_genome/PRS_scoring/PRS_scoring/CLOZUK_PGC2_noCOGS_COGS_normal_gene_regions_Clumped_whole_genome_final_significance_threshold_at_",significance_threshold, ".profile")
+Location_of_whole_genome_normal_gene_files <- paste0("~/Documents/COGS_pathways_results/IQ_COGS_PRS_pathway_analysis/IQ_COGS_GENIC_GENOME/PRS_scoring/IQ_COGS_normal_gene_regions_Clumped_whole_genome_final_significance_threshold_at_",significance_threshold,".profile")
 
-Location_of_whole_genome_extended_gene_files <- paste0("~/Documents/COGS_pathways_results/whole_genome/PRS_scoring/PRS_scoring/CLOZUK_PGC2_noCOGS_COGS_extended_gene_regions_Clumped_whole_genome_final_significance_threshold_at_",significance_threshold, ".profile")
+Location_of_whole_genome_extended_gene_files <- paste0("~/Documents/COGS_pathways_results/IQ_COGS_PRS_pathway_analysis/IQ_COGS_GENIC_GENOME/PRS_scoring/IQ_COGS_extended_gene_regions_Clumped_whole_genome_final_significance_threshold_at_",significance_threshold,".profile")
 
-Location_of_whole_genome_entire_genome_files <-  paste0("~/Documents/COGS_pathways_results/whole_genome/PRS_scoring/CLOZUKPGC2_NO_COGS_COGS_whole_genome_significance_threshold_at_",significance_threshold, ".profile")
+Location_of_whole_genome_entire_genome_files <-  paste0("~/Documents/COGS_pathways_results/IQ_COGS_PRS_pathway_analysis/IQ_and_COGS_whole_genome/IQ_COGS_output/PRS_scoring/IQ_COGS_whole_genome_significance_threshold_at_",significance_threshold,".profile")
 
 # Location of gene-set PRS files
-Location_of_extended_gene_set_PRS_files <- "~/Documents/COGS_pathways_results/FINAL_PATHWAY_RESULTS_PRS_PROFILESCLOZUK_PGC2_noCOGS_COGS_Selected_Pocklington_plus_GO_pathways_SCHIZ_extended.txt"
-Location_of_gene_boundary_gene_set_PRS_files <- "~/Documents/COGS_pathways_results/FINAL_PATHWAY_RESULTS_PRS_PROFILESCLOZUK_PGC2_noCOGS_COGS_Selected_Pocklington_plus_GO_pathways_SCHIZ_normal.txt" 
+Location_of_extended_gene_set_PRS_files <- "~/Documents/COGS_pathways_results/IQ_COGS_PRS_pathway_analysis/FINAL_PATHWAY_RESULTS_PRS_PROFILESIQ_COGS_Selected_Pocklington_plus_GO_pathways_SCHIZ_extended.txt"
+Location_of_gene_boundary_gene_set_PRS_files <- "~/Documents/COGS_pathways_results/IQ_COGS_PRS_pathway_analysis/FINAL_PATHWAY_RESULTS_PRS_PROFILESIQ_COGS_Selected_Pocklington_plus_GO_pathways_SCHIZ_normal.txt"
 # Location of Phenotype and covariate files 
 Location_of_Phenotype_file <- "~/Documents/COGS_pathways_results/Phenotypes.txt"
 Location_of_Alternative_ID_file <- "~/Documents/COGS_pathways_results/COGS_IDs_V2.txt"
@@ -588,4 +599,5 @@ write.table(Full_data,file = paste0(Location_of_analysis,Name_of_analysis,"_",ti
 write.table(Full_data_with_step_wise_regressions,  file = paste0(Location_of_analysis,Name_of_analysis,"_step_wise_regress_column_test_DSM_",time_of_analysis,".txt"), row.names = F, quote = F)
 write.table(results_constrained_model,file = paste0(Location_of_analysis,Name_of_analysis,"_constrained_model_test_DSM_", time_of_analysis,".txt"), row.names = F, quote = F)
 ```
+
 
