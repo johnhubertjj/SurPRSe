@@ -519,20 +519,39 @@ for (i in 1:length(samples)){
 Full_data <- ldply(all_TRS_PRS_results, data.frame)
 Full_data <- as.data.table(Full_data)
 
-keep_columns <- c("FID", "IID", PRS_names)
+keep_columns <- c("FID", "IID", PRS_names,"narrow_DSM" ,"broad_DSM", "broad_minus_narrow_DSM")
 
-list_of_data <-  list(
-  regress_results = Full_data,
-  rows_to_keep_SCZ_narrow_TRS = rows_to_keep_SCZ_narrow_TRS[, keep_columns, with = F],
-  rows_to_keep_SCZ_broad_TRS = as.data.frame(rows_to_keep_SCZ_broad_TRS[, keep_columns, with = F]),
-  rows_to_keep_SCZ_broad_minus_narrow_TRS = as.data.frame(rows_to_keep_SCZ_broad_minus_narrow_TRS[, keep_columns, with = F]),
-  COGS_treatment_resistance = as.data.frame(COGS_treatment_resistance[, keep_columns, with = F])
-)
+
+Testing_COGS_TRS <- COGS_total
+
+rows_to_keep_SCZ_narrow_integer <- na.omit(COGS_total[,.I[DSM_diagnosis_new == 1 | DSM_diagnosis_new == 2]])
+rows_to_keep_SCZ_broad_integer <- na.omit(COGS_total[,.I[DSM_diagnosis_new == 1 | DSM_diagnosis_new == 2 | DSM_diagnosis_new == 3 | DSM_diagnosis_new == 4]])
+rows_to_keep_broad_minus_narrow_integer <- na.omit(COGS_total[,.I[DSM_diagnosis_new == 3 | DSM_diagnosis_new == 4]])
+rows_to_keep_is_na <- COGS_total[,.I[is.na(DSM_diagnosis_new)]]
+
+Testing_COGS_TRS[, narrow_DSM := 0]
+Testing_COGS_TRS[rows_to_keep_SCZ_narrow_integer,narrow_DSM := 1]
+Testing_COGS_TRS[rows_to_keep_is_na,narrow_DSM := NA]
+
+Testing_COGS_TRS[, broad_DSM := 0]
+Testing_COGS_TRS[rows_to_keep_SCZ_broad_integer, broad_DSM := 1]
+Testing_COGS_TRS[rows_to_keep_is_na, broad_DSM := NA]
+
+Testing_COGS_TRS[, broad_minus_narrow_DSM := 0]
+Testing_COGS_TRS[rows_to_keep_broad_minus_narrow_integer, broad_minus_narrow_DSM := 1]
+Testing_COGS_TRS[rows_to_keep_is_na, broad_minus_narrow_DSM := NA]
+
+Testing_COGS_TRS_minus_na <- Testing_COGS_TRS[-rows_to_keep_is_na]
+
+Testing_COGS_TRS_minus_na <- Testing_COGS_TRS_minus_na[, c(keep_columns), with = F]
+    
 
 time_of_analysis <- paste(format(Sys.time(), "%d-%m-%Y_at_%H.%M"))
+
 write.table(Full_data,file = paste0(Location_of_analysis,Name_of_analysis,"_",time_of_analysis,".txt"), row.names = F, quote = F)
 
-save(list_of_data, file = paste0(Location_of_analysis,Name_of_analysis,"_",time_of_analysis,".Rdata"))
+write.table(Testing_COGS_TRS_minus_na,file = paste0(Location_of_analysis,Name_of_analysis,"_PRS_Profiles_for_shiny",time_of_analysis,".txt"), row.names = F, quote = F)
+
 
 ```
 
