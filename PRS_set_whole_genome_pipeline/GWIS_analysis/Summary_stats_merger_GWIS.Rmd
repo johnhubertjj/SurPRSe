@@ -1,0 +1,453 @@
+---
+title: "Summary_stats_merger_GWIS"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Read in Libraries required
+```{r, message=FALSE, include=F, results = 'hide'}
+# required packages -- will only install if they are not already installed
+list.of.packages <- c("plyr", "stringr", "dplyr", "tidyr", "reshape2", "ggplot2", "scales", "data.table", "plotly", "devtools", "gridExtra", "cowplot", "repr", "knitr", "kableExtra", "IRdisplay", "rms")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+
+
+#library(ggplot2) 
+    
+# loads the required packages
+lapply(list.of.packages, require, character.only = TRUE)
+
+```
+
+# Read in arguments for script to work
+
+```{r}
+#######################################
+# adding in arguments from BASH script#
+#######################################
+args <- commandArgs(trailingOnly = T)
+print(args)
+
+
+# specify the different input tables #
+Target_name <- args[1]
+Reference_name <- args[2]
+Target_dataset <- args[3]
+Reference_dataset <- args[4]
+Chromosomes <- args[5]
+split_dataset <- args[6]
+RS_SNP <- args[7]
+
+# Target_name <- "CLOZUK_PGC2_noCOGS1"
+# Reference_name <- "PGC2_no_CLOZUK"
+# Target_dataset <- "~/Documents/LD_score_COGSandNOCOGS/CLOZUK_PGC2_noCOGS1.tbl"
+# Reference_dataset <- "~/Documents/LD_score_COGSandNOCOGS/CLOZUK_PGC2_noCOGSmetaanalysis_flipped_INFOabove0point9.txt"
+# Chromosomes <- seq(1,22)
+# split_dataset <- TRUE
+# RS_SNP <- "Target_name"
+
+## RS_SNP MUST be Target_name, if no RS_snp in target then swap names around in arguments
+```
+
+# Warning!
+
+**The below will split both your target and reference dataset into 22 separate files and write them into your current working directory**
+
+This enables easier load on memory for when you merge datasets
+
+```{r}
+
+if( split_datset == T){
+
+## Read in function for separating out GWAS ##
+Make_more_datasets <- function(dataset_to_split, name, Chromosomes){
+Parsing_colnames <- colnames(dataset_to_split)
+Parsing_colnames <- toupper(Parsing_colnames)
+
+if(length(grep("CHR", Parsing_colnames)) == 1){
+setkey(dataset_to_split, CHR)
+}else{
+  stop("No chromosome column found in summary stats dataset, re-organise dataset so a chromosome number identifier is a column")
+}
+
+# separating out chromosome into certain sections
+
+# below is aka:
+  # after setting the key to the chromosome number,
+  # take a subset of the data matching the chromsome number
+  # and write the subsetted table to a new table for each chromosome. 
+
+for (chromosome.number in Chromosomes) { 
+write.table(eval(parse(text = paste0("dataset_to_split[J(",chromosome.number,")]"))), file = paste0(name,"_table", chromosome.number,".txt"), quote = F, row.names = F)
+}
+
+}
+
+## Perform on Target first to save memory
+Target_dataset_to_split <- fread(Target_dataset)
+Make_more_datasets(Target_dataset_to_split, Target_name, Chromosomes)
+rm(Target_dataset_to_split)
+
+## Perform on Reference_data next to save memory
+Reference_dataset_to_split <- fread(Reference_dataset)
+Make_more_datasets(Reference_dataset_to_split, Reference_name, Chromosomes)
+rm(Reference_dataset_to_split)
+
+}
+```
+
+
+## Merge two sets together from new files
+
+The following happens below:
+
+* 3 datasets read in (target, reference and LD_reference from 1000 genomes)
+* Functions defined for allele swapping, checking the length of allele notation and converting from log to odds and vis-versa
+* Duplication check
+* BETA and OR added to each dataset
+
+```{r}
+for (chromosome.number in Chromosomes){
+
+  summ_stat_target <- fread(paste0(Target_name,"_table",chromosome.number,".txt"))
+  summ_stat_target2 <- copy(summ_stat_target)
+
+  summ_stat_reference <- fread(paste0(Reference_name,"_table",chromosome.number,".txt"))
+  summ_stat_reference_2 <- copy(summ_stat_reference)
+  
+  LD_score_reference <- fread("w_hm3.snplist")
+  LD_score_reference_2 <- read.table(paste0("eur_w_ld_chr/",chromosome.number,".l2.ldscore.gz"),stringsAsFactors = F,header = T)
+  
+
+  ##################################################################
+  #### CHECK TO SEE IF TWO COLUMNS HAVE ALLELES SWAPPED FUNCTION ###
+  ##################################################################
+  
+  Checking_allele_swapping <- function(alteredtable1,table2,which.is.combined = c("NONE","PGC","CLOZUK")){
+    if (which.is.combined == "PGC") {
+      Allele.x <- alteredtable1[,c("A1.x","A2.x"),with = F]
+      Allele.y <- table2[,c("A1","A2"), with = F]
+    }
+    if(which.is.combined == "CLOZUK") {
+      Allele.x <- alteredtable1[,c("A1.y","A2.y"),with = F]
+      Allele.y <- table2[,c("A1","A2"), with = F]
+    }
+    if(which.is.combined == "NONE"){
+      Allele.x <- alteredtable1[,c("A1","A2"),with = F]
+      Allele.y <- table2[,c("A1","A2"), with = F]
+    }
+    
+    Allele.x <- as.data.frame(Allele.x)
+    Allele.y <- as.data.frame(Allele.y)
+    iterations.to.remain <- NULL
+    
+    for (i in 1:length(Allele.x[,1])){
+      if (Allele.x[i,1] != Allele.y[i,1]) {
+        iterations.to.remain <- c(iterations.to.remain,i)
+      }
+    }
+    argument.name <-deparse(substitute(alteredtable1))
+    assign(paste0(argument.name,"flipped.alleles"), iterations.to.remain, envir = e)
+  }
+  
+  Checking_length_of_alleles <- function(input_table1){
+
+    # Removes all multiple allele counts (aka indels and deletions) to clean up the data.
+    input_table1 <- input_table1[!(nchar(A1.x) > 1 | nchar(A2.x) > 1)]
+    input_table1 <- input_table1[!(nchar(A1.y) > 1 | nchar(A2.y) > 1)]
+    
+    # Checks for any Alleles which are not standard 1:1
+    integers_to_check <- which(input_table1$A1.x != "A" & input_table1$A1.x != "C" & input_table1$A1.x !=  "T" & input_table1$A1.x !=  "G")
+    integers_to_check2 <- which(input_table1$A1.y != "A" & input_table1$A1.y != "C" & input_table1$A1.y !=  "T" & input_table1$A1.y !=  "G")
+    integers_to_check3 <- which(input_table1$A2.x != "A" & input_table1$A2.x != "C" & input_table1$A2.x !=  "T" & input_table1$A2.x !=  "G")
+    integers_to_check4 <- which(input_table1$A2.y != "A" & input_table1$A2.y != "C" & input_table1$A2.y !=  "T" & input_table1$A2.y !=  "G")
+    
+    # Would probably work better in a loop but I got too lazy
+    if(length(integers_to_check) != 0){
+      input_table1 <- input_table1[!integers_to_check]
+    }
+    
+    if(length(integers_to_check2) != 0){
+      input_table1 <- input_table1[!integers_to_check2]
+    }
+    
+    if(length(integers_to_check3) != 0){
+      input_table1 <- input_table1[!integers_to_check3]
+    }
+    
+    if(length(integers_to_check4) != 0){
+      input_table1 <- input_table1[!integers_to_check4]
+    }
+    assign("Combined_summ_stat", input_table1, envir = .GlobalEnv)
+  }
+  
+  ###############################
+  # ODDS RATIO TO BETA FUNCTION #
+  ###############################
+  # add new environment#
+  e <- new.env()
+  
+  # BETA and OR change functions ###
+  log.to.odds <- function(imported.data.table,name) {
+    imported.dt.col.names <- colnames(imported.data.table)
+    if (any("OR" == imported.dt.col.names) == F) {
+      cat("No Odds Ratio included in", deparse(substitute(imported.data.table)))
+    }else{
+      testing <- deparse(substitute(imported.data.table))
+      assign(paste0(name,".BETA"), log(imported.data.table$OR), envir = e)
+      imported.data.table$BETA <- log(imported.data.table$OR)
+      assign(testing, imported.data.table, envir = e)
+    }
+  }
+  
+  Beta.to.odds <- function(imported.data.table, name) {
+    imported.dt.col.names <- colnames(imported.data.table)
+    if (any("BETA" == imported.dt.col.names) == F) {
+      cat("No BETA coefficient included in", deparse(substitute(imported.data.table)))
+    }else{
+      testing <- deparse(substitute(imported.data.table))
+      assign(paste0(name,".OR"), exp(imported.data.table$BETA), envir = e)
+      imported.data.table$OR <- exp(imported.data.table$BETA)
+      assign(testing, imported.data.table, envir = e)
+    }
+  }
+  
+  change.odds <- function (odds.ratios) {
+    PGC.NEW.OR <- 1 / odds.ratios
+    assign("PGC.NEW.OR", PGC.NEW.OR, envir = e)
+  }
+  
+  change.beta <- function (beta.coefficients) {
+    PGC.NEW.BETA <- -(beta.coefficients)
+    assign("PGC.NEW.BETA", PGC.NEW.BETA, envir = e)
+  }
+  
+  ####################################################################
+  
+  cat("Number of SNPS in ",Target_name,"_chromosome_", chromosome.number,": N=" , nrow(summ_stat_target))
+  
+  ### Remove Duplicated SNPs in Training here ###
+  PGC.duplicated.removed <- which(duplicated(summ_stat_target$SNP))
+  PGC.duplicated.removed.rev <- which(duplicated(summ_stat_target$SNP, fromLast = T))
+  
+  ### One-line duplication check - Training ###
+  length(summ_stat_target$SNP)
+  if (length(PGC.duplicated.removed) >= 1){
+    PGC_duplicate_SNPS <- summ_stat_target$SNP[(duplicated(summ_stat_target$SNP) | duplicated(summ_stat_target$SNP, fromLast = TRUE)) ]
+    summ_stat_target <- summ_stat_target[!(duplicated(summ_stat_target$SNP) | duplicated(summ_stat_target$SNP, fromLast = TRUE)) ]
+  }
+  length(summ_stat_target$SNP)
+  
+  cat("Number of SNPS in ", Target_name," after duplication check Chr:",chromosome.number, "N=" ,nrow(summ_stat_target))
+  
+  
+  cat("Number of SNPS in ", Reference_name,"_chromosome_", chromosome.number,": N=" ,nrow(summ_stat_reference))
+  
+  ### Remove Duplicated SNPs in Training here ###
+  PGC.duplicated.removed <- which(duplicated(summ_stat_reference$SNP))
+  PGC.duplicated.removed.rev <- which(duplicated(summ_stat_reference$SNP, fromLast = T))
+  
+  ### One-line duplication check - Training ###
+  length(summ_stat_reference$SNP)
+  if (length(PGC.duplicated.removed) >= 1){
+    PGC_duplicate_SNPS <- summ_stat_reference$RS_SNP[(duplicated(summ_stat_reference$RS_SNP) | duplicated(summ_stat_reference$SNP, fromLast = TRUE)) ]
+    summ_stat_reference <- summ_stat_reference[!(duplicated(summ_stat_reference$RS_SNP) | duplicated(summ_stat_reference$SNP, fromLast = TRUE)) ]
+  }
+  length(summ_stat_reference$SNP)
+  
+  cat("Number of SNPS in ",Reference_name," after duplication check Chr:",chromosome.number, "N=" ,nrow(summ_stat_reference))
+  
+  Beta.to.odds(summ_stat_target, Target_name)
+  log.to.odds(summ_stat_target, Target_name)
+  Beta.to.odds(summ_stat_reference, Reference_name)
+  log.to.odds(summ_stat_reference, Reference_name)
+  
+  
+  # Simple tracking of each row for future checks
+  e$summ_stat_target$place <- c(1:length(summ_stat_target$CHR))
+  e$summ_stat_reference$place <- c(1:length(summ_stat_reference$CHR))
+}
+```
+
+# RS IDENTIFIERS must be within the Target set! apologies for it being confusing (aka why are we altering the target set) but I wrote this script quickly and was annoyed at merging three identifiers together...
+
+The following happens below
+
+* Target and Reference GWAS dataset are merged together
+* A1 and A2 columns are checked for consistency
+* 
+
+```{r}
+  if (RS_SNP != "Target_name"){
+      stop("RS_identifier required in target datasets in order for the following script to run")
+    }else{
+      
+    
+  ### Merging based on BP position ###
+  Combined_summ_stat <- merge(x = e$summ_stat_reference, y = e$summ_stat_target, by = c('BP','CHR'), all = F, sort = F)
+  Combined_summ_stat <- Combined_summ_stat[,RS_SNP:= SNP.y]
+  
+  # Change all alleles to uppercase: saving time method
+  # below it states:
+  ## assign columns you want to change to object cols
+  ## take all rows of data.table; apply the toupper function to Subset of Data columns named in cols object
+  cols <- c('A1.x','A2.x','A1.y','A2.y')
+  
+  # cols <- c('A1.x','A2.x','A1.y','A2.y',"A1_LD","A2_LD")
+  Combined_summ_stat[, (cols) := lapply(.SD, toupper), .SDcols = cols ]
+  
+  ### Checking and limiting to SNPs with only one allele for each A1 and A2
+  Checking_length_of_alleles(Combined_summ_stat)
+  
+  new.target.datatable <- Combined_summ_stat[,.(RS_SNP,BP,CHR,A1.y,A2.y,OR.y,SE.y,P.y)]
+  setnames(new.target.datatable, old = c("RS_SNP","A1.y","A2.y","OR.y","SE.y","P.y"), new = c("SNP","A1","A2","OR", "SE", "P"))
+  
+  new.reference.datatable <- Combined_summ_stat[,.(RS_SNP,BP,CHR,A1.x,A2.x,OR.x,SE.x,P.x)]
+  setnames(new.reference.datatable, old = c("RS_SNP","A1.x","A2.x","OR.x","SE.x","P.x"), new = c("SNP","A1","A2","OR", "SE", "P"))
+  
+  new.target.table <- paste0(Target_name,"_table_changed_no_flipped_alleles", chromosome.number,"_new.txt")
+  new.reference.table <-  paste0(Reference_name,"_table_changed_no_flipped_alleles", chromosome.number,"_new.txt")
+  
+  # Write update file for plink
+  write.table(new.target.datatable, file = new.target.table, quote = F, row.names = F, col.names = T)
+  
+  # Write update file for plink
+  write.table(new.reference.datatable, file = new.reference.table, quote = F, row.names = F, col.names = T)
+}
+```
+
+
+## GWIS stuff from before
+
+```{r GWIS, echo=FALSE}
+###########################################
+###### GWIS #######
+###########################################
+
+h2TRS <- 0.3549 #(0.0183)
+h2non_TRS <-  0.4942 #(0.0255)
+gcov <-  0.4188 #(0.0216)
+
+Non_TRS <- fread("PGC_GWAS_metal_aligned_and_matched_snps.txt")
+TRS <-  fread("CLOZUK.1kGp1_table.txt")
+thousandgenomes <- fread("~/Documents/1000genomes_european/g1000_European_populations_QC_NO_bad_LD.frq", header=T)
+
+BPSCZ.bp.only.results <- read.delim("~/Dropbox/bip1.scz1.ruderfer2014 (1)/BPSCZ.bp-only.results.txt",stringsAsFactors =F)
+BPSCZ.scz.only.results <- read.delim("~/Dropbox/bip1.scz1.ruderfer2014 (1)/BPSCZ.scz-only.results.txt",stringsAsFactors =F)
+
+
+#### Rotate to obtain Unique BIP and Unique SCZ, first merge the files and allign the reference allele:
+primary <- merge(TRS,Non_TRS,by="SNP")
+
+#primary  <- merge(BPSCZ.bp.only.results,BPSCZ.scz.only.results,by=2)
+
+primary[primary$A1.x != primary$A1.y,7] <- exp(log(primary[primary$A1.x != primary$A1.y,7]) * -1)
+
+primary[primary$A1.x != primary$A1.y,4] <- primary[primary$A1.x != primary$A1.y,13]
+
+primary[primary$A2.x != primary$A2.y,5] <- primary[primary$A2.x != primary$A2.y,14]
+View(primary)
+
+
+# merge with reference allel frequency:
+primary2 <- merge(primary,thousandgenomes,by="SNP")
+
+# flip ref allele freq to align with the ref allel in BIP and SCZ
+rows_with_MAF_change <- which(primary2$A1.x != primary2$A1) 
+primary2$MAF[rows_with_MAF_change] <- 1 - primary2$MAF[rows_with_MAF_change]
+
+
+# compute allel frequencies to ensure proper accounting for the AF in computing the new beta:
+p <- primary2$MAF
+base <- 2*p * (1-p) + (1-p)^2
+het <- 2*p * (1-p) / base
+hom <- (1-p)^2/base
+
+
+
+
+################################# BELOW FIRST BIP - SCZ #################################
+# TRS - NON_TRS
+
+
+primary2 <- primary2[,1:24]
+
+# compute the variables c as described in the methosds, essential for transformation.
+c <- (h2TRS - gcov) / (h2TRS + gcov)
+
+
+primary2 <- cbind(primary2, het * ( (1+ c) *log(primary2$OR.x) - (1 - c) * log(primary2$OR.y))/2 + hom * ( (1+ c) * 2*log(primary2$OR.x)- (1 - c) * 2*log(primary2$OR.y))/4 )
+
+primary2 <- primary2[,1:25]
+
+# USe the delta method to get the SE for the beta:
+require(msm)
+se <- matrix(NA,nrow=nrow(primary2),ncol=1)
+for(i in 1:nrow(primary2)){
+  c1 <- 1+c 
+  c2 <- 1-c 
+  homi <- hom[i]
+  heti <- het[i]
+  se[i,] <-  deltamethod(~(heti*(c1) *log(x2) - (c2) *log(x1))/2 +  homi*((c1) *2*log(x2) - (c2) * 2*log(x1))/4 ,mean=c(primary2$OR.y[i],primary2$OR.x[i]),cov=diag(c(primary2$SE.y[i],primary2$SE.x[i])) %*%matrix(c(1,0,0,1),2,2) %*% diag(c(primary2$SE.y[i],primary2$SE.x[i])) )
+} 
+
+primary2 <- cbind(primary2,se)
+primary2 <- cbind(primary2,pchisq((primary2[,25]/primary2[,26])^2,1,lower.tail=F))
+
+
+primary2_out <- primary2[primary2[,6] > .9 & primary2[,6] < 1.1 & primary2[,24] < 0.95 & primary2[,24] > 0.05,]
+
+
+BIP_min_SCZ_out <- primary2_out[,c(1,2,3,4,5,24,25,26,27)]
+
+names(BIP_min_SCZ_out) <- c("SNP","CHR", "BP","A1","A2","EAF","Beta","SE","P" )
+
+write.table(BIP_min_SCZ_out,"BIP_min_SCZ_out_LDSCORE.txt",row.names=F,quote=F)
+
+
+######################################## REPEAT FOR SCZ - BIP #############################################
+
+# drop all BIP steps
+
+primary2 <- primary2[,1:24]
+
+
+
+# compute the variables c as described in the methosds, essential for transformation.
+c <- (h2BIP - gcov) / (h2BIP + gcov)
+
+
+primary2 <- cbind(primary2, het * ( (1+c) *log(primary2$OR.y) -  (1-c) * log(primary2$OR.x))/2 + hom * ( (1+ c) * 2*log(primary2$OR.y)- (1 - c) * 2*log(primary2$OR.x))/4 )
+
+primary2 <- primary2[,1:25]
+
+# Use the delta method to get the SE for the beta:
+require(msm)
+se <- matrix(NA,nrow=nrow(primary2),ncol=1)
+for(i in 1:nrow(primary2)){
+  c1 <- 1+c 
+  c2 <- 1-c 
+  homi <- hom[i]
+  heti <- het[i]
+  se[i,] <-  deltamethod(~(heti*(c1) *log(x1) - (c2) *log(x2))/2 +  homi*((c1) *2*log(x1) - (c2) * 2*log(x2))/4 ,mean=c(primary2$OR.y[i],primary2$OR.x[i]),cov=diag(c(primary2$SE.y[i],primary2$SE.x[i])) %*%matrix(c(1,0,0,1),2,2) %*% diag(c(primary2$SE.y[i],primary2$SE.x[i])) )
+} 
+
+primary2 <- cbind(primary2,se)
+primary2 <- cbind(primary2,pchisq((primary2[,25]/primary2[,26])^2,1,lower.tail=F))
+
+
+primary2_out <- primary2[primary2[,6] > .9 & primary2[,6] < 1.1 & primary2[,24] < 0.95 & primary2[,24] > 0.05,]
+
+
+SCZ_min_BIP_out <- primary2_out[,c(1,2,3,4,5,24,25,26,27)]
+
+names(SCZ_min_BIP_out) <- c("SNP","CHR", "BP","A1","A2","EAF","Beta","SE","P" )
+
+write.table(SCZ_min_BIP_out,"SCZ_min_BIP_out_LDSCORE.txt",row.names=F,quote=F)
+
+```
+

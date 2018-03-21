@@ -12,8 +12,8 @@ library(data.table)
 
 # required packages -- will only install if they are not already installed
 list.of.packages <- c("plyr", "stringr", "dplyr", "tidyr", "reshape2", "ggplot2", "scales", "data.table", "plotly","tools")
-#new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
-#if(length(new.packages)) install.packages(new.packages)
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
 
 # loads the required packages
 lapply(list.of.packages, require, character.only = TRUE)
@@ -30,7 +30,7 @@ print(args)
 
 # Specify the different input tables #
 Training_name <- args[3]
-Validation_name <- args[4]
+Validation_name <- args [4]
 Pathway_directory <- args[5]
 Pathway_file_name <- args[6] # the name of the file to be accessed (must be in stationary directory)
 Gene_regions <- args[7]
@@ -79,7 +79,7 @@ names(my_data) <- str_replace(final_scoring_output_file, pattern = ".profile", r
 
 # iterate through significance thresholds 
 for (i in 1:length(final_scoring_output_file)) {
-  my_data[[i]] <- my_data[[i]] [,c(1,2,6)]
+  my_data[[i]] <- my_data[[i]][,c(1,2,6)]
   colnames(my_data[[i]]) <- c("FID", "IID", paste("SCORE_", order_of_output_for_sig_thresh[i], sep=""))
 }
 

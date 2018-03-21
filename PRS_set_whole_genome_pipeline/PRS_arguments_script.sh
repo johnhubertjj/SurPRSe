@@ -117,15 +117,25 @@ fi
 
 if [[ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" = 'johnhubert-ThinkPad-P50' ]]; then
 
-  # Assign a Variable to show you are local
+  # Assign a variable to show that you are on raven
   Using_raven=FALSE
+ 
+  
+  # Path_to_locations_on_the_server
+  path_to_PRS_scripts="${HOME}/Schizophrenia_pipeline_scripts/"
+  
+  # Re-assign to the training_set_usually_genotype and validation_full_name_without_chromosome using the sed command
+  path_to_validation_dataset="/home/Documents/PRS_Tutorial/1000G.EUR.QC."
+  path_to_training_dataset="/home/Documents/PRS_Tutorial/EduYears_Main.txt"
 
-  #path_to_CLOZUK="/mnt/databank/CLOZUK/GWAS/BGE/RSupdate"
-  #path_to_Biobank="/c8000xd3/big-wpcvm/UKBB/"	
-  path_to_PGC_conversion="Summary_stat_manipulation"
-  path_to_CLOZUK_conversion="Genotype_dataset_manipulation"
-  path_to_stationary_data="${home_OS}/johnhubert/Dropbox/Stationary_data/" 
-  path_to_covariate_file="${path_to_stationary_data}CLOZUK2.r7.select2PC.eigenvec.txt"
+  # State paths to the relevant stationary folders required for the analysis
+  path_to_PGC_conversion="${path_to_PRS_scripts}/Summary_stat_manipulation/"
+  path_to_CLOZUK_conversion="${path_to_PRS_scripts}/Genotype_dataset_manipulation/"
+  path_to_MAGMA_scripts="${path_to_PRS_scripts}/MAGMA/"
+  
+  # Path to where stationary file is kept
+  path_to_stationary_data="${HOME}/Dropbox/Stationary_data/"
+  path_to_covariate_file="${path_to_stationary_data}CLOZUK2.r7.select2PC.eigenvec.txt" 
   path_to_chromosome_length_file="${path_to_stationary_data}UCSC_hg19_chromeinfo_length_of_chromosomes.txt"
   path_to_new_fam_file="${path_to_stationary_data}CLOZUK.r7.GWAS_IDs.fam"
  
@@ -137,26 +147,31 @@ if [[ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" = 'johnhuber
   training_set_name="IQ"
   validation_set_name="thousand_genomes" 
   
+  # Datasets
+  training_set_name="Educational_attainment"
+  validation_set_name="thousand_genomes" 
+ 
   # DO NOT ALTER!!!
   training_set_original_filename=`echo "${path_to_training_dataset}" | sed 's:.*/::'`
   validation_set_full_name_without_chromosome=`echo "${path_to_validation_dataset}" | sed 's:.*/::'`
   validation_set_usually_genotype="${validation_set_full_name_without_chromosome}_chr${chromosome_number}"
   validation_set_usually_genotype_serial="${validation_set_full_name_without_chromosome}_chr"
   training_set_usually_summary="${training_set_name}_table${chromosome_number}"
-
+  
+  # Path to LDscore regression python script
+  ldsc="/home/c1020109/ldsc/ldsc.py"  
+  
   # Pathway datasets
   Pathway_filename="Selected_Pocklington_plus_GO_pathways_SCHIZ.txt"
   Gene_location_filename="NCBI37.3.gene.loc"
-  
-  # These arguments below change from being in quotes to not, essentially, DON'T use quotes because they are not recognised in some POSIX style bash scripts.\
-  # However, some arguments are read by R and I haven't tested whether ALL arguments can be without quotes yet
-  # Again I don't like it but was short on time!
-
+  calculate_indep_SNPs=FALSE
+ 
   # Split_by_chromosome for genotype?
   split_by_chromosome_required=TRUE 
   # Do a missingness check? 
   Missing_geno=FALSE
   genotype_missingness_check=FALSE
+  
   # MAF, INFO and SE
   MAF_summary=FALSE
   MAF_threshold=0.01
@@ -166,17 +181,17 @@ if [[ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" = 'johnhuber
   SE_summary=FALSE
   SE_threshold=5
   Raven_out_info_directory="${training_set_name}_${validation_set_name}_clumping_log_files/"
+  
   # The number of chromosomes you wish to analyse (PRS_serial)
-  Chromosomes_to_analyse=(`seq 1 22`)
+  Chromosomes_to_analyse=(`seq 1 22`) 
   
   # Clumping Arguments
   p1=1
   p2=1
-  r2=0.1	
+  r2=0.1
   window=500
   
   # Arguments for PRS_serial script
-  # DEFUNCT ARGUMENTS?#
   Multiple_Training_set_tables="TRUE"
   Running_in_Serial="TRUE"
   
@@ -185,17 +200,18 @@ if [[ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' || "$whereami" = 'johnhuber
   sig_thresholds_lower_bounds=(0 0 0 0 0 0 0 0 0)
   # Lower bounds as optional format to match up with plink lower bounds
   
-  # arguments specific to PRS set analyses
-  Extra_analyses=TRUE
-  Name_of_extra_analysis=(Pathways Genes)
-  randomise=TRUE
+ 
+  # Arguments specific to PRS set analysis
+  Extra_analyses=FALSE
+  Name_of_extra_analysis=NULL
+  randomise=FALSE
   permutations=10000
-  Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates"
+  Magma_validation_set_name="_consensus_with_${training_set_name}_flipped_alleles_no_duplicates" 
+  
   # either "extended" "normal" or "both" : change to a numerical input in the future
-  Gene_regions=both #either ( extended normal both )	
-  whole_genome_genic=TRUE
-  Gene_specific_PRS=TRUE
-  external_harddrive="FALSE"
+  Gene_regions=both #either ( "extended" "normal" "both" )
+  whole_genome_genic=FALSE
+  Gene_specific_PRS=FALSE
 fi
 
 # This is defunct code as far as I'm aware, but I need to check back #

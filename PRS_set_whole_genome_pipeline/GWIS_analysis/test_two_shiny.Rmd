@@ -1,0 +1,140 @@
+---
+title: "test_one"
+runtime: shiny
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Insert Libraries
+
+```{r, message=FALSE, include=F, results = 'hide'}
+# required packages -- will only install if they are not already installed
+list.of.packages <- c("plyr", "stringr", "dplyr", "tidyr", "reshape2", "ggplot2", "scales", "data.table", "plotly", "devtools", "gridExtra", "cowplot", "repr", "knitr", "kableExtra", "IRdisplay","DT")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+
+
+#library(ggplot2) 
+    
+# loads the required packages
+lapply(list.of.packages, require, character.only = TRUE)
+
+library(data.table)
+library(DT)
+library(plyr)
+library(dplyr)
+library(rms)
+```
+
+This R Markdown document is made interactive using Shiny. Unlike the more traditional workflow of creating static reports, you can now create documents that allow your readers to change the assumptions underlying your analysis and see the results immediately. 
+
+To learn more, see [Interactive Documents](http://rmarkdown.rstudio.com/authoring_shiny.html).
+
+## Inputs and Outputs
+
+You can embed Shiny inputs and outputs in your document. Outputs are automatically updated whenever inputs change.  This demonstrates how a standard R plot can be made interactive by wrapping it in the Shiny `renderPlot` function. The `selectInput` and `sliderInput` functions create the input widgets used to drive the plot.
+
+```{r eruptions, echo=FALSE}
+
+## Read in data
+Full_data <- fread("~/Dropbox/COGS_CLOZUK_PGC2_noCOGS_pathway_PRS_analysis.txt")
+
+## Create new columns parsing the identifiers in the Full_data score column and input to the shiny app
+Full_data[, Genesets := gsub(pattern = ".*_SCORE_(.*)_.*", replacement = "\\1", x = Full_data$score,perl = T)]
+Full_data[, Gene_regions := gsub(pattern = "^(.*)_geneset_SCORE_.*", replacement = "\\1", x = Full_data$score,perl = T)]
+Full_data[, Significance_thresholds := gsub(pattern = ".*_(.*$)", replacement = "\\1", x = Full_data$score,perl = T)]
+
+## Create arguments to shiny app
+Gene.sets.input <- unique(Full_data$Genesets)
+significance_threshold.input <- unique(Full_data$Significance_thresholds)
+DSM.input <- unique(Full_data$samples.i.)
+
+## Identify which rows in the data table contain whole genome information
+whole_genome_genic_positions_Full_data <- grep(x = Full_data$Gene_regions, pattern = "genic.genome_SCORE_whole_genome",perl = T)
+whole_genome_all_genome_positions_Full_data <- grep(x = Full_data$Gene_regions, pattern = "All.genome_SCORE_whole_genome",perl = T)
+
+## Change the Gene regions identifier to enable comparison of gene-set PRS to whole genome PRS
+Full_data[whole_genome_genic_positions_Full_data, Gene_regions := gsub(pattern = "^(.*).genic.genome_SCORE_.*", replacement = "\\1", x = Full_data$Gene_regions[whole_genome_genic_positions_Full_data],perl = T)]
+
+Full_data[whole_genome_all_genome_positions_Full_data, Gene_regions := gsub(pattern = ".*", replacement = "Full", x = Full_data$Gene_regions[whole_genome_all_genome_positions_Full_data],perl = T)]
+
+## Identify columns that require alterations to reduce the number of decimal places
+cols <- c("estimate", "SE","r.squared","p")
+
+## Write shiny UI across 4 parameters in the data table
+inputPanel(
+  checkboxGroupInput("Significance_threshold", label = "PRS P Value Threshold:",
+              choices = significance_threshold.input, selected = "0.05"),
+  checkboxGroupInput("Gene_regions", label = "Length of Gene regions:",
+              choices = c("extended","normal","Full")),
+  selectInput("DSM", label = "DSM type:",
+              choices = DSM.input),
+  checkboxGroupInput("geneset", label = "Geneset PRS to include:",
+                     choices = Gene.sets.input)
+)
+
+## write the equivalent of the server for shiny that responds to the UI
+
+renderDataTable({
+# These are required in case no tick boxes are selected
+  if (is.null(input$Significance_threshold)) {
+        return(NULL)
+  }    
+  if (is.null(input$geneset)) {
+        return(NULL)
+  }    
+  if (is.null(input$Gene_regions)) {
+        return(NULL)
+  }    
+  
+## Limit data table to input arguments and pipe to limiting columns and ordering based on significance
+  sample_analysis <- Full_data %>%
+    filter(samples.i. == input$DSM,
+           Gene_regions %in% input$Gene_regions,
+           Significance_thresholds %in% input$Significance_threshold,
+           Genesets %in% input$geneset
+           )  %>%
+    select(c(score:SE,p,r.squared)) %>%
+    arrange(p)
+  
+## Format DF to DT and apply fixes to the number of decimal points, format "g" = change to nn.dde-dd only if required
+    Sample_analysis_2 <- as.data.table(sample_analysis)
+    Sample_analysis_2[, (cols) := lapply(.SD, formatC, digits = 3, format = "g"), .SDcols = cols]
+    
+## leave datatable function in for "prettyfying" the final result    
+ datatable(data = Sample_analysis_2,
+            options = list(pageLength = 10),
+            rownames = F)
+
+# Possible improvements:
+ # colour rows for significant values
+ # incorporate into its own app
+ # 
+})
+```
+
+
+## Embedded Application
+
+It's also possible to embed an entire Shiny application within an R Markdown document using the `shinyAppDir` function. This example embeds a Shiny application located in another directory:
+
+```{r tabsets, echo=FALSE}
+shinyAppDir(
+  system.file("examples/06_tabsets", package = "shiny"),
+  options = list(
+    width = "100%", height = 550
+  )
+)
+```
+
+Note the use of the `height` parameter to determine how much vertical space the embedded application should occupy.
+
+You can also use the `shinyApp` function to define an application inline rather then in an external directory.
+
+In all of R code chunks above the `echo = FALSE` attribute is used. This is to prevent the R code within the chunk from rendering in the document alongside the Shiny components.
+
+
+

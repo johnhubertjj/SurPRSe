@@ -19,6 +19,8 @@ print(args)
 # Checking location for serial or batch analysis #
 ##################################################
 
+#library(RCurl)
+
 library (data.table)
 library (parallel)
 library (base)
