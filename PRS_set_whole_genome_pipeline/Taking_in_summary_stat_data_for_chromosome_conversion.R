@@ -207,7 +207,14 @@ getwd()
 
 ## Reading in PGC data
 ## Select for CHR 22
-Training_data <- fread(Training_name_full_unseparated)
+if (grep(pattern = ".*\\.gz$", x = Training_name_full_unseparated) == 1){
+  Training_data <- fread(paste0("gzip -dc ",Training_name_full_unseparated))
+
+  }else{
+  Training_data <- fread(Training_name_full_unseparated)
+}
+
+
 Parsing_colnames <- colnames(Training_data)
 Parsing_colnames <- toupper(Parsing_colnames)
 
