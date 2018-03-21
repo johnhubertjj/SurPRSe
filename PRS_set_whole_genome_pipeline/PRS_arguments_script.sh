@@ -21,8 +21,8 @@ if [[ "$whereami" = *"raven"* ]]; then
   path_to_PRS_scripts="${HOME}/PhD_scripts/Schizophrenia_pipeline_scripts/"
   
   # Re-assign to the training_set_usually_genotype and validation_full_name_without_chromosome using the sed command
-  path_to_validation_dataset="/scratch/${USER}/PR54/PGC_CLOZUK_PRS/COGS_CLOZUK_datasets/COGSv2016_IMPUTE2"
-  path_to_training_dataset="/neurocluster/filesync/c1020109/NORCLOZ_re.EUR.mlma"
+  path_to_validation_dataset="/neurocluster/databank/2-genotypes/open-access/ref/1000-genomes-project/phase3/data/ftp.1000genomes.ebi.ac.uk/eur-1000g-phase3-chrall-mac5" 
+  path_to_training_dataset="/neurocluster/databank/1-summary/open-access/groves-ripke-als-2017/data/original/iPSYCH-PGC_ASD_Nov2017.gz"
 
   # State paths to the relevant stationary folders required for the analysis
   path_to_PGC_conversion="${path_to_PRS_scripts}/Summary_stat_manipulation/"
@@ -37,8 +37,8 @@ if [[ "$whereami" = *"raven"* ]]; then
   path_to_gene_annotation_file="${path_to_stationary_data}NCBI37.3.gene.loc"  
   
   # Datasets
-  training_set_name="NORCLOZ.EUR.mlma_metabolism"
-  validation_set_name="COGS" 
+  training_set_name="iPsych_GWAS"
+  validation_set_name="thousand_genomes" 
  
   # DO NOT ALTER!!!
   training_set_original_filename=`echo "${path_to_training_dataset}" | sed 's:.*/::'`
