@@ -30,13 +30,13 @@ print(Chromosomes_to_split)
 # Chromosomes_to_split <- args[9]
 
 
- Training_name_full_unseparated <- "/Users/johnhubert/Documents/PRS_tutorial_tmp/1001.assoc.tsv"
- Training_set_name <- "Biobank_GWAS"
- Validation_set_name <- "who_cares"
- MAF_summary <- F
- INFO_summary <- 0.9
- SE_summary <- F
- SE_threshold <- 5
+# Training_name_full_unseparated <- "/Users/johnhubert/Documents/PRS_tutorial_tmp/1001.assoc.tsv"
+# Training_set_name <- "Biobank_GWAS"
+# Validation_set_name <- "who_cares"
+# MAF_summary <- F
+# INFO_summary <- 0.9
+# SE_summary <- F
+# SE_threshold <- 5
  
 # Function to calculate what type of Training dataset we have
 What_summary_columns_do_we_have <- function(Parsing_colnames){

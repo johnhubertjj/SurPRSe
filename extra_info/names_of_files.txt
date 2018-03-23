@@ -1,4 +1,0 @@
-CLOZUK_PGC_bge_removed_A.T_C.G.target_r0.2_1000kb_non_verbose_
-extracted_Duplicate_snps
-chr10PGC_CLOZUK_common_SNPs
-CLOZUK_chr10_chr.pos
