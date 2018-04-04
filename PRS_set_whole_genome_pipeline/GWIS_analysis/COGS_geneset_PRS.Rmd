@@ -184,7 +184,7 @@ Location_of_gene_boundary_gene_set_PRS_files <- "~/Documents/COGS_pathways_resul
 Location_of_Phenotype_file <- "~/Documents/COGS_pathways_results/Phenotypes.txt"
 Location_of_Alternative_ID_file <- "~/Documents/COGS_pathways_results/COGS_IDs_V2.txt"
 Location_of_Covariates <- "~/Documents/COGS_pathways_results/COGSv2016.noREL.eigenvec"
-Location_of_Duplicate_samples <-"~/Documents/COGS_pathways_results/COGSv2016.PGCrelatives[2] copy.txt"
+Location_of_Duplicate_samples <-"~/Documents/COGS_pathways_results/COGSv2016.PGCrelatives.txt"
 Location_of_age_and_gender_phenotypes <-"~/Documents/COGS_pathways_results/COGS_AGE_SEX_Feb_18.txt"
 
 
