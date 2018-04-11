@@ -21,8 +21,8 @@ if [[ "$whereami" = *"raven"* ]]; then
   path_to_PRS_scripts="${HOME}/PhD_scripts/Schizophrenia_pipeline_scripts/"
   
   # Re-assign to the training_set_usually_genotype and validation_full_name_without_chromosome using the sed command
-  path_to_validation_dataset="/neurocluster/databank/2-genotypes/open-access/ref/1000-genomes-project/phase3/data/ftp.1000genomes.ebi.ac.uk/eur-1000g-phase3-chrall-mac5" 
-  path_to_training_dataset="/neurocluster/databank/1-summary/open-access/groves-ripke-als-2017/data/original/iPSYCH-PGC_ASD_Nov2017.gz"
+  path_to_validation_dataset="/scratch/${USER}/PR54/PGC_CLOZUK_PRS/COGS_CLOZUK_datasets/COGSv2016_IMPUTE2" 
+  path_to_training_dataset="/neurocluster/filesync/c1020109/Summary_stats_files/EduYears_Main.txt"
 
   # State paths to the relevant stationary folders required for the analysis
   path_to_PGC_conversion="${path_to_PRS_scripts}/Summary_stat_manipulation/"
@@ -37,8 +37,8 @@ if [[ "$whereami" = *"raven"* ]]; then
   path_to_gene_annotation_file="${path_to_stationary_data}NCBI37.3.gene.loc"  
   
   # Datasets
-  training_set_name="iPsych_GWAS"
-  validation_set_name="thousand_genomes" 
+  training_set_name="EduYears_Main"
+  validation_set_name="COGS" 
  
   # DO NOT ALTER!!!
   training_set_original_filename=`echo "${path_to_training_dataset}" | sed 's:.*/::'`
@@ -61,7 +61,7 @@ if [[ "$whereami" = *"raven"* ]]; then
   # Do a missingness check?
   Missing_geno=TRUE
   genotype_missingness_check=0.1
-  HWE_thresh=1e-04
+  HWE_thresh=1e-06
   hwe_p_test="midp"
   include_noncntrl="include-nonctrl"
   
@@ -93,7 +93,7 @@ if [[ "$whereami" = *"raven"* ]]; then
   sig_thresholds_lower_bounds=(0 0 0 0 0 0 0 0 0)
  
   # Arguments specific to PRS set analysis
-  Extra_analyses=FALSE
+  Extra_analyses=TRUE
   Name_of_extra_analysis=(Pathways Genes)
   randomise=FALSE
   sample_replace=FALSE
@@ -105,7 +105,7 @@ if [[ "$whereami" = *"raven"* ]]; then
   
   # either "extended" "normal" or "both" : change to a numerical input in the future
   Gene_regions=both #either ( "extended" "normal" "both" )
-  whole_genome_genic=FALSE
+  whole_genome_genic=TRUE
   Gene_specific_PRS=FALSE
 
 
