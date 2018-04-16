@@ -93,7 +93,7 @@ if [[ "$whereami" = *"raven"* ]]; then
   sig_thresholds_lower_bounds=(0 0 0 0 0 0 0 0 0)
  
   # Arguments specific to PRS set analysis
-  Extra_analyses=TRUE
+  Extra_analyses=FALSE
   Name_of_extra_analysis=(Pathways Genes)
   randomise=FALSE
   sample_replace=FALSE
@@ -105,7 +105,7 @@ if [[ "$whereami" = *"raven"* ]]; then
   
   # either "extended" "normal" or "both" : change to a numerical input in the future
   Gene_regions=both #either ( "extended" "normal" "both" )
-  whole_genome_genic=TRUE
+  whole_genome_genic=FALSE
   Gene_specific_PRS=FALSE
 
 
