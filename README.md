@@ -6,6 +6,7 @@
 * I'm always looking for people to help in making this better, If you are familiar to git please fork this repository. 
     * The code has a General Public license so you are free to make changes of your own just as long as you document them!
     * If you are unfamiliar with the 'git' structure but still want to help out, please email John Hubert @ <a href="mailto:hubertjj@cardiff.ac.uk">hubertjj@cardiff.ac.uk</a> and we can sort something out!
+* If you notice a bug or a fix that is required please add to the [issues page](http://gitlab.psycm.cf.ac.uk/john/Schizophrenia_PRS_pipeline_scripts/issues) or email <a href="mailto:hubertjj@cardiff.ac.uk">hubertjj@cardiff.ac.uk</a>
 * Please note that 'Super' refers to Supercomputer and not the state of the workflow, "Okay-PRS" didn't really have the same 'kick' to it...  
 
  
