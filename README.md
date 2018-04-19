@@ -1,6 +1,6 @@
 # Super-PRS
 
-* A workflow in Bash, R and python designed to allow easy processing and production of polygenic risk scores on [ARCCA's](http://www.cardiff.ac.uk/advanced-research-computing) Raven supercomputer
+* A workflow in Bash, R and python designed to allow easy processing and production of polygenic risk scores (both whole genome and set scores) on [ARCCA's](http://www.cardiff.ac.uk/advanced-research-computing) Raven supercomputer
 * For a [tutorial](http://gitlab.psycm.cf.ac.uk/john/Schizophrenia_PRS_pipeline_scripts/wikis/example-prs-tutorial), [debugging](http://gitlab.psycm.cf.ac.uk/john/Schizophrenia_PRS_pipeline_scripts/wikis/debugging_long) information and other documentation, please refer to the [wiki](http://gitlab.psycm.cf.ac.uk/john/Schizophrenia_PRS_pipeline_scripts/wikis/home)
 * If used for the creation of results to be published (one can dream...), please acknowledge  John hubert <a href="mailto:hubertjj@cardiff.ac.uk">hubertjj@cardiff.ac.uk</a> and Valentina Escott-Price <a href="mailto:escottpricev@cardiff.ac.uk">escottpricev@cardiff.ac.uk</a>
 * I'm always looking for people to help in making this better, If you are familiar to git please fork this repository. 
