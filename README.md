@@ -1,7 +1,7 @@
 # Super-PRS
 
 * A workflow in Bash, R and python designed to allow easy processing and production of polygenic risk scores on [ARCCA's](http://www.cardiff.ac.uk/advanced-research-computing) Raven supercomputer
-* If used for the creation of results to be published (one can dream...), please acknowledge  <a href="mailto:hubertjj@cardiff.ac.uk">John Hubert</a> and Valentina Escott-Price (escottpricev@cardiff.ac.uk) 
+* If used for the creation of results to be published (one can dream...), please acknowledge  John hubert <a href="mailto:hubertjj@cardiff.ac.uk">mailto:hubertjj@cardiff.ac.uk</a> and Valentina Escott-Price <a href="mailto:escottpricev@cardiff.ac.uk">mailto:escottpricev@cardiff.ac.uk</a>
 
 # Current datasets tested in PRS analysis:
 
