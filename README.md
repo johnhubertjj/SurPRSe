@@ -19,16 +19,36 @@
 
 # Current datasets tested in PRS analysis:
 
-PGCnoCLOZUK
+PGC2 - SCZ
 -------------- 
+
+#### PGC2minusCLOZUK (SCZ2minusCLOZUK)
 Location on rocks: /home/SHARED/PGC/daner_PGC_SCZ52_0513a.resultfiles_PGC_SCZ52_0513.sh2_noclo.txt
 Summary stats
 
+#### Sweden+SCZ1
+Location: https://www.med.unc.edu/pgc/results-and-downloads
+Summary stats
+
+#### SCZ1
+Location: https://www.med.unc.edu/pgc/results-and-downloads
+Summary stats
+*WARNING* build is UCSC hg18, will likely need to convert to hg19.
+
+
+
+
+#### PGC1 + Sweden
+
+
 CLOZUK_no_PGC:
 ---------------
-Location on rocks: /mnt/databank/CLOZUK/GWAS/BGE/\*CLOZUK_GWAS_BGE\*.tar.gz
+Location on raven: /neurocluster/databank/CLOZUK/GWAS/BGE/\*CLOZUK_GWAS_BGE\*.tar.gz
 Build: 
 Best guess genotype data
+
+CLOZUK_Meta:
+
 
 
 # Preparing the config file
