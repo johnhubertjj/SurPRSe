@@ -23,7 +23,7 @@ PGC2 (SCZ)
 -------------- 
 
 #### PGC2minusCLOZUK (SCZ2minusCLOZUK)
-Location on rocks: /home/SHARED/PGC/daner_PGC_SCZ52_0513a.resultfiles_PGC_SCZ52_0513.sh2_noclo.txt
+Location on rocks: /home/SHARED/PGC/daner_PGC_SCZ52_0513a.resultfiles_PGC_SCZ52_0513.sh2_noclo.txt  
 Summary stats
 
 #### Sweden+SCZ1
