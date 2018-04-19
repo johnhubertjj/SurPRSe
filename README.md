@@ -32,7 +32,7 @@ Summary stats
 
 #### SCZ1
 Location: https://www.med.unc.edu/pgc/results-and-downloads  
-Summary stats
+Summary stats  
 **WARNING** build is UCSC hg18, will likely need to convert to hg19.
 
 
