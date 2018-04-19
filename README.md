@@ -19,7 +19,7 @@
 
 # Current datasets tested in PRS analysis:
 
-PGC2 - SCZ
+PGC2 (SCZ)
 -------------- 
 
 #### PGC2minusCLOZUK (SCZ2minusCLOZUK)
@@ -27,27 +27,34 @@ Location on rocks: /home/SHARED/PGC/daner_PGC_SCZ52_0513a.resultfiles_PGC_SCZ52_
 Summary stats
 
 #### Sweden+SCZ1
-Location: https://www.med.unc.edu/pgc/results-and-downloads
-Summary stats
+Location: https://www.med.unc.edu/pgc/results-and-downloads  
+Summary stats  
 
 #### SCZ1
-Location: https://www.med.unc.edu/pgc/results-and-downloads
+Location: https://www.med.unc.edu/pgc/results-and-downloads  
 Summary stats
-*WARNING* build is UCSC hg18, will likely need to convert to hg19.
+**WARNING** build is UCSC hg18, will likely need to convert to hg19.
 
 
-
-
-#### PGC1 + Sweden
-
-
-CLOZUK_no_PGC:
+CLOZUK
 ---------------
+
+#### CLOZUK_no_PGC
 Location on raven: /neurocluster/databank/CLOZUK/GWAS/BGE/\*CLOZUK_GWAS_BGE\*.tar.gz
 Build: 
 Best guess genotype data
 
-CLOZUK_Meta:
+#### CLOZUK_Meta-analysis with PGC
+Location on raven: /neurocluster/databank/CLOZUK/GWAS/SUMSTATS/CLOZUK_PGC2noclo.wCHRX.w1000Gfrq.METAL.assoc.dosage.gz 
+
+ALSPAC
+---------------
+Best guess genotype data
+
+Biobank wv 1
+---------------
+Best guess genotype data
+
 
 
 
