@@ -40,12 +40,12 @@ CLOZUK
 ---------------
 
 #### CLOZUK_no_PGC
-Location on raven: /neurocluster/databank/CLOZUK/GWAS/BGE/\*CLOZUK_GWAS_BGE\*.tar.gz
-Build: 
+Location on raven: /neurocluster/databank/CLOZUK/GWAS/BGE/\*CLOZUK_GWAS_BGE\*.tar.gz  
 Best guess genotype data
 
 #### CLOZUK_Meta-analysis with PGC
-Location on raven: /neurocluster/databank/CLOZUK/GWAS/SUMSTATS/CLOZUK_PGC2noclo.wCHRX.w1000Gfrq.METAL.assoc.dosage.gz 
+Location on raven: /neurocluster/databank/CLOZUK/GWAS/SUMSTATS/CLOZUK_PGC2noclo.wCHRX.w1000Gfrq.METAL.assoc.dosage.gz  
+Summary stats
 
 ALSPAC
 ---------------
