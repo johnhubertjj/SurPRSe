@@ -1,6 +1,6 @@
-# SuPRSe!
+# SurPRSe!
 
-* **Su**percomputing with **P**olygenic **R**isk **S**cores....**E**xclamation point!
+* **Su**pe**r**computing with **P**olygenic **R**isk **S**cores....**E**xclamation point!
 * A workflow in Bash, R and python designed to allow easy processing and production of polygenic risk scores (both whole genome and set scores) on [ARCCA's](http://www.cardiff.ac.uk/advanced-research-computing) Raven supercomputer
 * For a [tutorial](http://gitlab.psycm.cf.ac.uk/john/Schizophrenia_PRS_pipeline_scripts/wikis/example-prs-tutorial), [debugging](http://gitlab.psycm.cf.ac.uk/john/Schizophrenia_PRS_pipeline_scripts/wikis/debugging_long) information and other documentation, please refer to the [wiki](http://gitlab.psycm.cf.ac.uk/john/Schizophrenia_PRS_pipeline_scripts/wikis/home)
 * If used for the creation of results to be published (one can dream...), please acknowledge  John Hubert <a href="mailto:hubertjj@cardiff.ac.uk">hubertjj@cardiff.ac.uk</a> and Valentina Escott-Price <a href="mailto:escottpricev@cardiff.ac.uk">escottpricev@cardiff.ac.uk</a>
@@ -15,7 +15,7 @@
 
 ** COMING SOON**
 
-* [**S**upPRSe! **A**nalysis **V**iewing **E**nvironment - **P**olygenic **R**isk **S**cores](https://johnhubertjj.shinyapps.io/Viewing_PRS_two_files/)
+* [**S**urpPRSe! **A**nalysis **V**iewing **E**nvironment - **P**olygenic **R**isk **S**cores](https://johnhubertjj.shinyapps.io/Viewing_PRS_two_files/)
 * Comparing whole genome polygenic risk scores to polygenic risk set scores is difficult as the 'ideal' significance threshold for a whole genome polygenic risk score is unlikely to be the same for a polygenic risk set score, and will likely change depending on which set you test.
 * SAVE-PRS allows for "real-time" comparison of set scores to whole genome polygenic risk scores in a [shiny app](https://shiny.rstudio.com/), to allow comparison across all significance thresholds and allow better interpretation of all results.
 
