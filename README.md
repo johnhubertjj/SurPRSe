@@ -2,7 +2,7 @@
 
 * A workflow in Bash, R and python designed to allow easy processing and production of polygenic risk scores on [ARCCA's](http://www.cardiff.ac.uk/advanced-research-computing) Raven supercomputer
 * For a tutorial, debugging information and other documentation, please refer to the [wiki](http://gitlab.psycm.cf.ac.uk/john/Schizophrenia_PRS_pipeline_scripts/wikis/home)
-* If used for the creation of results to be published (one can dream...), please acknowledge  John hubert <a href="mailto:hubertjj@cardiff.ac.uk">hubertjj@cardiff.ac.uk</a> and Valentina Escott-Price <a href="escottpricev@cardiff.ac.uk">mailto:escottpricev@cardiff.ac.uk</a>
+* If used for the creation of results to be published (one can dream...), please acknowledge  John hubert <a href="mailto:hubertjj@cardiff.ac.uk">hubertjj@cardiff.ac.uk</a> and Valentina Escott-Price <a href="mailto:escottpricev@cardiff.ac.uk">escottpricev@cardiff.ac.uk</a>
 * Please note that 'Super' refers to Supercomputer and not the state of the workflow, "Okay-PRS" didn't really have the same 'kick' to it...
  
 
