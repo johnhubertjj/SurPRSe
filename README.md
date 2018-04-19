@@ -15,7 +15,7 @@
 
 * [**S**et **A**nalysis **V**iewing **E**nvironment - **P**olygenic **R**isk **S**cores](https://johnhubertjj.shinyapps.io/Viewing_PRS_two_files/)
 * Comparing whole genome polygenic risk scores to polygenic risk set scores is difficult as the 'ideal' significance threshold for a whole genome polygenic risk score is unlikely to be the same for a polygenic risk set score, and will likely change depending on which set you test.
-* SAVE-PRS allows for "real-time" comparison of set scores to whole genome polygenic risk scores to allow comparison across all significance thresholds and allow better interpretation of all results.
+* SAVE-PRS allows for "real-time" comparison of set scores in [shiny](https://shiny.rstudio.com/) to whole genome polygenic risk scores to allow comparison across all significance thresholds and allow better interpretation of all results.
 * 
 
 # Current datasets tested in PRS analysis:
