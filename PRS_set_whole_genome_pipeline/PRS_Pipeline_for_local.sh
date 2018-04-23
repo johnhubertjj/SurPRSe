@@ -25,13 +25,23 @@ system=LINUX # oh god programmers are going to hate me for using this argument
 
 elif [[ "$whereami" = *"raven"* ]]; then 
 home_OS=${HOME}
-extra_path="/PhD_scripts"
+
+# extra_path must be NULL or a path
+extra_path=NULL
 system=LINUX #Too late to change now...its official, Raven runs on Linux because my scripts says so.
 fi
 
+if [[ "${extra_path}" != "NULL" ]]; then
 path_to_scripts="${home_OS}${extra_path}/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/"
 path_to_pathway_scripts="${home_OS}${extra_path}/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/Pathway_analysis_scripts/"
 path_to_gene_scripts="${home_OS}${extra_path}/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/Gene_analysis_scripts/"
+
+else
+path_to_scripts="${home_OS}/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/"
+path_to_pathway_scripts="${home_OS}/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/Pathway_analysis_scripts/"
+path_to_gene_scripts="${home_OS}/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/Gene_analysis_scripts/"
+fi
+
 
 source ${path_to_scripts}PRS_arguments_script.sh
 
