@@ -18,7 +18,7 @@ if [[ "$whereami" = *"raven"* ]]; then
   module load parallel/20170322 
   
   # Path_to_locations_on_the_server
-  path_to_PRS_scripts="${HOME}/PhD_scripts/Schizophrenia_pipeline_scripts/"
+  path_to_PRS_scripts="${HOME}/Schizophrenia_pipeline_scripts/"
   
   # Re-assign to the training_set_usually_genotype and validation_full_name_without_chromosome using the sed command
   path_to_validation_dataset="/scratch/${USER}/PR54/PGC_CLOZUK_PRS/COGS_CLOZUK_datasets/COGSv2016_IMPUTE2" 

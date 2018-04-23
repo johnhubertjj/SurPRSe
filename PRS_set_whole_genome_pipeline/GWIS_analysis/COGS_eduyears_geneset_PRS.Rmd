@@ -1,5 +1,5 @@
 ---
-title: "COGS_pathway_DSM"
+title: "COGS_EDUYEARS_pathway_DSM"
 output: html_document
 ---
 
@@ -12,7 +12,7 @@ output: html_document
 * Draft of secondary proposal has been attached to the email
 
 * Full genome PRS has been calculated for CLOZUK_no_PGC2 and PGC2_no_CLOZUK to test sets against case/control phenotype
-* Analysis on COGS re-done with IQ as a training set in each polygenic risk score.
+* Analysis on COGS re-done with EDU_Years as a training set in each polygenic risk score.
 * Results impending as we speak.
 
 # RESULTS Summary
@@ -52,7 +52,17 @@ output: html_document
 #### Sample sizes
 
 * COGS = 1024
-* CLOZUK_PGC2_NO_COGS \~ 104,000
+* EDU_YEARS = **????**
+
+#### Testing set Info
+**?????**
+
+* Sample info, NSNPs in the analysis  
+
+#### Training set info  
+**?????**
+
+* Obtained from where? what year? what paper? who was involved?
 
 #### Gene sets
 
@@ -72,6 +82,7 @@ output: html_document
 
 * All taken from James + Antonio's paper apart from GO terms which were defined in Amigo GO
   * GO terms were part of a conditional analysis at the top of Antonio's/James' paper in a data-driven pathway analysis so I've included them here
+  
 #### Phenotypes
 
 **DSM**
@@ -142,8 +153,6 @@ library(data.table)
 library(plyr)
 library(dplyr)
 library(rms)
-library(haven)
-
 ```
 # Write the Name of the analysis below 
 ```{r}
@@ -168,27 +177,28 @@ Files that are required to be read into this analysis:
 ```{r}
 
 # Output arguments and significance threshold arguments
-Name_of_analysis <- "COGS_CLOZUK_PGC2_noCOGS_pathway_PRS_analysis"
+Name_of_analysis <- "COGS_EDU_YEARS_pathway_PRS_analysis"
 significance_threshold <- c(5e-08,1e-06,1e-04,0.01,0.05,0.1,0.2,0.5,1)
-Location_of_analysis <- ("~/Documents/COGS_pathways_results/")
+Location_of_analysis <- ("~/Documents/COGS_pathways_results/EDU_years_COGS_analysis/")
 
 # Location of whole genome files
-Location_of_whole_genome_normal_gene_files <- paste0("~/Documents/COGS_pathways_results/whole_genome/PRS_scoring/PRS_scoring/CLOZUK_PGC2_noCOGS_COGS_normal_gene_regions_Clumped_whole_genome_final_significance_threshold_at_",significance_threshold, ".profile")
+Location_of_whole_genome_normal_gene_files <- paste0("~/Documents/COGS_pathways_results/EDU_years_COGS_analysis/PRS_scoring/EduYears_Main_COGS_normal_gene_regions_Clumped_whole_genome_final_significance_threshold_at_",significance_threshold,".profile")
 
-Location_of_whole_genome_extended_gene_files <- paste0("~/Documents/COGS_pathways_results/whole_genome/PRS_scoring/PRS_scoring/CLOZUK_PGC2_noCOGS_COGS_extended_gene_regions_Clumped_whole_genome_final_significance_threshold_at_",significance_threshold, ".profile")
+Location_of_whole_genome_extended_gene_files <- paste0("~/Documents/COGS_pathways_results/EDU_years_COGS_analysis/PRS_scoring/EduYears_Main_COGS_extended_gene_regions_Clumped_whole_genome_final_significance_threshold_at_",significance_threshold,".profile")
 
-Location_of_whole_genome_entire_genome_files <-  paste0("~/Documents/COGS_pathways_results/whole_genome/PRS_scoring/CLOZUKPGC2_NO_COGS_COGS_whole_genome_significance_threshold_at_",significance_threshold, ".profile")
+Location_of_whole_genome_entire_genome_files <-  paste0("~/Documents/COGS_pathways_results/EDU_years_COGS_analysis/EDU_years_whole_genome/EduYears_Main_COGS_output/PRS_scoring/EduYears_Main_COGS_whole_genome_significance_threshold_at_",significance_threshold,".profile")
 
 # Location of gene-set PRS files
-Location_of_extended_gene_set_PRS_files <- "~/Documents/COGS_pathways_results/FINAL_PATHWAY_RESULTS_PRS_PROFILESCLOZUK_PGC2_noCOGS_COGS_Selected_Pocklington_plus_GO_pathways_SCHIZ_extended.txt"
-Location_of_gene_boundary_gene_set_PRS_files <- "~/Documents/COGS_pathways_results/FINAL_PATHWAY_RESULTS_PRS_PROFILESCLOZUK_PGC2_noCOGS_COGS_Selected_Pocklington_plus_GO_pathways_SCHIZ_normal.txt" 
+Location_of_extended_gene_set_PRS_files <- "~/Documents/COGS_pathways_results/EDU_years_COGS_analysis/FINAL_PATHWAY_RESULTS_PRS_PROFILESEduYears_Main_COGS_Selected_Pocklington_plus_GO_pathways_SCHIZ_extended.txt"
+Location_of_gene_boundary_gene_set_PRS_files <- "~/Documents/COGS_pathways_results/EDU_years_COGS_analysis/FINAL_PATHWAY_RESULTS_PRS_PROFILESEduYears_Main_COGS_Selected_Pocklington_plus_GO_pathways_SCHIZ_normal.txt"
+
 # Location of Phenotype and covariate files 
 Location_of_Phenotype_file <- "~/Documents/COGS_pathways_results/Phenotypes.txt"
 Location_of_Alternative_ID_file <- "~/Documents/COGS_pathways_results/COGS_IDs_V2.txt"
 Location_of_Covariates <- "~/Documents/COGS_pathways_results/COGSv2016.noREL.eigenvec"
 Location_of_Duplicate_samples <-"~/Documents/COGS_pathways_results/COGSv2016.PGCrelatives.txt"
 Location_of_age_and_gender_phenotypes <-"~/Documents/COGS_pathways_results/COGS_AGE_SEX_Feb_18.txt"
-Location_of_Cognition_subphenotypes <- "~/Documents/COGS_pathways_results/Cognition_scores_for_John.sav"
+
 
 my_data <- lapply(Location_of_whole_genome_normal_gene_files, fread, header=TRUE) 
 names(my_data) <- str_replace(Location_of_whole_genome_normal_gene_files, pattern = ".profile", replacement = "")
@@ -261,12 +271,6 @@ COGS_ID_S = fread(Location_of_Alternative_ID_file)
 setnames(COGS_Phenotypes, old = "ID", new = "Study_ID")
 COGS_Phenotypes <- merge(COGS_Phenotypes,COGS_ID_S, by = "Study_ID")
 
-COGS_subphenotypes <- read_sav(Location_of_Cognition_subphenotypes)
-COGS_subphenotypes <- as.data.table(COGS_subphenotypes)
-
-COGS_all_Phenotypes <- merge(COGS_Phenotypes,COGS_subphenotypes, by = "Study_ID", all = F)
-
-
 COGS_list <- list(
 COGS_covaraties = fread(Location_of_Covariates),
 COGS_duplicates = fread(Location_of_Duplicate_samples, header = F),
@@ -278,7 +282,7 @@ COGS_whole_genome_genic_normal = all_prs_normal,
 COGS_whole_genome_genic_extended = all_prs_extended,
 COGS_whole_genome = all_prs_whole_genome,
 #COGS_Pathway_test_randomisation <- fread("~/Documents/COGS_pathways_results/FINAL_PATHWAY_RESULTS_PRS_PROFILESCLOZUKPGC2_NO_COGS_COGS_abnormal_behaviorrandomised_gene_sets.txt")
-COGS_Phenotypes = COGS_all_Phenotypes
+COGS_Phenotypes = COGS_Phenotypes
 )
 
 
@@ -291,7 +295,6 @@ setnames(COGS_list$COGS_duplicates, c("FID", "IID"))
 COGS_total <- join_all(dfs=COGS_list,by = "IID",type = "left")
 setkey(COGS_total,IID)
 COGS_total <- COGS_total[!COGS_list$COGS_duplicates$IID]
-COGS_total[,Composite_Zimpute := Composite_Zimpute.y]
 COGS_total_copy <- copy(COGS_total)
 ```
 
@@ -375,11 +378,6 @@ This is due to the fact that as you limit down to different DSM groups, you are 
 ```{r, message=FALSE, include = FALSE}
 # create separted DF for narrow and broad SCZ
 
-Cognition_phenotype_names <- c("Composite_Zimpute","ZHVLTTotal", "ZNABMazes", "ZBVMTTtotal", "ZMSCEIT", "ZCPTMean", "SoP_Zimpute", "WM_Zimpute")
-Cognition_phenotype_list <- list()
-
-for (k in 1:length(Cognition_phenotype_names)){
-
 rows_to_keep_SCZ_narrow <- COGS_total[DSM_diagnosis_new == 1 | DSM_diagnosis_new == 2 ]
 rows_to_keep_SCZ_broad <- COGS_total[DSM_diagnosis_new == 1 | DSM_diagnosis_new == 2 | DSM_diagnosis_new == 3 | DSM_diagnosis_new == 4]
 rows_to_keep_all_minus_narrow <- COGS_total[DSM_diagnosis_new != 1 & DSM_diagnosis_new != 2]
@@ -395,13 +393,11 @@ rows_to_keep_SCZ_broad_TRS <- rows_to_keep_SCZ_broad[FINAL_TRS != 9]
 rows_to_keep_all_minus_narrow_cognition <- rows_to_keep_all_minus_narrow[Composite_Zimpute != 999]
 rows_to_keep_all_minus_narrow_TRS <- rows_to_keep_all_minus_narrow[FINAL_TRS != 9]
 
-
-
 list_of_tests_cognition <- list(
-  rows_to_keep_SCZ_narrow_cognition = as.data.frame(rows_to_keep_SCZ_narrow_cognition[, test:= (rows_to_keep_SCZ_narrow_cognition[,Cognition_phenotype_names[k], with = F])]),
-  rows_to_keep_SCZ_broad_cognition = as.data.frame(rows_to_keep_SCZ_broad_cognition[, test:= (rows_to_keep_SCZ_broad_cognition[,Cognition_phenotype_names[k], with = F])]),
-  rows_to_keep_SCZ_all_minus_narrow_cognition = as.data.frame(rows_to_keep_all_minus_narrow_cognition[, test:= (rows_to_keep_all_minus_narrow_cognition[,Cognition_phenotype_names[k], with = F])]),
-  COGS_cognition = as.data.frame(COGS_cognition[,test:= (COGS_cognition[,Cognition_phenotype_names[k], with = F])])
+  rows_to_keep_SCZ_narrow_cognition = as.data.frame(rows_to_keep_SCZ_narrow_cognition[, test:= Composite_Zimpute]),
+  rows_to_keep_SCZ_broad_cognition = as.data.frame(rows_to_keep_SCZ_broad_cognition[, test := Composite_Zimpute]),
+  rows_to_keep_SCZ_all_minus_narrow_cognition = as.data.frame(rows_to_keep_all_minus_narrow_cognition[, test := Composite_Zimpute]),
+  COGS_cognition = as.data.frame(COGS_cognition[,test:= Composite_Zimpute])
   )  
 
 list_of_tests_TRS <- list(
@@ -551,16 +547,6 @@ for (i in score_list) {
   results <- obj[which(obj$score %in% score_list),]
   assign(paste0("results_",l), results)
 }
-
-Cognition_phenotype_list[[k]] <- all_cogs_PRS_results <- list(
-  Cognition_all_samples = results_COGS_cognition,
-  Cognition_broad = results_rows_to_keep_SCZ_broad_cognition,
-  Cognition_narrow = results_rows_to_keep_SCZ_narrow_cognition,
-  Cognition_minus_narrow = results_rows_to_keep_SCZ_all_minus_narrow_cognition
-  )
-
-}
-
 ```
 #### NOTES
 
@@ -614,4 +600,5 @@ write.table(Full_data,file = paste0(Location_of_analysis,Name_of_analysis,"_",ti
 write.table(Full_data_with_step_wise_regressions,  file = paste0(Location_of_analysis,Name_of_analysis,"_step_wise_regress_column_test_DSM_",time_of_analysis,".txt"), row.names = F, quote = F)
 write.table(results_constrained_model,file = paste0(Location_of_analysis,Name_of_analysis,"_constrained_model_test_DSM_", time_of_analysis,".txt"), row.names = F, quote = F)
 ```
+
 
