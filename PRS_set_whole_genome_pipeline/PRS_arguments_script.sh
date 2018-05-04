@@ -18,11 +18,11 @@ if [[ "$whereami" = *"raven"* ]]; then
   module load parallel/20170322 
   
   # Path_to_locations_on_the_server
-  path_to_PRS_scripts="${HOME}/Schizophrenia_pipeline_scripts/"
+  path_to_PRS_scripts="${HOME}/PhD_scripts/Schizophrenia_pipeline_scripts/"
   
   # Re-assign to the training_set_usually_genotype and validation_full_name_without_chromosome using the sed command
-  path_to_validation_dataset="/scratch/$USER/PRS_tutorial/eur-1000g-phase3-chrall-mac5"
-  path_to_training_dataset="/scratch/$USER/PRS_tutorial/iPSYCH-PGC_ASD_Nov2017.gz"
+  path_to_validation_dataset="/scratch/c1020109/PR54/CLOZUK_PRS_geneset_analysis/CLOZUK_GWAS_BGE" 
+  path_to_training_dataset="/scratch/c1020109/PR54/Summary_stats_files/daner_PGC_SCZ52_0513a.resultfiles_PGC_SCZ52_0513.sh2_noclo.txt"
 
   # State paths to the relevant stationary folders required for the analysis
   path_to_PGC_conversion="${path_to_PRS_scripts}/Summary_stat_manipulation/"
@@ -37,8 +37,8 @@ if [[ "$whereami" = *"raven"* ]]; then
   path_to_gene_annotation_file="${path_to_stationary_data}NCBI37.3.gene.loc"  
   
   # Datasets
-  training_set_name="iPsych_GWAS"
-  validation_set_name="thousand_genomes" 
+  training_set_name="PGC2minusCLOZUK"
+  validation_set_name="CLOZUKminusPGC2" 
  
   # DO NOT ALTER!!!
   training_set_original_filename=`echo "${path_to_training_dataset}" | sed 's:.*/::'`
@@ -51,17 +51,17 @@ if [[ "$whereami" = *"raven"* ]]; then
   ldsc="/home/c1020109/ldsc/ldsc.py"  
   
   # Pathway datasets
-  Pathway_filename="Selected_Pocklington_plus_GO_pathways_SCHIZ.txt"
+  Pathway_filename="IQ_2018_biorxiv_genesets.txt"
   Gene_location_filename="NCBI37.3.gene.loc"
   calculate_indep_SNPs=FALSE
  
   # Split_by_chromosome for genotype?
-  split_by_chromosome_required=TRUE 
+  split_by_chromosome_required=FALSE 
   
   # Do a missingness check?
   Missing_geno=TRUE
   genotype_missingness_check=0.1
-  HWE_thresh=1e-04
+  HWE_thresh=1e-06
   hwe_p_test="midp"
   include_noncntrl="include-nonctrl"
   
