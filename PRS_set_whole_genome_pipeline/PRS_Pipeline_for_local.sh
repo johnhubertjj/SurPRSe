@@ -128,6 +128,12 @@ else
 	${path_to_scripts}PRS_ANALYSIS_SERIAL_no_set.sh ${Directory_to_work_from} ${path_to_scripts} ${system}
 fi
 
+if [[ "${Full_genome_PRS_extra_analysis}" = "TRUE" ]]; then
+
+source ${path_to_scripts}PRS_whole_genome.sh
+
+fi
+
 if [[ "${Using_raven}" = "TRUE" ]]; then
 #Purge all modules
 module purge
