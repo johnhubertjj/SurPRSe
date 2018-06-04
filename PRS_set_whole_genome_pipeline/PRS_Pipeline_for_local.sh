@@ -124,13 +124,8 @@ length_of_extra_analysis_array=`echo ${#Name_of_extra_analysis[@]}`
 		 ${path_to_gene_scripts}Gene_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_gene_scripts} ${Name_of_extra_analysis[1]}
 	fi
 
-if [ "${Extra_analysis_plus_whole_genome}" == "TRUE" ]; then
-
 
 else
-
-
-
 	# Need an alternative to Raven's log files to extract locally on the computer probably output important information to one file
 	${path_to_scripts}PRS_ANALYSIS_SERIAL_no_set.sh ${Directory_to_work_from} ${path_to_scripts} ${system}
 fi
@@ -140,6 +135,15 @@ if [[ "${Full_genome_PRS_extra_analysis}" = "TRUE" ]]; then
 source ${path_to_scripts}PRS_whole_genome.sh
 
 fi
+
+if [[ "${SNP_list_for_Consensus_QCd_Training_set}" = "TRUE" ]]; then
+
+Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}MAGMA_extract_samples_script.R ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_sig_thresholds_lower_bounds_arguments_text_file.Rout\
+ ${training_set_name}\
+ ${validation_set_name}\
+ ${sig_thresholds_lower_bounds[@]}
+
+
 
 if [[ "${Using_raven}" = "TRUE" ]]; then
 #Purge all modules
