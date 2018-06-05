@@ -60,10 +60,10 @@ cat ${path_to_scripts}PRS_arguments_script.sh
 if [[ "${Using_raven}" = "FALSE" ]]; then
 
 # Quick fix for permissions on local and on the cluster
-sudo parallel ${path_to_scripts}POLYGENIC_RISK_SCORE_ANALYSIS_CLOZUK_PRS_JOB_ARRAY.sh ::: ${Chromosomes_to_analyse[@]} ::: ${Directory_to_work_from} ::: ${path_to_scripts} ::: ${system} ::: ${training_set_name} ::: ${validation_set_name}
+sudo parallel ${path_to_scripts}POLYGENIC_RISK_SCORE_ANALYSIS_WHOLE_GENOME_PRS_JOB_ARRAY.sh ::: ${Chromosomes_to_analyse[@]} ::: ${Directory_to_work_from} ::: ${path_to_scripts} ::: ${system} ::: ${training_set_name} ::: ${validation_set_name}
 else
 # For use on local
-parallel ${path_to_scripts}POLYGENIC_RISK_SCORE_ANALYSIS_CLOZUK_PRS_JOB_ARRAY.sh ::: ${Chromosomes_to_analyse[@]} ::: ${Directory_to_work_from} ::: ${path_to_scripts} ::: ${system} ::: ${training_set_name} ::: ${validation_set_name} 
+parallel ${path_to_scripts}POLYGENIC_RISK_SCORE_ANALYSIS_WHOLE_GENOME_PRS_JOB_ARRAY.sh ::: ${Chromosomes_to_analyse[@]} ::: ${Directory_to_work_from} ::: ${path_to_scripts} ::: ${system} ::: ${training_set_name} ::: ${validation_set_name} 
 fi
 
 # exit 0

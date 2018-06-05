@@ -21,7 +21,7 @@ if [[ "$whereami" = *"raven"* ]]; then
   path_to_PRS_scripts="${HOME}/PhD_scripts/Schizophrenia_pipeline_scripts/"
   
   # Re-assign to the training_set_usually_genotype and validation_full_name_without_chromosome using the sed command
-  path_to_validation_dataset="/scratch/${USER}/PRS_tutorial/eur-1000g-phase3-chrall-mac5" 
+  path_to_validation_dataset="/scratch/c1020109/PR54/1000_genomes_consensus_sets/eur-1000g-phase3-chrall-mac5" 
   path_to_training_dataset="/scratch/${USER}/PR54/Summary_stats_files/CLOZUK_PGC2_noCOGSmetaanalysis_flipped_INFOabove0point9.txt"
 
   # State paths to the relevant stationary folders required for the analysis
@@ -37,8 +37,8 @@ if [[ "$whereami" = *"raven"* ]]; then
   path_to_gene_annotation_file="${path_to_stationary_data}NCBI37.3.gene.loc"  
   
   # Datasets
-  training_set_name="CLOZUK_PGC2_noCOGS"
-  validation_set_name="1000genomes" 
+  training_set_name="CLOZUK_PGC2"
+  validation_set_name="eur-1000g-phase3-chrall-mac5" 
  
   # DO NOT ALTER!!!
   training_set_original_filename=`echo "${path_to_training_dataset}" | sed 's:.*/::'`
@@ -51,12 +51,12 @@ if [[ "$whereami" = *"raven"* ]]; then
   ldsc="/home/c1020109/ldsc/ldsc.py"  
   
   # Pathway datasets
-  Pathway_filename="IQ_2018_biorxiv_genesets.txt"
+  Pathway_filename="Selected_Pocklington_plus_GO_pathways_SCHIZ.txt"
   Gene_location_filename="NCBI37.3.gene.loc"
   calculate_indep_SNPs=FALSE
  
   # Split_by_chromosome for genotype?
-  split_by_chromosome_required=TRUE 
+  split_by_chromosome_required=TRUE
   
   # Do a missingness check?
   Missing_geno=TRUE
@@ -93,7 +93,7 @@ if [[ "$whereami" = *"raven"* ]]; then
   sig_thresholds_lower_bounds=(0 0 0 0 0 0 0 0 0)
  
   # Arguments specific to PRS set analysis
-  Extra_analyses=TRUE
+  Extra_analyses=FALSE
   Full_genome_PRS_extra_analysis=TRUE
   Name_of_extra_analysis=(Pathways Genes)
   randomise=FALSE
@@ -106,7 +106,7 @@ if [[ "$whereami" = *"raven"* ]]; then
   
   # either "extended" "normal" or "both" : change to a numerical input in the future
   Gene_regions=both #either ( "extended" "normal" "both" )
-  whole_genome_genic=TRUE
+  whole_genome_genic=FALSE
   Gene_specific_PRS=FALSE
 
 
