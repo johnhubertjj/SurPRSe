@@ -94,7 +94,7 @@ if [[ "$whereami" = *"raven"* ]]; then
  
   # Arguments specific to PRS set analysis
   Extra_analyses=FALSE
-  Full_genome_PRS_extra_analysis=TRUE
+  Full_genome_PRS_extra_analysis=FALSE
   Name_of_extra_analysis=(Pathways Genes)
   randomise=FALSE
   sample_replace=FALSE
