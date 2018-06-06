@@ -39,7 +39,9 @@ training_tables_to_merge <- fread(paste0("./", Training_name, "_", Validation_na
 
 
 colnames(combined_final_table) <- c("CHR", "SNP", "GD", "BP", "A1", "A2")
-SNP_list_table <- merge(combined_final_table,training_tables_to_merge, by = "SNP", all = F)
+SNP_list_table <- merge(combined_final_table,training_tables_to_merge, by = c("SNP","CHR","BP","A1","A2"), all = F)
 
-write.table(SNP_list_table, file = "combined_", Training_name,"_", Validation_name, "_table_with_CHR.POS_identifiers_flipped_alleles_no_duplicates_MAF_INFO.txt", quote = F, row.names = F, col.names = T)
+cat("The Number of SNPS consistent between both datasets after QC =",nrow(SNP_list_table))
+
+write.table(SNP_list_table, file = paste0( "combined_", Training_name,"_", Validation_name, "_table_with_CHR.POS_identifiers_flipped_alleles_no_duplicates_MAF_INFO.txt"), quote = F, row.names = F, col.names = T)
 

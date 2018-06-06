@@ -136,13 +136,14 @@ source ${path_to_scripts}PRS_whole_genome.sh
 
 fi
 
-if [[ "${SNP_list_for_Consensus_QCd_Training_set}" = "TRUE" ]]; then
+if [[ "${MAGMA_gene_set_analysis}" = "TRUE" ]]; then
 
-Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}MAGMA_extract_samples_script.R ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_sig_thresholds_lower_bounds_arguments_text_file.Rout\
+Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}MAGMA_extract_SNP_list.R ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_MAGMA_extract_SNP_list.Rout\
  ${training_set_name}\
  ${validation_set_name}\
- ${sig_thresholds_lower_bounds[@]}
+ ${Chromosomes_to_analyse[@]}
 
+fi
 
 
 if [[ "${Using_raven}" = "TRUE" ]]; then
