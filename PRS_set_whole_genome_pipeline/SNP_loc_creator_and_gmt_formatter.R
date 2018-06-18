@@ -42,24 +42,24 @@ writeGMT <- function #Create a gmt (gene matrix transposed) file
 
 Training_name <- args[3]
 Validation_name <- args[4]
-Stationary_directory <- args[5]
-Gene-set_file <- args[6]
+Gene_set_file <- args[5]
 input_file_Path <- paste0("combined_", Training_name,"_", Validation_name, "_table_with_CHR.POS_identifiers_flipped_alleles_no_duplicates_MAF_INFO.txt")
-Gene_set_file_path <- paste0(Stationary_directory,Gene-set_file)
 
-input_file <- fread(input_file_Path, quote = F, row.names = F, col.names = T)
+input_file <- fread(input_file_Path)
 SNP_loc <- input_file[,.(SNP,CHR,BP)]
 
-GMT_name <- file_path_sans_ext(path)
+training_name_literal <- file_path_sans_ext(input_file_Path)
 
-write.table(SNP_loc, file = paste0(GMT_name,".txt"),quote = F,row.names = F,col.names = T)
+write.table(SNP_loc, file = paste0(training_name_literal,"snploc.txt"),quote = F,row.names = F,col.names = T)
 
 
 # Reading in Andrews annotations
 
 
-annot <- fread(Gene_set_file_path)
-annot_name <- file_path_sans_ext(Gene_set_file_path)
+annot <- fread(Gene_set_file)
+
+basename_annot <- basename(Gene_set_file)
+annot_name <- file_path_sans_ext(basename_annot)
 
 list_of_gmt <- list()
 rownames <- unique(annot$V1)

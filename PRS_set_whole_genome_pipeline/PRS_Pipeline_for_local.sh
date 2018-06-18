@@ -143,6 +143,8 @@ Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}MAGMA_extract_SNP_list
  ${validation_set_name}\
  ${Chromosomes_to_analyse[@]}
 
+source ${path_to_scripts}MAGMA_gene_set_analysis.sh
+ 
 fi
 
 
