@@ -1,37 +1,6 @@
-echo "hi"
+# Sources arguments to the main script, ensures directory is local, and creates extra folders where needed
 
-whereami=$(uname -n)
-echo "$whereami"
-
-if [ "$whereami" = "v1711-0ab8c3db.mobile.cf.ac.uk" ]; then
-home_OS="/Users"
-extra_path="/johnhubert/Documents/PhD_scripts"
-system=MAC
-
-elif [ "$whereami" = "johnhubert-ThinkPad-P50" ]; then
-home_OS="/home"
-extra_path="/johnhubert/Documents"
-system=LINUX # oh god programmers are going to hate me for using this argument
-
-elif [[ "$whereami" = *"raven"* ]]; then
-home_OS=${HOME}
-
-# extra_path must be NULL or a path
-extra_path="/PhD_scripts"
-system=LINUX #Too late to change now...its official, Raven runs on Linux because my scripts says so.
-fi
-
-if [[ "${extra_path}" != "NULL" ]]; then
-path_to_scripts="${home_OS}${extra_path}/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/"
-path_to_pathway_scripts="${home_OS}${extra_path}/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/Pathway_analysis_scripts/"
-path_to_gene_scripts="${home_OS}${extra_path}/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/Gene_analysis_scripts/"
-
-else
-path_to_scripts="${home_OS}/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/"
-path_to_pathway_scripts="${home_OS}/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/Pathway_analysis_scripts/"
-path_to_gene_scripts="${home_OS}/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/Gene_analysis_scripts/"
-fi
-
+# When deciding better structure for results in pathway analysis and combining whole genome with gene-set analysis, put the directory structure here
 
 source ${path_to_scripts}PRS_arguments_script.sh
 
@@ -41,9 +10,6 @@ cd $PBS_O_WORKDIR
 fi
 
 Directory_to_work_from=`pwd`
-
-log_file_name="${validation_set_name}_${training_set_name}_PRS_analysis"
- exec &> "${log_file_name}"_logfile.txt
 
 cat ${path_to_scripts}PRS_arguments_script.sh
 

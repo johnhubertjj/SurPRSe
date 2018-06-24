@@ -7,9 +7,8 @@
 #PBS -l walltime=24:00:00
 #PBS -o /home/c1020109/Summary_stats_info_Biobank_PRS
 
-
 echo "hi"
- 
+
 whereami=$(uname -n)
 echo "$whereami"
 
@@ -23,7 +22,7 @@ home_OS="/home"
 extra_path="/johnhubert/Documents"
 system=LINUX # oh god programmers are going to hate me for using this argument
 
-elif [[ "$whereami" = *"raven"* ]]; then 
+elif [[ "$whereami" = *"raven"* ]]; then
 home_OS=${HOME}
 
 # extra_path must be NULL or a path
@@ -43,47 +42,16 @@ path_to_gene_scripts="${home_OS}/Schizophrenia_PRS_pipeline_scripts/PRS_set_whol
 fi
 
 
-source ${path_to_scripts}PRS_arguments_script.sh
-
-if [ ${Using_raven} = "TRUE" ]; then
-echo ${PBS_O_WORKDIR}
-cd $PBS_O_WORKDIR 
-fi
-
-Directory_to_work_from=`pwd`
+# Preparation script; only alter if stated within the wiki/tutorial of this software
+source ${path_to_scripts}Pipeline_Preparation.sh
 
 log_file_name="${validation_set_name}_${training_set_name}_PRS_analysis"
  exec &> "${log_file_name}"_logfile.txt
 
-cat ${path_to_scripts}PRS_arguments_script.sh
+# Create argument text files as alternative arguments to other scripts when defining chromosomes or p-value significance thresholds
+source ${path_to_scripts}Plink_arguments_files_R_scripts.sh
 
-
-  if [[ ! -d "${training_set_name}_${validation_set_name}_output" ]]; then
-     mkdir ${training_set_name}_${validation_set_name}_output
-  fi
-
-  if [[ ! -d "${training_set_name}_${validation_set_name}_extrainfo" ]]; then
-     mkdir ${training_set_name}_${validation_set_name}_extrainfo
-  fi
-
-# use the require function to make sure that the packages are up to date with the software
-
-# Create arguments files for easier input into Rscripts for parallelisation # 
-Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}Chromosome_arguments_text_file.R ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_Chromosome_arguments_text_file.Rout\
- ${training_set_name}\
- ${validation_set_name}\
- ${Chromosomes_to_analyse[@]}
-
-Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}sig_thresholds_lower_bounds_arguments_text_file.R ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_sig_thresholds_lower_bounds_arguments_text_file.Rout\
- ${training_set_name}\
- ${validation_set_name}\
- ${sig_thresholds_lower_bounds[@]}
-
-Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}sig_thresholds_plink_arguments_text_file.R ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_sig_thresholds_plink_arguments_text_file.Rout\
- ${training_set_name}\
- ${validation_set_name}\
- ${sig_thresholds[@]}
-
+# Convert input files into a chromosome format
 source ${path_to_scripts}Summary_stats_to_chromosome_converter.sh
 
 # calculate polygenic scores for the whole genome across different chromosomes	
