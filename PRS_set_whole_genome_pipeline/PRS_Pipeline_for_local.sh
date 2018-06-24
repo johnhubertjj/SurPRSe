@@ -84,7 +84,7 @@ Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}sig_thresholds_plink_a
  ${validation_set_name}\
  ${sig_thresholds[@]}
 
-${path_to_scripts}Summary_stats_to_chromosome_converter.sh ${Directory_to_work_from} ${path_to_scripts} ${system}
+source ${path_to_scripts}Summary_stats_to_chromosome_converter.sh
 
 # calculate polygenic scores for the whole genome across different chromosomes	
 
