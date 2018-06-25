@@ -95,7 +95,15 @@ length_of_extra_analysis_array=`echo ${#Name_of_extra_analysis[@]}`
 
 else
 	# Need an alternative to Raven's log files to extract locally on the computer probably output important information to one file
-	${path_to_scripts}PRS_ANALYSIS_SERIAL_no_set.sh ${Directory_to_work_from} ${path_to_scripts} ${system}
+
+# Source the altered arguments from earlier, unsure if it would have already been performed
+
+ source ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt  
+  cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
+
+# Source the final stages of the whole genome analysis...output files could use some structure though
+ source	${path_to_scripts}PRS_ANALYSIS_SERIAL_no_set.sh
+
 fi
 
 if [[ "${Full_genome_PRS_extra_analysis}" = "TRUE" ]]; then

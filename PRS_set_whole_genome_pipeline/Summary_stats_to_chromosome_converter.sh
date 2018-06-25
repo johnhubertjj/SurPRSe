@@ -28,10 +28,3 @@ else
 fi 
 
 
-
-
-if [[ "${Using_raven}" = "TRUE" ]]; then
-#Purge all modules
-module purge
-fi
-

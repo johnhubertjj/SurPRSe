@@ -2,6 +2,7 @@
 
 # When deciding better structure for results in pathway analysis and combining whole genome with gene-set analysis, put the directory structure here
 
+#Add arguments to the main body
 source ${path_to_scripts}PRS_arguments_script.sh
 
 if [ ${Using_raven} = "TRUE" ]; then
@@ -10,6 +11,7 @@ cd $PBS_O_WORKDIR
 fi
 
 Directory_to_work_from=`pwd`
+
 
 cat ${path_to_scripts}PRS_arguments_script.sh
 

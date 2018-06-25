@@ -1,61 +1,5 @@
 #!/bin/bash
 
-if [[ "$Using_raven" = "TRUE" ]]; then
-	cd $PBS_O_WORKDIR
-fi
-
-# Run locally or on ARCCA
-whereami=$(uname -n)
-echo "$whereami"
-
-system=$3
-
- #echo "Press CTRL+C to proceed."
- #trap "pkill -f 'sleep 1h'" INT
- #trap "set +x ; sleep 1h ; set -x" DEBUG
-
-if [[ "$system" = "MAC" || "$system" = "LINUX" ]]; then
-
-   
-  # Arguments
-  Directory_to_work_from=$1
-  path_to_scripts=$2
-  
-  #Change to correct directory (just in case)
-  cd ${Directory_to_work_from}
-
-  # Assign the shell variables
-  source ${path_to_scripts}/PRS_arguments_script.sh
-  cat ${path_to_scripts}/PRS_arguments_script.sh
-
-  # Alter/add variables depending on what type of training dataset you have 
-  source ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt  
-  cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
-  chromosome_number=NA
-fi 
-
-# echo "Press CTRL+C to proceed."
-# trap "pkill -f 'sleep 1h'" INT
-# trap "set +x ; sleep 1h ; set -x" DEBUG
-
-#if [[ "$whereami" = *"raven"* ]]; then
-#	echo ${Batch_job_ID}
-	# move the raven.OU files to one directory
-#	cd /home/$USER/
-#	shopt -s nullglob #enable
-#	set -- *${Batch_job_ID}*
-#	if [ "$#" -gt 0 ]; then
-#		if [[ ! -d "${Raven_out_info_directory}" ]]; then
-#			mkdir ${Raven_out_info_directory}
-#		fi
-#		cp *${Batch_job_ID}* ${Raven_out_info_directory}
-#	else
-#		echo "cannot find raven output scripts, check jobid from batch run (*POLYGENIC_RISK_SCORE* script) and add to end of *new_PRS_argument* script in relevant extrainfo directory"
-#		exit 1
-#	fi
-#	shopt -u nullglob #disable
-#	cd $PBS_O_WORKDIR
-#fi
 
 if [[ "$system" = "MAC" || "$system" = "LINUX" ]]; then
 	shopt -s nullglob
@@ -113,8 +57,4 @@ done
 
 #Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}PRS_whole_genome_calc_log_regres_with_sig_thresh.R ./${training_set_name}_${validation_set_name}_extrainfo/PRS_genome_calc_log_regres.Rout ${training_set_name} ${validation_set_name} ${sig_thresholds[@]}
 
-if [[ "${Using_raven}" = "TRUE" ]]; then
-#Purge all modules
-module purge
-fi
 
