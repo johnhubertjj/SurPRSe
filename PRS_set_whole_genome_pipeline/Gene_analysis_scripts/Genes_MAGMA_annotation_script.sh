@@ -17,7 +17,7 @@ cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_argument
 Name_of_extra_analysis=Genes
 
 gene_output_directory="./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis}"
-gene_bim_file=${gene_output_directory}/${validation_set_usually_genotype}_consensus_with_${training_set_name}_flipped_alleles_no_duplicates.bim
+gene_bim_file=${gene_output_directory}/${validation_set_usually_genotype_serial}${chromosome_number}_consensus_with_${training_set_name}_flipped_alleles_no_duplicates.bim
 # input the right format here
 
 if [[ ${Gene_regions} = "both" ]]; then
@@ -38,7 +38,7 @@ Rscript ${path_to_scripts}RscriptEcho.R\
  ./${training_set_name}_${validation_set_name}_extrainfo/${chromosome_number}_assiging_SNPs_to_genes_whole_genome.Rout\
  ${training_set_name}\
  ${validation_set_name}\
- ${validation_set_usually_genotype}\
+ ${validation_set_usually_genotype_serial}${chromosome_number}\
  ${gene_bim_file}\
  ${Name_of_extra_analysis}\
  ${path_to_stationary_data}${Gene_location_filename}\
