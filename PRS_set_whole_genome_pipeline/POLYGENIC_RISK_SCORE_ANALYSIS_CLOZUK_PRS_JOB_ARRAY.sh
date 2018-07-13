@@ -9,28 +9,28 @@ exec &> "${logname}_Rtestoutclusterlogfile$1.txt"
 whereami=$(uname -n)
 echo "$whereami"
 system=$4
- 
+
 if [[ "$system" = "MAC" || "$system" = "LINUX" ]]; then
   # add directory to work from at the top of the script (just in case)
   Directory_to_work_from=$2
-  cd ${Directory_to_work_from} 
-  
+  cd ${Directory_to_work_from}
+
   #add the chromosome this copy of the script will analyse
   chromosome_number=$1
   echo $chromosome_number
-  
+
   # path to where the scripts are located
   path_to_scripts=$3
-  
+
   # Assign the shell variables
   source ${path_to_scripts}/PRS_arguments_script.sh
-  cat ${path_to_scripts}/PRS_arguments_script.sh 
-  
+  cat ${path_to_scripts}/PRS_arguments_script.sh
+
   # Alter/add variables depending on what type of Training dataset you have
   source ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
   cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
   echo ${validation_set_usually_genotype}
-fi  
+fi
 
 ## rewrite so that the file input is an argument for the script instead, this will work for now
 ## -gt is greater than
@@ -42,13 +42,13 @@ if [ "$#" -gt 0 ]; then
 
 # unpack the CLOZUK datasets
 # remember to delete after unpacking at the end of the analysis
-tar -zxvf ${validation_set_usually_genotype}.tar.gz
+tar -zxvf ${validation_set_usually_genotype_serial}${chromosome_number}.tar.gz
 shopt -u nullglob # disable
 fi
 
 if [[ ${remove_IDs} = "TRUE" ]]; then
 
-plink --bfile ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype} --remove CLOZUK2_IDs_remove_plink_file_chr_${chromosome_number}.txt --make-bed --out ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype}
+plink --bfile ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype_serial}${chromosome_number} --remove CLOZUK2_IDs_remove_plink_file_chr_${chromosome_number}.txt --make-bed --out ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype_serial}${chromosome_number}
 
 fi
 
@@ -60,7 +60,7 @@ fi
 if [ ! -d "${training_set_name}_${validation_set_name}_extrainfo" ]; then
    mkdir ${training_set_name}_${validation_set_name}_extrainfo
 fi
- 
+
 # Run R script that removes SNPs based on INFO score and MAF
 Rscript ${path_to_scripts}RscriptEcho.R\
  ${path_to_scripts}MAF_and_INFO_score_summary_stats_script.R\
@@ -74,7 +74,7 @@ Rscript ${path_to_scripts}RscriptEcho.R\
  ${INFO_threshold}\
  ${SE_summary}\
  ${SE_threshold}\
- ${chromosome_number} 
+ ${chromosome_number}
 
 # Run R script that will combine PGC and CLOZUK to an individual table
 # Output is in PGC_CLOZUK_SNP_table.txt
@@ -82,7 +82,7 @@ Rscript ${path_to_scripts}RscriptEcho.R\
  ${path_to_scripts}CLOZUK_PGC_COMBINE_final.R\
  ./${training_set_name}_${validation_set_name}_extrainfo/${validation_set_name}_${training_set_name}_COMBINE_chr${chromosome_number}.Rout\
  ${training_set_usually_summary}\
- ${validation_set_usually_genotype}\
+ ${validation_set_usually_genotype_serial}${chromosome_number}\
  ${training_set_name}\
  ${validation_set_name}\
  ${chromosome_number}\
@@ -94,7 +94,7 @@ Rscript ${path_to_scripts}RscriptEcho.R\
  ${OR_name}\
  ${BETA_name}\
  ${system}\
- ${Number_of_frequency_columns}  
+ ${Number_of_frequency_columns}
 
 if [[ ${MAF_genotype} = "TRUE" ]]; then
 if [[ ${Missing_geno} = "TRUE" ]]; then
@@ -106,37 +106,37 @@ if [[ ${Missing_geno} = "TRUE" ]]; then
 --geno ${genotype_missingness_check} \
 --hwe ${HWE_thresh} ${hwe_p_test} ${include_noncntrl} \
 --make-bed  \
---out ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype}_2
-else 
+--out ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype_serial}${chromosome_number}_2
+else
 
    # using plink to change the names to a CHR.POS identifier and remaking the files
   plink \
---bfile ${validation_set_usually_genotype} \
+--bfile ${validation_set_usually_genotype_serial}${chromosome_number} \
 --update-name ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_chr${chromosome_number}_chr.pos.txt \
 --maf ${MAF_threshold} \
 --make-bed  \
---out ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype}_2
+--out ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype_serial}${chromosome_number}_2
 fi
 
-elif [[ ${MAF_genotype} = "FALSE" ]]; then 
+elif [[ ${MAF_genotype} = "FALSE" ]]; then
 if [[ ${Missing_geno} = "TRUE" ]]; then
 
 plink \
---bfile ${validation_set_usually_genotype} \
+--bfile ${validation_set_usually_genotype_serial}${chromosome_number} \
 --update-name ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_chr${chromosome_number}_chr.pos.txt \
 --geno ${genotype_missingness_check} \
 --hwe ${HWE_thresh} ${hwe_p_test} ${include_noncntrl} \
 --make-bed \
---out ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype}_2
+--out ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype_serial}${chromosome_number}_2
 
 else
 
 # using plink to change the names to a CHR.POS identifier and remaking the files
   plink \
---bfile ${validation_set_usually_genotype} \
+--bfile ${validation_set_usually_genotype_serial}${chromosome_number} \
 --update-name ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_chr${chromosome_number}_chr.pos.txt \
 --make-bed  \
---out ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype}_2
+--out ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype_serial}${chromosome_number}_2
 fi
 fi
 
@@ -147,7 +147,7 @@ fi
 # CLOZUK_GWAS_BGE_chr${chromosome_number}.fam
 
 if [[ ${Extra_analyses} = "TRUE" ]]; then
-# NEED A CHECK ON WHAT EXTRA ANALYSES YOU ARE RUNNING HERE! 
+# NEED A CHECK ON WHAT EXTRA ANALYSES YOU ARE RUNNING HERE!
 length_of_extra_analysis_array=`echo ${#Name_of_extra_analysis[@]}`
 
 if [ "${length_of_extra_analysis_array}" -eq  "2" ]; then
@@ -159,11 +159,11 @@ Name_of_extra_analysis_specific=(Pathways Genes)
 
 # Create files for Clumping
 	plink \
---bfile ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype}_2 \
+--bfile ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype_serial}${chromosome_number}_2 \
 --exclude ./${training_set_name}_${validation_set_name}_output/extracted_Duplicate_snps_${validation_set_name}_${training_set_name}_chr${chromosome_number}.txt \
 --extract ./${training_set_name}_${validation_set_name}_output/chr${chromosome_number}${training_set_name}_${validation_set_name}_common_SNPs.txt \
 --make-bed \
---out ./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis_specific[0]}/${validation_set_usually_genotype}_consensus_with_${training_set_name}_flipped_alleles_no_duplicates
+--out ./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis_specific[0]}/${validation_set_usually_genotype_serial}${chromosome_number}_consensus_with_${training_set_name}_flipped_alleles_no_duplicates
 
 echo "Arguments script stated that this analysis is for ${Name_of_extra_analysis_specific[0]}\
 , therefore clumping will be not be performed for Polygenic risk scores"
@@ -175,11 +175,11 @@ echo "Arguments script stated that this analysis is for ${Name_of_extra_analysis
 
 # Create files for Clumping
 	plink \
---bfile ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype}_2 \
+--bfile ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype_serial}${chromosome_number}_2 \
 --exclude ./${training_set_name}_${validation_set_name}_output/extracted_Duplicate_snps_${validation_set_name}_${training_set_name}_chr${chromosome_number}.txt \
 --extract ./${training_set_name}_${validation_set_name}_output/chr${chromosome_number}${training_set_name}_${validation_set_name}_common_SNPs.txt \
 --make-bed \
---out ./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis_specific[1]}/${validation_set_usually_genotype}_consensus_with_${training_set_name}_flipped_alleles_no_duplicates
+--out ./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis_specific[1]}/${validation_set_usually_genotype_serial}${chromosome_number}_consensus_with_${training_set_name}_flipped_alleles_no_duplicates
 
 echo "Arguments script stated that this analysis is for ${Name_of_extra_analysis_specific[1]}\
 , therefore clumping will be not be performed for Polygenic risk scores"
@@ -193,11 +193,11 @@ else
 
 # Create files for Clumping
 	plink \
---bfile ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype}_2 \
+--bfile ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype_serial}${chromosome_number}_2 \
 --exclude ./${training_set_name}_${validation_set_name}_output/extracted_Duplicate_snps_${validation_set_name}_${training_set_name}_chr${chromosome_number}.txt \
 --extract ./${training_set_name}_${validation_set_name}_output/chr${chromosome_number}${training_set_name}_${validation_set_name}_common_SNPs.txt \
 --make-bed \
---out ./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis[0]}/${validation_set_usually_genotype}_consensus_with_${training_set_name}_flipped_alleles_no_duplicates
+--out ./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis[0]}/${validation_set_usually_genotype_serial}${chromosome_number}_consensus_with_${training_set_name}_flipped_alleles_no_duplicates
 
 echo "Arguments script stated that this analysis is for ${Name_of_extra_analysis[0]}\
 , therefore clumping will be not be performed for Polygenic risk scores"
@@ -205,11 +205,11 @@ echo "Arguments script stated that this analysis is for ${Name_of_extra_analysis
 
 fi
 
-### Clean up original datasets to only leave the tar.gz file 
+### Clean up original datasets to only leave the tar.gz file
 shopt -s nullglob
-set -- *${validation_set_usually_genotype}*
+set -- *${validation_set_usually_genotype_serial}${chromosome_number}*
 if [ "$#" -gt 3 ]; then
-	rm -rf ${validation_set_usually_genotype}.{bim,bed,fam,log} 
+	rm -rf ${validation_set_usually_genotype_serial}${chromosome_number}.{bim,bed,fam,log}
 	shopt -u nullglob
 fi
 
@@ -217,17 +217,17 @@ fi
 exit 0
 
 else
-	
+
 	plink \
---bfile ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype}_2 \
+--bfile ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype_serial}${chromosome_number}_2 \
 --exclude ./${training_set_name}_${validation_set_name}_output/extracted_Duplicate_snps_${validation_set_name}_${training_set_name}_chr${chromosome_number}.txt \
 --extract ./${training_set_name}_${validation_set_name}_output/chr${chromosome_number}${training_set_name}_${validation_set_name}_common_SNPs.txt \
 --make-bed \
---out ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype}_consensus_with_${training_set_name}_flipped_alleles_no_duplicates
+--out ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype_serial}${chromosome_number}_consensus_with_${training_set_name}_flipped_alleles_no_duplicates
 
 fi
 
-## Limit to genic SNPs here 
+## Limit to genic SNPs here
 ##########################
 ##########################
 
@@ -235,7 +235,7 @@ fi
 # Extract the SNPs common between PGC and CLOZUK
 # Remove the duplicate SNPs
 plink \
---bfile ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype}_consensus_with_${training_set_name}_flipped_alleles_no_duplicates \
+--bfile ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype_serial}${chromosome_number}_consensus_with_${training_set_name}_flipped_alleles_no_duplicates \
 --extract ./${training_set_name}_${validation_set_name}_output/chr${chromosome_number}${training_set_name}_${validation_set_name}_common_SNPs.txt \
 --exclude ./${training_set_name}_${validation_set_name}_output/extracted_Duplicate_snps_${validation_set_name}_${training_set_name}_chr${chromosome_number}.txt \
 --clump ./${training_set_name}_${validation_set_name}_output/${training_set_name}_table${chromosome_number}_new.txt \
@@ -244,7 +244,7 @@ plink \
 --clump-p2 ${p2} \
 --clump-r2 ${r2} \
 --out ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_${training_set_name}_bge_removed_A.T_C.G.target_r0.2_1000kb_non_verbose_chr${chromosome_number}
- 
+
 # Clean up the files to leave a dataset that can be read into R/Python as well as a list of SNPs to extract for the CLUMPED plink files
 tr -s ' ' '\t' \
 < ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_${training_set_name}_bge_removed_A.T_C.G.target_r0.2_1000kb_non_verbose_chr${chromosome_number}.clumped \
@@ -262,29 +262,29 @@ awk '{ print $2 }' \
 
 printf "%s\n\n" \
 "$(tail -n +2 ./${training_set_name}_${validation_set_name}_output/CLUMPED_EXTRACT_${validation_set_name}_chr${chromosome_number}.txt)" \
-> ./${training_set_name}_${validation_set_name}_output/CLUMPED_EXTRACT_${validation_set_name}_chr${chromosome_number}.txt 
+> ./${training_set_name}_${validation_set_name}_output/CLUMPED_EXTRACT_${validation_set_name}_chr${chromosome_number}.txt
 
-	
+
 # Create clumped plink files
 plink \
---bfile ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype}_consensus_with_${training_set_name}_flipped_alleles_no_duplicates \
+--bfile ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype_serial}${chromosome_number}_consensus_with_${training_set_name}_flipped_alleles_no_duplicates \
 --extract ./${training_set_name}_${validation_set_name}_output/CLUMPED_EXTRACT_${validation_set_name}_chr${chromosome_number}.txt \
 --make-bed \
---out ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype}_${training_set_name}_CLUMPED
+--out ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype_serial}${chromosome_number}_${training_set_name}_CLUMPED
 
-# Clean up original datasets to only leave the tar.gz file 
+# Clean up original datasets to only leave the tar.gz file
 shopt -s nullglob
-set -- *${validation_set_usually_genotype}*
+set -- *${validation_set_usually_genotype_serial}${chromosome_number}*
 if [ "$#" -gt 3 ]; then
-	rm -rf ${validation_set_usually_genotype}.{bim,bed,fam,log} 
+	rm -rf ${validation_set_usually_genotype_serial}${chromosome_number}.{bim,bed,fam,log}
 	shopt -u nullglob
 fi
 
 # Clean up other unneeded files
-rm ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype}_2.{bim,bed,fam,log}
+rm ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype_serial}${chromosome_number}_2.{bim,bed,fam,log}
 rm ./${training_set_name}_${validation_set_name}_output/chr${chromosome_number}${training_set_name}_${validation_set_name}_common_SNPs.txt
-rm ./${training_set_name}_${validation_set_name}_output/extracted_Duplicate_snps_${validation_set_name}_${training_set_name}_chr${chromosome_number}.txt 
-rm ./${training_set_name}_${validation_set_name}_output/CLUMPED_EXTRACT_${validation_set_name}_chr${chromosome_number}.txt 
+rm ./${training_set_name}_${validation_set_name}_output/extracted_Duplicate_snps_${validation_set_name}_${training_set_name}_chr${chromosome_number}.txt
+rm ./${training_set_name}_${validation_set_name}_output/CLUMPED_EXTRACT_${validation_set_name}_chr${chromosome_number}.txt
 
 # Append job ID to PRS_arguments_script
 #if [[ "$PBS_ARRAYID" = 1 ]]; then
@@ -295,4 +295,3 @@ if [[ "${Using_raven}" = "TRUE" ]]; then
 #Purge all modules
 module purge
 fi
-
