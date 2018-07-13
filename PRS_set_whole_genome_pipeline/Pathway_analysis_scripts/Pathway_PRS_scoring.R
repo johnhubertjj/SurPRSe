@@ -31,7 +31,7 @@ Pathway_file_name <- args[7] # the name of the file to be accessed (must be in s
 Gene_regions <- args[8]
 
 # This will be a problem, write in a script that defines what the arguments are (probably have to be linked with the arguments script however...stop un-needed analysis)
-significance_thresholds <- as.character(args[c(9:length(args))])
+significance_thresholds <- as.numeric(args[c(9:length(args))])
 print(significance_thresholds)
 
 #Training_name <- "HG19_pgc.scz.full.2012-04"
