@@ -29,7 +29,7 @@ if [[ "$system" = "MAC" || "$system" = "LINUX" ]]; then
   # Alter/add variables depending on what type of Training dataset you have
   source ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
   cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
-  echo ${validation_set_usually_genotype}
+  echo ${validation_set_usually_genotype_serial}${chromosome_number}
 fi
 
 ## rewrite so that the file input is an argument for the script instead, this will work for now
@@ -65,7 +65,7 @@ fi
 Rscript ${path_to_scripts}RscriptEcho.R\
  ${path_to_scripts}MAF_and_INFO_score_summary_stats_script.R\
  ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_remove_MAF_INFO${chromosome_number}.Rout\
- ${training_set_usually_summary}\
+ ${training_set_usually_summary}${chromosome_number}\
  ${training_set_name}\
  ${validation_set_name}\
  ${MAF_summary}\
@@ -81,7 +81,7 @@ Rscript ${path_to_scripts}RscriptEcho.R\
 Rscript ${path_to_scripts}RscriptEcho.R\
  ${path_to_scripts}CLOZUK_PGC_COMBINE_final.R\
  ./${training_set_name}_${validation_set_name}_extrainfo/${validation_set_name}_${training_set_name}_COMBINE_chr${chromosome_number}.Rout\
- ${training_set_usually_summary}\
+ ${training_set_usually_summary}${chromosome_number}\
  ${validation_set_usually_genotype_serial}${chromosome_number}\
  ${training_set_name}\
  ${validation_set_name}\
@@ -100,7 +100,7 @@ if [[ ${MAF_genotype} = "TRUE" ]]; then
 if [[ ${Missing_geno} = "TRUE" ]]; then
      	# using plink to change the names to a CHR.POS identifier and remaking the files
   plink \
---bfile ${validation_set_usually_genotype} \
+--bfile ${validation_set_usually_genotype_serial}${chromosome_number} \
 --update-name ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_chr${chromosome_number}_chr.pos.txt \
 --maf ${MAF_threshold} \
 --geno ${genotype_missingness_check} \
