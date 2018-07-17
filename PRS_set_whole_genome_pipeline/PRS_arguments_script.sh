@@ -53,7 +53,7 @@ if [[ "$whereami" = *"raven"* ]]; then
   ldsc="/home/c1020109/ldsc/ldsc.py"
 
   # Pathway datasets
-  Pathway_filename="Pocklington2015_134sets.txt"
+  Pathway_filename="Selected_Pocklington_pathways.txt"
   Gene_location_filename="NCBI37.3.gene.loc"
   calculate_indep_SNPs=FALSE
 
