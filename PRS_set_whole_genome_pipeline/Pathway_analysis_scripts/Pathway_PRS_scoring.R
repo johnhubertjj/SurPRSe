@@ -1,6 +1,8 @@
 #####################################
 ###########PRS PER PATHWAY###########
 #####################################
+# source(paste0(path_to_PRS_scripts,'Pathway_analysis_scripts/Pathway_PRS_scoring.R'))
+
 ### Start Timer
 ptm <- proc.time()
 
@@ -57,140 +59,159 @@ number_of_pathways_to_analyse <- length(pathway_names)
 Summary_stats_full_dataset <- fread(paste0("./", Training_name, "_", Validation_name,"_output/combined_", Training_name, "_table_with_CHR.POS_identifiers.txt"))
 
 calculating_scores <- function(i,Summary_stats_full_dataset, Validation_name, Training_name, Pathway_directory, pathway_names, Gene_regions){
- 
-if (Gene_regions == "both" | Gene_regions == "normal"){
-
-	extra_gene_regions <- "normal"
- 
-	# Read in pathway_bim_file
-	test_pathway <- fread(paste0(Pathway_directory, pathway_names[i],"/",Validation_name,"_",Training_name,"_",pathway_names[i],"_",extra_gene_regions,"_Clumped_whole_genome_final.bim"))
-
-                      
-#for (i in 1:length(Useful_pathways)) {
-#  Maindir <- paste0("~/Documents/testing_PRS_chromosome_22/test_chr5/output/", Useful_pathways[i])
-#  scoredir <- "score"
-#  profiledir <- "Profile"
-#  if (file.exists(scoredir) == FALSE){
-#    dir.create(file.path(Maindir, scoredir))
-#  }
-#  if (file.exists(profiledir) == FALSE){
-#    dir.create(file.path(Maindir, profiledir))
-#  }
-#}
-
-  scoring_output_file <- paste0(Pathway_directory,pathway_names[i],"/scoring_",Training_name,"_",Validation_name,"_pathway_",pathway_names[i],"_",extra_gene_regions)
-
-  #path_to_pathway_plink_file <- paste0(Useful_pathways[i],"/pathways_CLOZUK_GWAS_BGE_CLUMPED_",Useful_pathways[i])                         
   
-  setnames(test_pathway,c("CHR","SNP","GD","BP","A1","A2"))  
-  
-  combined.test.training.clumped.Genomic.SNPs <- merge(test_pathway, Summary_stats_full_dataset, by.x="SNP", by.y="SNP", all=F, sort=F)
-  combined.test.training.clumped.Genomic.SNPs$A1.y <- toupper(combined.test.training.clumped.Genomic.SNPs$A1.y)
-  combined.test.training.clumped.Genomic.SNPs$A2.y <- toupper(combined.test.training.clumped.Genomic.SNPs$A2.y)
-  
-  ## check that it is merging properly here (after analysis is run)
-
-  for (w in 1:length(significance_thresholds)) {
+  if (Gene_regions == "both" | Gene_regions == "normal"){
     
-    a <- copy(combined.test.training.clumped.Genomic.SNPs)    
-    SNPs <- a[, .I[which(P <= significance_thresholds[w])]]
+    extra_gene_regions <- "normal"
     
-    if (length(SNPs) != 0){
-      a <- a[SNPs, .(SNP, A1.y, BETA)]
+    # Read in pathway_bim_file
+    test_pathway <- fread(paste0(Pathway_directory, pathway_names[i],"/",Validation_name,"_",Training_name,"_",pathway_names[i],"_",extra_gene_regions,"_Clumped_whole_genome_final.bim"))
+    
+    
+    #for (i in 1:length(Useful_pathways)) {
+    #  Maindir <- paste0("~/Documents/testing_PRS_chromosome_22/test_chr5/output/", Useful_pathways[i])
+    #  scoredir <- "score"
+    #  profiledir <- "Profile"
+    #  if (file.exists(scoredir) == FALSE){
+    #    dir.create(file.path(Maindir, scoredir))
+    #  }
+    #  if (file.exists(profiledir) == FALSE){
+    #    dir.create(file.path(Maindir, profiledir))
+    #  }
+    #}
+    
+    scoring_output_file <- paste0(Pathway_directory,pathway_names[i],"/scoring_",Training_name,"_",Validation_name,"_pathway_",pathway_names[i],"_",extra_gene_regions)
+    
+    #path_to_pathway_plink_file <- paste0(Useful_pathways[i],"/pathways_CLOZUK_GWAS_BGE_CLUMPED_",Useful_pathways[i])                         
+    
+    setnames(test_pathway,c("CHR","SNP","GD","BP","A1","A2"))  
+    
+    combined.test.training.clumped.Genomic.SNPs <- merge(test_pathway, Summary_stats_full_dataset, by.x="SNP", by.y="SNP", all=F, sort=F)
+    combined.test.training.clumped.Genomic.SNPs$A1.y <- toupper(combined.test.training.clumped.Genomic.SNPs$A1.y)
+    combined.test.training.clumped.Genomic.SNPs$A2.y <- toupper(combined.test.training.clumped.Genomic.SNPs$A2.y)
+    
+    ## check that it is merging properly here (after analysis is run)
+    
+    for (w in 1:length(significance_thresholds)) {
       
-      filename <- paste0(scoring_output_file,'_with_', significance_thresholds[w],".score")
-
-      write.table(file = filename, a, row.names = F, col.names = F, quote = F, sep="\t")
+      a <- copy(combined.test.training.clumped.Genomic.SNPs)    
+      SNPs <- a[, .I[which(P <= significance_thresholds[w])]]
       
-      #      if (Useful_pathways[i] == "abnormal_learning|memory|conditioning" | Useful_pathways[i] == "abnormal_motor_capabilities|coordination|movement") {
-      #        Useful_pathways[i] <- "abnormal_learning\\|memory\\|conditioning"
-      #        filename <- paste0(Useful_pathways[i],'/score/', Useful_pathways[i],'_with_', p.value.thresholds[w],".score")
-      #        path_to_pathway_plink_file <- paste0(Useful_pathways[i],"/pathways_CLOZUK_GWAS_BGE_CLUMPED_",Useful_pathways[i])                         
-      #        }
-      
-      #      if (Useful_pathways[i] == "abnormal_motor_capabilities|coordination|movement") {
-      #        Useful_pathways[i] <-"abnormal_learning_motor_capabilities\|coordination\|movement"
-      #        filename <- paste0(Useful_pathways[i],'/score/', Useful_pathways[i],'_with_', p.value.thresholds[w],".score")
-      #        path_to_pathway_plink_file <- paste0(Useful_pathways[i],"/pathways_CLOZUK_GWAS_BGE_CLUMPED_",Useful_pathways[i])                         
-      #        
-      #      }
-      
-      
-    }else{
-      cat("No SNPs found for pathway ",pathway_names[i]," no score file produced for ", extra_gene_regions, " gene regions")
-      write(x = pathway_names[i], file = paste0(Pathway_directory,"Pathways_with_no_SNPs_for_scoring_",extra_gene_regions,".txt"), append = T)
-      next()
+      if (length(SNPs) != 0){
+        a <- a[SNPs, .(SNP, A1.y, BETA)]
+        
+        filename <- paste0(scoring_output_file,'_with_', significance_thresholds[w],".score")
+        
+        write.table(file = filename, a, row.names = F, col.names = F, quote = F, sep="\t")
+        
+        write(x = paste(pathway_names[i],significance_thresholds[w],TRUE,sep = " "), file = paste0(Pathway_directory,"thresholds_to_use_",extra_gene_regions,".txt"), append = T)
+        
+        #      if (Useful_pathways[i] == "abnormal_learning|memory|conditioning" | Useful_pathways[i] == "abnormal_motor_capabilities|coordination|movement") {
+        #        Useful_pathways[i] <- "abnormal_learning\\|memory\\|conditioning"
+        #        filename <- paste0(Useful_pathways[i],'/score/', Useful_pathways[i],'_with_', p.value.thresholds[w],".score")
+        #        path_to_pathway_plink_file <- paste0(Useful_pathways[i],"/pathways_CLOZUK_GWAS_BGE_CLUMPED_",Useful_pathways[i])                         
+        #        }
+        
+        #      if (Useful_pathways[i] == "abnormal_motor_capabilities|coordination|movement") {
+        #        Useful_pathways[i] <-"abnormal_learning_motor_capabilities\|coordination\|movement"
+        #        filename <- paste0(Useful_pathways[i],'/score/', Useful_pathways[i],'_with_', p.value.thresholds[w],".score")
+        #        path_to_pathway_plink_file <- paste0(Useful_pathways[i],"/pathways_CLOZUK_GWAS_BGE_CLUMPED_",Useful_pathways[i])                         
+        #        
+        #      }
+        
+        
+      }else{
+        #cat("No SNPs found for pathway ",pathway_names[i]," no score file produced for ", extra_gene_regions, " gene regions")
+        write(x = paste(pathway_names[i],significance_thresholds[w],FALSE,sep = " "), file = paste0(Pathway_directory,"thresholds_to_use_",extra_gene_regions,".txt"), append = T)
+        next()
+      }
     }
   }
+  
+  if (Gene_regions == "both" | Gene_regions == "extended"){
+    
+    extra_gene_regions <- "extended"
+    
+    # Read in pathway_bim_file
+    test_pathway <- fread(paste0(Pathway_directory, pathway_names[i],"/",Validation_name,"_",Training_name,"_",pathway_names[i],"_",extra_gene_regions,"_Clumped_whole_genome_final.bim"))
+    
+    
+    #for (i in 1:length(Useful_pathways)) {
+    #  Maindir <- paste0("~/Documents/testing_PRS_chromosome_22/test_chr5/output/", Useful_pathways[i])
+    #  scoredir <- "score"
+    #  profiledir <- "Profile"
+    #  if (file.exists(scoredir) == FALSE){
+    #    dir.create(file.path(Maindir, scoredir))
+    #  }
+    #  if (file.exists(profiledir) == FALSE){
+    #    dir.create(file.path(Maindir, profiledir))
+    #  }
+    #}
+    
+    scoring_output_file <- paste0(Pathway_directory,pathway_names[i],"/scoring_",Training_name,"_",Validation_name,"_pathway_",pathway_names[i],"_",extra_gene_regions)
+    
+    #path_to_pathway_plink_file <- paste0(Useful_pathways[i],"/pathways_CLOZUK_GWAS_BGE_CLUMPED_",Useful_pathways[i])                         
+    
+    setnames(test_pathway,c("CHR","SNP","GD","BP","A1","A2"))  
+    
+    combined.test.training.clumped.Genomic.SNPs <- merge(test_pathway, Summary_stats_full_dataset, by.x="SNP", by.y="SNP", all=F, sort=F)
+    combined.test.training.clumped.Genomic.SNPs$A1.y <- toupper(combined.test.training.clumped.Genomic.SNPs$A1.y)
+    combined.test.training.clumped.Genomic.SNPs$A2.y <- toupper(combined.test.training.clumped.Genomic.SNPs$A2.y)
+    
+    ## check that it is merging properly here (after analysis is run)
+    
+    for (w in 1:length(significance_thresholds)) {
+      
+      a <- copy(combined.test.training.clumped.Genomic.SNPs)    
+      SNPs <- a[, .I[which(P <= significance_thresholds[w])]]
+      
+      if (length(SNPs) != 0){
+        a <- a[SNPs, .(SNP, A1.y, BETA)]
+        
+        filename_score_file <- paste0(scoring_output_file,'_with_', significance_thresholds[w],".score")
+        
+        write(x = paste(pathway_names[i],significance_thresholds[w],TRUE,sep = " "), file = paste0(Pathway_directory,"thresholds_to_use_",extra_gene_regions,".txt"), append = T)
+        
+        
+        write.table(file = filename_score_file, a, row.names = F, col.names = F, quote = F, sep="\t")
+        
+        #      if (Useful_pathways[i] == "abnormal_learning|memory|conditioning" | Useful_pathways[i] == "abnormal_motor_capabilities|coordination|movement") {
+        #        Useful_pathways[i] <- "abnormal_learning\\|memory\\|conditioning"
+        #        filename <- paste0(Useful_pathways[i],'/score/', Useful_pathways[i],'_with_', p.value.thresholds[w],".score")
+        #        path_to_pathway_plink_file <- paste0(Useful_pathways[i],"/pathways_CLOZUK_GWAS_BGE_CLUMPED_",Useful_pathways[i])                         
+        #        }
+        
+        #      if (Useful_pathways[i] == "abnormal_motor_capabilities|coordination|movement") {
+        #        Useful_pathways[i] <-"abnormal_learning_motor_capabilities\|coordination\|movement"
+        #        filename <- paste0(Useful_pathways[i],'/score/', Useful_pathways[i],'_with_', p.value.thresholds[w],".score")
+        #        path_to_pathway_plink_file <- paste0(Useful_pathways[i],"/pathways_CLOZUK_GWAS_BGE_CLUMPED_",Useful_pathways[i])                         
+        #        
+        #      }
+        
+        
+      }else{
+        #cat("No SNPs found for pathway ",pathway_names[i]," no score file produced for ", extra_gene_regions, " gene regions")
+        write(x = paste(pathway_names[i],significance_thresholds[w],FALSE,sep = " "), file = paste0(Pathway_directory,"thresholds_to_use_",extra_gene_regions,".txt"), append = T)
+        next()
+      }
+    }
+  }
+  # Bracket for function call
+}
+
+if (Gene_regions == "both" | Gene_regions == "normal"){
+  
+if(file.exists(paste0(Pathway_directory,"thresholds_to_use_normal.txt"))){
+  file.remove(paste0(Pathway_directory,"thresholds_to_use_normal.txt"))
+}
 }
 
 if (Gene_regions == "both" | Gene_regions == "extended"){
-
-	extra_gene_regions <- "extended"
- 
-	# Read in pathway_bim_file
-	test_pathway <- fread(paste0(Pathway_directory, pathway_names[i],"/",Validation_name,"_",Training_name,"_",pathway_names[i],"_",extra_gene_regions,"_Clumped_whole_genome_final.bim"))
-
-                      
-#for (i in 1:length(Useful_pathways)) {
-#  Maindir <- paste0("~/Documents/testing_PRS_chromosome_22/test_chr5/output/", Useful_pathways[i])
-#  scoredir <- "score"
-#  profiledir <- "Profile"
-#  if (file.exists(scoredir) == FALSE){
-#    dir.create(file.path(Maindir, scoredir))
-#  }
-#  if (file.exists(profiledir) == FALSE){
-#    dir.create(file.path(Maindir, profiledir))
-#  }
-#}
-
-  scoring_output_file <- paste0(Pathway_directory,pathway_names[i],"/scoring_",Training_name,"_",Validation_name,"_pathway_",pathway_names[i],"_",extra_gene_regions)
-
-  #path_to_pathway_plink_file <- paste0(Useful_pathways[i],"/pathways_CLOZUK_GWAS_BGE_CLUMPED_",Useful_pathways[i])                         
-  
-  setnames(test_pathway,c("CHR","SNP","GD","BP","A1","A2"))  
-  
-  combined.test.training.clumped.Genomic.SNPs <- merge(test_pathway, Summary_stats_full_dataset, by.x="SNP", by.y="SNP", all=F, sort=F)
-  combined.test.training.clumped.Genomic.SNPs$A1.y <- toupper(combined.test.training.clumped.Genomic.SNPs$A1.y)
-  combined.test.training.clumped.Genomic.SNPs$A2.y <- toupper(combined.test.training.clumped.Genomic.SNPs$A2.y)
-  
-  ## check that it is merging properly here (after analysis is run)
-
-  for (w in 1:length(significance_thresholds)) {
-    
-    a <- copy(combined.test.training.clumped.Genomic.SNPs)    
-    SNPs <- a[, .I[which(P <= significance_thresholds[w])]]
-    
-    if (length(SNPs) != 0){
-      a <- a[SNPs, .(SNP, A1.y, BETA)]
-      
-      filename <- paste0(scoring_output_file,'_with_', significance_thresholds[w],".score")
-
-      write.table(file = filename, a, row.names = F, col.names = F, quote = F, sep="\t")
-      
-      #      if (Useful_pathways[i] == "abnormal_learning|memory|conditioning" | Useful_pathways[i] == "abnormal_motor_capabilities|coordination|movement") {
-      #        Useful_pathways[i] <- "abnormal_learning\\|memory\\|conditioning"
-      #        filename <- paste0(Useful_pathways[i],'/score/', Useful_pathways[i],'_with_', p.value.thresholds[w],".score")
-      #        path_to_pathway_plink_file <- paste0(Useful_pathways[i],"/pathways_CLOZUK_GWAS_BGE_CLUMPED_",Useful_pathways[i])                         
-      #        }
-      
-      #      if (Useful_pathways[i] == "abnormal_motor_capabilities|coordination|movement") {
-      #        Useful_pathways[i] <-"abnormal_learning_motor_capabilities\|coordination\|movement"
-      #        filename <- paste0(Useful_pathways[i],'/score/', Useful_pathways[i],'_with_', p.value.thresholds[w],".score")
-      #        path_to_pathway_plink_file <- paste0(Useful_pathways[i],"/pathways_CLOZUK_GWAS_BGE_CLUMPED_",Useful_pathways[i])                         
-      #        
-      #      }
-      
-      
-    }else{
-      cat("No SNPs found for pathway ",pathway_names[i]," no score file produced for ", extra_gene_regions, " gene regions")
-      write(x = pathway_names[i], file = paste0(Pathway_directory,"Pathways_with_no_SNPs_for_scoring_",extra_gene_regions,".txt"), append = T)
-      next()
-    }
+  if(file.exists(paste0(Pathway_directory,"thresholds_to_use_extended.txt"))){
+    file.remove(paste0(Pathway_directory,"thresholds_to_use_extended.txt"))
   }
 }
-# Bracket for function call
-}
+
 
 # Calculate the number of cores
 no_cores <- detectCores() - 1
@@ -202,6 +223,3 @@ cl <- makeCluster(no_cores, type = "FORK")
 clusterExport(cl, "e")
 parLapply(cl, 1:number_of_pathways_to_analyse, calculating_scores, Summary_stats_full_dataset, Validation_name, Training_name, Pathway_directory, pathway_names, Gene_regions)
 stopCluster(cl)
-
-## END script!
-#######################################
