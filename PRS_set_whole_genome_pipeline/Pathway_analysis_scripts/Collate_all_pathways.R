@@ -34,10 +34,6 @@ Pathway_directory <- args[5]
 Pathway_file_name <- args[6] # the name of the file to be accessed (must be in stationary directory)
 Gene_regions <- args[7]
 
-# This will be a problem, write in a script that defines what the arguments are (probably have to be linked with the arguments script however...stop un-needed analysis)
-significance_thresholds <- as.character(args[c(8:length(args))])
-print(significance_thresholds)
-
 # Define environment
 e <- new.env()
 
@@ -45,7 +41,7 @@ e <- new.env()
 
 # This function creates 3 stringed vectors recording the PRS score files that exist, the ones that don't and all together if there was at least one SNP in each
 
-list_of_filenames <- function(Training_name,Validation_name,Pathway_directory,Gene_regions){
+list_of_filenames <- function(Training_name, Validation_name, Pathway_directory, Gene_regions){
   
   Filenames_of_score_files <- NULL
   All_files_for_PRS <- NULL
@@ -67,7 +63,7 @@ list_of_filenames <- function(Training_name,Validation_name,Pathway_directory,Ge
     FALSE_Filenames_of_score_files <- c(FALSE_Filenames_of_score_files, scoring_output_file)
   }
   
-  for (i in 1:nrow(Scores_with_SNPs_all)){
+  for (i in 1:nrow(Scores_with_SNPs)){
     scoring_output_file <- paste0(Pathway_directory,Scores_with_SNPs$Pathway[i],"/scoring_",Training_name,"_",Validation_name,"_pathway_",Scores_with_SNPs$Pathway[i],"_", Gene_regions,"_with_",Scores_with_SNPs$Significance_Threshold[i],".profile")
     All_files_for_PRS <- c(All_files_for_PRS, scoring_output_file)
   }
@@ -90,7 +86,8 @@ create_collated_polygenic_risk_scores <- function(Gene_regions){
     my_data[[i]] <- my_data[[i]][,c(1,2,6)]
     name <- names(my_data[i])
     score_significance_thresh <- gsub(".*\\_with\\_(.*$)", "\\1",x = name)
-    score_name <- gsub(".*pathway_(.*?)_extended.*", "\\1", x = name)
+    score_name_pattern <- paste0(".*pathway_(.*?)_",Gene_regions,".*")
+    score_name <- gsub(score_name_pattern, "\\1", x = name)
     colnames(my_data[[i]]) <- c("FID", "IID", paste("SCORE_", score_name,"_",score_significance_thresh, sep=""))
   }
   
@@ -129,7 +126,7 @@ if (Gene_regions == "both" | Gene_regions == "normal"){
   
   Final_normal_gene_regions_table <- merge(e$PRS_profiles_with_SNPS,e$PRS_dummy_profiles_without_SNPS, by = c("FID", "IID"))
 
-  write.table(Final_normal_gene_regions_table,file = paste0("FINAL_PATHWAY_RESULTS_PRS_PROFILES",Training_name,"_",Validation_name, "_", Pathways_used,"_", extra_gene_regions, ".txt"),quote = F,row.names = F)
+  write.table(Final_normal_gene_regions_table,file = paste0("FINAL_PATHWAY_RESULTS_PRS_PROFILES",Training_name,"_",Validation_name, "_", extra_gene_regions, ".txt"),quote = F,row.names = F)
 }
 
 ### Create collated PRS profiles for the extended gene regions ###
@@ -146,7 +143,7 @@ if (Gene_regions == "both" | Gene_regions == "extended"){
   
   Final_normal_gene_regions_table <- merge(e$PRS_profiles_with_SNPS,e$PRS_dummy_profiles_without_SNPS, by = c("FID", "IID"))
   
-  write.table(Final_normal_gene_regions_table,file = paste0("FINAL_PATHWAY_RESULTS_PRS_PROFILES",Training_name,"_",Validation_name, "_", Pathways_used,"_", extra_gene_regions, ".txt"),quote = F,row.names = F)
+  write.table(Final_normal_gene_regions_table,file = paste0("FINAL_PATHWAY_RESULTS_PRS_PROFILES",Training_name,"_",Validation_name, "_", extra_gene_regions, ".txt"),quote = F,row.names = F)
 }
 
 
