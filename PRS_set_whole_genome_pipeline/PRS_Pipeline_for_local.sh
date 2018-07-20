@@ -54,7 +54,7 @@ source ${path_to_scripts}Plink_arguments_files_R_scripts.sh
 # Convert input files into a chromosome format
 source ${path_to_scripts}Summary_stats_to_chromosome_converter.sh
 
-# calculate polygenic scores for the whole genome across different chromosomes	
+# calculate polygenic scores for the whole genome across different chromosomes
 
 if [[ "${Using_raven}" = "FALSE" ]]; then
 
@@ -62,7 +62,7 @@ if [[ "${Using_raven}" = "FALSE" ]]; then
 sudo parallel ${path_to_scripts}POLYGENIC_RISK_SCORE_ANALYSIS_CLOZUK_PRS_JOB_ARRAY.sh ::: ${Chromosomes_to_analyse[@]} ::: ${Directory_to_work_from} ::: ${path_to_scripts} ::: ${system} ::: ${training_set_name} ::: ${validation_set_name}
 else
 # For use on local
-parallel ${path_to_scripts}POLYGENIC_RISK_SCORE_ANALYSIS_CLOZUK_PRS_JOB_ARRAY.sh ::: ${Chromosomes_to_analyse[@]} ::: ${Directory_to_work_from} ::: ${path_to_scripts} ::: ${system} ::: ${training_set_name} ::: ${validation_set_name} 
+parallel ${path_to_scripts}POLYGENIC_RISK_SCORE_ANALYSIS_CLOZUK_PRS_JOB_ARRAY.sh ::: ${Chromosomes_to_analyse[@]} ::: ${Directory_to_work_from} ::: ${path_to_scripts} ::: ${system} ::: ${training_set_name} ::: ${validation_set_name}
 fi
 
 # exit 0
@@ -80,13 +80,13 @@ length_of_extra_analysis_array=`echo ${#Name_of_extra_analysis[@]}`
 		echo hi all
 		Name_of_extra_analysis_specific=(Pathways Genes)
 		${path_to_gene_scripts}Gene_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_gene_scripts} ${Name_of_extra_analysis_specific[1]}
-		${path_to_pathway_scripts}Pathway_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_pathway_scripts} ${path_to_gene_scripts} ${Name_of_extra_analysis_specific[0]} 
-	
+		${path_to_pathway_scripts}Pathway_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_pathway_scripts} ${path_to_gene_scripts} ${Name_of_extra_analysis_specific[0]}
+
 	elif  [[ "${Name_of_extra_analysis[0]}" = "Pathways" ]]; then
 		echo hi Pat
 		echo ${Name_of_extra_analysis[0]}
- 		${path_to_pathway_scripts}Pathway_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_pathway_scripts} ${Name_of_extra_analysis[0]} 
-	
+ 		${path_to_pathway_scripts}Pathway_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_pathway_scripts} ${Name_of_extra_analysis[0]}
+
 	elif [[ "${Name_of_extra_analysis[1]}" = "Genes" ]]; then
 		echo hi Gene
 		 ${path_to_gene_scripts}Gene_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_gene_scripts} ${Name_of_extra_analysis[1]}
@@ -98,7 +98,7 @@ else
 
 # Source the altered arguments from earlier, unsure if it would have already been performed
 
- source ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt  
+ source ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
   cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
 
 # Source the final stages of the whole genome analysis...output files could use some structure though
@@ -120,13 +120,22 @@ Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}MAGMA_extract_SNP_list
  ${Chromosomes_to_analyse[@]}
 
 source ${path_to_scripts}MAGMA_gene_set_analysis.sh
- 
+
 fi
 
+Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}Collate_all_PRS_files_together.R ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_${validation_set_name}_combine_PRS_results.Rout\
+ ${training_set_name}
+ ${validation_set_name}
+ ${Extra_analyses}
+ ${Full_genome_PRS_extra_analysis}
+ ${Gene_regions}
+ ${whole_genome_genic}
+ ${Gene_specific_PRS}
+ ${sig_thresholds[@]}
 
+ 
 if [[ "${Using_raven}" = "TRUE" ]]; then
 #Purge all modules
 module purge
-# rsync -avz . /neurocluster/filesync/c1020109/. 
+# rsync -avz . /neurocluster/filesync/c1020109/.
 fi
-
