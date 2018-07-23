@@ -24,6 +24,8 @@ args <- commandArgs(trailingOnly = T)
 getwd()
 print(args)
 
+
+
 # Specify the different input tables #
 Training_name <- args[3]
 Validation_name <- args [4]
@@ -41,7 +43,7 @@ print(significance_thresholds)
 ### Write function combining Gene-set PRS into one table
 
 # This checks and reads in the 
-combine_Gene_set_PRS <- function(Extra_analyses, Gene_regions, Training_name, Validation_name, All_PRS){
+combine_Gene_set_PRS <- function(Extra_analyses, Gene_regions, Training_name, Validation_name, ALL_PRS){
   if (Extra_analyses == TRUE){
     
     if (Gene_regions == "both" | Gene_regions == "extended"){
@@ -52,9 +54,9 @@ combine_Gene_set_PRS <- function(Extra_analyses, Gene_regions, Training_name, Va
      
      if("FID" %in% colnames(ALL_PRS) & "IID" %in% colnames(ALL_PRS))
      {
-        All_PRS <- merge(ALL_PRS, Gene_regions_extended, by = c("FID", "IID"))
+        ALL_PRS <- merge(ALL_PRS, Gene_regions_extended, by = c("FID", "IID"))
      }else{
-        All_PRS <- Gene_regions_extended
+        ALL_PRS <- Gene_regions_extended
      }
     }
     
@@ -65,7 +67,7 @@ combine_Gene_set_PRS <- function(Extra_analyses, Gene_regions, Training_name, Va
       
       if("FID" %in% colnames(ALL_PRS) & "IID" %in% colnames(ALL_PRS))
       {
-        All_PRS <- merge(ALL_PRS, Gene_regions_normal, by = c("FID", "IID"))
+        ALL_PRS <- merge(ALL_PRS, Gene_regions_normal, by = c("FID", "IID"))
       }else{
         ALL_PRS <- Gene_regions_normal
       }
@@ -104,9 +106,9 @@ combined_whole_genome_genic <- function(whole_genome_genic, Gene_regions, Traini
       
       if("FID" %in% colnames(ALL_PRS) & "IID" %in% colnames(ALL_PRS))
       {
-        All_PRS <- merge(ALL_PRS, all_prs_extended, by = c("FID", "IID"))
+        ALL_PRS <- merge(ALL_PRS, all_prs_extended, by = c("FID", "IID"))
       }else{
-        All_PRS <- all_prs_extended
+        ALL_PRS <- all_prs_extended
       }
     }
       
@@ -130,13 +132,13 @@ combined_whole_genome_genic <- function(whole_genome_genic, Gene_regions, Traini
         
         if("FID" %in% colnames(ALL_PRS) & "IID" %in% colnames(ALL_PRS))
         {
-          All_PRS <- merge(ALL_PRS, all_prs_normal, by = c("FID", "IID"))
+          ALL_PRS <- merge(ALL_PRS, all_prs_normal, by = c("FID", "IID"))
         }else{
-          All_PRS <- all_prs_normal
+          ALL_PRS <- all_prs_normal
         }
       }
     
-      assign("All_PRS", ALL_PRS, envir = e)
+      assign("ALL_PRS", ALL_PRS, envir = e)
     
     }else{
       stop("No Gene-Set PRS involved in this analysis")
@@ -161,17 +163,19 @@ combined_full_genome <- function (Training_name, Validation_name, significance_t
     
     if("FID" %in% colnames(ALL_PRS) & "IID" %in% colnames(ALL_PRS))
     {
-      All_PRS <- merge(ALL_PRS, all_prs_whole_genome, by = c("FID", "IID"))
+      ALL_PRS <- merge(ALL_PRS, all_prs_whole_genome, by = c("FID", "IID"))
     }else{
-      All_PRS <- all_prs_whole_genome
+      ALL_PRS <- all_prs_whole_genome
     }
     
-    assign("All_PRS", ALL_PRS, envir = e)
+    assign("ALL_PRS", ALL_PRS, envir = e)
 }
 
 ALL_PRS <- data.frame(x = NA, y = NA)
 assign("ALL_PRS", ALL_PRS, envir = e)
 
-combine_Gene_set_PRS(Extra_analyses, Gene_regions, Training_name, Validation_name, e$All_PRS)
+combine_Gene_set_PRS(Extra_analyses, Gene_regions, Training_name, Validation_name, e$ALL_PRS)
 combined_whole_genome_genic(whole_genome_genic, Gene_regions, Training_name, Validation_name, significance_thresholds, e$ALL_PRS)
 combined_full_genome(Training_name, Validation_name, significance_thresholds, e$ALL_PRS)
+
+write.table(e$ALL_PRS, file = paste0("Collated_PRS_analysis_for",Training_name,"_", Validation_name,".txt"), quote = F, row.names = F)

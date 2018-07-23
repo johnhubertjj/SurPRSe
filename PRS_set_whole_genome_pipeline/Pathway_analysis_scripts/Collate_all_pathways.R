@@ -106,7 +106,8 @@ create_dummy_table_for_null_profiles <- function(Gene_regions){
   for (i in 1:length(e$FALSE_Filenames_of_score_files)){
     name <- e$FALSE_Filenames_of_score_files[i]
     score_significance_thresh <- gsub(".*\\_with\\_(.*?).profile", "\\1",x = name)
-    score_name <- gsub(".*pathway_(.*?)_extended.*", "\\1", x = name)
+    score_name_pattern <- paste0(".*pathway_(.*?)_",Gene_regions,".*")
+    score_name <- gsub(score_name_pattern, "\\1", x = name)
     new_false_column_names[i] <- paste("SCORE_", score_name,"_",score_significance_thresh, sep="")
   }
   
