@@ -16,15 +16,16 @@ print(args)
 
 ## specify the different input tables #
 Training_name <- args[3]
-Validation_name <- args [4]
-chromosome.number <- as.numeric(args[c(5:length(args))])
+Validation_name <- args[4]
+Validation_set_name <- args [5]
+chromosome.number <- as.numeric(args[c(6:length(args))])
 print(chromosome.number)
 
 ## Read in the latest Summary stats tables after converting to one table
 
 
 for (i in chromosome.number){
-  assign(paste0("Training_table", i), fread(paste0("./",Training_name,"_",Validation_name,"_output/",Validation_name,"_chr",i,"_consensus_with_", Training_name,"_flipped_alleles_no_duplicates.bim")))
+  assign(paste0("Training_table", i), fread(paste0("./",Training_name,"_",Validation_name,"_output/",Validation_set_name,i,"_consensus_with_", Training_name,"_flipped_alleles_no_duplicates.bim")))
 }
 
 l = list()

@@ -10,6 +10,7 @@ ptm <- proc.time()
 library(data.table)
 library(plyr)
 library(dplyr)
+library(stringr)
 
 ### environment for functions
 e <- new.env()
@@ -94,7 +95,7 @@ combined_whole_genome_genic <- function(whole_genome_genic, Gene_regions, Traini
       
       # iterate through significance thresholds
       for (i in 1:length(significance_thresholds)) {
-        my_data[[i]] <- my_data[[i]][,c(1,2,6)]
+        my_data[[i]] <- my_data[[i]][,c(1,2,6), with = FALSE]
         colnames(my_data[[i]]) <- c("FID", "IID", paste("SCORE_whole_genome_", significance_thresholds[i], sep=""))
       }
       
@@ -121,7 +122,7 @@ combined_whole_genome_genic <- function(whole_genome_genic, Gene_regions, Traini
         
         # iterate through significance thresholds
         for (i in 1:length(significance_thresholds)) {
-          my_data[[i]] <- my_data[[i]][,c(1,2,6)]
+          my_data[[i]] <- my_data[[i]][,c(1,2,6), with = FALSE]
           colnames(my_data[[i]]) <- c("FID", "IID", paste("SCORE_whole_genome_", significance_thresholds[i], sep=""))
         }
         
@@ -153,7 +154,7 @@ combined_full_genome <- function (Training_name, Validation_name, significance_t
     
     # iterate through significance thresholds
     for (i in 1:length(significance_thresholds)) {
-      my_data[[i]] <- my_data[[i]][,c(1,2,6)]
+      my_data[[i]] <- my_data[[i]][,c(1,2,6), with = FALSE]
       colnames(my_data[[i]]) <- c("FID", "IID", paste("SCORE_whole_genome_", significance_thresholds[i], sep=""))
     }
     

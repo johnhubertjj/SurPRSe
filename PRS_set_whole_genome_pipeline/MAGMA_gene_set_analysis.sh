@@ -9,7 +9,7 @@ Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}SNP_loc_creator_and_gm
 Pathway_filename_minus_extension="${Pathway_filename%.*}"
 
 # Create Make file from list of current files in directory
-Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}MAKE_LIST_file_creator_unclumped_files.R ./${training_set_name}_${validation_set_name}_extrainfo/MAKE_list_file_creator_before_clumping.Rout ${training_set_name} ${validation_set_name} ${Chromosomes_to_analyse[@]}
+Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}MAKE_LIST_file_creator_unclumped_files.R ./${training_set_name}_${validation_set_name}_extrainfo/MAKE_list_file_creator_before_clumping.Rout ${training_set_name} ${validation_set_name} ${validation_set_usually_genotype_serial} ${Chromosomes_to_analyse[@]}
 
 plink --merge-list ${training_set_name}_${validation_set_name}_output/Make_file_${validation_set_name}_consensus_with_${training_set_name}_flipped_alleles_no_duplicates_full_genome_before_clumping.txt --make-bed --out ${validation_set_name}_consensus_with_${training_set_name}_flipped_alleles_no_duplicates_full_genome_before_clumping
 
