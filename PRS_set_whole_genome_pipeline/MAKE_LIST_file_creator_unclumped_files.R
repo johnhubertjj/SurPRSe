@@ -19,14 +19,15 @@ print(args)
 # specify the different input tables #
 Training_name <- args[3]
 Validation_name <- args[4]
-chromosomes_to_parse <- as.numeric(args[c(5:length(args))])
+Validation_set_name <- args[5]
+chromosomes_to_parse <- as.numeric(args[c(6:length(args))])
 print(chromosomes_to_parse)
 
 new_data_frame <- data.frame(filenames=rep(0,length(chromosomes_to_parse)))
 
 
 for (i in chromosomes_to_parse){
-  new_data_frame[i,1] <- paste0("./",Training_name,"_",Validation_name,"_output/",Validation_name,"_chr",i,"_consensus_with_", Training_name,"_flipped_alleles_no_duplicates")
+  new_data_frame[i,1] <- paste0("./",Training_name,"_",Validation_name,"_output/",Validation_set_name,i,"_consensus_with_", Training_name,"_flipped_alleles_no_duplicates")
 }
 
 filename <- paste0("./",Training_name,"_",Validation_name,"_output/Make_file_",Validation_name,"_consensus_with_", Training_name,"_flipped_alleles_no_duplicates_full_genome_before_clumping.txt")

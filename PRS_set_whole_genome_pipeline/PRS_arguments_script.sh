@@ -21,7 +21,7 @@ if [[ "$whereami" = *"raven"* ]]; then
   path_to_PRS_scripts="${HOME}/PhD_scripts/Schizophrenia_pipeline_scripts/"
 
   # Re-assign to the training_set_usually_genotype and validation_full_name_without_chromosome using the sed command
-  path_to_validation_dataset="/scratch/${USER}/PR54/PGC_CLOZUK_PRS/COGS_CLOZUK_datasets/COGSv2016_IMPUTE2"
+  path_to_validation_dataset="/scratch/${USER}/PR54/1000_genomes_consensus_sets/eur-1000g-phase3-chrall-mac5"
   path_to_training_dataset="/scratch/${USER}/PR54/Summary_stats_files/IQ_2017_GWAS.txt"
 
   # State paths to the relevant stationary folders required for the analysis
@@ -38,10 +38,10 @@ if [[ "$whereami" = *"raven"* ]]; then
 
   # Datasets
   training_set_name="IQ"
-  validation_set_name="COGS"
+  validation_set_name="eur-1000g-phase3-chrall-mac5"
 
   # Sample sizes
-  number_of_samples_training=78000
+  number_of_samples_training=78308
 
   # DO NOT ALTER!!!
   training_set_original_filename=`echo "${path_to_training_dataset}" | sed 's:.*/::'`
@@ -53,7 +53,7 @@ if [[ "$whereami" = *"raven"* ]]; then
   ldsc="/home/c1020109/ldsc/ldsc.py"
 
   # Pathway datasets
-  Pathway_filename="Pocklington2015_134sets.txt"
+  Pathway_filename="Pocklington2015_134sets_LoFi.txt"
   Gene_location_filename="NCBI37.3.gene.loc"
   calculate_indep_SNPs=FALSE
 
@@ -95,8 +95,8 @@ if [[ "$whereami" = *"raven"* ]]; then
   sig_thresholds_lower_bounds=(0 0 0 0 0 0 0 0 0)
 
   # Arguments specific to PRS set analysis
-  Extra_analyses=TRUE
-  Full_genome_PRS_extra_analysis=TRUE
+  Extra_analyses=FALSE
+  Full_genome_PRS_extra_analysis=FALSE
   Name_of_extra_analysis=(Pathways Genes)
   randomise=FALSE
   sample_replace=FALSE
@@ -108,11 +108,11 @@ if [[ "$whereami" = *"raven"* ]]; then
 
   # either "extended" "normal" or "both" : change to a numerical input in the future
   Gene_regions=both #either ( "extended" "normal" "both" )
-  whole_genome_genic=TRUE
+  whole_genome_genic=FALSE
   Gene_specific_PRS=FALSE
 
   # MAGMA analysis
-  MAGMA_gene_set_analysis=FALSE
+  MAGMA_gene_set_analysis=TRUE
 
 elif [ "$whereami" = 'v1711-0ab8c3db.mobile.cf.ac.uk' ]; then
 home_OS="/Users"

@@ -117,21 +117,24 @@ if [[ "${MAGMA_gene_set_analysis}" = "TRUE" ]]; then
 Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}MAGMA_extract_SNP_list.R ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_MAGMA_extract_SNP_list.Rout\
  ${training_set_name}\
  ${validation_set_name}\
+ ${validation_set_usually_genotype_serial}\
  ${Chromosomes_to_analyse[@]}
 
 source ${path_to_scripts}MAGMA_gene_set_analysis.sh
 
 fi
 
+if [ "${Extra_analyses}" = "TRUE" ]; then
 Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}Collate_all_PRS_files_together.R ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_${validation_set_name}_combine_PRS_results.Rout\
- ${training_set_name}
- ${validation_set_name}
- ${Extra_analyses}
- ${Full_genome_PRS_extra_analysis}
- ${Gene_regions}
- ${whole_genome_genic}
- ${Gene_specific_PRS}
+ ${training_set_name}\
+ ${validation_set_name}\
+ ${Extra_analyses}\
+ ${Full_genome_PRS_extra_analysis}\
+ ${Gene_regions}\
+ ${whole_genome_genic}\
+ ${Gene_specific_PRS}\
  ${sig_thresholds[@]}
+fi
 
  
 if [[ "${Using_raven}" = "TRUE" ]]; then
