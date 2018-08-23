@@ -7,9 +7,8 @@
 #PBS -l walltime=24:00:00
 #PBS -o /home/c1020109/Summary_stats_info_Biobank_PRS
 
-
 echo "hi"
- 
+
 whereami=$(uname -n)
 echo "$whereami"
 
@@ -23,11 +22,11 @@ home_OS="/home"
 extra_path="/johnhubert/Documents"
 system=LINUX # oh god programmers are going to hate me for using this argument
 
-elif [[ "$whereami" = *"raven"* ]]; then 
+elif [[ "$whereami" = *"raven"* ]]; then
 home_OS=${HOME}
 
 # extra_path must be NULL or a path
-extra_path=NULL
+extra_path="/PhD_scripts"
 system=LINUX #Too late to change now...its official, Raven runs on Linux because my scripts says so.
 fi
 
@@ -43,50 +42,19 @@ path_to_gene_scripts="${home_OS}/Schizophrenia_PRS_pipeline_scripts/PRS_set_whol
 fi
 
 
-source ${path_to_scripts}PRS_arguments_script.sh
-
-if [ ${Using_raven} = "TRUE" ]; then
-echo ${PBS_O_WORKDIR}
-cd $PBS_O_WORKDIR 
-fi
-
-Directory_to_work_from=`pwd`
+# Preparation script; only alter if stated within the wiki/tutorial of this software
+source ${path_to_scripts}Pipeline_Preparation.sh
 
 log_file_name="${validation_set_name}_${training_set_name}_PRS_analysis"
  exec &> "${log_file_name}"_logfile.txt
 
-cat ${path_to_scripts}PRS_arguments_script.sh
+# Create argument text files as alternative arguments to other scripts when defining chromosomes or p-value significance thresholds
+source ${path_to_scripts}Plink_arguments_files_R_scripts.sh
 
+# Convert input files into a chromosome format
+source ${path_to_scripts}Summary_stats_to_chromosome_converter.sh
 
-  if [[ ! -d "${training_set_name}_${validation_set_name}_output" ]]; then
-     mkdir ${training_set_name}_${validation_set_name}_output
-  fi
-
-  if [[ ! -d "${training_set_name}_${validation_set_name}_extrainfo" ]]; then
-     mkdir ${training_set_name}_${validation_set_name}_extrainfo
-  fi
-
-# use the require function to make sure that the packages are up to date with the software
-
-# Create arguments files for easier input into Rscripts for parallelisation # 
-Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}Chromosome_arguments_text_file.R ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_Chromosome_arguments_text_file.Rout\
- ${training_set_name}\
- ${validation_set_name}\
- ${Chromosomes_to_analyse[@]}
-
-Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}sig_thresholds_lower_bounds_arguments_text_file.R ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_sig_thresholds_lower_bounds_arguments_text_file.Rout\
- ${training_set_name}\
- ${validation_set_name}\
- ${sig_thresholds_lower_bounds[@]}
-
-Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}sig_thresholds_plink_arguments_text_file.R ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_sig_thresholds_plink_arguments_text_file.Rout\
- ${training_set_name}\
- ${validation_set_name}\
- ${sig_thresholds[@]}
-
-${path_to_scripts}Summary_stats_to_chromosome_converter.sh ${Directory_to_work_from} ${path_to_scripts} ${system}
-
-# calculate polygenic scores for the whole genome across different chromosomes	
+# calculate polygenic scores for the whole genome across different chromosomes
 
 if [[ "${Using_raven}" = "FALSE" ]]; then
 
@@ -94,7 +62,7 @@ if [[ "${Using_raven}" = "FALSE" ]]; then
 sudo parallel ${path_to_scripts}POLYGENIC_RISK_SCORE_ANALYSIS_CLOZUK_PRS_JOB_ARRAY.sh ::: ${Chromosomes_to_analyse[@]} ::: ${Directory_to_work_from} ::: ${path_to_scripts} ::: ${system} ::: ${training_set_name} ::: ${validation_set_name}
 else
 # For use on local
-parallel ${path_to_scripts}POLYGENIC_RISK_SCORE_ANALYSIS_CLOZUK_PRS_JOB_ARRAY.sh ::: ${Chromosomes_to_analyse[@]} ::: ${Directory_to_work_from} ::: ${path_to_scripts} ::: ${system} ::: ${training_set_name} ::: ${validation_set_name} 
+parallel ${path_to_scripts}POLYGENIC_RISK_SCORE_ANALYSIS_CLOZUK_PRS_JOB_ARRAY.sh ::: ${Chromosomes_to_analyse[@]} ::: ${Directory_to_work_from} ::: ${path_to_scripts} ::: ${system} ::: ${training_set_name} ::: ${validation_set_name}
 fi
 
 # exit 0
@@ -112,25 +80,65 @@ length_of_extra_analysis_array=`echo ${#Name_of_extra_analysis[@]}`
 		echo hi all
 		Name_of_extra_analysis_specific=(Pathways Genes)
 		${path_to_gene_scripts}Gene_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_gene_scripts} ${Name_of_extra_analysis_specific[1]}
-		${path_to_pathway_scripts}Pathway_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_pathway_scripts} ${path_to_gene_scripts} ${Name_of_extra_analysis_specific[0]} 
-	
+		${path_to_pathway_scripts}Pathway_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_pathway_scripts} ${path_to_gene_scripts} ${Name_of_extra_analysis_specific[0]}
+
 	elif  [[ "${Name_of_extra_analysis[0]}" = "Pathways" ]]; then
 		echo hi Pat
 		echo ${Name_of_extra_analysis[0]}
- 		${path_to_pathway_scripts}Pathway_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_pathway_scripts} ${Name_of_extra_analysis[0]} 
-	
+ 		${path_to_pathway_scripts}Pathway_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_pathway_scripts} ${Name_of_extra_analysis[0]}
+
 	elif [[ "${Name_of_extra_analysis[1]}" = "Genes" ]]; then
 		echo hi Gene
-		 ${path_to_gene_scripts}Gene_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_gene_scripts} ${Name_of_extra_analysis[1]}
+		${path_to_gene_scripts}Gene_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_gene_scripts} ${Name_of_extra_analysis[1]}
 	fi
+
+
 else
 	# Need an alternative to Raven's log files to extract locally on the computer probably output important information to one file
-	${path_to_scripts}PRS_ANALYSIS_SERIAL_no_set.sh ${Directory_to_work_from} ${path_to_scripts} ${system}
+
+# Source the altered arguments from earlier, unsure if it would have already been performed
+
+ source ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
+ cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
+
+# Source the final stages of the whole genome analysis...output files could use some structure though
+ source	${path_to_scripts}PRS_ANALYSIS_SERIAL_no_set.sh
+
 fi
 
+if [[ "${Full_genome_PRS_extra_analysis}" = "TRUE" ]]; then
+
+source ${path_to_scripts}PRS_whole_genome.sh
+
+fi
+
+if [[ "${MAGMA_gene_set_analysis}" = "TRUE" ]]; then
+
+Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}MAGMA_extract_SNP_list.R ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_MAGMA_extract_SNP_list.Rout\
+ ${training_set_name}\
+ ${validation_set_name}\
+ ${validation_set_usually_genotype_serial}\
+ ${Chromosomes_to_analyse[@]}
+
+source ${path_to_scripts}MAGMA_gene_set_analysis.sh
+
+fi
+
+if [ "${Extra_analyses}" = "TRUE" ]; then
+Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}Collate_all_PRS_files_together.R ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_${validation_set_name}_combine_PRS_results.Rout\
+ ${training_set_name}\
+ ${validation_set_name}\
+ ${Extra_analyses}\
+ ${Full_genome_PRS_extra_analysis}\
+ ${Gene_regions}\
+ ${whole_genome_genic}\
+ ${Gene_specific_PRS}\
+ ${sig_thresholds[@]}
+fi
+
+ 
 if [[ "${Using_raven}" = "TRUE" ]]; then
 #Purge all modules
 module purge
-# rsync -avz . /neurocluster/filesync/c1020109/. 
+# rsync -avz . /neurocluster/filesync/c1020109/.
 fi
-

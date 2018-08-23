@@ -21,4 +21,7 @@ PGC_table22.txt
 # any R_output files
 *.Rout
 
+#Stationary data
+Stationary_Data/
+testing_SCZ_workflow/ 
 nihms-381979.pdf

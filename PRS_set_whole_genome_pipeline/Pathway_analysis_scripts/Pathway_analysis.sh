@@ -132,7 +132,7 @@ fi
 
 Rscript ${path_to_scripts}RscriptEcho.R\
  ${path_to_pathway_scripts}Assign_SNPs_to_genes_from_pathways.R\
- ./${training_set_name}_${validation_set_name}_extrainfo/${pathways}_assiging_SNPs_to_genes_from_pathways.Rout\
+ ./${training_set_name}_${validation_set_name}_extrainfo/pathways_assiging_SNPs_to_genes_from_pathways.Rout\
  ${training_set_name}\
  ${validation_set_name}\
  ${validation_set_usually_genotype_serial}\

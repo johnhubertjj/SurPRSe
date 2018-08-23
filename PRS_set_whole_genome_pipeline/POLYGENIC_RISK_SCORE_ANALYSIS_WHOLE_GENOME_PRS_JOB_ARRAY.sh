@@ -1,7 +1,7 @@
 #!/bin/bash
 
 logname="${5}_${6}"
-exec &> "${logname}_Rtestoutclusterlogfile$1.txt"
+exec &> "${logname}_Rtestoutclusterlogfile_whole_genome$1.txt"
 
 # script requries 22 files for each validation and training set
 
@@ -146,77 +146,9 @@ fi
 # CLOZUK_GWAS_BGE_chr${chromosome_number}.bim\
 # CLOZUK_GWAS_BGE_chr${chromosome_number}.fam
 
-if [[ ${Extra_analyses} = "TRUE" ]]; then
-# NEED A CHECK ON WHAT EXTRA ANALYSES YOU ARE RUNNING HERE!
-length_of_extra_analysis_array=`echo ${#Name_of_extra_analysis[@]}`
-
-if [ "${length_of_extra_analysis_array}" -eq  "2" ]; then
-Name_of_extra_analysis_specific=(Pathways Genes)
-# Create output directory for Extra_analysis results
-	if [ ! -d "./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis_specific[0]}" ]; then
-		mkdir ./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis_specific[0]}
-	fi
-
-# Create files for Clumping
-	plink \
---bfile ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype_serial}${chromosome_number}_2 \
---exclude ./${training_set_name}_${validation_set_name}_output/extracted_Duplicate_snps_${validation_set_name}_${training_set_name}_chr${chromosome_number}.txt \
---extract ./${training_set_name}_${validation_set_name}_output/chr${chromosome_number}${training_set_name}_${validation_set_name}_common_SNPs.txt \
---make-bed \
---out ./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis_specific[0]}/${validation_set_usually_genotype_serial}${chromosome_number}_consensus_with_${training_set_name}_flipped_alleles_no_duplicates
-
-echo "Arguments script stated that this analysis is for ${Name_of_extra_analysis_specific[0]}\
-, therefore clumping will be not be performed for Polygenic risk scores"
-
-# Create output directory for Extra_analysis results
-	if [ ! -d "./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis_specific[1]}" ]; then
-		mkdir ./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis_specific[1]}
-	fi
-
-# Create files for Clumping
-	plink \
---bfile ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype_serial}${chromosome_number}_2 \
---exclude ./${training_set_name}_${validation_set_name}_output/extracted_Duplicate_snps_${validation_set_name}_${training_set_name}_chr${chromosome_number}.txt \
---extract ./${training_set_name}_${validation_set_name}_output/chr${chromosome_number}${training_set_name}_${validation_set_name}_common_SNPs.txt \
---make-bed \
---out ./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis_specific[1]}/${validation_set_usually_genotype_serial}${chromosome_number}_consensus_with_${training_set_name}_flipped_alleles_no_duplicates
-
-echo "Arguments script stated that this analysis is for ${Name_of_extra_analysis_specific[1]}\
-, therefore clumping will be not be performed for Polygenic risk scores"
 
 
-else
 
-	if [ ! -d "./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis[0]}" ]; then
-		mkdir ./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis[0]}
-	fi
-
-# Create files for Clumping
-	plink \
---bfile ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype_serial}${chromosome_number}_2 \
---exclude ./${training_set_name}_${validation_set_name}_output/extracted_Duplicate_snps_${validation_set_name}_${training_set_name}_chr${chromosome_number}.txt \
---extract ./${training_set_name}_${validation_set_name}_output/chr${chromosome_number}${training_set_name}_${validation_set_name}_common_SNPs.txt \
---make-bed \
---out ./${training_set_name}_${validation_set_name}_output/${Name_of_extra_analysis[0]}/${validation_set_usually_genotype_serial}${chromosome_number}_consensus_with_${training_set_name}_flipped_alleles_no_duplicates
-
-echo "Arguments script stated that this analysis is for ${Name_of_extra_analysis[0]}\
-, therefore clumping will be not be performed for Polygenic risk scores"
-
-
-fi
-
-### Clean up original datasets to only leave the tar.gz file
-shopt -s nullglob
-set -- *${validation_set_usually_genotype_serial}${chromosome_number}*
-if [ "$#" -gt 3 ]; then
-	rm -rf ${validation_set_usually_genotype_serial}${chromosome_number}.{bim,bed,fam,log}
-	shopt -u nullglob
-fi
-
-# Exit so that clumping is not performed on the whole dataset
-exit 0
-
-else
 
 	plink \
 --bfile ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype_serial}${chromosome_number}_2 \
@@ -225,7 +157,6 @@ else
 --make-bed \
 --out ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype_serial}${chromosome_number}_consensus_with_${training_set_name}_flipped_alleles_no_duplicates
 
-fi
 
 ## Limit to genic SNPs here
 ##########################
@@ -282,6 +213,7 @@ fi
 
 # Clean up other unneeded files
 rm ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype_serial}${chromosome_number}_2.{bim,bed,fam,log}
+rm ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_chr${chromosome_number}_chr.pos.txt
 rm ./${training_set_name}_${validation_set_name}_output/chr${chromosome_number}${training_set_name}_${validation_set_name}_common_SNPs.txt
 rm ./${training_set_name}_${validation_set_name}_output/extracted_Duplicate_snps_${validation_set_name}_${training_set_name}_chr${chromosome_number}.txt
 rm ./${training_set_name}_${validation_set_name}_output/CLUMPED_EXTRACT_${validation_set_name}_chr${chromosome_number}.txt

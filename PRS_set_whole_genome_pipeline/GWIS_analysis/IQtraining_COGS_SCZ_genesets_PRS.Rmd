@@ -1,5 +1,5 @@
 ---
-title: "for_antonio_combined_PRS"
+title: "COGS_IQ_pathway_DSM"
 output: html_document
 ---
 
@@ -153,12 +153,8 @@ library(data.table)
 library(plyr)
 library(dplyr)
 library(rms)
-library(rlist)
 ```
-# Write the Name of the analysis below 
-```{r}
-Name_of_analysis <- "COGS_metabolism_combined_PRS"
-```
+
 
 
 ## Files I need
@@ -178,18 +174,20 @@ Files that are required to be read into this analysis:
 ```{r}
 
 # Output arguments and significance threshold arguments
+Name_of_analysis <- "COGS_IQ_pathway_PRS_analysis"
 significance_threshold <- c(5e-08,1e-06,1e-04,0.01,0.05,0.1,0.2,0.5,1)
-Location_of_analysis <- ("~/Documents/COGS_pathways_results/forantonio_metabolism_combined_PRS/")
+Location_of_analysis <- ("~/Documents/COGS_pathways_results/IQ_COGS_PRS_pathway_analysis/")
 
-# Location of whole genome GWAS1 files
-Location_of_whole_genome_CLOZ_GWAS <- paste0("~/Documents/COGS_pathways_results/forantonio_metabolism_combined_PRS/forantonio_metabolism/CLOZ_whole_genome/PRS_scoring/CLOZ_re.EUR.mlma_metabolism_COGS_whole_genome_significance_threshold_at_",significance_threshold,".profile")
+# Location of whole genome files
+Location_of_whole_genome_normal_gene_files <- paste0("~/Documents/COGS_pathways_results/IQ_COGS_PRS_pathway_analysis/IQ_COGS_GENIC_GENOME/PRS_scoring/IQ_COGS_normal_gene_regions_Clumped_whole_genome_final_significance_threshold_at_",significance_threshold,".profile")
 
-# Location of whole genome GWAS2 files
-Location_of_whole_genome_RATIO_GWAS <- paste0("~/Documents/COGS_pathways_results/forantonio_metabolism_combined_PRS/forantonio_metabolism/RATIO_whole_genome/PRS_scoring/RATIO_re.EUR.mlma_COGS_whole_genome_significance_threshold_at_",significance_threshold,".profile")
+Location_of_whole_genome_extended_gene_files <- paste0("~/Documents/COGS_pathways_results/IQ_COGS_PRS_pathway_analysis/IQ_COGS_GENIC_GENOME/PRS_scoring/IQ_COGS_extended_gene_regions_Clumped_whole_genome_final_significance_threshold_at_",significance_threshold,".profile")
 
-# Location of whole genome GWAS3 files
-Location_of_whole_genome_NORCLOZ_GWAS <- paste0("~/Documents/COGS_pathways_results/forantonio_metabolism_combined_PRS/forantonio_metabolism/NORCLOZ_whole_genome/NORCLOZ.EUR.mlma_metabolism_COGS_output/PRS_scoring/NORCLOZ.EUR.mlma_metabolism_COGS_whole_genome_significance_threshold_at_",significance_threshold,".profile")
+Location_of_whole_genome_entire_genome_files <-  paste0("~/Documents/COGS_pathways_results/IQ_COGS_PRS_pathway_analysis/IQ_and_COGS_whole_genome/IQ_COGS_output/PRS_scoring/IQ_COGS_whole_genome_significance_threshold_at_",significance_threshold,".profile")
 
+# Location of gene-set PRS files
+Location_of_extended_gene_set_PRS_files <- "~/Documents/COGS_pathways_results/IQ_COGS_PRS_pathway_analysis/FINAL_PATHWAY_RESULTS_PRS_PROFILESIQ_COGS_Selected_Pocklington_plus_GO_pathways_SCHIZ_extended.txt"
+Location_of_gene_boundary_gene_set_PRS_files <- "~/Documents/COGS_pathways_results/IQ_COGS_PRS_pathway_analysis/FINAL_PATHWAY_RESULTS_PRS_PROFILESIQ_COGS_Selected_Pocklington_plus_GO_pathways_SCHIZ_normal.txt"
 # Location of Phenotype and covariate files 
 Location_of_Phenotype_file <- "~/Documents/COGS_pathways_results/Phenotypes.txt"
 Location_of_Alternative_ID_file <- "~/Documents/COGS_pathways_results/COGS_IDs_V2.txt"
@@ -197,9 +195,9 @@ Location_of_Covariates <- "~/Documents/COGS_pathways_results/COGSv2016.noREL.eig
 Location_of_Duplicate_samples <-"~/Documents/COGS_pathways_results/COGSv2016.PGCrelatives[2] copy.txt"
 Location_of_age_and_gender_phenotypes <-"~/Documents/COGS_pathways_results/COGS_AGE_SEX_Feb_18.txt"
 
-# CLOZ data
-my_data <- lapply(Location_of_whole_genome_CLOZ_GWAS, fread, header=TRUE) 
-names(my_data) <- str_replace(Location_of_whole_genome_CLOZ_GWAS, pattern = ".profile", replacement = "")
+
+my_data <- lapply(Location_of_whole_genome_normal_gene_files, fread, header=TRUE) 
+names(my_data) <- str_replace(Location_of_whole_genome_normal_gene_files, pattern = ".profile", replacement = "")
 
 # iterate through significance thresholds 
 for (i in 1:length(significance_threshold)) {
@@ -207,29 +205,14 @@ for (i in 1:length(significance_threshold)) {
   colnames(my_data[[i]]) <- c("FID", "IID", paste("SCORE_whole_genome_", significance_threshold[i], sep=""))
 }
 
-all_prs_CLOZ <- join_all(my_data, by=c("FID", "IID"), type='left')
+all_prs_normal <- join_all(my_data, by=c("FID", "IID"), type='left')
 
-cols <- names(all_prs_CLOZ)[3:ncol(all_prs_CLOZ)]
-setnames(all_prs_CLOZ, old = c(3:ncol(all_prs_CLOZ)), new = paste("CLOZ_WHOLE.genome", cols, sep = "_"))
+cols <- names(all_prs_normal)[3:ncol(all_prs_normal)]
+setnames(all_prs_normal, old = c(3:ncol(all_prs_normal)), new = paste("normal.genic.genome", cols, sep = "_"))
 
-# Ratio data
-my_data <- lapply(Location_of_whole_genome_RATIO_GWAS, fread, header=TRUE) 
-names(my_data) <- str_replace(Location_of_whole_genome_RATIO_GWAS, pattern = ".profile", replacement = "")
 
-# iterate through significance thresholds 
-for (i in 1:length(significance_threshold)) {
-  my_data[[i]] <- my_data[[i]][,c(1,2,6)]
-  colnames(my_data[[i]]) <- c("FID", "IID", paste("SCORE_whole_genome_", significance_threshold[i], sep=""))
-}
-
-all_prs_RATIO <- join_all(my_data, by=c("FID", "IID"), type='left')
-
-cols <- names(all_prs_RATIO)[3:ncol(all_prs_RATIO)]
-setnames(all_prs_RATIO, old = c(3:ncol(all_prs_RATIO)), new = paste("RATIO_WHOLE.genome", cols, sep = "_"))
-
-# Norcloz data
-my_data <- lapply(Location_of_whole_genome_NORCLOZ_GWAS, fread, header=TRUE) 
-names(my_data) <- str_replace(Location_of_whole_genome_NORCLOZ_GWAS, pattern = ".profile", replacement = "")
+my_data <- lapply(Location_of_whole_genome_extended_gene_files, fread, header=TRUE) 
+names(my_data) <- str_replace(Location_of_whole_genome_extended_gene_files, pattern = ".profile", replacement = "")
 
 # iterate through significance thresholds 
 for (i in 1:length(significance_threshold)) {
@@ -237,11 +220,10 @@ for (i in 1:length(significance_threshold)) {
   colnames(my_data[[i]]) <- c("FID", "IID", paste("SCORE_whole_genome_", significance_threshold[i], sep=""))
 }
 
-all_prs_NORCLOZ <- join_all(my_data, by=c("FID", "IID"), type='left')
+all_prs_extended <- join_all(my_data, by=c("FID", "IID"), type='left')
 
-cols <- names(all_prs_NORCLOZ)[3:ncol(all_prs_NORCLOZ)]
-setnames(all_prs_NORCLOZ, old = c(3:ncol(all_prs_NORCLOZ)), new = paste("NORCLOZ_WHOLE.genome", cols, sep = "_"))
-
+cols <- names(all_prs_extended)[3:ncol(all_prs_extended)]
+setnames(all_prs_extended, old = c(3:ncol(all_prs_extended)), new = paste("extended.genic.genome", cols, sep = "_"))
 
 ```
 
@@ -288,11 +270,13 @@ COGS_Phenotypes <- merge(COGS_Phenotypes,COGS_ID_S, by = "Study_ID")
 COGS_list <- list(
 COGS_covaraties = fread(Location_of_Covariates),
 COGS_duplicates = fread(Location_of_Duplicate_samples, header = F),
-
+#COGS_Pathway_results = fread("~/Documents/COGS_pathways_results/FINAL_PATHWAY_RESULTS_PRS_PROFILESCLOZUKPGC2_NO_COGS_COGS_Selected_Pocklington_plus_GO_pathways_SCHIZ.txt"),
+COGS_Pathway_results_normal = COGS_Pathway_results_normal,
+COGS_Pathway_results_extended = COGS_Pathway_results_extended,
 COGS_age_gender = fread(Location_of_age_and_gender_phenotypes),
-COGS_CLOZ = all_prs_CLOZ,
-COGS_NORCLOZ = all_prs_NORCLOZ,
-COGS_RATIO = all_prs_RATIO,
+COGS_whole_genome_genic_normal = all_prs_normal,
+COGS_whole_genome_genic_extended = all_prs_extended,
+COGS_whole_genome = all_prs_whole_genome,
 #COGS_Pathway_test_randomisation <- fread("~/Documents/COGS_pathways_results/FINAL_PATHWAY_RESULTS_PRS_PROFILESCLOZUKPGC2_NO_COGS_COGS_abnormal_behaviorrandomised_gene_sets.txt")
 COGS_Phenotypes = COGS_Phenotypes
 )
@@ -330,7 +314,6 @@ PC_s <- grep(x = names(COGS_total), pattern = "PC\\d+")
   }
 
 ```
-
 
 ## Limit to DSM (narrow and broad) and run multiple linear regressions on cognition
 
@@ -386,12 +369,14 @@ This is due to the fact that as you limit down to different DSM groups, you are 
     
 * All four p-values will be analysed to see if the model improves with the added covariate against the null model.
 
+
+
 ```{r, message=FALSE, include = FALSE}
 # create separted DF for narrow and broad SCZ
 
 rows_to_keep_SCZ_narrow <- COGS_total[DSM_diagnosis_new == 1 | DSM_diagnosis_new == 2 ]
 rows_to_keep_SCZ_broad <- COGS_total[DSM_diagnosis_new == 1 | DSM_diagnosis_new == 2 | DSM_diagnosis_new == 3 | DSM_diagnosis_new == 4]
-rows_to_keep_SCZ_broad_minus_narrow <- COGS_total[DSM_diagnosis_new == 3 | DSM_diagnosis_new == 4]
+rows_to_keep_all_minus_narrow <- COGS_total[DSM_diagnosis_new != 1 & DSM_diagnosis_new != 2]
 
 COGS_cognition <- COGS_total[Composite_Zimpute != 999]
 COGS_treatment_resistance <- COGS_total[FINAL_TRS != 9]
@@ -401,26 +386,111 @@ rows_to_keep_SCZ_broad_cognition <- rows_to_keep_SCZ_broad[Composite_Zimpute != 
 rows_to_keep_SCZ_narrow_TRS <- rows_to_keep_SCZ_narrow[FINAL_TRS != 9]
 rows_to_keep_SCZ_broad_TRS <- rows_to_keep_SCZ_broad[FINAL_TRS != 9]
 
-rows_to_keep_SCZ_broad_minus_narrow_cognition <- rows_to_keep_SCZ_broad_minus_narrow[Composite_Zimpute != 999]
-rows_to_keep_SCZ_broad_minus_narrow_TRS <- rows_to_keep_SCZ_broad_minus_narrow[FINAL_TRS != 9]
+rows_to_keep_all_minus_narrow_cognition <- rows_to_keep_all_minus_narrow[Composite_Zimpute != 999]
+rows_to_keep_all_minus_narrow_TRS <- rows_to_keep_all_minus_narrow[FINAL_TRS != 9]
 
 list_of_tests_cognition <- list(
   rows_to_keep_SCZ_narrow_cognition = as.data.frame(rows_to_keep_SCZ_narrow_cognition[, test:= Composite_Zimpute]),
   rows_to_keep_SCZ_broad_cognition = as.data.frame(rows_to_keep_SCZ_broad_cognition[, test := Composite_Zimpute]),
-  rows_to_keep_SCZ_broad_minus_narrow_cognition = as.data.frame(rows_to_keep_SCZ_broad_minus_narrow_cognition[, test := Composite_Zimpute]),
+  rows_to_keep_SCZ_all_minus_narrow_cognition = as.data.frame(rows_to_keep_all_minus_narrow_cognition[, test := Composite_Zimpute]),
   COGS_cognition = as.data.frame(COGS_cognition[,test:= Composite_Zimpute])
   )  
 
 list_of_tests_TRS <- list(
   rows_to_keep_SCZ_narrow_TRS = as.data.frame(rows_to_keep_SCZ_narrow_TRS[,test := FINAL_TRS]),
   rows_to_keep_SCZ_broad_TRS = as.data.frame(rows_to_keep_SCZ_broad_TRS[,test:= FINAL_TRS]),
-  rows_to_keep_SCZ_broad_minus_narrow_TRS = as.data.frame(rows_to_keep_SCZ_broad_minus_narrow_TRS[, test := FINAL_TRS]),
+  rows_to_keep_SCZ_all_minus_narrow_TRS = as.data.frame(rows_to_keep_all_minus_narrow_TRS[,test := FINAL_TRS]),
   COGS_treatment_resistance = as.data.frame(COGS_treatment_resistance[,test:= FINAL_TRS])
 )
+
+Testing_COGS_cognition <- COGS_cognition
+
+rows_to_keep_SCZ_narrow_integer <- na.omit(COGS_cognition[,.I[DSM_diagnosis_new == 1 | DSM_diagnosis_new == 2]])
+rows_to_keep_SCZ_broad_integer <- na.omit(COGS_cognition[,.I[DSM_diagnosis_new == 1 | DSM_diagnosis_new == 2 | DSM_diagnosis_new == 3 | DSM_diagnosis_new == 4]])
+rows_to_keep_all_minus_narrow_integer <- na.omit(COGS_cognition[,.I[DSM_diagnosis_new != 1 & DSM_diagnosis_new != 2]])
+rows_to_keep_is_na <- COGS_cognition[,.I[is.na(DSM_diagnosis_new)]]
+
+Testing_COGS_cognition[, narrow_DSM := 0]
+Testing_COGS_cognition[rows_to_keep_SCZ_narrow_integer,narrow_DSM := 1]
+Testing_COGS_cognition[rows_to_keep_is_na,narrow_DSM := NA]
+
+Testing_COGS_cognition[, broad_DSM := 0]
+Testing_COGS_cognition[rows_to_keep_SCZ_broad_integer, broad_DSM := 1]
+Testing_COGS_cognition[rows_to_keep_is_na, broad_DSM := NA]
+
+Testing_COGS_cognition[, All_minus_narrow_DSM := 0]
+Testing_COGS_cognition[rows_to_keep_all_minus_narrow_integer, All_minus_narrow_DSM := 1]
+Testing_COGS_cognition[rows_to_keep_is_na, All_minus_narrow_DSM := NA]
+
+Testing_COGS_cognition_minus_na <- Testing_COGS_cognition[-rows_to_keep_is_na]
 
 # create a score list
 score_list <- PRS_names
 names_of_analyses <- names(list_of_tests_cognition)
+
+
+N <- 4
+
+# Whole_genome_DSM_check
+obj <- data.frame(test=0, score=0, estimate=0, SE=0, tvalue=0, p=0, r.squared=0, lower = 0, upper = 0)
+obj_current <- data.frame(test=rep(0,N), score=rep(0,N), estimate=rep(0,N), SE=rep(0,N), tvalue=rep(0,N), p=rep(0,N),r.squared = rep(NA,N), lower = rep(0,N), upper = rep(0,N))
+step_wise_results <- data.frame(score=0,predictors_retained=0)
+
+# Command for stepwise regression
+# step(lm (test ~ Testing_COGS_cognition[[i]] + male_sex + Age_at_Interview + Broad_DSM + narrow_DSM + All_minus_narrow_DSM, data = Testing_COGS_cognition), direction = "backward") 
+
+# When comparing p-values of other models, check the differences between the null and new model
+
+for (i in score_list) {
+  fit_broad <- lm (test ~ Testing_COGS_cognition_minus_na[[i]] + male_sex + Age_at_Interview + broad_DSM, data = Testing_COGS_cognition_minus_na)
+  fit_narrow <- lm (test ~ Testing_COGS_cognition_minus_na[[i]] + male_sex + Age_at_Interview + narrow_DSM, data = Testing_COGS_cognition_minus_na)
+  fit_all_minus_narrow <- lm (test ~ Testing_COGS_cognition_minus_na[[i]] + male_sex + Age_at_Interview + All_minus_narrow_DSM, data = Testing_COGS_cognition_minus_na)
+  fit2 <- lm (test ~ Testing_COGS_cognition_minus_na[[i]] + male_sex + Age_at_Interview , data = Testing_COGS_cognition_minus_na)
+  
+  tmp_broad <- coef(summary(fit_broad))
+  tmp_narrow <- coef(summary(fit_narrow))
+  tmp_all_minus_narrow <- coef(summary(fit_all_minus_narrow))
+  tmp2 <- coef(summary(fit2))
+  
+  CI_broad <- confint(fit_broad, level=0.95)
+  CI_narrow <- confint(fit_narrow, level=0.95)
+  CI_all_minus_narrow <- confint(fit_all_minus_narrow, level=0.95)
+  CI_all <- confint(fit2, level=0.95)
+  
+  CI_broad <- CI_broad[2,]
+  CI_narrow <- CI_narrow[2,]
+  CI_all_minus_narrow <- CI_all_minus_narrow[2,]
+  CI_all <- CI_all[2,]
+  
+  obj_current[1,] <- c("broad_lm",i,tmp_broad[2,],NA, CI_broad)
+  obj_current[2,] <- c("narrow_lm",i,tmp_narrow[2,],NA, CI_narrow)
+  obj_current[3,] <- c("all_minus_narrow_lm",i,tmp_all_minus_narrow[2,],NA, CI_all_minus_narrow)
+  obj_current[4,] <- c("Null_model_lm",i,tmp2[2,],NA, CI_all)
+  
+  obj <- rbind(obj,obj_current)
+
+# Step-wise regression analyses 
+  Full_model <- lm (Testing_COGS_cognition_minus_na[[i]] ~ male_sex + Age_at_Interview + broad_DSM + narrow_DSM + All_minus_narrow_DSM, data = Testing_COGS_cognition_minus_na)
+  b <- step(Full_model, direction = "both", scope = list(upper = ~ male_sex + Age_at_Interview + broad_DSM + narrow_DSM + All_minus_narrow_DSM, lower = ~ male_sex + Age_at_Interview), trace = F)
+ current_model <- coef(summary(b))
+ names_of_predictors <- rownames(current_model)
+ 
+ if(length(names_of_predictors) > 3){
+ predictors_kept <- names_of_predictors[4:length(names_of_predictors)]
+ }else{
+  predictors_kept <- "none"
+ }
+ 
+ if(length(predictors_kept) > 1){
+   predictors_kept <- paste(predictors_kept,sep = "", collapse = ",")
+ }
+ 
+step_wise_results_beta <- c(i,predictors_kept)
+step_wise_results <- rbind(step_wise_results, step_wise_results_beta)
+}
+
+results_constrained_model <- obj[which(obj$score %in% score_list),]
+results_stepwise <- step_wise_results[which(step_wise_results$score %in% score_list), ] 
 
 
 # this example if for a linear regression (the phenotype of interest is a quantiative trait)
@@ -473,7 +543,6 @@ for (i in score_list) {
   results <- obj[which(obj$score %in% score_list),]
   assign(paste0("results_",l), results)
 }
-
 ```
 #### NOTES
 
@@ -498,61 +567,34 @@ all_cogs_PRS_results <- list(
   Cognition_all_samples = results_COGS_cognition,
   Cognition_broad = results_rows_to_keep_SCZ_broad_cognition,
   Cognition_narrow = results_rows_to_keep_SCZ_narrow_cognition,
-  Cognition_broad_minus_narrow = results_rows_to_keep_SCZ_broad_minus_narrow_cognition
+  Cognition_minus_narrow = results_rows_to_keep_SCZ_all_minus_narrow_cognition
   )
 
 all_TRS_PRS_results <- list (
   TRS_all_samples <- results_COGS_treatment_resistance,
   TRS_broad <- results_rows_to_keep_SCZ_broad_TRS,
   TRS_narrow <- results_rows_to_keep_SCZ_narrow_TRS,
-  TRS_broad_minus_narrow <- results_rows_to_keep_SCZ_broad_minus_narrow_TRS
+  TRS_minus_narrow <- results_rows_to_keep_SCZ_all_minus_narrow_TRS
 )
 
 library(knitr)
 
-samples <- c("Everything", "broad", "narrow", "Broad_minus_narrow")
+samples <- c("Everything", "broad", "narrow", "All_minus_narrow")
 
 for (i in 1:length(samples)){
-  all_TRS_PRS_results[[i]] <- cbind(all_TRS_PRS_results[[i]], samples[i])
+  all_cogs_PRS_results[[i]] <- cbind(all_cogs_PRS_results[[i]], samples[i])
 } 
 
-Full_data <- ldply(all_TRS_PRS_results, data.frame)
+Full_data <- ldply(all_cogs_PRS_results, data.frame)
 Full_data <- as.data.table(Full_data)
 
-keep_columns <- c("FID", "IID", PRS_names,"narrow_DSM" ,"broad_DSM", "broad_minus_narrow_DSM")
-
-
-Testing_COGS_TRS <- COGS_total
-
-rows_to_keep_SCZ_narrow_integer <- na.omit(COGS_total[,.I[DSM_diagnosis_new == 1 | DSM_diagnosis_new == 2]])
-rows_to_keep_SCZ_broad_integer <- na.omit(COGS_total[,.I[DSM_diagnosis_new == 1 | DSM_diagnosis_new == 2 | DSM_diagnosis_new == 3 | DSM_diagnosis_new == 4]])
-rows_to_keep_broad_minus_narrow_integer <- na.omit(COGS_total[,.I[DSM_diagnosis_new == 3 | DSM_diagnosis_new == 4]])
-rows_to_keep_is_na <- COGS_total[,.I[is.na(DSM_diagnosis_new)]]
-
-Testing_COGS_TRS[, narrow_DSM := 0]
-Testing_COGS_TRS[rows_to_keep_SCZ_narrow_integer,narrow_DSM := 1]
-Testing_COGS_TRS[rows_to_keep_is_na,narrow_DSM := NA]
-
-Testing_COGS_TRS[, broad_DSM := 0]
-Testing_COGS_TRS[rows_to_keep_SCZ_broad_integer, broad_DSM := 1]
-Testing_COGS_TRS[rows_to_keep_is_na, broad_DSM := NA]
-
-Testing_COGS_TRS[, broad_minus_narrow_DSM := 0]
-Testing_COGS_TRS[rows_to_keep_broad_minus_narrow_integer, broad_minus_narrow_DSM := 1]
-Testing_COGS_TRS[rows_to_keep_is_na, broad_minus_narrow_DSM := NA]
-
-Testing_COGS_TRS_minus_na <- Testing_COGS_TRS[-rows_to_keep_is_na]
-
-Testing_COGS_TRS_minus_na <- Testing_COGS_TRS_minus_na[, c(keep_columns), with = F]
-    
-
+Full_data_with_step_wise_regressions <- merge(Full_data,step_wise_results, by = ("score"), all = F)
 time_of_analysis <- paste(format(Sys.time(), "%d-%m-%Y_at_%H.%M"))
 
+
 write.table(Full_data,file = paste0(Location_of_analysis,Name_of_analysis,"_",time_of_analysis,".txt"), row.names = F, quote = F)
-
-write.table(Testing_COGS_TRS_minus_na,file = paste0(Location_of_analysis,Name_of_analysis,"_PRS_Profiles_for_shiny",time_of_analysis,".txt"), row.names = F, quote = F)
-
-
+write.table(Full_data_with_step_wise_regressions,  file = paste0(Location_of_analysis,Name_of_analysis,"_step_wise_regress_column_test_DSM_",time_of_analysis,".txt"), row.names = F, quote = F)
+write.table(results_constrained_model,file = paste0(Location_of_analysis,Name_of_analysis,"_constrained_model_test_DSM_", time_of_analysis,".txt"), row.names = F, quote = F)
 ```
 
 
