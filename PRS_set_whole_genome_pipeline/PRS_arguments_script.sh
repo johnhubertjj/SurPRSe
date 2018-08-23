@@ -22,7 +22,7 @@ if [[ "$whereami" = *"raven"* ]]; then
 
   # Re-assign to the training_set_usually_genotype and validation_full_name_without_chromosome using the sed command
   path_to_validation_dataset="/scratch/${USER}/PR54/1000_genomes_consensus_sets/eur-1000g-phase3-chrall-mac5"
-  path_to_training_dataset="/scratch/${USER}/PR54/Summary_stats_files/IQ_2017_GWAS.txt"
+  path_to_training_dataset="/scratch/$USER/PRS_tutorial/iPSYCH-PGC_ASD_Nov2017.tsv.gz"
 
   # State paths to the relevant stationary folders required for the analysis
   path_to_PGC_conversion="${path_to_PRS_scripts}/Summary_stat_manipulation/"
@@ -37,8 +37,8 @@ if [[ "$whereami" = *"raven"* ]]; then
   path_to_gene_annotation_file="${path_to_stationary_data}NCBI37.3.gene.loc"
 
   # Datasets
-  training_set_name="IQ"
-  validation_set_name="eur-1000g-phase3-chrall-mac5"
+  training_set_name="iPsych_GWAS"
+  validation_set_name="thousand_genomes"
 
   # Sample sizes
   number_of_samples_training=78308
