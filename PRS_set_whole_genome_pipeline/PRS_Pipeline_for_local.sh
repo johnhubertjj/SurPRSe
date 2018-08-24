@@ -89,7 +89,7 @@ length_of_extra_analysis_array=`echo ${#Name_of_extra_analysis[@]}`
 
 	elif [[ "${Name_of_extra_analysis[1]}" = "Genes" ]]; then
 		echo hi Gene
-		 ${path_to_gene_scripts}Gene_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_gene_scripts} ${Name_of_extra_analysis[1]}
+		${path_to_gene_scripts}Gene_analysis.sh ${Directory_to_work_from} ${path_to_scripts} ${system} ${path_to_gene_scripts} ${Name_of_extra_analysis[1]}
 	fi
 
 
@@ -99,7 +99,7 @@ else
 # Source the altered arguments from earlier, unsure if it would have already been performed
 
  source ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
-  cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
+ cat ./${training_set_name}_${validation_set_name}_extrainfo/new_PRS_set_arguments_for_${training_set_name}.txt
 
 # Source the final stages of the whole genome analysis...output files could use some structure though
  source	${path_to_scripts}PRS_ANALYSIS_SERIAL_no_set.sh

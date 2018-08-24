@@ -56,7 +56,12 @@ write.table(SNP_loc, file = paste0(training_name_literal,"snploc.txt"),quote = F
 # Reading in Andrews annotations
 
 
-annot <- fread(Gene_set_file)
+annot <- fread(Gene_set_file, header = F)
+
+if (grepl("^\\b\\d+\\b$", annot$V2[1]) == F){
+  write.table(annot, file = paste0(annot_name,".gmt"),col.names = F, quote = F, row.names = F,sep = "\t")
+  
+}else{
 
 basename_annot <- basename(Gene_set_file)
 annot_name <- file_path_sans_ext(basename_annot)
@@ -70,3 +75,4 @@ for (i in rownames){
 }
 
 writeGMT(list_of_gmt,fname = paste0(annot_name,".gmt"))
+}
