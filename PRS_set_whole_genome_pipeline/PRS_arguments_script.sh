@@ -21,7 +21,7 @@ if [[ "$whereami" = *"raven"* ]]; then
   path_to_PRS_scripts="${HOME}/Schizophrenia_pipeline_scripts/"
 
   # Re-assign to the training_set_usually_genotype and validation_full_name_without_chromosome using the sed command
-  path_to_validation_dataset="/scratch/${USER}/PR54/1000_genomes_consensus_sets/eur-1000g-phase3-chrall-mac5"
+  path_to_validation_dataset="/scratch/${USER}/PRS_tutorial/eur-1000g-phase3-chrall-mac5"
   path_to_training_dataset="/scratch/$USER/PRS_tutorial/iPSYCH-PGC_ASD_Nov2017.tsv.gz"
 
   # State paths to the relevant stationary folders required for the analysis
