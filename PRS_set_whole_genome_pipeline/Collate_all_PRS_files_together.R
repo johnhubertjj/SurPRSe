@@ -95,13 +95,8 @@ combined_whole_genome_genic <- function(whole_genome_genic, Gene_regions, Traini
 
       # iterate through significance thresholds
       for (i in 1:length(significance_thresholds)) {
-<<<<<<< HEAD
-        my_data[[i]] <- my_data[[i]][,c(1:3,6)]
+        my_data[[i]] <- my_data[[i]][,c(1:3,6), with = FALSE]
         colnames(my_data[[i]]) <- c("FID", "IID", "PHENO", paste("SCORE_whole_genome_", significance_thresholds[i], sep=""))
-=======
-        my_data[[i]] <- my_data[[i]][,c(1,2,6), with = FALSE]
-        colnames(my_data[[i]]) <- c("FID", "IID", paste("SCORE_whole_genome_", significance_thresholds[i], sep=""))
->>>>>>> a758482652c4523d9ba1ce16b8de6aa8d0f96a1c
       }
 
       all_prs_extended <- join_all(my_data, by=c("FID", "IID", "PHENO"), type='left')
@@ -127,7 +122,7 @@ combined_whole_genome_genic <- function(whole_genome_genic, Gene_regions, Traini
 
         # iterate through significance thresholds
         for (i in 1:length(significance_thresholds)) {
-          my_data[[i]] <- my_data[[i]][,c(1:3,6)]
+          my_data[[i]] <- my_data[[i]][,c(1:3,6), with = FALSE]
           colnames(my_data[[i]]) <- c("FID", "IID","PHENO", paste("SCORE_whole_genome_", significance_thresholds[i], sep=""))
         }
 
@@ -159,7 +154,7 @@ combined_full_genome <- function (Training_name, Validation_name, significance_t
 
     # iterate through significance thresholds
     for (i in 1:length(significance_thresholds)) {
-      my_data[[i]] <- my_data[[i]][,c(1:3,6)]
+      my_data[[i]] <- my_data[[i]][,c(1:3,6), with = FALSE]
       colnames(my_data[[i]]) <- c("FID", "IID", "PHENO", paste("SCORE_whole_genome_", significance_thresholds[i], sep=""))
     }
 
