@@ -76,6 +76,8 @@ Rscript ${path_to_scripts}RscriptEcho.R\
  ${SE_threshold}\
  ${chromosome_number}
 
+Summary_analysis=FALSE
+
 # Run R script that will combine PGC and CLOZUK to an individual table
 # Output is in PGC_CLOZUK_SNP_table.txt
 Rscript ${path_to_scripts}RscriptEcho.R\
@@ -94,7 +96,9 @@ Rscript ${path_to_scripts}RscriptEcho.R\
  ${OR_name}\
  ${BETA_name}\
  ${system}\
- ${Number_of_frequency_columns}
+ ${Number_of_frequency_columns}\
+ ${path_to_scripts}\
+ ${Summary_analysis}
 
 if [[ ${MAF_genotype} = "TRUE" ]]; then
 if [[ ${Missing_geno} = "TRUE" ]]; then
@@ -212,8 +216,7 @@ if [ "$#" -gt 3 ]; then
 fi
 
 # Clean up other unneeded files
-rm ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype_serial}${chromosome_number}_2.{bim,bed,fam,log}
-rm ./${training_set_name}_${validation_set_name}_output/${validation_set_name}_chr${chromosome_number}_chr.pos.txt
+rm ./${training_set_name}_${validation_set_name}_output/${validation_set_usually_genotype_serial}${chromosome_number}_2.{bed,fam,log}
 rm ./${training_set_name}_${validation_set_name}_output/chr${chromosome_number}${training_set_name}_${validation_set_name}_common_SNPs.txt
 rm ./${training_set_name}_${validation_set_name}_output/extracted_Duplicate_snps_${validation_set_name}_${training_set_name}_chr${chromosome_number}.txt
 rm ./${training_set_name}_${validation_set_name}_output/CLUMPED_EXTRACT_${validation_set_name}_chr${chromosome_number}.txt
