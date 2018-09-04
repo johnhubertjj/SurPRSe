@@ -46,6 +46,14 @@ number_of_frequency_columns <- args[16]
 path_to_PRS_scripts <- args[17]
 Summary_analysis <- args[18]
 
+# load libraries
+library(data.table)
+library(dplyr)
+
+# Set Working directory
+setwd(".")
+getwd()
+
 source(paste0(path_to_PRS_scripts,"Functions/functions_CLOZUK_PGC_COMBINE.R"))
 
 Column_headers_to_keep <- c(CHR, SNP, BP, A1, A2, OR, BETA)
@@ -65,12 +73,6 @@ Column_headers <- Column_headers[Column_headers_to_keep_elements]
 # COMBINING CLOZUK AND PGC SNPS #
 #################################
 
-# load libraries
-library(data.table)
-
-# Set Working directory
-setwd(".")
-getwd()
 
 ### Adding in PGC data ###
 PGC.data.frame <- fread(Training_datatable)

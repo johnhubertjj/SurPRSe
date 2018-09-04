@@ -136,7 +136,7 @@ Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}Collate_all_PRS_files_
  ${sig_thresholds[@]}
 fi
 
-source ${path_to_scripts}Summary_information.sh
+# source ${path_to_scripts}Summary_information.sh
 
  
 if [[ "${Using_raven}" = "TRUE" ]]; then

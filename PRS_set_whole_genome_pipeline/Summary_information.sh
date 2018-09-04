@@ -1,12 +1,14 @@
 #! /bin/bash
 
+Summary_analysis=FALSE
+
 Rscript ${path_to_scripts}RscriptEcho.R ${path_to_scripts}Summary_table_for_analysis.R ./${training_set_name}_${validation_set_name}_extrainfo/${training_set_name}_${validation_set_name}_Summary_table_for_analysis.Rout\
  ${validation_set_full_name_without_chromosome}\
  ${training_set_name}\
  ${validation_set_name}\
+ ${Summary_analysis}\
  ${Chromosomes_to_analyse[@]}
 
-Summary_analysis=TRUE
 
 if [[ "${Using_raven}" = "FALSE" ]]; then
 
