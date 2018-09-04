@@ -101,11 +101,21 @@ CLOZUK.data <- fread(Validation_datatable_bim_file)
 CLOZUK.original <- copy(CLOZUK.data)
 
 # Number of SNPs in CLOZUK data
-string_of_information <- paste0("Number of SNPs in", Validation_name)
+string_of_information <- paste0("Number of SNPs in ", Validation_name)
 Add_information(df = CLOZUK.data, string_of_information = string_of_information, e=e, stage = 3, chromosome = chromosome.number)
 
 ### Replace the column names ###
 setnames(CLOZUK.data, c("CHR","SNP","GENEDIST","BP","A1","A2"))
+
+if (Summary_analysis == FALSE){
+  ### Changes the CLOZUK identifiers ###
+  CLOZUK.integers.to.change <- CLOZUK.data[,.I[grep(paste0("^",chromosome.number,":\\d+:\\w+:\\w+"),SNP, perl = T,invert = T)]]
+  CLOZUK.divisive.names <- CLOZUK.data[CLOZUK.integers.to.change]
+  CLOZUK.original_new_name <- copy(CLOZUK.data[,SNP := paste0(CHR,":",BP)])
+  CLOZUK.original_new_name <- CLOZUK.original_new_name[,c("CHR","SNP","BP","A1","A2"),with = F]
+}else{
+  CLOZUK.original_new_name <- copy(CLOZUK.data)
+}
 
 ### Remove Duplicated SNPs in Validation here ###
 CLOZUK.duplicated.removed <- which(duplicated(CLOZUK.data$SNP))
@@ -149,11 +159,15 @@ if(BETA == FALSE & OR == FALSE){
    stop("neither BETAs or Odds ratios supplied in the Training set datatable, please calculate before merging with Genotype")
 }
 
+if (Summary_analysis == FALSE){
 ### Changes the CLOZUK identifiers ###
 CLOZUK.integers.to.change <- CLOZUK.data[,.I[grep(paste0("^",chromosome.number,":\\d+:\\w+:\\w+"),SNP, perl = T,invert = T)]]
 CLOZUK.divisive.names <- CLOZUK.data[CLOZUK.integers.to.change]
 CLOZUK.alternative <- CLOZUK.data[,SNP := paste0(CHR,":",BP)]
 CLOZUK.alternative <- CLOZUK.alternative[,c("CHR","SNP","BP","A1","A2"),with = F]
+}else{
+  CLOZUK.alternative <- CLOZUK.data
+}
 
 # Simple tracking of each row for future checks
 CLOZUK.alternative$place <- c(1:length(CLOZUK.alternative$CHR))
@@ -203,11 +217,20 @@ if (nrow(combined.CLOZUK.PGC) > nrow(PGC.alternative) | nrow(combined.CLOZUK.PGC
   warning("combined dataset size is larger than one/both of the input datasets, check for duplicates")
 }
 
+GWAS_before_flipped_alleles <- copy(combined.CLOZUK.PGC)
+
 a <- which(combined.CLOZUK.PGC$A1.x == "C" & combined.CLOZUK.PGC$A2.x == "G"); if (length(a)>0) {combined.CLOZUK.PGC<-combined.CLOZUK.PGC[-a]}
 a <- which(combined.CLOZUK.PGC$A1.x == "G" & combined.CLOZUK.PGC$A2.x == "C"); if (length(a)>0) {combined.CLOZUK.PGC<-combined.CLOZUK.PGC[-a]}
 a <- which(combined.CLOZUK.PGC$A1.x == "A" & combined.CLOZUK.PGC$A2.x == "T"); if (length(a)>0) {combined.CLOZUK.PGC<-combined.CLOZUK.PGC[-a]}
 a <- which(combined.CLOZUK.PGC$A1.x == "T" & combined.CLOZUK.PGC$A2.x == "A"); if (length(a)>0) {combined.CLOZUK.PGC<-combined.CLOZUK.PGC[-a]}
 
+GWAS_of_flipped_alleles_stage_one <- combined.CLOZUK.PGC[,SNP := SNP.x]
+GWAS_before_flipped_alleles[,SNP := SNP.x]
+
+setkey(GWAS_before_flipped_alleles,"SNP")
+setkey(GWAS_of_flipped_alleles_stage_one,"SNP")
+
+GWAS_of_flipped_alleles_write <- GWAS_before_flipped_alleles[!GWAS_of_flipped_alleles_stage_one$SNP]
 
 # Allele flipping stage one
 string_of_information <- paste0(Validation_name," and ", Training_name ,": remove A-T, C-G Step one")
@@ -413,8 +436,9 @@ if (length(which(is.na(SNPs))) > 0 ) {
 }
 
 # Write out update file for use in plink
-CLOZUK_together <- CLOZUK.original[,.(V2)][,SNP := CLOZUK.alternative$SNP]
+CLOZUK_together <- CLOZUK.original[,.(V2)][,SNP := CLOZUK.original_new_name$SNP]
 rm(CLOZUK.original)
+rm(CLOZUK.original_new_name)
 
 # Write according to destination
 if (Summary_analysis == FALSE){
@@ -423,12 +447,14 @@ if (Summary_analysis == FALSE){
   filename.common.snps <- paste0("./",Training_name,"_",Validation_name,"_output/chr", chromosome.number, Training_name,"_", Validation_name,"_common_SNPs.txt")
   filename.duplicate.snps <- paste0("./",Training_name,"_",Validation_name,"_output/extracted_Duplicate_snps_",Validation_name,"_", Training_name,"_chr",chromosome.number,".txt")
   filename.SNP.info <- paste0("./",Training_name,"_",Validation_name,"_extrainfo/Summary_SNP_info_for_QC_of_",Validation_name,"_", Training_name,"_chr",chromosome.number,".txt")
+  filename.GWAS_snps_removed <- paste0("./",Training_name,"_",Validation_name,"_extrainfo/Info_for_AT-CG_allele_flipping_",Validation_name,"_", Training_name,"_chr",chromosome.number,".txt")
 } else {  
   filename.CLOZUK.together <- paste0("./",Training_name,"_",Validation_name,"_output/SUMMARY_USING_MAF_genotype_", Validation_name,"_chr", chromosome.number,"_chr.pos.txt")
   new.PGC.table <- paste0("./",Training_name,"_",Validation_name,"_output/SUMMARY_USING_MAF_genotype_", Training_name,"_table", chromosome.number,"_new.txt")
   filename.common.snps <- paste0("./",Training_name,"_",Validation_name,"_output/SUMMARY_USING_MAF_genotype_chr", chromosome.number, Training_name,"_", Validation_name,"_common_SNPs.txt")
   filename.duplicate.snps <- paste0("./",Training_name,"_",Validation_name,"_output/SUMMARY_USING_MAF_genotype_extracted_Duplicate_snps_",Validation_name,"_", Training_name,"_chr",chromosome.number,".txt")
   filename.SNP.info <- paste0("./",Training_name,"_",Validation_name,"_extrainfo/SUMMARY_USING_MAF_genotype_Summary_SNP_info_for_QC_of_",Validation_name,"_", Training_name,"_chr",chromosome.number,".txt")
+  filename.GWAS_snps_removed <- paste0("./",Training_name,"_",Validation_name,"_extrainfo/SUMMARY_Info_for_AT-CG_allele_flipping_",Validation_name,"_", Training_name,"_chr",chromosome.number,".txt")
 }
 
 # Write update file for plink
@@ -445,6 +471,9 @@ write(duplicate_SNPS, file = filename.duplicate.snps)
 
 ### write the summary table 
 write.table(e$SNP.information.table, file = filename.SNP.info, row.names = F,col.names = T, quote = F, sep = "\t")
+
+### write the AT_CG check
+write.table(GWAS_of_flipped_alleles_write, file = filename.GWAS_snps_removed, row.names = F, col.names = T, quote = F)
 
 ### End timer
 proc.time() - ptm

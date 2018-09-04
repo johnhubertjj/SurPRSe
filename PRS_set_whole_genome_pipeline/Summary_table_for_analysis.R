@@ -16,16 +16,22 @@ print(args)
 validation_set_full_name_without_chromosome <- args[3]
 training_set_name <- args[4]
 validation_set_name <- args[5]
-Chromosomes_to_analyse <- args[6]
+Summary_analysis <- args[6]
+Chromosomes_to_analyse <- as.numeric(args[c(7:length(args))])
 
 # insert library
 library(data.table)
 
+if(Summary_analysis == FALSE){
 ## Read in the latest Summary stats tables after converting to one table
 for (i in Chromosomes_to_analyse){
   assign(paste0("Training_table", i), fread(paste0("./",training_set_name,"_",validation_set_name,"_extrainfo/Summary_SNP_info_for_QC_of_",validation_set_name,"_",training_set_name,"_chr",i,".txt"), header = T),envir = .GlobalEnv)
 }
-
+}else{
+  for (i in Chromosomes_to_analyse){
+    assign(paste0("Training_table", i), fread(paste0("./",training_set_name,"_",validation_set_name,"_extrainfo/SUMMARY_USING_MAF_genotype_Summary_SNP_info_for_QC_of_",validation_set_name,"_",training_set_name,"_chr",i,".txt"), header = T),envir = .GlobalEnv)
+  }
+}
 
 l = list()
 
