@@ -1,6 +1,6 @@
 # SurPRSe!
 
-+ **Su**pe<b>r</b>computing with **P**olygenic **R**isk **S**cores....**E**xclamation point!
++ **Su**pe<b>r</b>computing with **P**olygenic **R**isk **S**core **E**valuation
 * A workflow in Bash, R and python designed to allow easy processing and production of polygenic risk scores (both whole genome and set scores) on [ARCCA's](http://www.cardiff.ac.uk/advanced-research-computing) Raven supercomputer
 * For a [tutorial](http://gitlab.psycm.cf.ac.uk/john/Schizophrenia_PRS_pipeline_scripts/wikis/example-prs-tutorial), [debugging](http://gitlab.psycm.cf.ac.uk/john/Schizophrenia_PRS_pipeline_scripts/wikis/debugging_long) information and other documentation, please refer to the [wiki](http://gitlab.psycm.cf.ac.uk/john/Schizophrenia_PRS_pipeline_scripts/wikis/home)
 * If used for the creation of results to be published (one can dream...), please acknowledge  John Hubert <a href="mailto:hubertjj@cardiff.ac.uk">hubertjj@cardiff.ac.uk</a> and Valentina Escott-Price <a href="mailto:escottpricev@cardiff.ac.uk">escottpricev@cardiff.ac.uk</a>
