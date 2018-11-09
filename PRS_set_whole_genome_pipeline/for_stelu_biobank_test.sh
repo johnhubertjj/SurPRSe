@@ -1,4 +1,6 @@
- -q serial
+#! /bin/bash
+
+#PBS -q serial
 #PBS -P PR54
 #PBS -l ncpus=16
 #PBS -l mem=40gb
