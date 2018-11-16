@@ -57,3 +57,7 @@ Biobank wv 1
 ---------------
 Best guess genotype data
 
+Edit the parallel commands to reduce the number of cores that are used to process in SurPRSe which will reduce the errors produced by this command.
+
+
+
