@@ -5,7 +5,7 @@
 #Add arguments to the main body
 source ${path_to_scripts}PRS_arguments_script.sh
 
-if [ ${Using_raven} = "TRUE" ]; then
+if [[ ${Using_raven} = "TRUE" ]]; then
 echo ${SLURM_SUBMIT_DIR}
 cd $SLURM_SUBMIT_DIR
 fi

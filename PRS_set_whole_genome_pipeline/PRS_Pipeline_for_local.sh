@@ -23,7 +23,8 @@ home_OS="/home"
 extra_path="/johnhubert/Documents"
 system=LINUX # oh god programmers are going to hate me for using this argument
 
-elif [[ "$whereami" = *"raven"* ]]; then
+else
+
 home_OS=${HOME}
 
 # extra_path must be NULL or a path
