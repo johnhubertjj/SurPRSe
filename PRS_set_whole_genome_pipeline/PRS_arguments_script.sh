@@ -11,6 +11,7 @@ if [[ "$whereami" = *"raven"* ]]; then
 
   # Load modules for analysis
   module purge
+  module load raven
   module load R/3.3.0
   module load plink/1.9c3
   module load python/2.7.11-genomics

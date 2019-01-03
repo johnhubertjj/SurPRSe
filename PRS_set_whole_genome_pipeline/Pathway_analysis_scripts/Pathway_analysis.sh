@@ -202,7 +202,7 @@ path_to_config_file=${path_to_scripts}scoring_config_yaml.yaml
 
 ${path_to_scripts}config_yaml_writer.sh ${path_to_scripts} ${system} ${path_to_config_file} ${Pathway_output_directory} ${Gene_output_directory} ${Random_directory} ${Random_scoring_directory} 
 
-cp ${path_to_config_file} ${PBS_O_WORKDIR}
+cp ${path_to_config_file} ${SLURM_SUBMIT_DIR}
 
 if [[ ${Using_raven} = FALSE ]]; then
 sudo parallel ${path_to_pathway_scripts}test_script_randomised_plink.sh ::: ${pathways_for_randomisation[@]} ::: ${path_to_scripts} ::: ${Name_of_extra_analysis} ::: ${Gene_output_directory} ::: ${Random_scoring_directory} ::: ${permutations} 

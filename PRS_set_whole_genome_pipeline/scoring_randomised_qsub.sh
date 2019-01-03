@@ -37,8 +37,8 @@ path_to_gene_scripts="${home_OS}${extra_path}/Schizophrenia_PRS_pipeline_scripts
 source ${path_to_scripts}PRS_arguments_script.sh
 
 if [ ${Using_raven} = "TRUE" ]; then
-echo ${PBS_O_WORKDIR}
-cd $PBS_O_WORKDIR
+echo ${SLURM_SUBMIT_DIR}
+cd $SLURM_SUBMIT_DIR
 fi
 
 Directory_to_work_from=`pwd`

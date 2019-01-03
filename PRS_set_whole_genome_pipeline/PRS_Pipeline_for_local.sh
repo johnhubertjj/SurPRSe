@@ -1,11 +1,12 @@
 #! /bin/bash
 
-#PBS -q serial
-#PBS -P PR54
-#PBS -l ncpus=16
-#PBS -l mem=40gb
-#PBS -l walltime=24:00:00
-#PBS -o /home/c1020109/Summary_stats_info_Biobank_PRS
+#SBATCH -p htc
+#SBATCH --account=scw1143
+#SBATCH --tasks-per-node=22
+#SBATCH --mem-per-cpu=10G
+#SBATCH -t 1-00:00:00
+#SBATCH --job-name=PRS_tutorial_test
+#SBATCH -o /home/c.c1020109/Summary_stats_info_Biobank_PRS
 
 echo "hi"
 

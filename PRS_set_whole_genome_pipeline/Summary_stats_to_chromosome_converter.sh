@@ -23,7 +23,7 @@ else
    
    for i in "${Chromosomes_to_analyse[@]}" ;
    do
-	cp -v "${path_to_validation_dataset}_chr${i}.tar.gz" ${PBS_O_WORKDIR}
+	cp -v "${path_to_validation_dataset}_chr${i}.tar.gz" ${SLURM_SUBMIT_DIR}
    done
 fi 
 

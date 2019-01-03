@@ -30,7 +30,7 @@ if [[ "$whereami" = *"raven"* ]]; then
   module load python/2.7.11
   module load magma/1.06
 
-  cd $PBS_O_WORKDIR
+  cd $SLURM_SUBMIT_DIR
   path_to_scripts="/home/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/"
   path_to_pathway_scripts="/home/$USER/PhD_scripts/Schizophrenia_PRS_pipeline_scripts/PRS_set_whole_genome_pipeline/Pathway_analysis_scripts"
   # Assign the shell variables
