@@ -22,8 +22,8 @@ echo "$whereami"
   path_to_PRS_scripts="${HOME}/Schizophrenia_pipeline_scripts/"
 
   # Re-assign to the training_set_usually_genotype and validation_full_name_without_chromosome using the sed command
-  path_to_validation_dataset="/scratch/${USER}/PRS_tutorial/eur-1000g-phase3-chrall-mac5"
-  path_to_training_dataset="/scratch/$USER/PRS_tutorial/iPSYCH-PGC_ASD_Nov2017.tsv.gz"
+  path_to_validation_dataset="/scratch/${USER}/Biobank_converted_data/ukb1517_imp_v2_bge_noduplicate"
+  path_to_training_dataset="/scratch/$USER/Summary_stats_files/CLOZUK_PGC2_noCOGSmetaanalysis_flipped_INFOabove0point9.txt"
 
   # State paths to the relevant stationary folders required for the analysis
   path_to_PGC_conversion="${path_to_PRS_scripts}/Summary_stat_manipulation/"
@@ -38,11 +38,11 @@ echo "$whereami"
   path_to_gene_annotation_file="${path_to_stationary_data}NCBI37.3.gene.loc"
 
   # Datasets
-  training_set_name="iPsych_GWAS"
-  validation_set_name="thousand_genomes"
+  training_set_name="SCZ-COGS"
+  validation_set_name="Biobank_full"
 
   # Sample sizes
-  number_of_samples_training=78308
+  number_of_samples_training=78900
 
   # DO NOT ALTER!!!
   training_set_original_filename=`echo "${path_to_training_dataset}" | sed 's:.*/::'`
@@ -54,12 +54,12 @@ echo "$whereami"
   ldsc="/home/c1020109/ldsc/ldsc.py"
 
   # Pathway datasets
-  Pathway_filename="Pocklington2015_134sets_LoFi.txt"
+  Pathway_filename="IQ_SCZ_Supersets_SCZ_IQ_sets_exome_conditional_sets_geneset_minus_supersets.txt"
   Gene_location_filename="NCBI37.3.gene.loc"
   calculate_indep_SNPs=FALSE
 
   # Split_by_chromosome for genotype?
-  split_by_chromosome_required=TRUE
+  split_by_chromosome_required=FALSE
 
   # Do a missingness check?
   Missing_geno=TRUE
@@ -96,8 +96,8 @@ echo "$whereami"
   sig_thresholds_lower_bounds=(0 0 0 0 0 0 0 0 0)
 
   # Arguments specific to PRS set analysis
-  Extra_analyses=FALSE
-  Full_genome_PRS_extra_analysis=FALSE
+  Extra_analyses=TRUE
+  Full_genome_PRS_extra_analysis=TRUE
   Name_of_extra_analysis=(Pathways Genes)
   randomise=FALSE
   sample_replace=FALSE
@@ -109,9 +109,9 @@ echo "$whereami"
 
   # either "extended" "normal" or "both" : change to a numerical input in the future
   Gene_regions=both #either ( "extended" "normal" "both" )
-  whole_genome_genic=FALSE
+  whole_genome_genic=TRUE
   Gene_specific_PRS=FALSE
 
   # MAGMA analysis
-  MAGMA_gene_set_analysis=TRUE
+  MAGMA_gene_set_analysis=FALSE
 
